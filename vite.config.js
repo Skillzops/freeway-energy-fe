@@ -5,19 +5,31 @@ import tailwindcss from "tailwindcss";
 import tsconfigPaths from "vite-tsconfig-paths";
 // https://vitejs.dev/config/
 export default defineConfig({
+  build: {
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ["react", "react-dom"],
+        },
+      },
+    },
+  },
   server: {
-    historyApiFallback: true, // Helps with SPA routing
     host: "0.0.0.0",
     port: 5173,
     watch: {
       usePolling: true,
+      followSymlinks: false,
     },
+    allowedHosts: ["a4nt-grvnz.ondigitalocean.app", "a4nt-epaoy.ondigitalocean.app"],
+  },
+  preview: {
+    host: "0.0.0.0",
+    port: 5173,
+    allowedHosts: ["a4nt-grvnz.ondigitalocean.app", "a4nt-epaoy.ondigitalocean.app"],
   },
   plugins: [react(), tsconfigPaths()],
-  base: "/", // Ensure the base is correctly set
-  build: {
-    outDir: "dist", // Ensure Vite builds into 'dist'
-  },
   resolve: {
     alias: {
       "@": resolve(__dirname, "src"),
