@@ -7,10 +7,14 @@ import tsconfigPaths from "vite-tsconfig-paths";
 export default defineConfig({
   server: {
     host: "0.0.0.0",
-    port: 5173,
+    port: 8080,
     watch: {
       usePolling: true,
     },
+  },
+  preview: {
+    port: 8080,
+    host: "0.0.0.0",
   },
   plugins: [react(), tsconfigPaths()],
   resolve: {
