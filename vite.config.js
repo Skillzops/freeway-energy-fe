@@ -8,7 +8,7 @@ export default defineConfig({
   server: {
     historyApiFallback: true, // Helps with SPA routing
     host: "0.0.0.0",
-    port: 8080,
+    port: 5173,
     watch: {
       usePolling: true,
     },
