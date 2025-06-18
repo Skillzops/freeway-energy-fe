@@ -29,7 +29,7 @@ export default defineConfig({
     port: 5173,
     allowedHosts: ["a4nt-grvnz.ondigitalocean.app", "a4nt-epaoy.ondigitalocean.app", "www.a4tpowercrm.com.ng"],
   },
-  plugins: [react(), tsconfigPaths()],
+  plugins: [react(), tsconfigPaths()], 
   resolve: {
     alias: {
       "@": resolve(__dirname, "src"),
