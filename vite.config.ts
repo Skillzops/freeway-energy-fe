@@ -22,12 +22,12 @@ export default defineConfig({
       usePolling: true,
       followSymlinks: false,
     },
-    allowedHosts: ["a4nt-grvnz.ondigitalocean.app", "a4nt-epaoy.ondigitalocean.app"],
+    allowedHosts: ["a4nt-grvnz.ondigitalocean.app", "a4nt-epaoy.ondigitalocean.app", "www.a4tpowercrm.com.ng"],
   },
   preview: {
     host: "0.0.0.0",
     port: 5173,
-    allowedHosts: ["a4nt-grvnz.ondigitalocean.app", "a4nt-epaoy.ondigitalocean.app"],
+    allowedHosts: ["a4nt-grvnz.ondigitalocean.app", "a4nt-epaoy.ondigitalocean.app", "www.a4tpowercrm.com.ng"],
   },
   plugins: [react(), tsconfigPaths()],
   resolve: {
