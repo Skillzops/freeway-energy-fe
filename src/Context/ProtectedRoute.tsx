@@ -49,7 +49,6 @@ const ProtectedRouteWrapper: React.FC = () => {
     return <Navigate to={redirectPath} replace />;
   }
 
-  // Otherwise, render the protected content
   return <Outlet />;
 };
 

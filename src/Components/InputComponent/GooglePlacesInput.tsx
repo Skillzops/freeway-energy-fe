@@ -38,7 +38,7 @@ export const GooglePlacesInput = ({
   const [internalValue, setInternalValue] = useState(value || "");
   const [apiLoaded, setApiLoaded] = useState(false);
 
-  const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
+  const apiKey = import.meta.env.VITE_GOOGLE_API_KEY || "AIzaSyATl5m6TnXjJ2R3c-Qpr8ccx_DrJia3Gd0";
 
   // Sync internal value with external value changes
   useEffect(() => {
