@@ -24,6 +24,12 @@ const CustomerDetails = ({
   refreshTable: KeyedMutator<any>;
   displayInput?: boolean;
 }) => {
+  // Debug logging to check received data
+  console.log("CustomerDetails received data:", data);
+  console.log("Longitude received:", data.longitude);
+  console.log("Latitude received:", data.latitude);
+  console.log("DisplayInput:", displayInput);
+
   const [loading, setLoading] = useState<boolean>(false);
   const [formData, setFormData] = useState({
     customerId: data.customerId,

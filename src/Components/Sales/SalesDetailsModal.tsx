@@ -21,6 +21,8 @@ export type SaleDetailsType = {
   address: string;
   phone: string;
   email: string;
+  lat: string;
+  lng: string;
   datetime: string;
   agent: string;
   sale?: any;
@@ -81,6 +83,8 @@ const SalesDetailsModal = ({
       address: customerKey?.location || "",
       phone: customerKey?.phone || "",
       email: customerKey?.email || "",
+      lat: customerKey?.latitude || "",
+      lng: customerKey?.longitude || "",
       datetime: data?.createdAt || "",
       agent: data?.agent || "N/A",
       image: data?.product?.image || "",
@@ -117,6 +121,8 @@ const SalesDetailsModal = ({
       name: customerName,
       phone_number: customerKey?.phone,
       email: customerKey?.email,
+      lat: customerKey?.latitude || "",
+      lng: customerKey?.longitude || "",
     };
     return { entries, paymentInfo: data?.sale?.payment, customer };
   };
