@@ -1,0 +1,64 @@
+{
+    "category": "PRODUCT",
+    "customerId": "678d59c7a40ec29412eeddfd",
+    "bvn": "12345678901",
+    "saleItems": [
+        {
+            "productId": "679fda02d8d364331c523da1",
+            "quantity": 5,
+            "paymentMode": "INSTALLMENT",
+            "discount": 100,
+            "installmentDuration": 1,
+            "installmentStartingPrice": 500,
+            "devices": [
+                "679b9079f2e8b9d63c5f5645",
+                "679cddd9f6e839066a987088"
+            ],
+            "miscellaneousPrices": {
+                "coq": 100
+            },
+            "saleRecipient": {
+                "firstname": "John",
+                "lastname": "Doe",
+                "address": "1234 Elm Street",
+                "phone": "08123456789",
+                "email": "johndoe@example.com"
+            }
+        }
+    ],
+    "nextOfKinDetails": {
+        "fullName": "Jane Doe",
+        "relationship": "Sister",
+        "phoneNumber": "08123456780",
+        "email": "janedoe@example.com",
+        "homeAddress": "5678 Oak Avenue",
+        "dateOfBirth": "1990-05-01T00:00:00.000Z",
+        "nationality": "Nigerian"
+    },
+    "identificationDetails": {
+        "idType": "Passport",
+        "idNumber": "A123456789",
+        "issuingCountry": "Nigeria",
+        "issueDate": "2020-01-01T00:00:00.000Z",
+        "expirationDate": "2030-01-01T00:00:00.000Z",
+        "fullNameAsOnID": "John Doe",
+        "addressAsOnID": "1234 Elm Street"
+    },
+    "guarantorDetails": {
+        "fullName": "Michael Smith",
+        "phoneNumber": "08123456781",
+        "email": "michaelsmith@example.com",
+        "homeAddress": "1234 Pine Road",
+        "dateOfBirth": "1985-08-15T00:00:00.000Z",
+        "nationality": "Nigerian",
+        "identificationDetails": {
+            "idType": "Passport",
+            "idNumber": "N123456789",
+            "issuingCountry": "Nigeria",
+            "issueDate": "2018-06-10T00:00:00.000Z",
+            "expirationDate": "2028-06-10T00:00:00.000Z",
+            "fullNameAsOnID": "Michael Smith",
+            "addressAsOnID": "1234 Pine Road"
+        }
+    }
+}

@@ -1,0 +1,14 @@
+version: '3.8'  # Define the version of Docker Compose
+
+services:
+  web:  # Define the web service
+    build:
+      context: .  # Specify the path to the build context (current directory)
+      dockerfile: Dockerfile  # Specify the Dockerfile name (optional if it's named Dockerfile)
+    ports:
+      - "5173:5173"  # Map port 5173 on the host to port 5173 in the container
+    volumes:
+      - .:/app  # Mount the current directory to /app in the container
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true  # Environment variable for file watching in Docker

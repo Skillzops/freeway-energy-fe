@@ -1,0 +1,66 @@
+name: energy-project-frontend-dev-deploy
+
+on:
+  # push:
+    # branches:
+    #   - main
+  pull_request:
+    branches:
+      - dev
+    types: [closed]
+
+jobs:
+  deploy-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+        
+      - name: rename env.example to .env
+        run: mv .env.example .env
+
+      - name: Run tests
+        run: npm run test
+
+
+  deploy-dev:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: rename env.example to .env
+        run: mv .env.example .env
+
+      - name: Run build
+        run: npm run build
+
+      - name: Update apt repositories
+        run: sudo apt update
+
+      - name: Install rsync
+        run: sudo apt-get install -y rsync
+
+      - name: SSH login and deploy
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{secrets.SSH_PRIVATE_KEY}}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          rsync --delete -va -e 'ssh -p 7822 -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no' \
+            dist/ .htaccess .env  skillz@103.72.76.68:energy/frontend

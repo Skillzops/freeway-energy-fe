@@ -1,0 +1,11 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+      "module": "ES2020",   // Ensure using ES module syntax
+      "target": "ES2022",   // Modern JavaScript
+      "moduleResolution": "node",
+      "esModuleInterop": true,
+      "jsx": "react-jsx"
+    }
+  }
+  

@@ -1,0 +1,104 @@
+{
+    "products": [
+        {
+            "id": "1",
+            "name": "SolarMax 2000",
+            "description": "High-efficiency solar panel for maximum power output.",
+            "image": "https://example.com/images/solarmax2000.jpg",
+            "price": 500,
+            "currency": "NGN",
+            "paymentModes": "Online, Cash",
+            "createdAt": "2024-11-26T12:00:00Z",
+            "category": {
+                "id": "101",
+                "name": "solarPanels",
+                "type": "PRODUCT",
+                "createdAt": "2024-11-25T09:00:00Z"
+            },
+            "creatorDetails": {
+                "id": 1,
+                "name": "Ahire Tersoo"
+            }
+        },
+        {
+            "id": "2",
+            "name": "VoltSwitch Pro",
+            "description": "Reliable inverter for seamless power switching.",
+            "image": "https://example.com/images/voltswitchpro.jpg",
+            "price": 700,
+            "currency": "NGN",
+            "paymentModes": "Online",
+            "createdAt": "2024-11-26T12:10:00Z",
+            "category": {
+                "id": "102",
+                "name": "inverters",
+                "type": "PRODUCT",
+                "createdAt": "2024-11-25T09:10:00Z"
+            },
+            "creatorDetails": {
+                "id": 1,
+                "name": "Ahire Tersoo"
+            }
+        },
+        {
+            "id": "3",
+            "name": "LithiumCore X",
+            "description": "Durable lithium battery with high storage capacity.",
+            "image": "https://example.com/images/lithiumcorex.jpg",
+            "price": 1000,
+            "currency": "NGN",
+            "paymentModes": "Online, Cash, Credit",
+            "createdAt": "2024-11-26T12:20:00Z",
+            "category": {
+                "id": "103",
+                "name": "batteries",
+                "type": "PRODUCT",
+                "createdAt": "2024-11-25T09:20:00Z"
+            },
+            "creatorDetails": {
+                "id": 1,
+                "name": "Ahire Tersoo"
+            }
+        },
+        {
+            "id": "4",
+            "name": "SolarBrain X",
+            "description": "Advanced charge controller with smart technology.",
+            "image": "https://example.com/images/solarbrainx.jpg",
+            "price": 300,
+            "currency": "NGN",
+            "paymentModes": "Cash",
+            "createdAt": "2024-11-26T12:30:00Z",
+            "category": {
+                "id": "104",
+                "name": "chargeControllers",
+                "type": "PRODUCT",
+                "createdAt": "2024-11-25T09:30:00Z"
+            },
+            "creatorDetails": {
+                "id": 1,
+                "name": "Ahire Tersoo"
+            }
+        },
+        {
+            "id": "5",
+            "name": "CableMaster Pro",
+            "description": "Premium cable management solution for solar setups.",
+            "image": "https://example.com/images/cablemasterpro.jpg",
+            "price": 100,
+            "currency": "NGN",
+            "paymentModes": "Online, Cash",
+            "createdAt": "2024-11-26T12:40:00Z",
+            "category": {
+                "id": "105",
+                "name": "accessories",
+                "type": "PRODUCT",
+                "createdAt": "2024-11-25T09:40:00Z"
+            },
+            "creatorDetails": {
+                "id": 1,
+                "name": "Ahire Tersoo"
+            }
+        }
+    ]
+}
