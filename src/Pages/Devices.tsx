@@ -11,13 +11,22 @@ import { DropDown } from "@/Components/DropDownComponent/DropDown";
 import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
 import { useGetRequest } from "@/utils/useApiCall";
 import CreateNewDevice from "@/Components/Devices/CreateNewDevice";
+import GenerateTokens from "@/Components/Tokens/GenerateTokens";
+import { Modal } from "@/Components/ModalComponent/Modal";
+import sale from "../assets/titlepill/sale.svg";
 
 const DevicesTable = lazy(() => import("@/Components/Devices/DevicesTable"));
+const TokensTable = lazy(() => import("@/Components/Tokens/TokensTable"));
 
 const Devices = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isTokensOpen, setIsTokensOpen] = useState<boolean>(false);
+  const [isTokensHistoryOpen, setIsTokensHistoryOpen] = useState<boolean>(false);
   const [formType, setFormType] = useState<"singleUpload" | "batchUpload">(
+    "singleUpload"
+  );
+  const [tokensFormType, setTokensFormType] = useState<"singleUpload" | "batchUpload">(
     "singleUpload"
   );
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -26,8 +35,20 @@ const Devices = () => {
     string,
     any
   > | null>({});
+  
+  // Tokens history state
+  const [tokensCurrentPage, setTokensCurrentPage] = useState<number>(1);
+  const [tokensEntriesPerPage, setTokensEntriesPerPage] = useState<number>(20);
+  const [tokensTableQueryParams, setTokensTableQueryParams] = useState<Record<
+    string,
+    any
+  > | null>({});
 
   const queryString = Object.entries(tableQueryParams || {})
+    .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+    .join("&");
+
+  const tokensQueryString = Object.entries(tokensTableQueryParams || {})
     .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
     .join("&");
 
@@ -44,6 +65,20 @@ const Devices = () => {
     60000
   );
 
+  // Tokens history data fetching - now enabled for real API
+  const {
+    data: tokensData,
+    isLoading: tokensLoading,
+    mutate: allTokensRefresh,
+    errorStates: allTokensErrorStates,
+  } = useGetRequest(
+    `/v1/tokens?page=${tokensCurrentPage}&limit=${tokensEntriesPerPage}${
+      tokensQueryString && `&${tokensQueryString}`
+    }`,
+    true, // Enabled - now using real API
+    60000
+  );
+
   const paginationInfo = () => {
     const total = deviceData?.total;
     return {
@@ -55,11 +90,29 @@ const Devices = () => {
     };
   };
 
+  const tokensPaginationInfo = () => {
+    // Use real API data total
+    const total = tokensData?.total || 0;
+    return {
+      total,
+      currentPage: tokensCurrentPage,
+      entriesPerPage: tokensEntriesPerPage,
+      setCurrentPage: setTokensCurrentPage,
+      setEntriesPerPage: setTokensEntriesPerPage,
+    };
+  };
+
   const navigationList = [
     {
       title: "All Devices",
       link: "/devices/all",
       count: deviceData?.total || 0,
+    },
+    {
+      title: "Tokens History",
+      link: "/devices/tokens-history",
+      count: tokensData?.total || 0,
+      onClick: () => setIsTokensHistoryOpen(true),
     },
   ];
 
@@ -79,7 +132,7 @@ const Devices = () => {
   }, [location.pathname]);
 
   const dropDownList = {
-    items: ["Create New Devices (Batch)"],
+    items: ["Create New Devices (Batch)", "Generate Tokens (Batch)", "Generate Tokens (Single)"],
     onClickLink: (index: number) => {
       switch (index) {
         case 0:
@@ -87,9 +140,12 @@ const Devices = () => {
           setIsOpen(true);
           break;
         case 1:
-          console.log("Exporting list...");
+          setTokensFormType("batchUpload");
+          setIsTokensOpen(true);
           break;
         default:
+          setTokensFormType("singleUpload");
+          setIsTokensOpen(true);
           break;
       }
     },
@@ -109,6 +165,13 @@ const Devices = () => {
               topText="All"
               bottomText="DEVICES"
               value={deviceData?.total || 0}
+            />
+            <TitlePill
+              icon={sale}
+              iconBgColor="bg-[#E2F7E2]"
+              topText="All"
+              bottomText="TOKENS"
+              value={tokensData?.total || 0}
             />
           </div>
           <div className="flex w-full items-center justify-between gap-2 min-w-max sm:w-max sm:justify-end">
@@ -136,22 +199,34 @@ const Devices = () => {
                   path="/"
                   element={<Navigate to="/devices/all" replace />}
                 />
-                {devicesPaths.map((path) => (
-                  <Route
-                    key={path}
-                    path={path}
-                    element={
-                      <DevicesTable
-                        devicesData={deviceData}
-                        isLoading={deviceLoading}
-                        refreshTable={allDeviceRefresh}
-                        errorData={allDevicesErrorStates}
-                        paginationInfo={paginationInfo}
-                        setTableQueryParams={setTableQueryParams}
+                <Route
+                  path="all"
+                  element={
+                    <DevicesTable
+                      devicesData={deviceData}
+                      isLoading={deviceLoading}
+                      refreshTable={allDeviceRefresh}
+                      errorData={allDevicesErrorStates}
+                      paginationInfo={paginationInfo}
+                      setTableQueryParams={setTableQueryParams}
+                    />
+                  }
+                />
+                <Route
+                  path="tokens-history"
+                  element={
+                    <Suspense fallback={<div>Loading tokens...</div>}>
+                      <TokensTable
+                        tokensData={tokensData}
+                        errorData={allTokensErrorStates}
+                        isLoading={tokensLoading}
+                        refreshTable={allTokensRefresh}
+                        paginationInfo={tokensPaginationInfo}
+                        setTableQueryParams={setTokensTableQueryParams}
                       />
-                    }
-                  />
-                ))}
+                    </Suspense>
+                  }
+                />
               </Routes>
             </Suspense>
           </section>
@@ -162,6 +237,13 @@ const Devices = () => {
         setIsOpen={setIsOpen}
         allDevicesRefresh={allDeviceRefresh}
         formType={formType}
+      />
+      <GenerateTokens
+        isOpen={isTokensOpen}
+        setIsOpen={setIsTokensOpen}
+        allDevicesRefresh={allDeviceRefresh}
+        formType={tokensFormType}
+        isTokenable={true}
       />
     </>
   );

@@ -27,6 +27,10 @@ type InstallmentAccountDetails = {
 const SaleDetails = ({ data }: { data: SaleDetailsType }) => {
   const iDetails: InstallmentAccountDetails =
     data?.sale?.installmentAccountDetails;
+  
+  // Get latitude and longitude from multiple possible sources
+  const latitude = data.lat || data?.sale?.latitude || "N/A";
+  const longitude = data.lng || data?.sale?.longitude || "N/A";
 
   return (
     <div className="flex flex-col w-full gap-4">
@@ -202,6 +206,14 @@ const SaleDetails = ({ data }: { data: SaleDetailsType }) => {
         <div className="flex items-center justify-between">
           <Tag name="Email Address" />
           <p className="text-xs font-bold text-textDarkGrey">{data.email}</p>
+        </div>
+        <div className="flex items-center justify-between">
+          <Tag name="Latitude" />
+          <p className="text-xs font-bold text-textDarkGrey">{latitude}</p>
+        </div>
+        <div className="flex items-center justify-between">
+          <Tag name="Longitude" />
+          <p className="text-xs font-bold text-textDarkGrey">{longitude}</p>
         </div>
       </div>
 
