@@ -12,6 +12,7 @@ import jsPDF from "jspdf";
 
 interface GenerateTokensProps {
     isOpen: boolean;
+    isTokenable: boolean;
     setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
     allDevicesRefresh: KeyedMutator<any>;
     formType: "singleUpload" | "batchUpload";
@@ -31,7 +32,7 @@ const DeviceFormSchema = z.object({
         }),
 });
 
-const GenerateTokens = ({ isOpen, setIsOpen, allDevicesRefresh, formType }: GenerateTokensProps) => {
+const GenerateTokens = ({ isOpen, setIsOpen, allDevicesRefresh, formType, isTokenable }: GenerateTokensProps) => {
     const { apiCall } = useApiCall();
     const [loading, setLoading] = useState(false);
     const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([]);
@@ -53,10 +54,12 @@ const GenerateTokens = ({ isOpen, setIsOpen, allDevicesRefresh, formType }: Gene
     } = useGetRequest("/v1/device", isOpen);
 
     // Convert devices data to options for SelectInput
-    const deviceOptions = devicesData?.devices?.map((device: any) => ({
-        label: `${device.serialNumber} - ${device.hardwareModel}`,
-        value: device.id,
-    })) || [];
+    const deviceOptions = devicesData?.devices
+        ?.filter((device: any) => device.isTokenable === true)
+        ?.map((device: any) => ({
+            label: `${device.serialNumber} - ${device.hardwareModel}`,
+            value: device.id,
+        })) || [];
 
     const handleCopyToClipboard = async (text: string) => {
         try {
@@ -495,7 +498,7 @@ const GenerateTokens = ({ isOpen, setIsOpen, allDevicesRefresh, formType }: Gene
                                         {deviceOptions.length === 0 && !devicesLoading && !devicesError && (
                                             <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
                                                 <p className="text-sm text-yellow-600">
-                                                    No devices available. Please add devices first.
+                                                    No tokenable devices available.
                                                 </p>
                                             </div>
                                         )}

@@ -13,6 +13,7 @@ import { useGetRequest } from "@/utils/useApiCall";
 import CreateNewDevice from "@/Components/Devices/CreateNewDevice";
 import GenerateTokens from "@/Components/Tokens/GenerateTokens";
 import { Modal } from "@/Components/ModalComponent/Modal";
+import sale from "../assets/titlepill/sale.svg";
 
 const DevicesTable = lazy(() => import("@/Components/Devices/DevicesTable"));
 const TokensTable = lazy(() => import("@/Components/Tokens/TokensTable"));
@@ -107,6 +108,12 @@ const Devices = () => {
       link: "/devices/all",
       count: deviceData?.total || 0,
     },
+    {
+      title: "Tokens History",
+      link: "/devices/tokens-history",
+      count: tokensData?.total || 0,
+      onClick: () => setIsTokensHistoryOpen(true),
+    },
   ];
 
   useEffect(() => {
@@ -125,7 +132,7 @@ const Devices = () => {
   }, [location.pathname]);
 
   const dropDownList = {
-    items: ["Create New Devices (Batch)", "Generate Tokens (Batch)"],
+    items: ["Create New Devices (Batch)", "Generate Tokens (Batch)", "Generate Tokens (Single)"],
     onClickLink: (index: number) => {
       switch (index) {
         case 0:
@@ -137,6 +144,8 @@ const Devices = () => {
           setIsTokensOpen(true);
           break;
         default:
+          setTokensFormType("singleUpload");
+          setIsTokensOpen(true);
           break;
       }
     },
@@ -157,6 +166,13 @@ const Devices = () => {
               bottomText="DEVICES"
               value={deviceData?.total || 0}
             />
+            <TitlePill
+              icon={sale}
+              iconBgColor="bg-[#E2F7E2]"
+              topText="All"
+              bottomText="TOKENS"
+              value={tokensData?.total || 0}
+            />
           </div>
           <div className="flex w-full items-center justify-between gap-2 min-w-max sm:w-max sm:justify-end">
             <ActionButton
@@ -165,21 +181,6 @@ const Devices = () => {
               onClick={() => {
                 setFormType("singleUpload");
                 setIsOpen(true);
-              }}
-            />
-            <ActionButton
-              label="Generate Tokens"
-              icon={<img src={circleAction} />}
-              onClick={() => {
-                setTokensFormType("singleUpload");
-                setIsTokensOpen(true);
-              }}
-            />
-            <ActionButton
-              label="View Tokens History"
-              icon={<img src={circleAction} />}
-              onClick={() => {
-                setIsTokensHistoryOpen(true);
               }}
             />
             <DropDown {...dropDownList} />
@@ -198,22 +199,34 @@ const Devices = () => {
                   path="/"
                   element={<Navigate to="/devices/all" replace />}
                 />
-                {devicesPaths.map((path) => (
-                  <Route
-                    key={path}
-                    path={path}
-                    element={
-                      <DevicesTable
-                        devicesData={deviceData}
-                        isLoading={deviceLoading}
-                        refreshTable={allDeviceRefresh}
-                        errorData={allDevicesErrorStates}
-                        paginationInfo={paginationInfo}
-                        setTableQueryParams={setTableQueryParams}
+                <Route
+                  path="all"
+                  element={
+                    <DevicesTable
+                      devicesData={deviceData}
+                      isLoading={deviceLoading}
+                      refreshTable={allDeviceRefresh}
+                      errorData={allDevicesErrorStates}
+                      paginationInfo={paginationInfo}
+                      setTableQueryParams={setTableQueryParams}
+                    />
+                  }
+                />
+                <Route
+                  path="tokens-history"
+                  element={
+                    <Suspense fallback={<div>Loading tokens...</div>}>
+                      <TokensTable
+                        tokensData={tokensData}
+                        errorData={allTokensErrorStates}
+                        isLoading={tokensLoading}
+                        refreshTable={allTokensRefresh}
+                        paginationInfo={tokensPaginationInfo}
+                        setTableQueryParams={setTokensTableQueryParams}
                       />
-                    }
-                  />
-                ))}
+                    </Suspense>
+                  }
+                />
               </Routes>
             </Suspense>
           </section>
@@ -230,40 +243,8 @@ const Devices = () => {
         setIsOpen={setIsTokensOpen}
         allDevicesRefresh={allDeviceRefresh}
         formType={tokensFormType}
+        isTokenable={true}
       />
-      
-      {/* Tokens History Modal */}
-      <Modal
-        isOpen={isTokensHistoryOpen}
-        onClose={() => setIsTokensHistoryOpen(false)}
-        size="large"
-      >
-        <div className="fixed inset-0 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-[90vw] h-[80vh] max-w-6xl overflow-hidden">
-            <div className="flex items-center justify-between p-4 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-800">Tokens History</h2>
-              <button
-                onClick={() => setIsTokensHistoryOpen(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="p-4 h-full overflow-auto">
-              <Suspense fallback={<div>Loading tokens...</div>}>
-                <TokensTable
-                  tokensData={tokensData}
-                  errorData={allTokensErrorStates}
-                  isLoading={tokensLoading}
-                  refreshTable={allTokensRefresh}
-                  paginationInfo={tokensPaginationInfo}
-                  setTableQueryParams={setTokensTableQueryParams}
-                />
-              </Suspense>
-            </div>
-          </div>
-        </div>
-      </Modal>
     </>
   );
 };
