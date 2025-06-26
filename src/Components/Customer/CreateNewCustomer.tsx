@@ -186,7 +186,17 @@ const CreateNewCustomer = ({
             required={true}
             errorMessage={getFieldError("phone")}
           />
-          <GooglePlacesInput
+          <Input
+            type="text"
+            name="location"
+            label="Location"
+            value={formData.location}
+            onChange={handleInputChange}
+            placeholder="Enter location"
+            required={true}
+            errorMessage={getFieldError("location")}
+          />
+          {/* <GooglePlacesInput
             type="text"
             name="location"
             label="Location"
@@ -202,7 +212,7 @@ const CreateNewCustomer = ({
                 latitude: coordinates?.lat || "",
               }));
             }}
-          />
+          /> */}
           <SelectInput
             label="Address Type"
             options={[
