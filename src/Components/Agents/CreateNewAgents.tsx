@@ -6,7 +6,7 @@ import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 import { useApiCall } from "../../utils/useApiCall";
 import { z } from "zod";
 import ApiErrorMessage from "../ApiErrorMessage";
-import { GooglePlacesInput } from "../InputComponent/GooglePlacesInput";
+// import { GooglePlacesInput } from "../InputComponent/GooglePlacesInput";
 
 interface CreateNewAgentsProps {
   isOpen: boolean;
@@ -156,7 +156,17 @@ const CreateNewAgents = ({
           required={true}
           errorMessage={getFieldError("email")}
         />
-        <GooglePlacesInput
+        <Input
+            type="text"
+            name="location"
+            label="Location"
+            value={formData.location}
+            onChange={handleInputChange}
+            placeholder="Enter location"
+            required={true}
+            errorMessage={getFieldError("location")}
+          />
+        {/* <GooglePlacesInput
           type="text"
           name="location"
           label="Location"
@@ -172,7 +182,7 @@ const CreateNewAgents = ({
               latitude: coordinates?.lat || "",
             }));
           }}
-        />
+        /> */}
         <SelectInput
           label="Address Type (Home/Work)"
           options={[
