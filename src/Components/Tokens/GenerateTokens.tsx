@@ -1,5 +1,5 @@
 import { useApiCall, useGetRequest } from "@/utils/useApiCall";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { KeyedMutator } from "swr";
 import { z } from "zod";
 import { Modal } from "../ModalComponent/Modal";

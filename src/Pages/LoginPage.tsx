@@ -67,9 +67,45 @@ const LoginPage = () => {
         successMessage: "Login Successful!",
       });
 
+      const optimizedPermissions =
+        response.data.role?.permissions?.map((permission: any) => ({
+          action: permission.action,
+          subject: permission.subject,
+        })) || [];
+
+      // Create optimized user data with minimal permission data
       const userData = {
         token: response.headers.access_token,
-        ...response.data,
+        id: response.data.id,
+        firstname: response.data.firstname,
+        lastname: response.data.lastname,
+        username: response.data.username,
+        email: response.data.email,
+        phone: response.data.phone,
+        location: response.data.location,
+        addressType: response.data.addressType,
+        staffId: response.data.staffId,
+        longitude: response.data.longitude,
+        latitude: response.data.latitude,
+        emailVerified: response.data.emailVerified,
+        isBlocked: response.data.isBlocked,
+        status: response.data.status,
+        roleId: response.data.roleId,
+        createdAt: response.data.createdAt,
+        updatedAt: response.data.updatedAt,
+        deletedAt: response.data.deletedAt,
+        lastLogin: response.data.lastLogin,
+        role: {
+          id: response.data.role?.id,
+          role: response.data.role?.role,
+          active: response.data.role?.active,
+          permissionIds: response.data.role?.permissionIds,
+          created_by: response.data.role?.created_by,
+          created_at: response.data.role?.created_at,
+          updated_at: response.data.role?.updated_at,
+          deleted_at: response.data.role?.deleted_at,
+          permissions: optimizedPermissions, // Only action and subject
+        },
       };
       Cookies.set("userData", JSON.stringify(userData), {
         expires: 7,

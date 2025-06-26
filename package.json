@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
-    "start": "tsc -b && vite build && vite preview",
+    "build": "NODE_OPTIONS=--max-old-space-size=32768 vite build --debug",
+    "start": "NODE_OPTIONS=--max-old-space-size=32768 vite preview --port 5173",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "jest",

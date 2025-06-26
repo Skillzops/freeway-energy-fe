@@ -6,7 +6,6 @@ import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 import { Modal } from "../ModalComponent/Modal";
 import { KeyedMutator } from "swr";
 import ApiErrorMessage from "../ApiErrorMessage";
-import { GooglePlacesInput } from "../InputComponent/GooglePlacesInput";
 
 const formSchema = z.object({
   email: z.string().trim().email("Invalid email address"),
@@ -19,8 +18,6 @@ const formSchema = z.object({
     .transform((val) => val.replace(/\s+/g, "")),
   role: z.string().trim().min(1, "Role is required"),
   location: z.string().trim().min(1, "Location is required"),
-  longitude: z.string().optional(),
-  latitude: z.string().optional(),
 });
 
 const defaultFormData = {
@@ -177,22 +174,15 @@ const CreateNewUserModal = ({
             required={true}
             errorMessage={getFieldError("email")}
           />
-          <GooglePlacesInput
+          <Input
             type="text"
             name="location"
-            label="Location"
+            label="LOCATION"
             value={formData.location}
-            placeholder="Search for a location"
+            onChange={handleInputChange}
+            placeholder="Location"
             required={true}
             errorMessage={getFieldError("location")}
-            onChange={(value, _place, coordinates) => {
-              setFormData((prev) => ({
-                ...prev,
-                location: value,
-                longitude: coordinates?.lng || "",
-                latitude: coordinates?.lat || "",
-              }));
-            }}
           />
           <Input
             type="text"
