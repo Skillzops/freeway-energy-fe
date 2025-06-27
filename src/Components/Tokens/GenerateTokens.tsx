@@ -7,7 +7,7 @@ import { FileInput, Input, SelectInput } from "../InputComponent/Input";
 import ApiErrorMessage from "../ApiErrorMessage";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 import { RxFilePlus } from "react-icons/rx";
-import { FiCopy, FiDownload, FiRefreshCw } from "react-icons/fi";
+import { FiCopy, FiDownload, FiRefreshCw, FiSearch } from "react-icons/fi";
 import jsPDF from "jspdf";
 
 interface GenerateTokensProps {
@@ -39,6 +39,7 @@ const GenerateTokens = ({ isOpen, setIsOpen, allDevicesRefresh, formType, isToke
     const [apiError, setApiError] = useState<string | Record<string, string[]>>("");
     const [generatedToken, setGeneratedToken] = useState<any>(null);
     const [copySuccess, setCopySuccess] = useState(false);
+    const [deviceSearch, setDeviceSearch] = useState("");
     const [formData, setFormData] = useState({
         deviceID: "",
         tokenDuration: "",
@@ -53,13 +54,25 @@ const GenerateTokens = ({ isOpen, setIsOpen, allDevicesRefresh, formType, isToke
         mutate: refreshDevices,
     } = useGetRequest("/v1/device", isOpen);
 
-    // Convert devices data to options for SelectInput
-    const deviceOptions = devicesData?.devices
+    // Convert devices data to options for SelectInput with search filtering
+    const allDeviceOptions = devicesData?.devices
         ?.filter((device: any) => device.isTokenable === true)
         ?.map((device: any) => ({
             label: `${device.serialNumber} - ${device.hardwareModel}`,
             value: device.id,
+            serialNumber: device.serialNumber,
+            hardwareModel: device.hardwareModel,
         })) || [];
+
+    // Filter device options based on search term
+    const deviceOptions = allDeviceOptions.filter((device: any) => {
+        const searchTerm = deviceSearch.toLowerCase();
+        return (
+            device.serialNumber.toLowerCase().includes(searchTerm) ||
+            device.hardwareModel.toLowerCase().includes(searchTerm) ||
+            device.label.toLowerCase().includes(searchTerm)
+        );
+    });
 
     const handleCopyToClipboard = async (text: string) => {
         try {
@@ -196,6 +209,11 @@ const GenerateTokens = ({ isOpen, setIsOpen, allDevicesRefresh, formType, isToke
         
         // Clear field-specific errors
         setFormErrors(prev => prev.filter(error => error.path[0] !== "deviceID"));
+    };
+
+    // Handle device search input
+    const handleDeviceSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setDeviceSearch(e.target.value);
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -483,16 +501,32 @@ const GenerateTokens = ({ isOpen, setIsOpen, allDevicesRefresh, formType, isToke
                                                 </p>
                                             </div>
                                         ) : (
-                                            <SelectInput
-                                                label=""
-                                                value={formData.deviceID}
-                                                onChange={handleDeviceSelect}
-                                                required={true}
-                                                errorMessage={getFieldError("deviceID")}
-                                                options={deviceOptions}
-                                                placeholder={devicesLoading ? "Loading devices..." : "Select a device"}
-                                                disabled={devicesLoading || deviceOptions.length === 0}
-                                            />
+                                            <>
+                                                {/* Device Search Input */}
+                                                <div className="relative mb-3">
+                                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                        <FiSearch className="h-4 w-4 text-gray-400" />
+                                                    </div>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Search devices by serial number or model..."
+                                                        value={deviceSearch}
+                                                        onChange={handleDeviceSearch}
+                                                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm"
+                                                    />
+                                                </div>
+                                                
+                                                <SelectInput
+                                                    label=""
+                                                    value={formData.deviceID}
+                                                    onChange={handleDeviceSelect}
+                                                    required={true}
+                                                    errorMessage={getFieldError("deviceID")}
+                                                    options={deviceOptions}
+                                                    placeholder={devicesLoading ? "Loading devices..." : deviceSearch ? `Searching... (${deviceOptions.length} found)` : "Select a device"}
+                                                    disabled={devicesLoading || deviceOptions.length === 0}
+                                                />
+                                            </>
                                         )}
                                         
                                         {deviceOptions.length === 0 && !devicesLoading && !devicesError && (
