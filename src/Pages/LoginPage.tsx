@@ -71,13 +71,22 @@ const LoginPage = () => {
         token: response.headers.access_token,
         ...response.data,
       };
-      Cookies.set("userData", JSON.stringify(userData), {
-        expires: 7,
-        path: "/",
-        sameSite: "Lax",
-      }); // Token expires in 7 days
-      navigate(redirectPath || "/home");
+      console.log({userData});
+      
+      try {
+        const cookiebar = JSON.stringify(userData);
+        console.log({cookiebar});
+        Cookies.set("userData", cookiebar, {
+          expires: 7,
+          path: "/",
+          sameSite: "Lax",
+        }); // Token expires in 7 days
+        navigate(redirectPath || "/home");
+      } catch (error) {
+        console.log({ error });
+      }
     } catch (error: any) {
+      console.log({error});
       if (error instanceof z.ZodError) {
         setFormErrors(error.issues);
       } else {
