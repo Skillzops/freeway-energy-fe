@@ -46,7 +46,7 @@ const InventoryStats = ({
       <TitlePill
         icon={inventorygradient}
         iconBgColor="bg-[#FDEEC2]"
-        topText="Current Available (in percentage)"
+        topText="Available Stock"
         bottomText="BATCH"
         value={stats?.percentageAvailable}
         parentClass="w-full"

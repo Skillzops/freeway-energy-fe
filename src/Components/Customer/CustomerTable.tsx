@@ -54,11 +54,19 @@ export type CustomerType = {
   username: string | null;
   email: string;
   phone: string;
+  alternatePhone?: string;
+  gender?: string;
   location: string;
   addressType: string | null;
+  installationAddress?: string;
+  lga?: string;
+  state?: string;
   staffId: string | null;
   longitude: string;
   latitude: string;
+  idType?: string;
+  idNumber?: string;
+  type?: string;
   emailVerified: boolean;
   isBlocked: boolean;
   status: string;
@@ -69,6 +77,8 @@ export type CustomerType = {
   lastLogin: string | null;
   customerDetails: CustomerDetails;
   role: Role;
+  passportPhoto?: string;
+  idImage?: string;
 };
 
 // Helper function to map the API data to the desired format

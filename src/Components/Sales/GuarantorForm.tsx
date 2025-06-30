@@ -225,9 +225,9 @@ const GuarantorForm = ({ handleClose }: { handleClose: () => void }) => {
         required={false}
         errorMessage={getFieldError("nationality")}
       />
-      <p className="text-sm font-semibold pt-2">
+      {/* <p className="text-sm font-semibold pt-2">
         Fill Guarantor Identification Details
-      </p>
+      </p> */}
       <SelectInput
         label="ID Type"
         options={[
