@@ -16,28 +16,28 @@ const ProtectedRouteWrapper: React.FC = () => {
     []
   );
 
-  useEffect(() => {
-    if (
-      !token &&
-      !unprotectedRoutes.some((route) => matchPath(route, location.pathname))
-    ) {
-      const toastId = toast.warning("You are not logged in!");
-      return () => toast.dismiss(toastId);
-    }
-  }, [token, location.pathname, unprotectedRoutes]);
+  // useEffect(() => {
+  //   if (
+  //     !token &&
+  //     !unprotectedRoutes.some((route) => matchPath(route, location.pathname))
+  //   ) {
+  //     const toastId = toast.warning("You are not logged in!");
+  //     return () => toast.dismiss(toastId);
+  //   }
+  // }, [token, location.pathname, unprotectedRoutes]);
 
-  // If not authenticated and trying to access protected route, redirect to login
-  if (
-    !token &&
-    !unprotectedRoutes.some((route) => matchPath(route, location.pathname))
-  ) {
-    return (
-      <Navigate
-        to={`/?redirect=${encodeURIComponent(location.pathname)}`}
-        replace
-      />
-    );
-  }
+  // // If not authenticated and trying to access protected route, redirect to login
+  // if (
+  //   !token &&
+  //   !unprotectedRoutes.some((route) => matchPath(route, location.pathname))
+  // ) {
+  //   return (
+  //     <Navigate
+  //       to={`/?redirect=${encodeURIComponent(location.pathname)}`}
+  //       replace
+  //     />
+  //   );
+  // }
 
   // If authenticated but trying to access login page, redirect to home or saved redirect
   if (

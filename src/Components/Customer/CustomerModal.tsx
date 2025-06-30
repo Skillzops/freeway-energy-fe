@@ -3,7 +3,7 @@ import { KeyedMutator } from "swr";
 import { Modal } from "@/Components/ModalComponent/Modal";
 // import editInput from "../../assets/settings/editInput.svg";
 import { DropDown } from "../DropDownComponent/DropDown";
-import { useGetRequest } from "@/utils/useApiCall";
+import { useGetRequest, useApiCall } from "@/utils/useApiCall";
 import { CustomerType } from "./CustomerTable";
 import TabComponent from "../TabComponent/TabComponent";
 // import { Icon } from "../Settings/UserModal";
@@ -23,7 +23,7 @@ const CustomerModal = ({
   customerID: string;
   refreshTable: KeyedMutator<any>;
 }) => {
-  // const [displayInput, setDisplayInput] = useState<boolean>(false);
+  const [displayInput, setDisplayInput] = useState<boolean>(false);
   const [tabContent, setTabContent] = useState<string>("customerDetails");
 
   const fetchSingleCustomer = useGetRequest(
@@ -31,28 +31,56 @@ const CustomerModal = ({
     false
   );
 
+  const { apiCall } = useApiCall();
+
   const generateCustomerEntries = (data: CustomerType): DetailsType => {
     return {
       customerId: data?.id,
-      firstName: data?.firstname,
-      lastName: data?.lastname,
+      firstname: data?.firstname,
+      lastname: data?.lastname,
       email: data?.email,
       phoneNumber: data?.phone,
+      alternatePhone: data?.alternatePhone || "",
+      gender: data?.gender || "",
       addressType: data?.addressType ?? "",
+      installationAddress: data?.installationAddress || "",
+      lga: data?.lga || "",
+      state: data?.state || "",
       location: data?.location,
       longitude: data?.longitude || "",
       latitude: data?.latitude || "",
+      idType: data?.idType || "",
+      idNumber: data?.idNumber || "",
+      type: data?.type || "",
+      passportPhoto: data?.passportPhoto || "",
+      idImage: data?.idImage || "",
     };
   };
 
-  // const handleCancelClick = () => setDisplayInput(false);
+  const handleDeleteCustomer = async (customerId: string) => {
+    if (!window.confirm("Are you sure you want to delete this customer?")) return;
+    try {
+      await apiCall({
+        endpoint: `/v1/customers/${customerId}`,
+        method: "delete",
+        successMessage: "Customer deleted successfully!",
+      });
+      setIsOpen(false);
+      refreshTable();
+    } catch (error) {
+      console.error("Error deleting customer:", error);
+    }
+  };
 
   const dropDownList = {
-    items: ["Delete Customer"],
+    items: ["Delete Customer", "Edit Customer"],
     onClickLink: (index: number) => {
       switch (index) {
         case 0:
-          console.log("Delete Customer");
+          handleDeleteCustomer(customerID);
+          break;
+        case 1:
+          setDisplayInput(true);
           break;
         default:
           break;
@@ -89,7 +117,7 @@ const CustomerModal = ({
       onClose={() => {
         setTabContent("customerDetails");
         setIsOpen(false);
-        // setDisplayInput(false)
+        setDisplayInput(false);
       }}
       leftHeaderContainerClass="pl-2"
       // rightHeaderComponents={
@@ -156,7 +184,7 @@ const CustomerModal = ({
               <CustomerDetails
                 {...generateCustomerEntries(fetchSingleCustomer?.data)}
                 refreshTable={refreshTable}
-                displayInput={false}
+                displayInput={displayInput}
               />
             </DataStateWrapper>
           ) : (

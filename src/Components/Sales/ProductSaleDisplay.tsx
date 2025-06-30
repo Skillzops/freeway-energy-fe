@@ -28,7 +28,7 @@ export const ProductDetailRow = ({
       title={title}
     >
       {showNaira && <NairaSymbol />}
-      {label === "Product Category" ? <ProductTag productTag={value} /> : value}
+      {label === "Product Category" ? <ProductTag productTag={String(value)} /> : String(value)}
     </p>
   </div>
 );
@@ -98,7 +98,7 @@ const ProductSaleDisplay = observer(
       SaleStore.getRecipientByProductId(productId)
     );
 
-    const types = ["parameters", "miscellaneous", "devices", "recipient"];
+    const types = ["miscellaneous", "devices", "recipient", "parameters"];
 
     const allErrors = [
       ...getFieldError("quantity", productId),

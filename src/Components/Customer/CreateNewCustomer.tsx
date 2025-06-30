@@ -1,12 +1,14 @@
-import { useApiCall } from "@/utils/useApiCall";
 import React, { useState } from "react";
+import { Input, SelectInput } from "../InputComponent/Input";
+import StateLgaSelect from "../InputComponent/StateLgaSelect";
+import IdTypeSelect from "../InputComponent/IdTypeSelect";
+import { UploadPhotoInput } from "../InputComponent/UploadPhotoInput";
+import { z } from "zod";
+import { useApiCall } from "../../utils/useApiCall";
 import { KeyedMutator } from "swr";
 import { Modal } from "../ModalComponent/Modal";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
-import { Input, SelectInput } from "../InputComponent/Input";
-import { z } from "zod";
 import ApiErrorMessage from "../ApiErrorMessage";
-import { GooglePlacesInput } from "../InputComponent/GooglePlacesInput";
 
 interface CreatNewCustomerProps {
   isOpen: boolean;
@@ -17,32 +19,59 @@ interface CreatNewCustomerProps {
 const customerSchema = z.object({
   firstname: z.string().min(1, "First name is required"),
   lastname: z.string().min(1, "Last name is required"),
-  email: z.string().email("Invalid email address"),
+  email: z.string().email("Invalid email address").or(z.literal("")),
   phone: z
     .string()
     .trim()
     .min(1, "Phone number is required")
     .max(20, "Phone number cannot be more than 20 digits")
     .transform((val) => val.replace(/\s+/g, "")),
-  location: z.string().trim().min(1, "Address is required"),
+  alternatePhone: z
+    .string()
+    .trim()
+    .min(1, "Alternate phone is required")
+    .max(20, "Alternate phone cannot be more than 20 digits")
+    .transform((val) => val.replace(/\s+/g, "")),
+  gender: z.string().min(1, "Gender is required"),
   addressType: z
     .enum(["HOME", "WORK"], {
       errorMap: () => ({ message: "Please select an address type" }),
     })
     .default("HOME"),
+  installationAddress: z.string().min(1, "Installation address is required"),
+  lga: z.string().min(1, "LGA is required"),
+  state: z.string().min(1, "State is required"),
+  location: z.string().trim().min(1, "Location is required"),
   longitude: z.string().optional(),
   latitude: z.string().optional(),
+  idType: z.string().optional(),
+  idNumber: z.string().optional(),
+  type: z.string().optional(),
+  passportPhoto: z.instanceof(File).optional(),
+  idImage: z.instanceof(File).optional(),
 });
 
 type CustomerFormData = z.infer<typeof customerSchema>;
 
-const defaultFormData = {
+const defaultFormData: CustomerFormData = {
   firstname: "",
   lastname: "",
   email: "",
   phone: "",
-  addressType: "HOME" as "HOME" | "WORK",
+  alternatePhone: "",
+  gender: "",
+  addressType: "HOME",
+  installationAddress: "",
+  lga: "",
+  state: "",
   location: "",
+  longitude: "",
+  latitude: "",
+  idType: "",
+  idNumber: "",
+  type: "",
+  passportPhoto: undefined,
+  idImage: undefined,
 };
 
 const CreateNewCustomer = ({
@@ -54,9 +83,7 @@ const CreateNewCustomer = ({
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<CustomerFormData>(defaultFormData);
   const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([]);
-  const [apiError, setApiError] = useState<string | Record<string, string[]>>(
-    ""
-  );
+  const [apiError, setApiError] = useState<string | Record<string, string[]>>("");
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -67,6 +94,22 @@ const CreateNewCustomer = ({
       [name]: value,
     }));
     resetFormErrors(name);
+  };
+
+  const handlePhotoChange = (file: File | null) => {
+    setFormData((prev) => ({
+      ...prev,
+      passportPhoto: file || undefined,
+    }));
+    resetFormErrors("passportPhoto");
+  };
+
+  const handleIdImageChange = (file: File | null) => {
+    setFormData((prev) => ({
+      ...prev,
+      idImage: file || undefined,
+    }));
+    resetFormErrors("idImage");
   };
 
   const handleSelectChange = (name: string, values: string) => {
@@ -89,10 +132,22 @@ const CreateNewCustomer = ({
 
     try {
       const validatedData = customerSchema.parse(formData);
+      
+      // Create FormData for multipart/form-data
+      const formDataToSend = new FormData();
+      Object.entries(validatedData).forEach(([key, value]) => {
+        if (value !== undefined && value !== "") {
+          formDataToSend.append(key, value);
+        }
+      });
+
       await apiCall({
         endpoint: "/v1/customers/create",
         method: "post",
-        data: validatedData,
+        data: formDataToSend,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
         successMessage: "Customer created successfully!",
       });
 
@@ -146,10 +201,18 @@ const CreateNewCustomer = ({
           </h2>
         </div>
         <div className="flex flex-col items-center justify-center w-full px-4 gap-4 py-8">
+          <UploadPhotoInput
+            label="Photograph"
+            value={formData.passportPhoto}
+            onChange={handlePhotoChange}
+            errorMessage={getFieldError("passportPhoto")}
+            required={false}
+            maxSizeInMB={2}
+          />
           <Input
             type="text"
             name="firstname"
-            label="FIRST NAME"
+            label="* First Name"
             value={formData.firstname}
             onChange={handleInputChange}
             placeholder="First Name"
@@ -159,7 +222,7 @@ const CreateNewCustomer = ({
           <Input
             type="text"
             name="lastname"
-            label="LAST NAME"
+            label="* Last Name"
             value={formData.lastname}
             onChange={handleInputChange}
             placeholder="Last Name"
@@ -169,17 +232,17 @@ const CreateNewCustomer = ({
           <Input
             type="email"
             name="email"
-            label="EMAIL"
+            label="Email"
             value={formData.email}
             onChange={handleInputChange}
             placeholder="Email"
-            required={true}
+            required={false}
             errorMessage={getFieldError("email")}
           />
           <Input
             type="text"
             name="phone"
-            label="PHONE"
+            label="* Phone Number"
             value={formData.phone}
             onChange={handleInputChange}
             placeholder="Phone Number"
@@ -188,48 +251,125 @@ const CreateNewCustomer = ({
           />
           <Input
             type="text"
-            name="location"
-            label="Location"
-            value={formData.location}
+            name="alternatePhone"
+            label="* Alternative Phone Number"
+            value={formData.alternatePhone}
             onChange={handleInputChange}
-            placeholder="Enter location"
+            placeholder="Alternate Phone Number"
             required={true}
-            errorMessage={getFieldError("location")}
+            errorMessage={getFieldError("alternatePhone")}
           />
-          {/* <GooglePlacesInput
-            type="text"
-            name="location"
-            label="Location"
-            value={formData.location}
-            placeholder="Search for a location"
-            required={true}
-            errorMessage={getFieldError("location")}
-            onChange={(value, _place, coordinates) => {
-              setFormData((prev) => ({
-                ...prev,
-                location: value,
-                longitude: coordinates?.lng || "",
-                latitude: coordinates?.lat || "",
-              }));
-            }}
-          /> */}
           <SelectInput
-            label="Address Type"
+            label="* Gender"
+            options={[
+              { label: "Male", value: "Male" },
+              { label: "Female", value: "Female" },
+              { label: "Other", value: "Other" },
+            ]}
+            value={formData.gender}
+            onChange={(selectedValue) => handleSelectChange("gender", selectedValue)}
+            required={true}
+            placeholder="Gender"
+            errorMessage={getFieldError("gender")}
+          />
+          <SelectInput
+            label="* Address type (Home/Work)"
             options={[
               { label: "Home", value: "HOME" },
               { label: "Work", value: "WORK" },
             ]}
             value={formData.addressType}
-            onChange={(selectedValue) =>
-              handleSelectChange("addressType", selectedValue)
-            }
-            required={false}
-            placeholder="Choose Address Type"
+            onChange={(selectedValue) => handleSelectChange("addressType", selectedValue)}
+            required={true}
+            placeholder="Address type"
             errorMessage={getFieldError("addressType")}
           />
-
+          <StateLgaSelect
+            state={formData.state}
+            lga={formData.lga}
+            onStateChange={(selectedState) => handleSelectChange("state", selectedState)}
+            onLgaChange={(selectedLga) => handleSelectChange("lga", selectedLga)}
+            required={true}
+            stateError={getFieldError("state")}
+            lgaError={getFieldError("lga")}
+          />
+          <Input
+            type="text"
+            name="installationAddress"
+            label="* Address"
+            value={formData.installationAddress}
+            onChange={handleInputChange}
+            placeholder="Installation address"
+            required={true}
+            errorMessage={getFieldError("installationAddress")}
+          />
+          <IdTypeSelect
+            value={formData.idType || ""}
+            onChange={(selectedValue) => handleSelectChange("idType", selectedValue)}
+            required={false}
+            errorMessage={getFieldError("idType")}
+          />
+          <Input
+            type="text"
+            name="idNumber"
+            label="ID Number"
+            value={formData.idNumber || ""}
+            onChange={handleInputChange}
+            placeholder="ID number"
+            required={false}
+            errorMessage={getFieldError("idNumber")}
+          />
+          <UploadPhotoInput
+            label="ID Image"
+            value={formData.idImage}
+            onChange={handleIdImageChange}
+            errorMessage={getFieldError("idImage")}
+            required={false}
+            maxSizeInMB={2}
+          />
+          <Input
+            type="text"
+            name="location"
+            label="Location"
+            value={formData.location}
+            onChange={handleInputChange}
+            placeholder="Home Address"
+            required={true}
+            errorMessage={getFieldError("location")}
+          />
+          <Input
+            type="text"
+            name="longitude"
+            label="Longitude"
+            value={formData.longitude || ""}
+            onChange={handleInputChange}
+            placeholder="Longitude"
+            required={false}
+            errorMessage={getFieldError("longitude")}
+          />
+          <Input
+            type="text"
+            name="latitude"
+            label="Latitude"
+            value={formData.latitude || ""}
+            onChange={handleInputChange}
+            placeholder="Latitude"
+            required={false}
+            errorMessage={getFieldError("latitude")}
+          />
+          <SelectInput
+            label="Customer Type"
+            options={[
+              { label: "Lead", value: "lead" },
+              { label: "Purchase", value: "purchase" },
+            ]}
+            value={formData.type || ""}
+            onChange={(selectedValue) => handleSelectChange("type", selectedValue)}
+            required={false}
+            placeholder="Customer type"
+            errorMessage={getFieldError("type")}
+          />
           <ApiErrorMessage apiError={apiError} />
-
           <ProceedButton
             type="submit"
             loading={loading}

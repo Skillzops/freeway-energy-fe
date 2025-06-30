@@ -17,6 +17,13 @@ export const identificationDetailsSchema = z
       .string()
       .trim()
       .nonempty({ message: "Issue date is required" })
+      .transform((date) => {
+        // Handle ISO date strings by extracting just the date part
+        if (date.includes('T')) {
+          return date.split('T')[0];
+        }
+        return date;
+      })
       .refine((date) => !isNaN(Date.parse(date)), {
         message: "Invalid issue date",
       })
@@ -28,6 +35,13 @@ export const identificationDetailsSchema = z
       .string()
       .trim()
       .nonempty({ message: "Expiration date is required" })
+      .transform((date) => {
+        // Handle ISO date strings by extracting just the date part
+        if (date.includes('T')) {
+          return date.split('T')[0];
+        }
+        return date;
+      })
       .refine((date) => !isNaN(Date.parse(date)), {
         message: "Invalid expiration date",
       })
@@ -61,7 +75,14 @@ export const nextOfKinDetailsSchema = z.object({
   dateOfBirth: z
     .string()
     .trim()
-    .nonempty({ message: "Issue date is required" })
+    .nonempty({ message: "Date of birth is required" })
+    .transform((date) => {
+      // Handle ISO date strings by extracting just the date part
+      if (date.includes('T')) {
+        return date.split('T')[0];
+      }
+      return date;
+    })
     .refine((date) => !isNaN(Date.parse(date)), {
       message: "Invalid date of birth",
     })
@@ -79,7 +100,14 @@ export const guarantorDetailsSchema = z.object({
   dateOfBirth: z
     .string()
     .trim()
-    .nonempty({ message: "Issue date is required" })
+    .nonempty({ message: "Date of birth is required" })
+    .transform((date) => {
+      // Handle ISO date strings by extracting just the date part
+      if (date.includes('T')) {
+        return date.split('T')[0];
+      }
+      return date;
+    })
     .refine((date) => !isNaN(Date.parse(date)), {
       message: "Invalid date of birth",
     })
@@ -123,102 +151,6 @@ export const saleItemSchema = z
             "Installment starting price is required for installment payments",
           path: ["installmentStartingPrice"],
         });
-      }
-    }
-  });
-
-export const formSchema = z
-  .object({
-    category: z.enum(["PRODUCT"], {
-      message: "Category is required",
-    }),
-    customerId: z.string().min(1, "Please select at least one customer"),
-    saleItems: z
-      .array(saleItemSchema)
-      .min(1, "At least one sale item is required"),
-    bvn: z
-      .string()
-      .length(11, "BVN must be exactly 11 digits")
-      .regex(/^\d+$/, "BVN must contain only numbers")
-      .optional(),
-    identificationDetails: identificationDetailsSchema.optional(),
-    nextOfKinDetails: nextOfKinDetailsSchema.optional(),
-    guarantorDetails: guarantorDetailsSchema.optional(),
-    applyMargin: z.boolean().default(true),
-  })
-  .superRefine((data, ctx) => {
-    // Check if any sale item has paymentMode as "INSTALLMENT"
-    const hasInstallment = data.saleItems.some(
-      (item) => item.paymentMode === "INSTALLMENT"
-    );
-
-    // If any sale item has paymentMode as "INSTALLMENT", enforce identificationDetails, nextOfKinDetails and guarantorDetails
-    if (hasInstallment) {
-      // Validate identificationDetails
-      if (!data.identificationDetails) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message:
-            "Identification details are required for installment payments",
-          path: ["identificationDetails"],
-        });
-      } else {
-        // Validate the nested schema for identificationDetails
-        const identificationValidation = identificationDetailsSchema.safeParse(
-          data.identificationDetails
-        );
-        if (!identificationValidation.success) {
-          identificationValidation.error.issues.forEach((issue) => {
-            ctx.addIssue({
-              ...issue,
-              path: ["identificationDetails", ...issue.path],
-            });
-          });
-        }
-      }
-
-      // Validate nextOfKinDetails
-      if (!data.nextOfKinDetails) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Next of kin details are required for installment payments",
-          path: ["nextOfKinDetails"],
-        });
-      } else {
-        // Validate the nested schema for nextOfKinDetails
-        const nextOfKinValidation = nextOfKinDetailsSchema.safeParse(
-          data.nextOfKinDetails
-        );
-        if (!nextOfKinValidation.success) {
-          nextOfKinValidation.error.issues.forEach((issue) => {
-            ctx.addIssue({
-              ...issue,
-              path: ["nextOfKinDetails", ...issue.path],
-            });
-          });
-        }
-      }
-
-      // Validate guarantorDetails
-      if (!data.guarantorDetails) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Guarantor details are required for installment payments",
-          path: ["guarantorDetails"],
-        });
-      } else {
-        // Validate the nested schema for guarantorDetails
-        const guarantorValidation = guarantorDetailsSchema.safeParse(
-          data.guarantorDetails
-        );
-        if (!guarantorValidation.success) {
-          guarantorValidation.error.issues.forEach((issue) => {
-            ctx.addIssue({
-              ...issue,
-              path: ["guarantorDetails", ...issue.path],
-            });
-          });
-        }
       }
     }
   });
@@ -282,6 +214,7 @@ export type SalePayload = {
   identificationDetails?: IdentificationDetails;
   guarantorDetails?: GuarantorDetails;
   applyMargin: boolean;
+  paymentMethod: "ONLINE" | "CASH";
 };
 
 export const defaultSaleFormData: SalePayload = {
@@ -325,4 +258,83 @@ export const defaultSaleFormData: SalePayload = {
       addressAsOnID: "",
     },
   },
+  paymentMethod: "ONLINE",
 };
+
+export const formSchema = z
+  .object({
+    category: z.enum(["PRODUCT"], {
+      message: "Category is required",
+    }),
+    customerId: z.string().min(1, "Please select at least one customer"),
+    saleItems: z
+      .array(saleItemSchema)
+      .min(1, "At least one sale item is required"),
+    bvn: z
+      .string()
+      .optional()
+      .refine((val) => !val || val.length === 0 || (val.length === 11 && /^\d+$/.test(val)), {
+        message: "BVN must be exactly 11 digits when provided"
+      }),
+    identificationDetails: identificationDetailsSchema.optional(),
+    nextOfKinDetails: nextOfKinDetailsSchema.optional(),
+    guarantorDetails: guarantorDetailsSchema.optional(),
+    applyMargin: z.boolean().default(true),
+    paymentMethod: z.enum(["ONLINE", "CASH"], {
+      message: "Payment method is required",
+    }),
+  })
+  .superRefine((data, ctx) => {
+    // Check if any sale item has paymentMode as "INSTALLMENT"
+    const hasInstallment = data.saleItems.some(
+      (item) => item.paymentMode === "INSTALLMENT"
+    );
+
+    // If any sale item has paymentMode as "INSTALLMENT", enforce identificationDetails and guarantorDetails
+    if (hasInstallment) {
+      // Validate identificationDetails
+      if (!data.identificationDetails) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            "Identification details are required for installment payments",
+          path: ["identificationDetails"],
+        });
+      } else {
+        // Validate the nested schema for identificationDetails
+        const identificationValidation = identificationDetailsSchema.safeParse(
+          data.identificationDetails
+        );
+        if (!identificationValidation.success) {
+          identificationValidation.error.issues.forEach((issue) => {
+            ctx.addIssue({
+              ...issue,
+              path: ["identificationDetails", ...issue.path],
+            });
+          });
+        }
+      }
+
+      // Validate guarantorDetails
+      if (!data.guarantorDetails) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Guarantor details are required for installment payments",
+          path: ["guarantorDetails"],
+        });
+      } else {
+        // Validate the nested schema for guarantorDetails
+        const guarantorValidation = guarantorDetailsSchema.safeParse(
+          data.guarantorDetails
+        );
+        if (!guarantorValidation.success) {
+          guarantorValidation.error.issues.forEach((issue) => {
+            ctx.addIssue({
+              ...issue,
+              path: ["guarantorDetails", ...issue.path],
+            });
+          });
+        }
+      }
+    }
+  });

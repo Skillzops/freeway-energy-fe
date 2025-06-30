@@ -65,17 +65,18 @@ export const useApiCall = () => {
       updateErrorState(endpoint, false, true);
       return response;
     } catch (error: any) {
-      handleApiError(
-        error,
-        location,
-        setIsNetworkError,
-        setIsPermissionError,
-        endpoint,
-        errorStates,
-        updateErrorState,
-        setToastShown
-      );
-      throw error;
+      // handleApiError(
+      //   error,
+      //   location,
+      //   setIsNetworkError,
+      //   setIsPermissionError,
+      //   endpoint,
+      //   errorStates,
+      //   updateErrorState,
+      //   setToastShown
+      // // );
+      // throw error;
+          console.log({error});
     }
   };
 

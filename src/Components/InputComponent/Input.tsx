@@ -120,7 +120,7 @@ export const Input = forwardRef<HTMLInputElement, InputType>(
             onClick={onClick}
           >
             <span
-              className={`absolute flex -top-2 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] transition-opacity duration-500 ease-in-out
+              className={`absolute flex -top-2 items-center justify-center text-sm text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] transition-opacity duration-500 ease-in-out
             ${value ? "opacity-100" : "opacity-0"}
             `}
             >
@@ -255,14 +255,14 @@ export const SmallSelectInput = ({
         value={value}
         onChange={onChange}
         required={required}
-        className={`px-2 py-1 w-full border-[0.6px] border-strokeGreyThree rounded-full ${className}`}
+        className={`w-full text-sm font-semibold text-textBlack border-[0.6px] border-strokeGreyThree rounded-3xl px-[1.1em] py-[1.25em] bg-white ${className}`}
       >
         <option value="">{placeholder}</option>
         {options.map((option: any) => (
           <option
             key={option.value}
             value={option.value}
-            className="w-full capitalize"
+            className="w-full capitalize text-sm"
           >
             {option.label}
           </option>
@@ -771,7 +771,7 @@ export const SelectInput = ({
           onClick={() => !disabled && setIsOpen(!isOpen)}
         >
           <span
-            className={`absolute flex -top-2 items-center justify-center text-[10px] text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] transition-opacity duration-500 ease-in-out
+            className={`absolute flex -top-2 items-center justify-center text-sm text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] transition-opacity duration-500 ease-in-out
               ${value ? "opacity-100" : "opacity-0"}`}
           >
             {label.toUpperCase()}

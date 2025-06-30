@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input, SelectInput } from "../InputComponent/Input";
 import { z } from "zod";
 import { SaleStore } from "@/stores/SaleStore";
@@ -10,7 +10,7 @@ const formSchema = z.object({
   }),
   installmentDuration: z.number().optional(),
   installmentStartingPrice: z.number().optional(),
-  discount: z.number().optional(),
+  discount: z.number().min(0, "Discount must be at least 0%").max(100, "Discount cannot exceed 100%").optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -20,6 +20,26 @@ const defaultFormData: FormData = {
   installmentDuration: 0,
   installmentStartingPrice: 0,
   discount: 0,
+};
+
+// Calculate installment amount based on your specified logic
+const calculateInstallmentAmount = (
+  productPrice: number,
+  discount: number,
+  miscellaneousCosts: number,
+  installmentDuration: number
+): number => {
+  // Step 1: Apply discount to product price
+  const discountAmount = (discount / 100) * productPrice;
+  const discountedPrice = productPrice - discountAmount;
+  
+  // Step 2: Add miscellaneous costs
+  const totalAmount = discountedPrice + miscellaneousCosts;
+  
+  // Step 3: Calculate monthly installment
+  const monthlyInstallment = totalAmount / installmentDuration;
+  
+  return Math.round(monthlyInstallment); // Round to nearest whole number
 };
 
 const ParametersForm = ({
@@ -34,39 +54,68 @@ const ParametersForm = ({
   );
   const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([]);
 
+  // Get product details for calculation
+  const product = SaleStore.getProductById(currentProductId);
+  console.log("Product for calculation:", product);
+  console.log("Product price string:", product?.productPrice);
+  
+  // Parse product price properly - remove any currency symbols and commas
+  const productPriceString = product?.productPrice || "0";
+  const cleanPriceString = productPriceString.toString().replace(/[₦,]/g, '');
+  const productPrice = parseFloat(cleanPriceString) || 0;
+  
+  console.log("Parsed product price:", productPrice);
+  
+  const miscellaneousCosts = SaleStore.getMiscellaneousByProductId(currentProductId)?.costs || {};
+  
+  // Properly handle MobX observable Map
+  const totalMiscellaneousCosts = miscellaneousCosts instanceof Map 
+    ? Array.from(miscellaneousCosts.values()).reduce((sum, cost) => sum + (Number(cost) || 0), 0)
+    : Object.values(miscellaneousCosts).reduce((sum, cost) => sum + (Number(cost) || 0), 0);
+
+  // Calculate installment amount when relevant fields change
+  useEffect(() => {
+    if (formData.paymentMode === "INSTALLMENT" && 
+        formData.installmentDuration && 
+        formData.installmentDuration > 0) {
+      
+      const calculatedAmount = calculateInstallmentAmount(
+        productPrice,
+        formData.discount || 0,
+        totalMiscellaneousCosts,
+        formData.installmentDuration
+      );
+      
+      setFormData(prev => ({
+        ...prev,
+        installmentStartingPrice: calculatedAmount
+      }));
+    }
+  }, [formData.paymentMode, formData.installmentDuration, formData.discount, productPrice, totalMiscellaneousCosts]);
+
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
+    const numericValue = parseFloat(value);
 
-    // Special handling for installmentStartingPrice
-    if (name === "installmentStartingPrice") {
-      const numericValue = parseFloat(value);
-
-      // If the value is greater than 100, set it to zero
-      if (numericValue > 100) {
-        setFormData((prev) => ({
-          ...prev,
-          [name]: 0, // Transform back to zero
-        }));
-        setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
-        return;
+    if (!isNaN(numericValue)) {
+      if (name === 'discount') {
+        if (numericValue < 0 || numericValue > 100) {
+          return;
+        }
       }
-
-      // Otherwise, update the value as usual
       setFormData((prev) => ({
         ...prev,
         [name]: numericValue,
       }));
-      setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
-      return;
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
     }
-
-    // Handle other fields
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    
     setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
   };
 
@@ -138,6 +187,10 @@ const ParametersForm = ({
         ]
       : [{ label: "Single Deposit", value: "ONE_OFF" }];
 
+  // Show calculation breakdown for installment mode
+  const showCalculationBreakdown = formData.paymentMode === "INSTALLMENT" && 
+    formData.installmentDuration && formData.installmentDuration > 0;
+
   return (
     <div className="flex flex-col justify-between w-full h-full min-h-[360px]">
       <div className="flex flex-col gap-3">
@@ -151,6 +204,18 @@ const ParametersForm = ({
           placeholder="Select Payment Mode"
           required={true}
           errorMessage={getFieldError("paymentMode")}
+        />
+        <Input
+          type="number"
+          name="discount"
+          label="DISCOUNT (%)"
+          value={formData.discount as number}
+          onChange={handleInputChange}
+          placeholder="Enter Discount Percentage"
+          required={false}
+          max={100}
+          errorMessage={getFieldError("discount")}
+          description={formData.discount === 0 ? "Enter Discount Percentage (0-100)" : ""}
         />
         {formData.paymentMode === "INSTALLMENT" ? (
           <Input
@@ -173,31 +238,35 @@ const ParametersForm = ({
           <Input
             type="number"
             name="installmentStartingPrice"
-            label="INITIAL PAYMENT AMOUNT (PERCENTAGE)"
+            label="MONTHLY INSTALLMENT AMOUNT"
             value={formData.installmentStartingPrice as number}
             onChange={handleInputChange}
-            placeholder="Initial Payment Amount"
+            placeholder="Monthly Installment Amount"
             required={true}
             errorMessage={getFieldError("installmentStartingPrice")}
             description={
               formData.installmentStartingPrice === 0
-                ? "Enter Initial Payment Amount (Percentage)"
+                ? "Calculated automatically based on total amount, discount, and installments"
                 : ""
             }
-            max={100}
+            readOnly={Boolean(showCalculationBreakdown)}
           />
         ) : null}
-        <Input
-          type="number"
-          name="discount"
-          label="DISCOUNT"
-          value={formData.discount as number}
-          onChange={handleInputChange}
-          placeholder="Discount"
-          required={false}
-          errorMessage={getFieldError("discount")}
-          description={formData.discount === 0 ? "Enter Discount Value" : ""}
-        />
+        
+        {/* Calculation Breakdown */}
+        {showCalculationBreakdown && (
+          <div className="p-3 bg-gray-50 rounded-md text-xs">
+            <p className="font-semibold mb-2">Calculation Breakdown:</p>
+            <div className="space-y-1">
+              <p>Product Price: ₦{productPrice.toLocaleString()}</p>
+              <p>Discount ({formData.discount || 0}%): -₦{(((formData.discount || 0) / 100) * productPrice).toLocaleString()}</p>
+              <p>Discounted Price: ₦{(productPrice - (((formData.discount || 0) / 100) * productPrice)).toLocaleString()}</p>
+              <p>Miscellaneous Costs: +₦{totalMiscellaneousCosts.toLocaleString()}</p>
+              <p className="font-semibold">Total Amount: ₦{(productPrice - (((formData.discount || 0) / 100) * productPrice) + totalMiscellaneousCosts).toLocaleString()}</p>
+              <p className="font-semibold">Monthly Payment: ₦{(formData.installmentStartingPrice || 0).toLocaleString()} × {formData.installmentDuration || 0} months</p>
+            </div>
+          </div>
+        )}
       </div>
       <div className="flex items-center justify-between gap-1">
         <SecondaryButton

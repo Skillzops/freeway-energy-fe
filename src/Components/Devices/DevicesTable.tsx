@@ -127,6 +127,8 @@ const DevicesTable = ({
   const getTableData = () => {
     return generateDeviceEntries(devicesData);
   };
+  
+
 
   return (
     <>
@@ -135,6 +137,7 @@ const DevicesTable = ({
           <Table
             tableTitle="DEVICES"
             filterList={filterList}
+        
             columnList={columnList}
             loading={isLoading}
             tableData={getTableData()}
