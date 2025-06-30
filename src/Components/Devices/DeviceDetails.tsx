@@ -28,6 +28,7 @@ const DeviceFormSchema = z.object({
   restrictedDigitMode: z.boolean(),
   hardwareModel: z.string().trim(),
   firmwareVersion: z.string().trim(),
+  isTokenable: z.boolean(),
 });
 
 type DeviceFormData = z.infer<typeof DeviceFormSchema>;
@@ -57,6 +58,7 @@ const DeviceDetails = ({
       restrictedDigitMode: deviceData?.restrictedDigitMode,
       hardwareModel: deviceData?.hardwareModel,
       firmwareVersion: deviceData?.firmwareVersion,
+      isTokenable: deviceData?.isTokenable ?? false,
     };
   }, [deviceData]);
 
@@ -70,6 +72,7 @@ const DeviceDetails = ({
   const [apiError, setApiError] = useState<string | Record<string, string[]>>(
     ""
   );
+
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -103,6 +106,33 @@ const DeviceDetails = ({
     }
 
     setApiError(""); // Clear API errors on change
+  };
+
+  const handleCheckboxChange = (name: string, checked: boolean) => {
+    setFormData((prev) => ({
+      ...prev,
+      [name]: checked,
+    }));
+
+    // Validate the field immediately
+    const parsed = DeviceFormSchema.safeParse({
+      ...formData,
+      [name]: checked,
+    });
+
+    if (!parsed.success) {
+      const newErrors = parsed.error.issues.filter(
+        (issue) => issue.path[0] === name
+      );
+      setFormErrors((prev) => [
+        ...prev.filter((err) => err.path[0] !== name),
+        ...newErrors,
+      ]);
+    } else {
+      setFormErrors((prev) => prev.filter((err) => err.path[0] !== name));
+    }
+
+    setApiError("");
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -320,6 +350,41 @@ const DeviceDetails = ({
                 required={false}
                 errorMessage={getFieldError("firmwareVersion")}
               />
+            )
+          }
+        />
+
+        <DetailComponent
+          label="Tokenable Status"
+          value={
+            defaultFormData.isTokenable
+              ? "Can Generate Tokens"
+              : "Cannot Generate Tokens"
+          }
+          parentClass="border-none p-0"
+          valueClass={
+            defaultFormData.isTokenable ? "text-green-600" : "text-red-600"
+          }
+          inputComponent={
+            !displayInput ? null : (
+              <div className="flex items-center space-x-3">
+                <SmallInput
+                  type="checkbox"
+                  name="isTokenable"
+                  checked={formData.isTokenable}
+                  onChange={(e) =>
+                    handleCheckboxChange("isTokenable", e.target.checked)
+                  }
+                  placeholder="Can generate tokens"
+                  required={false}
+                  errorMessage={getFieldError("isTokenable")}
+                />
+                <span className="text-sm text-gray-600">
+                  {formData.isTokenable
+                    ? "Device can generate tokens"
+                    : "Device cannot generate tokens"}
+                </span>
+              </div>
             )
           }
         />

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Input, InputType } from "./Input";
 
+
 declare global {
   interface Window {
     google: any;
@@ -38,7 +39,7 @@ export const GooglePlacesInput = ({
   const [internalValue, setInternalValue] = useState(value || "");
   const [apiLoaded, setApiLoaded] = useState(false);
 
-  const apiKey = "AIzaSyDqKiQNSG3P4Wsx3Qjy_BSQO2fTgfZIZoE";
+  const apiKey = import.meta.env.VITE_GOOGLE_API_KEY || "AIzaSyDqKiQNSG3P4Wsx3Qjy_BSQO2fTgfZIZoE";
 
   // Sync internal value with external value changes
   useEffect(() => {

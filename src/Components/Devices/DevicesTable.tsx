@@ -5,6 +5,12 @@ import { PaginationType, Table } from "../TableComponent/Table";
 import { ErrorComponent } from "@/Pages/ErrorPage";
 import DeviceDetailModal from "./DeviceDetailModal";
 
+export interface TokenEntry {
+  id: string;
+  token: string;
+  duration: number;
+  createdAt: string;
+}
 export type DeviceEntries = {
   id: string;
   no?: string;
@@ -18,6 +24,7 @@ export type DeviceEntries = {
   firmwareVersion: string;
   isTokenable: boolean;
   saleItemIDs?: string[];
+  tokens?: TokenEntry[];
   createdAt?: string;
   updatedAt?: string;
 };

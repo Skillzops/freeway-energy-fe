@@ -3,23 +3,40 @@ import react from "@vitejs/plugin-react-swc";
 import { resolve } from "path";
 import tailwindcss from "tailwindcss";
 import tsconfigPaths from "vite-tsconfig-paths";
-// https://vitejs.dev/config/
+
 export default defineConfig({
+  build: {
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ["react", "react-dom"],
+        },
+      },
+    },
+  },
   server: {
     host: "0.0.0.0",
     port: 5173,
     watch: {
       usePolling: true,
+      followSymlinks: false,
     },
+    allowedHosts: ["a4nt-grvnz.ondigitalocean.app", "a4nt-epaoy.ondigitalocean.app", "www.a4tpowercrm.com.ng"],
   },
-  plugins: [react(), tsconfigPaths()],
+  preview: {
+    host: "0.0.0.0",
+    port: 5173,
+    allowedHosts: ["a4nt-grvnz.ondigitalocean.app", "a4nt-epaoy.ondigitalocean.app", "www.a4tpowercrm.com.ng"],
+  },
+  plugins: [react(), tsconfigPaths()], 
   resolve: {
     alias: {
       "@": resolve(__dirname, "src"),
     },
   },
   optimizeDeps: {
-    include: ["@axios", "@react-icons"],
+    include: ["axios", "react-icons"],
   },
   css: {
     postcss: {

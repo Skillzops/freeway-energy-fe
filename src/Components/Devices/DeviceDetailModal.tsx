@@ -10,6 +10,7 @@ import { DataStateWrapper } from "../Loaders/DataStateWrapper";
 import DeviceDetails from "./DeviceDetails";
 import { DropDown } from "../DropDownComponent/DropDown";
 import { toast } from "react-toastify";
+import DeviceTokenDetails from "./DeviceTokenDetails";
 
 const DeviceDetailModal = ({
   isOpen,
@@ -30,6 +31,7 @@ const DeviceDetailModal = ({
 
   const tabNames: TabNamesType[] = [
     { name: "Details", key: "details", count: null },
+    { name: "Tokens", key: "tokens", count: null },
   ];
 
   const getDeviceDetailsData = (data: DeviceEntries) => {
@@ -147,6 +149,21 @@ const DeviceDetailModal = ({
                 refreshTable={refreshTable}
                 refreshListView={fetchSingleDevice.mutate}
                 setDisplayInput={setDisplayInput}
+              />
+            </DataStateWrapper>
+          ) : null}
+          {tabContent === "tokens" ? (
+            <DataStateWrapper
+              isLoading={fetchSingleDevice?.isLoading}
+              error={fetchSingleDevice?.error}
+              errorStates={fetchSingleDevice?.errorStates}
+              refreshData={fetchSingleDevice?.mutate}
+              errorMessage="Failed to fetch device details"
+            >
+              <DeviceTokenDetails
+                deviceData={deviceData}
+                refreshTable={fetchSingleDevice?.mutate}
+                refreshListView={fetchSingleDevice.mutate}
               />
             </DataStateWrapper>
           ) : null}
