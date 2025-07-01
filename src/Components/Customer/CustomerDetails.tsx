@@ -109,6 +109,8 @@ const CustomerDetails = ({
   });
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [idImageFile, setIdImageFile] = useState<File | null>(null);
+  const [selectedImage, setSelectedImage] = useState<{ url: string; title: string } | null>(null);
+  const [showImageModal, setShowImageModal] = useState<boolean>(false);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -137,6 +139,11 @@ const CustomerDetails = ({
   const handleIdImageChange = (file: File | null) => {
     setIdImageFile(file);
     setApiError("");
+  };
+
+  const handleViewImage = (url: string, title: string) => {
+    setSelectedImage({ url, title });
+    setShowImageModal(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -199,27 +206,38 @@ const CustomerDetails = ({
         {displayInput ? (
           <UploadPhotoInput value={photoFile} onChange={handlePhotoChange} maxSizeInMB={2} />
         ) : (
-          <div className="flex items-center justify-center max-w-[40px] h-[40px] border-[0.6px] border-strokeCream rounded-full overflow-clip">
-            {data.passportPhotoUrl ? (
-              <>
-                <img 
-                  src={data.passportPhotoUrl} 
-                  alt="Profile" 
-                  className="w-full h-full object-cover rounded-full"
-                  onError={(e) => {
-                    console.error('Error loading passport photo:', data.passportPhotoUrl);
-                    e.currentTarget.style.display = 'none';
-                  }}
-                  onLoad={() => console.log('Passport photo loaded successfully:', data.passportPhotoUrl)}
-                />
-                <div className="w-full h-full bg-gray-50 flex items-center justify-center rounded-full hidden" id="passport-fallback">
-                  <span className="text-[10px] text-textLightGrey">Error</span>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center justify-center max-w-[40px] h-[40px] border-[0.6px] border-strokeCream rounded-full overflow-clip">
+              {data.passportPhotoUrl ? (
+                <>
+                  <img 
+                    src={data.passportPhotoUrl} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover rounded-full"
+                    onError={(e) => {
+                      console.error('Error loading passport photo:', data.passportPhotoUrl);
+                      e.currentTarget.style.display = 'none';
+                    }}
+                    onLoad={() => console.log('Passport photo loaded successfully:', data.passportPhotoUrl)}
+                  />
+                  <div className="w-full h-full bg-gray-50 flex items-center justify-center rounded-full hidden" id="passport-fallback">
+                    <span className="text-[10px] text-textLightGrey">Error</span>
+                  </div>
+                </>
+              ) : (
+                <div className="w-full h-full bg-gray-50 flex items-center justify-center rounded-full">
+                  <span className="text-[10px] text-textLightGrey">No Passport</span>
                 </div>
-              </>
-            ) : (
-              <div className="w-full h-full bg-gray-50 flex items-center justify-center rounded-full">
-                <span className="text-[10px] text-textLightGrey">No Passport</span>
-              </div>
+              )}
+            </div>
+            {data.passportPhotoUrl && (
+              <button
+                onClick={() => handleViewImage(data.passportPhotoUrl!, "Passport Photo")}
+                className="px-2 py-1 text-xs bg-primaryGradient text-white rounded-full hover:bg-primaryGradient/80 transition-colors"
+                title="View Passport Photo"
+              >
+                View
+              </button>
             )}
           </div>
         )}
@@ -320,27 +338,38 @@ const CustomerDetails = ({
           {displayInput ? (
             <UploadPhotoInput value={idImageFile} onChange={handleIdImageChange} maxSizeInMB={2} />
           ) : (
-            <div className="flex items-center justify-center max-w-[40px] h-[40px] border-[0.6px] border-strokeCream rounded-full overflow-clip">
-              {data.idImageUrl ? (
-                <>
-                  <img 
-                    src={data.idImageUrl} 
-                    alt="ID Image" 
-                    className="w-full h-full object-cover rounded-full"
-                    onError={(e) => {
-                      console.error('Error loading ID image:', data.idImageUrl);
-                      e.currentTarget.style.display = 'none';
-                    }}
-                    onLoad={() => console.log('ID image loaded successfully:', data.idImageUrl)}
-                  />
-                  <div className="w-full h-full bg-gray-50 flex items-center justify-center rounded-full hidden" id="id-fallback">
-                    <span className="text-[10px] text-textLightGrey">Error</span>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center max-w-[40px] h-[40px] border-[0.6px] border-strokeCream rounded-full overflow-clip">
+                {data.idImageUrl ? (
+                  <>
+                    <img 
+                      src={data.idImageUrl} 
+                      alt="ID Image" 
+                      className="w-full h-full object-cover rounded-full"
+                      onError={(e) => {
+                        console.error('Error loading ID image:', data.idImageUrl);
+                        e.currentTarget.style.display = 'none';
+                      }}
+                      onLoad={() => console.log('ID image loaded successfully:', data.idImageUrl)}
+                    />
+                    <div className="w-full h-full bg-gray-50 flex items-center justify-center rounded-full hidden" id="id-fallback">
+                      <span className="text-[10px] text-textLightGrey">Error</span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="w-full h-full bg-gray-50 flex items-center justify-center rounded-full">
+                    <span className="text-[10px] text-textLightGrey">No ID Image</span>
                   </div>
-                </>
-              ) : (
-                <div className="w-full h-full bg-gray-50 flex items-center justify-center rounded-full">
-                  <span className="text-[10px] text-textLightGrey">No ID Image</span>
-                </div>
+                )}
+              </div>
+              {data.idImageUrl && (
+                <button
+                  onClick={() => handleViewImage(data.idImageUrl!, "ID Image")}
+                  className="px-2 py-1 text-xs bg-primaryGradient text-white rounded-full hover:bg-primaryGradient/80 transition-colors"
+                  title="View ID Image"
+                >
+                  View
+                </button>
               )}
             </div>
           )}
@@ -356,6 +385,42 @@ const CustomerDetails = ({
             disabled={loading}
             onClick={handleSubmit}
           />
+        </div>
+      )}
+
+      {/* Image Modal */}
+      {showImageModal && selectedImage && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-4 max-w-4xl max-h-[90vh] overflow-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-800">{selectedImage.title}</h3>
+              <button
+                onClick={() => setShowImageModal(false)}
+                className="text-gray-500 hover:text-gray-700 text-xl font-bold"
+              >
+                ×
+              </button>
+            </div>
+            <div className="flex justify-center">
+              <img
+                src={selectedImage.url}
+                alt={selectedImage.title}
+                className="max-w-full max-h-[70vh] object-contain rounded"
+                onError={(e) => {
+                  console.error('Error loading image in modal:', selectedImage.url);
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+            </div>
+            <div className="flex justify-center mt-4">
+              <button
+                onClick={() => window.open(selectedImage.url, '_blank')}
+                className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/80 transition-colors"
+              >
+                Expand Image
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
