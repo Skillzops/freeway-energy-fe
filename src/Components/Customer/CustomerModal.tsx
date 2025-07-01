@@ -52,8 +52,8 @@ const CustomerModal = ({
       idType: data?.idType || "",
       idNumber: data?.idNumber || "",
       type: data?.type || "",
-      passportPhoto: data?.passportPhoto || "",
-      idImage: data?.idImage || "",
+      passportPhotoUrl: data?.passportPhotoUrl || "",
+      idImageUrl: data?.idImageUrl || "",
     };
   };
 

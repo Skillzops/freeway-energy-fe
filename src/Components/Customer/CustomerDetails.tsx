@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { KeyedMutator } from "swr";
 import { Tag } from "../Products/ProductDetails";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
@@ -11,25 +11,27 @@ import IdTypeSelect from "../InputComponent/IdTypeSelect";
 import { SelectInput } from "../InputComponent/Input";
 
 export type DetailsType = {
-  customerId: string;
+  customerId?: string;
+  id?: string;
   firstname: string;
   lastname: string;
-  email: string;
-  phoneNumber: string;
-  alternatePhone: string;
-  gender: string;
-  addressType: string;
-  installationAddress: string;
-  lga: string;
-  state: string;
-  location: string;
-  longitude: string;
-  latitude: string;
-  idType: string;
-  idNumber: string;
-  type: string;
-  passportPhotoUrl: string;
-  idImageUrl: string;
+  email?: string | null;
+  phoneNumber?: string;
+  phone?: string;
+  alternatePhone?: string;
+  gender?: string;
+  addressType?: string;
+  installationAddress?: string;
+  lga?: string;
+  state?: string;
+  location?: string;
+  longitude?: string;
+  latitude?: string;
+  idType?: string;
+  idNumber?: string;
+  type?: string;
+  passportPhotoUrl?: string;
+  idImageUrl?: string;
 };
 
 interface CustomerDetailsProps extends DetailsType {
@@ -44,28 +46,65 @@ const CustomerDetails = ({
   onEditSuccess,
   ...data
 }: CustomerDetailsProps) => {
+  console.log('CustomerDetails data:', data);
+  console.log('Passport photo URL:', data.passportPhotoUrl);
+  console.log('ID image URL:', data.idImageUrl);
+  console.log('Data type of passportPhotoUrl:', typeof data.passportPhotoUrl);
+  console.log('Data type of idImageUrl:', typeof data.idImageUrl);
+  
+  // Test image URLs accessibility
+  useEffect(() => {
+    if (data.passportPhotoUrl) {
+      console.log('Testing passport photo URL accessibility...');
+      fetch(data.passportPhotoUrl, { method: 'HEAD' })
+        .then(response => {
+          console.log('Passport photo URL status:', response.status);
+          if (!response.ok) {
+            console.error('Passport photo URL not accessible:', response.status, response.statusText);
+          }
+        })
+        .catch(error => {
+          console.error('Error testing passport photo URL:', error);
+        });
+    }
+    
+    if (data.idImageUrl) {
+      console.log('Testing ID image URL accessibility...');
+      fetch(data.idImageUrl, { method: 'HEAD' })
+        .then(response => {
+          console.log('ID image URL status:', response.status);
+          if (!response.ok) {
+            console.error('ID image URL not accessible:', response.status, response.statusText);
+          }
+        })
+        .catch(error => {
+          console.error('Error testing ID image URL:', error);
+        });
+    }
+  }, [data.passportPhotoUrl, data.idImageUrl]);
+  
   const { apiCall } = useApiCall();
   const [loading, setLoading] = useState<boolean>(false);
   const [apiError, setApiError] = useState<string | Record<string, string[]>>("");
   const [formData, setFormData] = useState({
-    customerId: data.customerId,
+    customerId: data.customerId || data.id,
     firstname: data.firstname,
     lastname: data.lastname,
-    email: data.email,
-    phoneNumber: data.phoneNumber,
+    email: data.email || "",
+    phoneNumber: data.phoneNumber || data.phone || "",
     alternatePhone: data.alternatePhone || "",
     gender: data.gender || "",
-    addressType: data.addressType,
+    addressType: data.addressType || "",
     installationAddress: data.installationAddress || "",
     lga: data.lga || "",
     state: data.state || "",
-    location: data.location,
-    longitude: data.longitude,
-    latitude: data.latitude,
+    location: data.location || "",
+    longitude: data.longitude || "",
+    latitude: data.latitude || "",
     idType: data.idType || "",
     idNumber: data.idNumber || "",
     type: data.type || "",
-    passportPhotoUrl: data.passportPhotoUrl,
+    passportPhotoUrl: data.passportPhotoUrl || "",
     idImageUrl: data.idImageUrl || "",
   });
   const [photoFile, setPhotoFile] = useState<File | null>(null);
@@ -122,7 +161,7 @@ const CustomerDetails = ({
       }
 
       await apiCall({
-        endpoint: `/v1/customers/${formData.customerId}`,
+        endpoint: `/v1/customers/${formData.customerId || data.id}`,
         method: "patch",
         data: formDataToSend,
         headers: {
@@ -151,7 +190,7 @@ const CustomerDetails = ({
       {/* User ID Row */}
       <div className="flex items-center justify-between h-[44px] p-2.5 gap-2 bg-white border-[0.6px] border-strokeGreyThree rounded-full">
         <Tag name="User ID" />
-        <p className="text-textDarkGrey text-xs font-bold">{data.customerId}</p>
+        <p className="text-textDarkGrey text-xs font-bold">{data.customerId || data.id}</p>
       </div>
 
       {/* Photograph Row */}
@@ -162,7 +201,21 @@ const CustomerDetails = ({
         ) : (
           <div className="flex items-center justify-center max-w-[40px] h-[40px] border-[0.6px] border-strokeCream rounded-full overflow-clip">
             {data.passportPhotoUrl ? (
-              <img src={data.passportPhotoUrl} alt="Profile" className="w-full h-full object-cover rounded-full" />
+              <>
+                <img 
+                  src={data.passportPhotoUrl} 
+                  alt="Profile" 
+                  className="w-full h-full object-cover rounded-full"
+                  onError={(e) => {
+                    console.error('Error loading passport photo:', data.passportPhotoUrl);
+                    e.currentTarget.style.display = 'none';
+                  }}
+                  onLoad={() => console.log('Passport photo loaded successfully:', data.passportPhotoUrl)}
+                />
+                <div className="w-full h-full bg-gray-50 flex items-center justify-center rounded-full hidden" id="passport-fallback">
+                  <span className="text-[10px] text-textLightGrey">Error</span>
+                </div>
+              </>
             ) : (
               <div className="w-full h-full bg-gray-50 flex items-center justify-center rounded-full">
                 <span className="text-[10px] text-textLightGrey">No Passport</span>
@@ -178,19 +231,19 @@ const CustomerDetails = ({
           <img src={customericon} alt="Customer Icon" /> PERSONAL DETAILS
         </p>
         {([
-          { label: "First Name", name: "firstname" },
-          { label: "Last Name", name: "lastname" },
-          { label: "Email", name: "email" },
-          { label: "Phone Number", name: "phoneNumber" },
-          { label: "Alternative Phone Number", name: "alternatePhone" },
-          { label: "Gender", name: "gender" },
-          { label: "Address Type", name: "addressType" },
-          { label: "State", name: "state" },
-          { label: "LGA", name: "lga" },
-          { label: "Address", name: "location" },
-          { label: "Latitude", name: "latitude" },
-          { label: "Longitude", name: "longitude" },
-        ] as { label: string; name: keyof typeof formData }[]).map((item) => (
+          { label: "First Name", name: "firstname", value: data.firstname },
+          { label: "Last Name", name: "lastname", value: data.lastname },
+          { label: "Email", name: "email", value: data.email },
+          { label: "Phone Number", name: "phoneNumber", value: data.phoneNumber || data.phone },
+          { label: "Alternative Phone Number", name: "alternatePhone", value: data.alternatePhone },
+          { label: "Gender", name: "gender", value: data.gender },
+          { label: "Address Type", name: "addressType", value: data.addressType },
+          { label: "State", name: "state", value: data.state },
+          { label: "LGA", name: "lga", value: data.lga },
+          { label: "Address", name: "location", value: data.location },
+          { label: "Latitude", name: "latitude", value: data.latitude },
+          { label: "Longitude", name: "longitude", value: data.longitude },
+        ] as { label: string; name: keyof typeof formData; value: any }[]).map((item) => (
           <div key={item.label} className="flex items-center justify-between">
             <Tag name={item.label} />
             {displayInput ? (
@@ -202,7 +255,7 @@ const CustomerDetails = ({
                 className="text-xs text-textDarkGrey px-2 py-1 w-full max-w-[160px] border-[0.6px] border-strokeGreyThree rounded-full"
               />
             ) : (
-              <p className="text-xs font-bold text-textDarkGrey">{formData[item.name] || "N/A"}</p>
+              <p className="text-xs font-bold text-textDarkGrey">{item.value || "N/A"}</p>
             )}
           </div>
         ))}
@@ -269,7 +322,21 @@ const CustomerDetails = ({
           ) : (
             <div className="flex items-center justify-center max-w-[40px] h-[40px] border-[0.6px] border-strokeCream rounded-full overflow-clip">
               {data.idImageUrl ? (
-                <img src={data.idImageUrl} alt="ID Image" className="w-full h-full object-cover rounded-full" />
+                <>
+                  <img 
+                    src={data.idImageUrl} 
+                    alt="ID Image" 
+                    className="w-full h-full object-cover rounded-full"
+                    onError={(e) => {
+                      console.error('Error loading ID image:', data.idImageUrl);
+                      e.currentTarget.style.display = 'none';
+                    }}
+                    onLoad={() => console.log('ID image loaded successfully:', data.idImageUrl)}
+                  />
+                  <div className="w-full h-full bg-gray-50 flex items-center justify-center rounded-full hidden" id="id-fallback">
+                    <span className="text-[10px] text-textLightGrey">Error</span>
+                  </div>
+                </>
               ) : (
                 <div className="w-full h-full bg-gray-50 flex items-center justify-center rounded-full">
                   <span className="text-[10px] text-textLightGrey">No ID Image</span>
