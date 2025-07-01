@@ -238,10 +238,10 @@ const ParametersForm = ({
           <Input
             type="number"
             name="installmentStartingPrice"
-            label="MONTHLY INSTALLMENT AMOUNT"
+            label="INITIAL PAYMENT AMOUNT"
             value={formData.installmentStartingPrice as number}
             onChange={handleInputChange}
-            placeholder="Monthly Installment Amount"
+            placeholder="Initial Payment Amount"
             required={true}
             errorMessage={getFieldError("installmentStartingPrice")}
             description={

@@ -28,8 +28,8 @@ export type DetailsType = {
   idType: string;
   idNumber: string;
   type: string;
-  passportPhoto: string;
-  idImage: string;
+  passportPhotoUrl: string;
+  idImageUrl: string;
 };
 
 interface CustomerDetailsProps extends DetailsType {
@@ -65,8 +65,8 @@ const CustomerDetails = ({
     idType: data.idType || "",
     idNumber: data.idNumber || "",
     type: data.type || "",
-    passportPhoto: data.passportPhoto,
-    idImage: data.idImage || "",
+    passportPhotoUrl: data.passportPhotoUrl,
+    idImageUrl: data.idImageUrl || "",
   });
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [idImageFile, setIdImageFile] = useState<File | null>(null);
@@ -108,17 +108,17 @@ const CustomerDetails = ({
     try {
       const formDataToSend = new FormData();
       Object.entries(formData).forEach(([key, value]) => {
-        if (value !== undefined && value !== "" && key !== "passportPhoto" && key !== "idImage") {
+        if (value !== undefined && value !== "" && key !== "passportPhotoUrl" && key !== "idImageUrl") {
           formDataToSend.append(key, value);
         }
       });
 
       if (photoFile) {
-        formDataToSend.append("passportPhoto", photoFile);
+        formDataToSend.append("passportPhotoUrl", photoFile);
       }
 
       if (idImageFile) {
-        formDataToSend.append("idImage", idImageFile);
+        formDataToSend.append("idImageUrl", idImageFile);
       }
 
       await apiCall({
@@ -161,8 +161,8 @@ const CustomerDetails = ({
           <UploadPhotoInput value={photoFile} onChange={handlePhotoChange} maxSizeInMB={2} />
         ) : (
           <div className="flex items-center justify-center max-w-[40px] h-[40px] border-[0.6px] border-strokeCream rounded-full overflow-clip">
-            {data.passportPhoto ? (
-              <img src={data.passportPhoto} alt="Profile" className="w-full h-full object-cover rounded-full" />
+            {data.passportPhotoUrl ? (
+              <img src={data.passportPhotoUrl} alt="Profile" className="w-full h-full object-cover rounded-full" />
             ) : (
               <div className="w-full h-full bg-gray-50 flex items-center justify-center rounded-full">
                 <span className="text-[10px] text-textLightGrey">No Passport</span>
@@ -268,8 +268,8 @@ const CustomerDetails = ({
             <UploadPhotoInput value={idImageFile} onChange={handleIdImageChange} maxSizeInMB={2} />
           ) : (
             <div className="flex items-center justify-center max-w-[40px] h-[40px] border-[0.6px] border-strokeCream rounded-full overflow-clip">
-              {data.idImage ? (
-                <img src={data.idImage} alt="ID Image" className="w-full h-full object-cover rounded-full" />
+              {data.idImageUrl ? (
+                <img src={data.idImageUrl} alt="ID Image" className="w-full h-full object-cover rounded-full" />
               ) : (
                 <div className="w-full h-full bg-gray-50 flex items-center justify-center rounded-full">
                   <span className="text-[10px] text-textLightGrey">No ID Image</span>
