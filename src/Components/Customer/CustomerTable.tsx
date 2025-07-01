@@ -77,8 +77,8 @@ export type CustomerType = {
   lastLogin: string | null;
   customerDetails: CustomerDetails;
   role: Role;
-  passportPhoto?: string;
-  idImage?: string;
+  passportPhotoUrl?: string;
+  idImageUrl?: string;
 };
 
 // Helper function to map the API data to the desired format
