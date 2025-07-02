@@ -3,7 +3,7 @@ import { z } from "zod";
 import { FaPlus } from "react-icons/fa";
 import { MdFilterList, MdFilterListOff } from "react-icons/md";
 import { HiPlus } from "react-icons/hi2";
-import { useApiCall, useGetRequest } from "@/utils/useApiCall";
+import { useApiCall, useGetRequest, useGetAllDevices } from "@/utils/useApiCall";
 import { Asterik } from "../InputComponent/Input";
 import { LuPlus } from "react-icons/lu";
 import { TiEdit } from "react-icons/ti";
@@ -95,17 +95,21 @@ const UploadDevicesForm = observer(
     const [linkView, setLinkView] = useState<string>("");
     const [prevDescription, setPrevDescription] = useState<string>("");
     const [requiredQuantity, setRequiredQuantity] = useState<number>(0);
-    const product = SaleStore.getProductById(currentProductId);
     const [showLinkedDevices, setShowLinkedDevices] = useState(false);
 
     const [linkedDevicesCount, setLinkedDevicesCount] = useState<number>(0);
+    const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
 
-    const { data, mutate } = useGetRequest("/v1/device", true);
+    const { data, mutate } = useGetAllDevices(true);
+    // Use currentProductId directly to avoid undefined productId issues
     const {
       data: productData,
       isLoading: productLoading,
       error: productError,
-    } = useGetRequest(`/v1/products/${product?.productId}`, true);
+    } = useGetRequest(
+      currentProductId ? `/v1/products/${currentProductId}` : null,
+      true
+    );
 
     const [selectedDeviceIds, setSelectedDeviceIds] = useState<string[]>([]);
     const [editMode, setEditMode] = useState<boolean>(false);
@@ -118,6 +122,15 @@ const UploadDevicesForm = observer(
         ) || [];
       setSelectedDeviceIds(tentativeDevices);
     }, [currentProductId, currentInventoryId]);
+
+    // Cleanup timeout on unmount
+    useEffect(() => {
+      return () => {
+        if (searchTimeout) {
+          clearTimeout(searchTimeout);
+        }
+      };
+    }, [searchTimeout]);
 
     const selectedLinkedDevices: DeviceResponse[] = filteredDevices
       ? filteredDevices.filter(
@@ -145,8 +158,19 @@ const UploadDevicesForm = observer(
     const filterDevices = async () => {
       const newParams: Record<string, string> = {};
       if (searchTerm.trim()) {
-        if (filterKey) newParams[filterKey] = searchTerm;
-        else newParams.serialNumber = searchTerm;
+        // Auto-detect if the search term looks like a serial number
+        const isSerialNumber = /^[A-Z0-9\/\-_]+$/i.test(searchTerm.trim());
+        
+        if (filterKey === "search" && isSerialNumber) {
+          // If using general search but input looks like a serial number, use serialNumber filter
+          newParams.serialNumber = searchTerm.trim();
+        } else if (filterKey && filterKey !== "search") {
+          // Use the selected filter
+          newParams[filterKey] = searchTerm.trim();
+        } else {
+          // Default to general search
+          newParams.search = searchTerm.trim();
+        }
       }
       return newParams;
     };
@@ -154,17 +178,55 @@ const UploadDevicesForm = observer(
     const fetchDevice = async () => {
       setLoading(true);
       const newParams = await filterDevices();
+      console.log("Search params:", newParams); // Debug log
+      
+      // Try client-side filtering first if we have data
+      if (data?.devices && Object.keys(newParams).length > 0) {
+        console.log("Using client-side filtering"); // Debug log
+        const allDevices = data.devices;
+        let filteredResults = allDevices;
+        
+        // Apply filters
+        if (newParams.serialNumber) {
+          filteredResults = filteredResults.filter((device: DeviceResponse) =>
+            device.serialNumber.toLowerCase().includes(newParams.serialNumber.toLowerCase())
+          );
+        } else if (newParams.search) {
+          filteredResults = filteredResults.filter((device: DeviceResponse) =>
+            device.serialNumber.toLowerCase().includes(newParams.search.toLowerCase()) ||
+            device.key.toLowerCase().includes(newParams.search.toLowerCase()) ||
+            device.hardwareModel.toLowerCase().includes(newParams.search.toLowerCase()) ||
+            device.firmwareVersion.toLowerCase().includes(newParams.search.toLowerCase())
+          );
+        }
+        
+        console.log("Client-side filtered devices:", filteredResults.length); // Debug log
+        setFilteredDevices(filteredResults);
+        setLoading(false);
+        return;
+      }
+      
+      // Fallback to API call if no client-side data
+      const searchParams = new URLSearchParams(newParams);
+      searchParams.set('limit', '1000'); // Ensure we get all devices
+      const endpoint = `/v1/device?${searchParams.toString()}`;
+      console.log("Full endpoint:", endpoint); // Debug log
+      
       try {
         const response = await apiCall({
-          endpoint: `/v1/device?${new URLSearchParams(newParams).toString()}`,
+          endpoint: endpoint,
           method: "get",
           successMessage: "",
           showToast: false,
         });
+        console.log("API Response:", response); // Debug log
         const devices = response.data?.devices || [];
+        console.log("Found devices:", devices.length); // Debug log
+        console.log("Devices:", devices); // Debug log - show actual devices
         setFilteredDevices(devices);
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error fetching devices:", error);
+        console.error("Error details:", error.response?.data); // Debug log
         setFilteredDevices([]);
       }
       setLoading(false);
@@ -205,6 +267,24 @@ const UploadDevicesForm = observer(
       const { name, value, type, checked } = e.target;
       if (name === "searchTerm") {
         setSearchTerm(value);
+        
+        // Clear existing timeout
+        if (searchTimeout) {
+          clearTimeout(searchTimeout);
+        }
+        
+        // Set new timeout for debounced search
+        if (value.trim()) {
+          const timeout = setTimeout(() => {
+            filterDevices();
+            fetchDevice();
+          }, 500); // 500ms delay
+          setSearchTimeout(timeout);
+        } else {
+          // Clear filtered devices if search is empty
+          setFilteredDevices(null);
+        }
+        
         e.preventDefault();
       } else {
         setFormData((prev) => ({
@@ -297,6 +377,12 @@ const UploadDevicesForm = observer(
     };
 
     const handleCancel = () => {
+      // Clear search timeout
+      if (searchTimeout) {
+        clearTimeout(searchTimeout);
+        setSearchTimeout(null);
+      }
+      
       setSearchTerm("");
       setFilterKey("search");
       setCreateDevice(false);
@@ -674,6 +760,18 @@ const UploadDevicesForm = observer(
                           fetchDevice();
                         }
                       }}
+                      onPaste={(e) => {
+                        // Auto-search when pasting a device serial number
+                        setTimeout(() => {
+                          const pastedValue = e.clipboardData.getData('text');
+                          console.log("Pasted value:", pastedValue); // Debug log
+                          if (pastedValue.trim()) {
+                            // Force immediate search for pasted content
+                            filterDevices();
+                            fetchDevice();
+                          }
+                        }, 50); // Reduced delay for better responsiveness
+                      }}
                       placeholder="Search devices..."
                       className="w-full px-4 py-2 pr-10 border rounded-md outline-none transition-colors border-gray-300 focus:border-blue-500"
                     />
@@ -739,13 +837,12 @@ const UploadDevicesForm = observer(
                             }`}
                             onClick={() => setShowLinkedDevices(false)}
                           >
-                            {filteredAvailableDevices?.length === 0
+                            {filteredDevices && filteredDevices.length > 0
+                              ? `${filteredDevices.length} search result${filteredDevices.length > 1 ? "s" : ""}`
+                              : filteredAvailableDevices?.length === 0
                               ? ""
-                              : "View"}{" "}
-                            {filteredAvailableDevices?.length} available device
-                            {filteredAvailableDevices?.length > 1
-                              ? "s"
-                              : ""}{" "}
+                              : `${filteredAvailableDevices?.length} available device${filteredAvailableDevices?.length > 1 ? "s" : ""}`
+                            }{" "}
                             found
                           </span>
                           <span
@@ -970,7 +1067,10 @@ const UploadDevicesForm = observer(
                               </td>
                             </tr>
                           ))
-                        : filteredAvailableDevices?.map(
+                        : (filteredDevices && filteredDevices.length > 0 
+                            ? filteredDevices 
+                            : filteredAvailableDevices
+                          )?.map(
                             (device: DeviceResponse) => (
                               <tr
                                 key={device.serialNumber}

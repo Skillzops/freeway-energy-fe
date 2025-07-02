@@ -46,42 +46,9 @@ const CustomerDetails = ({
   onEditSuccess,
   ...data
 }: CustomerDetailsProps) => {
-  console.log('CustomerDetails data:', data);
-  console.log('Passport photo URL:', data.passportPhotoUrl);
-  console.log('ID image URL:', data.idImageUrl);
-  console.log('Data type of passportPhotoUrl:', typeof data.passportPhotoUrl);
-  console.log('Data type of idImageUrl:', typeof data.idImageUrl);
+
   
-  // Test image URLs accessibility
-  useEffect(() => {
-    if (data.passportPhotoUrl) {
-      console.log('Testing passport photo URL accessibility...');
-      fetch(data.passportPhotoUrl, { method: 'HEAD' })
-        .then(response => {
-          console.log('Passport photo URL status:', response.status);
-          if (!response.ok) {
-            console.error('Passport photo URL not accessible:', response.status, response.statusText);
-          }
-        })
-        .catch(error => {
-          console.error('Error testing passport photo URL:', error);
-        });
-    }
-    
-    if (data.idImageUrl) {
-      console.log('Testing ID image URL accessibility...');
-      fetch(data.idImageUrl, { method: 'HEAD' })
-        .then(response => {
-          console.log('ID image URL status:', response.status);
-          if (!response.ok) {
-            console.error('ID image URL not accessible:', response.status, response.statusText);
-          }
-        })
-        .catch(error => {
-          console.error('Error testing ID image URL:', error);
-        });
-    }
-  }, [data.passportPhotoUrl, data.idImageUrl]);
+
   
   const { apiCall } = useApiCall();
   const [loading, setLoading] = useState<boolean>(false);
@@ -111,6 +78,50 @@ const CustomerDetails = ({
   const [idImageFile, setIdImageFile] = useState<File | null>(null);
   const [selectedImage, setSelectedImage] = useState<{ url: string; title: string } | null>(null);
   const [showImageModal, setShowImageModal] = useState<boolean>(false);
+
+  // Reset image state when customer changes
+  useEffect(() => {
+    setPhotoFile(null);
+    setIdImageFile(null);
+    setSelectedImage(null);
+    setShowImageModal(false);
+    setApiError(""); // Clear any previous errors
+    
+    // Update formData with new customer data
+    setFormData({
+      customerId: data.customerId || data.id,
+      firstname: data.firstname,
+      lastname: data.lastname,
+      email: data.email || "",
+      phoneNumber: data.phoneNumber || data.phone || "",
+      alternatePhone: data.alternatePhone || "",
+      gender: data.gender || "",
+      addressType: data.addressType || "",
+      installationAddress: data.installationAddress || "",
+      lga: data.lga || "",
+      state: data.state || "",
+      location: data.location || "",
+      longitude: data.longitude || "",
+      latitude: data.latitude || "",
+      idType: data.idType || "",
+      idNumber: data.idNumber || "",
+      type: data.type || "",
+      passportPhotoUrl: data.passportPhotoUrl || "",
+      idImageUrl: data.idImageUrl || "",
+    });
+  }, [data.customerId || data.id, data.firstname, data.lastname, data.email, data.phoneNumber, data.phone, data.alternatePhone, data.gender, data.addressType, data.installationAddress, data.lga, data.state, data.location, data.longitude, data.latitude, data.idType, data.idNumber, data.type, data.passportPhotoUrl, data.idImageUrl]);
+
+  // Cleanup object URLs on unmount
+  useEffect(() => {
+    return () => {
+      if (photoFile) {
+        URL.revokeObjectURL(URL.createObjectURL(photoFile));
+      }
+      if (idImageFile) {
+        URL.revokeObjectURL(URL.createObjectURL(idImageFile));
+      }
+    };
+  }, [photoFile, idImageFile]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -168,7 +179,7 @@ const CustomerDetails = ({
       }
 
       await apiCall({
-        endpoint: `/v1/customers/${formData.customerId || data.id}`,
+        endpoint: `/v1/customers/${formData.customerId}`,
         method: "patch",
         data: formDataToSend,
         headers: {
@@ -204,7 +215,32 @@ const CustomerDetails = ({
       <div className="flex items-center justify-between h-[64px] px-4 bg-white border-[0.6px] border-strokeGreyThree rounded-full">
         <Tag name="Photograph" />
         {displayInput ? (
-          <UploadPhotoInput value={photoFile} onChange={handlePhotoChange} maxSizeInMB={2} />
+          <div className="flex items-center gap-2">
+            <div className="flex items-center justify-center max-w-[40px] h-[40px] border-[0.6px] border-strokeCream rounded-full overflow-clip">
+              {photoFile ? (
+                <img 
+                  src={URL.createObjectURL(photoFile)} 
+                  alt="New Profile" 
+                  className="w-full h-full object-cover rounded-full"
+                />
+              ) : data.passportPhotoUrl ? (
+                <img 
+                  src={data.passportPhotoUrl} 
+                  alt="Profile" 
+                  className="w-full h-full object-cover rounded-full"
+                  onError={(e) => {
+                    console.error('Error loading passport photo:', data.passportPhotoUrl);
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              ) : (
+                <div className="w-full h-full bg-gray-50 flex items-center justify-center rounded-full">
+                  <span className="text-[10px] text-textLightGrey">No Passport</span>
+                </div>
+              )}
+            </div>
+            <UploadPhotoInput value={photoFile} onChange={handlePhotoChange} maxSizeInMB={2} />
+          </div>
         ) : (
           <div className="flex items-center gap-2">
             <div className="flex items-center justify-center max-w-[40px] h-[40px] border-[0.6px] border-strokeCream rounded-full overflow-clip">
@@ -215,10 +251,8 @@ const CustomerDetails = ({
                     alt="Profile" 
                     className="w-full h-full object-cover rounded-full"
                     onError={(e) => {
-                      console.error('Error loading passport photo:', data.passportPhotoUrl);
                       e.currentTarget.style.display = 'none';
                     }}
-                    onLoad={() => console.log('Passport photo loaded successfully:', data.passportPhotoUrl)}
                   />
                   <div className="w-full h-full bg-gray-50 flex items-center justify-center rounded-full hidden" id="passport-fallback">
                     <span className="text-[10px] text-textLightGrey">Error</span>
@@ -336,22 +370,44 @@ const CustomerDetails = ({
         <div className="flex items-center justify-between">
           <Tag name="ID Image" />
           {displayInput ? (
-            <UploadPhotoInput value={idImageFile} onChange={handleIdImageChange} maxSizeInMB={2} />
+            <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center max-w-[40px] h-[40px] border-[0.6px] border-strokeCream rounded-full overflow-clip">
+                {idImageFile ? (
+                  <img 
+                    src={URL.createObjectURL(idImageFile)} 
+                    alt="New ID Image" 
+                    className="w-full h-full object-cover rounded-full"
+                  />
+                ) : data.idImageUrl ? (
+                  <img 
+                    src={data.idImageUrl} 
+                    alt="ID Image" 
+                    className="w-full h-full object-cover rounded-full"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-50 flex items-center justify-center rounded-full">
+                    <span className="text-[10px] text-textLightGrey">No ID Image</span>
+                  </div>
+                )}
+              </div>
+              <UploadPhotoInput value={idImageFile} onChange={handleIdImageChange} maxSizeInMB={2} />
+            </div>
           ) : (
             <div className="flex items-center gap-2">
               <div className="flex items-center justify-center max-w-[40px] h-[40px] border-[0.6px] border-strokeCream rounded-full overflow-clip">
                 {data.idImageUrl ? (
                   <>
-                    <img 
-                      src={data.idImageUrl} 
-                      alt="ID Image" 
-                      className="w-full h-full object-cover rounded-full"
-                      onError={(e) => {
-                        console.error('Error loading ID image:', data.idImageUrl);
-                        e.currentTarget.style.display = 'none';
-                      }}
-                      onLoad={() => console.log('ID image loaded successfully:', data.idImageUrl)}
-                    />
+                                      <img 
+                    src={data.idImageUrl} 
+                    alt="ID Image" 
+                    className="w-full h-full object-cover rounded-full"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
                     <div className="w-full h-full bg-gray-50 flex items-center justify-center rounded-full hidden" id="id-fallback">
                       <span className="text-[10px] text-textLightGrey">Error</span>
                     </div>

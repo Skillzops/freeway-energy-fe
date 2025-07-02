@@ -48,7 +48,7 @@ export type ExtraInfoType =
   | "miscellaneous"
   | "devices"
   | "recipient"
-  | "identification"
+  // | "identification"
   // | "nextOfKin"
   | "guarantor"
   | "";
@@ -125,12 +125,29 @@ const CreateNewSale = observer(
         // Include BVN from formData
         payload.bvn = formData.bvn;
         
-        // Include other details from the store
-        payload.identificationDetails = SaleStore.identificationDetails;
+        // Only include guarantor details if they have actual data
+        if (SaleStore.guarantorDetails && SaleStore.guarantorDetails.fullName) {
+          // Create a copy of guarantor details without empty identification details
+          const guarantorDetails = { ...SaleStore.guarantorDetails };
+          
+          // Only include identification details if they have actual data
+          if (!guarantorDetails.identificationDetails || 
+              !guarantorDetails.identificationDetails.idType || 
+              !guarantorDetails.identificationDetails.idNumber) {
+            // Create a new object without identification details
+            const { identificationDetails, ...guarantorWithoutId } = guarantorDetails;
+            payload.guarantorDetails = guarantorWithoutId;
+          } else {
+            payload.guarantorDetails = guarantorDetails;
+          }
+        }
+        
+        // Don't include identification details or next of kin details
+        // payload.identificationDetails = SaleStore.identificationDetails;
         // payload.nextOfKinDetails = SaleStore.nextOfKinDetails;
-        payload.guarantorDetails = SaleStore.guarantorDetails;
       }
       
+      console.log("Generated payload:", JSON.stringify(payload, null, 2));
       return payload;
     }, [formData]);
 
@@ -231,10 +248,24 @@ const CreateNewSale = observer(
     }, [payload, apiError, loading]);
 
     const getIsFormFilled = () => {
-      const isPayloadValid = formSchema.safeParse(payload).success;
+      const validationResult = formSchema.safeParse(payload);
+      const isPayloadValid = validationResult.success;
+      
+      if (!isPayloadValid) {
+        console.log("Payload validation failed:", validationResult.error.issues);
+      }
+      
       const doesParamsExist =
         SaleStore.parameters.length > 0 &&
         SaleStore.parameters.every((param) => param.currentProductId !== "");
+      
+      console.log("Form validation:", {
+        isPayloadValid,
+        doesParamsExist,
+        payload: payload,
+        parameters: SaleStore.parameters
+      });
+      
       return isPayloadValid && doesParamsExist;
     };
 
@@ -410,7 +441,7 @@ const CreateNewSale = observer(
                         errorMessage={getFieldError("bvn")}
                         maxLength={11}
                       />
-                      <ModalInput
+                      {/* <ModalInput
                         type="button"
                         name="identificationDetails"
                         label="IDENTIFICATION DETAILS"
@@ -436,7 +467,7 @@ const CreateNewSale = observer(
                           </div>
                         }
                         errorMessage={getFieldError("identificationDetails")}
-                      />
+                      /> */}
                       {/* <ModalInput
                         type="button"
                         name="nextOfKinDetails"
