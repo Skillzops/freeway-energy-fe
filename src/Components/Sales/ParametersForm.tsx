@@ -18,7 +18,7 @@ type FormData = z.infer<typeof formSchema>;
 const defaultFormData: FormData = {
   paymentMode: "ONE_OFF",
   installmentDuration: 0,
-  installmentStartingPrice: 0,
+  installmentStartingPrice: 6000, // Standard initial payment amount
   discount: 0,
 };
 
@@ -79,19 +79,24 @@ const ParametersForm = ({
         formData.installmentDuration && 
         formData.installmentDuration > 0) {
       
-      const calculatedAmount = calculateInstallmentAmount(
-        productPrice,
-        formData.discount || 0,
-        totalMiscellaneousCosts,
-        formData.installmentDuration
-      );
-      
-      setFormData(prev => ({
-        ...prev,
-        installmentStartingPrice: calculatedAmount
-      }));
+      // Only auto-calculate if the user hasn't manually set a custom initial payment
+      // or if this is the first time setting installment duration
+      const currentInitialPayment = SaleStore.getParametersByProductId(currentProductId)?.installmentStartingPrice;
+      if (!currentInitialPayment || currentInitialPayment === 0) {
+        const calculatedAmount = calculateInstallmentAmount(
+          productPrice,
+          formData.discount || 0,
+          totalMiscellaneousCosts,
+          formData.installmentDuration
+        );
+        
+        setFormData(prev => ({
+          ...prev,
+          installmentStartingPrice: calculatedAmount
+        }));
+      }
     }
-  }, [formData.paymentMode, formData.installmentDuration, formData.discount, productPrice, totalMiscellaneousCosts]);
+  }, [formData.paymentMode, formData.installmentDuration, formData.discount, productPrice, totalMiscellaneousCosts, currentProductId]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -244,12 +249,7 @@ const ParametersForm = ({
             placeholder="Initial Payment Amount"
             required={true}
             errorMessage={getFieldError("installmentStartingPrice")}
-            description={
-              formData.installmentStartingPrice === 0
-                ? "Calculated automatically based on total amount, discount, and installments"
-                : ""
-            }
-            readOnly={Boolean(showCalculationBreakdown)}
+            description="Standard initial payment is ₦6,000. You can modify this amount."
           />
         ) : null}
         
@@ -259,11 +259,13 @@ const ParametersForm = ({
             <p className="font-semibold mb-2">Calculation Breakdown:</p>
             <div className="space-y-1">
               <p>Product Price: ₦{productPrice.toLocaleString()}</p>
-              <p>Discount ({formData.discount || 0}%): -₦{(((formData.discount || 0) / 100) * productPrice).toLocaleString()}</p>
-              <p>Discounted Price: ₦{(productPrice - (((formData.discount || 0) / 100) * productPrice)).toLocaleString()}</p>
-              <p>Miscellaneous Costs: +₦{totalMiscellaneousCosts.toLocaleString()}</p>
+              {/* <p>Discount ({formData.discount || 0}%): -₦{(((formData.discount || 0) / 100) * productPrice).toLocaleString()}</p> */}
+              {/* <p>Discounted Price: ₦{(productPrice - (((formData.discount || 0) / 100) * productPrice)).toLocaleString()}</p> */}
+              {/* <p>Miscellaneous Costs: +₦{totalMiscellaneousCosts.toLocaleString()}</p> */}
               <p className="font-semibold">Total Amount: ₦{(productPrice - (((formData.discount || 0) / 100) * productPrice) + totalMiscellaneousCosts).toLocaleString()}</p>
-              <p className="font-semibold">Monthly Payment: ₦{(formData.installmentStartingPrice || 0).toLocaleString()} × {formData.installmentDuration || 0} months</p>
+              <p>Initial Payment: ₦{(formData.installmentStartingPrice || 0).toLocaleString()}</p>
+              <p className="font-semibold text-green-600">Remaining Balance: ₦{((productPrice - (((formData.discount || 0) / 100) * productPrice) + totalMiscellaneousCosts) - (formData.installmentStartingPrice || 0)).toLocaleString()}</p>
+              <p className="font-semibold">Monthly Installment: ₦{Math.round(((productPrice - (((formData.discount || 0) / 100) * productPrice) + totalMiscellaneousCosts) - (formData.installmentStartingPrice || 0)) / (formData.installmentDuration || 1)).toLocaleString()} × {formData.installmentDuration || 0} months</p>
             </div>
           </div>
         )}

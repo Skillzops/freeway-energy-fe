@@ -115,7 +115,7 @@ export const guarantorDetailsSchema = z.object({
       message: "Date of birth cannot be in the future",
     }),
   nationality: z.string().trim(),
-  identificationDetails: identificationDetailsSchema,
+  identificationDetails: identificationDetailsSchema.optional(),
 });
 
 export const saleItemSchema = z
@@ -200,7 +200,7 @@ type GuarantorDetails = {
   phoneNumber: string;
   email: string;
   homeAddress: string;
-  identificationDetails: IdentificationDetails;
+  identificationDetails?: IdentificationDetails;
   dateOfBirth: string;
   nationality: string;
 };
@@ -223,41 +223,6 @@ export const defaultSaleFormData: SalePayload = {
   applyMargin: true,
   bvn: "",
   saleItems: [],
-  nextOfKinDetails: {
-    fullName: "",
-    relationship: "",
-    phoneNumber: "",
-    email: "",
-    homeAddress: "",
-    dateOfBirth: "",
-    nationality: "",
-  },
-  identificationDetails: {
-    idType: "",
-    idNumber: "",
-    issuingCountry: "",
-    issueDate: "",
-    expirationDate: "",
-    fullNameAsOnID: "",
-    addressAsOnID: "",
-  },
-  guarantorDetails: {
-    fullName: "",
-    phoneNumber: "",
-    email: "",
-    homeAddress: "",
-    dateOfBirth: "",
-    nationality: "",
-    identificationDetails: {
-      idType: "",
-      idNumber: "",
-      issuingCountry: "",
-      issueDate: "",
-      expirationDate: "",
-      fullNameAsOnID: "",
-      addressAsOnID: "",
-    },
-  },
   paymentMethod: "ONLINE",
 };
 
@@ -290,40 +255,10 @@ export const formSchema = z
       (item) => item.paymentMode === "INSTALLMENT"
     );
 
-    // If any sale item has paymentMode as "INSTALLMENT", enforce identificationDetails and guarantorDetails
+    // If any sale item has paymentMode as "INSTALLMENT", validate guarantorDetails if provided
     if (hasInstallment) {
-      // Validate identificationDetails
-      if (!data.identificationDetails) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message:
-            "Identification details are required for installment payments",
-          path: ["identificationDetails"],
-        });
-      } else {
-        // Validate the nested schema for identificationDetails
-        const identificationValidation = identificationDetailsSchema.safeParse(
-          data.identificationDetails
-        );
-        if (!identificationValidation.success) {
-          identificationValidation.error.issues.forEach((issue) => {
-            ctx.addIssue({
-              ...issue,
-              path: ["identificationDetails", ...issue.path],
-            });
-          });
-        }
-      }
-
-      // Validate guarantorDetails
-      if (!data.guarantorDetails) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Guarantor details are required for installment payments",
-          path: ["guarantorDetails"],
-        });
-      } else {
-        // Validate the nested schema for guarantorDetails
+      // Validate guarantorDetails if provided
+      if (data.guarantorDetails) {
         const guarantorValidation = guarantorDetailsSchema.safeParse(
           data.guarantorDetails
         );

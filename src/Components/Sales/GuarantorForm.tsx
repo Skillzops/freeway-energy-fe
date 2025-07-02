@@ -16,15 +16,7 @@ const defaultFormData: FormData = {
   homeAddress: "",
   dateOfBirth: "",
   nationality: "",
-  identificationDetails: {
-    idType: "",
-    idNumber: "",
-    issuingCountry: "",
-    issueDate: "",
-    expirationDate: "",
-    fullNameAsOnID: "",
-    addressAsOnID: "",
-  },
+  identificationDetails: undefined,
 };
 
 const GuarantorForm = ({ handleClose }: { handleClose: () => void }) => {
@@ -32,13 +24,7 @@ const GuarantorForm = ({ handleClose }: { handleClose: () => void }) => {
   const [formData, setFormData] = useState<FormData>({
     ...savedData,
     dateOfBirth: savedData.dateOfBirth,
-    identificationDetails: {
-      ...savedData.identificationDetails,
-      issueDate: formatDateForInput(savedData.identificationDetails.issueDate),
-      expirationDate: formatDateForInput(
-        savedData.identificationDetails.expirationDate
-      ),
-    },
+    identificationDetails: undefined,
   });
   const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([]);
 
@@ -64,60 +50,13 @@ const GuarantorForm = ({ handleClose }: { handleClose: () => void }) => {
     setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
   };
 
-  const handleNestedInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      identificationDetails: {
-        ...prev.identificationDetails,
-        [name]: value,
-      },
-    }));
-    validateItems();
-    setFormErrors((prev) =>
-      prev.filter(
-        (error) =>
-          !(
-            Array.isArray(error.path) &&
-            error.path.join(".") === `identificationDetails.${name}`
-          )
-      )
-    );
-  };
 
-  const handleNestedSelectChange = (
-    name: string,
-    values: string | string[]
-  ) => {
-    setFormData((prev) => ({
-      ...prev,
-      identificationDetails: {
-        ...prev.identificationDetails,
-        [name]: values,
-      },
-    }));
-    validateItems();
-    setFormErrors((prev) =>
-      prev.filter(
-        (error) =>
-          !(
-            Array.isArray(error.path) &&
-            error.path.join(".") === `identificationDetails.${name}`
-          )
-      )
-    );
-  };
 
   const isFormFilled = guarantorDetailsSchema.safeParse(formData).success;
 
   const getFieldError = (fieldName: string) => {
-    // Check for both top-level and nested paths
     const error = formErrors.find(
-      (err) =>
-        err.path.join(".") === fieldName || // Top-level check
-        err.path.join(".") === `identificationDetails.${fieldName}` // Nested field check
+      (err) => err.path.join(".") === fieldName
     );
     return error?.message;
   };
@@ -130,15 +69,13 @@ const GuarantorForm = ({ handleClose }: { handleClose: () => void }) => {
         ? ""
         : new Date(formData.dateOfBirth).toISOString(),
       identificationDetails: {
-        ...formData.identificationDetails,
-        issueDate: !formData.identificationDetails.issueDate
-          ? ""
-          : new Date(formData.identificationDetails.issueDate).toISOString(),
-        expirationDate: !formData.identificationDetails.expirationDate
-          ? ""
-          : new Date(
-              formData.identificationDetails.expirationDate
-            ).toISOString(),
+        idType: "",
+        idNumber: "",
+        issuingCountry: "",
+        issueDate: "",
+        expirationDate: "",
+        fullNameAsOnID: "",
+        addressAsOnID: "",
       },
     });
     handleClose();
@@ -227,7 +164,7 @@ const GuarantorForm = ({ handleClose }: { handleClose: () => void }) => {
       />
       {/* <p className="text-sm font-semibold pt-2">
         Fill Guarantor Identification Details
-      </p> */}
+      </p>
       <SelectInput
         label="ID Type"
         options={[
@@ -306,7 +243,7 @@ const GuarantorForm = ({ handleClose }: { handleClose: () => void }) => {
         placeholder="Enter Address as on ID"
         required={false}
         errorMessage={getFieldError("addressAsOnID")}
-      />
+      /> */}
       <div className="flex items-center justify-between gap-1 mt-4">
         <SecondaryButton
           variant="secondary"

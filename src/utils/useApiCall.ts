@@ -89,7 +89,7 @@ export const useApiCall = () => {
 
 // SWR hook for GET requests with revalidation
 export const useGetRequest = (
-  endpoint: string,
+  endpoint: string | null,
   revalidate = true,
   refreshInterval?: number
 ) => {
@@ -109,7 +109,7 @@ export const useGetRequest = (
           Authorization: `Bearer ${token}`,
         },
       });
-      updateErrorState(endpoint, false, true);
+      updateErrorState(endpoint || "", false, true);
       return response.data;
     } catch (error: any) {
       handleApiError(
@@ -117,7 +117,7 @@ export const useGetRequest = (
         location,
         setIsNetworkError,
         setIsPermissionError,
-        endpoint,
+        endpoint || "",
         errorStates,
         updateErrorState,
         setToastShown
@@ -145,7 +145,68 @@ export const useGetRequest = (
 
   return {
     ...useSWR(
-      `${apiClient.defaults.baseURL}/api${endpoint}`,
+      endpoint ? `${apiClient.defaults.baseURL}/api${endpoint}` : null,
+      fetcher,
+      swrConfig
+    ),
+    errorStates: { errorStates, isNetworkError, isPermissionError },
+  };
+};
+
+// Special hook for fetching all devices without pagination (to avoid cache conflicts)
+export const useGetAllDevices = (revalidate = true) => {
+  const { token } = useTokens();
+  const location = useLocation();
+  const { errorStates, updateErrorState, setToastShown } = useEndpointErrors();
+  const [isNetworkError, setIsNetworkError] = useState<boolean>(false);
+  const [isPermissionError, setIsPermissionError] = useState<boolean>(false);
+
+  const fetcher = async (url: string): Promise<any> => {
+    setIsNetworkError(false);
+    setIsPermissionError(false);
+
+    try {
+      const response = await apiClient.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      updateErrorState("/v1/device/all", false, true);
+      return response.data;
+    } catch (error: any) {
+      handleApiError(
+        error,
+        location,
+        setIsNetworkError,
+        setIsPermissionError,
+        "/v1/device/all",
+        errorStates,
+        updateErrorState,
+        setToastShown
+      );
+
+      // Throw a special error for permission errors to prevent SWR from retrying
+      if (axios.isAxiosError(error) && error.response?.status === 403) {
+        throw new Error("PERMISSION_DENIED");
+      }
+
+      throw error;
+    }
+  };
+
+  // Custom SWR configuration that won't retry on permission errors
+  const swrConfig = {
+    revalidateOnFocus: revalidate && !isPermissionError,
+    revalidateOnReconnect: revalidate && !isPermissionError,
+    shouldRetryOnError: (error: any) => {
+      // Don't retry if it's a permission error
+      return error.message !== "PERMISSION_DENIED";
+    },
+  };
+
+  return {
+    ...useSWR(
+      `${apiClient.defaults.baseURL}/api/v1/device?limit=1000`,
       fetcher,
       swrConfig
     ),
