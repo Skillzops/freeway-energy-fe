@@ -221,7 +221,7 @@ export const defaultSaleFormData: SalePayload = {
   category: "PRODUCT",
   customerId: "",
   applyMargin: true,
-  bvn: "",
+  bvn: undefined,
   saleItems: [],
   paymentMethod: "ONLINE",
 };
@@ -238,7 +238,18 @@ export const formSchema = z
     bvn: z
       .string()
       .optional()
-      .refine((val) => !val || val.length === 0 || (val.length === 11 && /^\d+$/.test(val)), {
+      .refine((val) => {
+        // If no value provided, it's valid (optional field)
+        if (!val || val.length === 0) return true;
+        
+        // Must be exactly 11 digits
+        if (val.length !== 11) return false;
+        
+        // Must contain only digits
+        if (!/^\d+$/.test(val)) return false;
+        
+        return true;
+      }, {
         message: "BVN must be exactly 11 digits when provided"
       }),
     identificationDetails: identificationDetailsSchema.optional(),

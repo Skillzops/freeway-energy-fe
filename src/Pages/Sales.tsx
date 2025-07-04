@@ -5,6 +5,7 @@ import {
   Routes,
   useLocation,
   useSearchParams,
+  useNavigate,
 } from "react-router-dom";
 import PageLayout from "./PageLayout";
 import transactionsbadge from "../assets/transactions/transactionsbadge.png";
@@ -24,6 +25,7 @@ const SalesTable = lazy(() => import("@/Components/Sales/SalesTable"));
 
 const Sales = observer(() => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { apiCall } = useApiCall();
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -110,8 +112,16 @@ const Sales = observer(() => {
   const transaction_id = searchParams.get("transaction_id")?.toString();
 
   const verifyPayment = useCallback(async () => {
+    // Validate required parameters
+    if (!tx_ref_param || !transaction_id) {
+      console.error("Missing payment verification parameters:", { tx_ref_param, transaction_id });
+      return;
+    }
+
     try {
-      apiCall({
+      console.log("Verifying payment with params:", { tx_ref_param, transaction_id });
+      
+      const response = await apiCall({
         endpoint: "/v1/payment/verify/callback",
         method: "get",
         params: {
@@ -120,14 +130,59 @@ const Sales = observer(() => {
         },
         showToast: false,
       });
-      console.log("VERIFIED SUCCESSFULLY");
-    } catch (error) {
-      console.error("Failed to verify payment:", error);
+
+      console.log("Payment verification response:", response);
+      
+      if (response?.data) {
+        console.log("Payment verified successfully");
+        console.log("Full verification response:", response);
+        console.log("Verification response data:", response.data);
+        
+        // Check what the response contains
+        if (response.data.status) {
+          console.log("Verification status:", response.data.status);
+        }
+        if (response.data.saleId) {
+          console.log("Sale ID from verification:", response.data.saleId);
+        }
+        if (response.data.paymentStatus) {
+          console.log("Payment status from verification:", response.data.paymentStatus);
+        }
+        
+        // Refresh sales data to show updated status
+        if (allSalesRefresh) {
+          await allSalesRefresh();
+        }
+      }
+    } catch (error: any) {
+      console.error("Payment verification failed:", error);
+      
+      // Log detailed error information
+      const errorDetails = {
+        message: error.response?.data?.message || error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+        params: { tx_ref_param, transaction_id }
+      };
+      console.error("Error details:", errorDetails);
+      
+      // Show user-friendly error message
+      const errorMessage = error.response?.data?.message || 
+        "Payment verification failed. Please contact support if the issue persists.";
+      
+      // Don't show toast for verification errors as they might be expected
+      // (e.g., when user cancels payment and returns to page)
+      console.warn("Payment verification error:", errorMessage);
     }
-  }, [apiCall, transaction_id, tx_ref_param]);
+  }, [apiCall, transaction_id, tx_ref_param, allSalesRefresh]);
 
   useEffect(() => {
-    if (tx_ref_param && transaction_id) verifyPayment();
+    if (tx_ref_param && transaction_id) {
+      console.log("Payment verification triggered with:", { tx_ref_param, transaction_id });
+      verifyPayment();
+    } else if (tx_ref_param || transaction_id) {
+      console.warn("Incomplete payment verification params:", { tx_ref_param, transaction_id });
+    }
   }, [tx_ref_param, transaction_id, verifyPayment]);
 
   return (

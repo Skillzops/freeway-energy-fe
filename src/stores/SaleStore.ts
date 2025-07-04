@@ -928,19 +928,24 @@ const saleStore = types
     },
     getTotal() {
       return self.products.reduce((total, product) => {
-        const baseAmount = Number(product.productPrice) * (product.productUnits || 1);
+        // Ensure we have valid numeric values
+        const price = Number(product.productPrice) || 0;
+        const units = Number(product.productUnits) || 1;
+        const baseAmount = price * units;
         
         // Get parameters for discount calculation
         const params = self.parameters.find(p => p.currentProductId === product.productId);
-        const discount = params?.params?.discount || 0;
+        const discount = Number(params?.params?.discount) || 0;
         const discountAmount = (baseAmount * discount) / 100;
         
         // Get miscellaneous costs
         const miscPrices = self.miscellaneousPrices.find(m => m.currentProductId === product.productId);
         const miscellaneousCosts = miscPrices ? 
-          Array.from(miscPrices.costs.entries()).reduce((sum, [, cost]) => sum + cost, 0) : 0;
+          Array.from(miscPrices.costs.entries()).reduce((sum, [, cost]) => sum + (Number(cost) || 0), 0) : 0;
         
-        return total + baseAmount - discountAmount + miscellaneousCosts;
+        const productTotal = baseAmount - discountAmount + miscellaneousCosts;
+        
+        return total + productTotal;
       }, 0);
     },
   }));

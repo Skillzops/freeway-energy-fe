@@ -127,6 +127,40 @@ const SalesDetailsModal = ({
     return { entries, paymentInfo: data?.sale?.payment, customer };
   };
 
+  // Generate saleData for progress bar
+  const generateSaleData = () => {
+    const saleData = fetchSingleSale?.data;
+    const sale = saleData?.sale;
+    
+    console.log('=== generateSaleData Debug ===');
+    console.log('Full API response:', JSON.stringify(fetchSingleSale?.data, null, 2));
+    console.log('saleData:', JSON.stringify(saleData, null, 2));
+    console.log('sale:', JSON.stringify(sale, null, 2));
+    console.log('sale.totalInstallmentDuration:', sale?.totalInstallmentDuration);
+    console.log('saleData.paymentMode:', saleData?.paymentMode);
+    
+    // Check for alternative field names
+    console.log('Checking alternative field names:');
+    console.log('sale.installmentDuration:', sale?.installmentDuration);
+    console.log('sale.duration:', sale?.duration);
+    console.log('sale.totalInstallments:', sale?.totalInstallments);
+    console.log('sale.installments:', sale?.installments);
+    console.log('sale.paymentDuration:', sale?.paymentDuration);
+    console.log('saleData.installmentDuration:', saleData?.installmentDuration);
+    console.log('saleData.duration:', saleData?.duration);
+    console.log('=== End generateSaleData Debug ===');
+    
+    if (!sale) return undefined;
+    
+    return {
+      totalPrice: sale.totalPrice || 0,
+      totalPaid: sale.totalPaid || 0,
+      paymentMode: saleData.paymentMode || "",
+      totalInstallments: saleData.installmentDuration || 0,
+      paymentsMade: sale.payment?.filter((p: any) => p.paymentStatus === "COMPLETED").length || 0,
+    };
+  };
+
   const tabNames: TabNamesType[] = [
     { name: "Sale Details", key: "details", count: null },
     {
@@ -216,7 +250,10 @@ const SalesDetailsModal = ({
             ) : tabContent === "devices" ? (
               <SaleDevices data={fetchSingleSale?.data?.devices} />
             ) : (
-              <SaleTransactions data={generateSaleTransactionEntries()} />
+              <SaleTransactions 
+                data={generateSaleTransactionEntries()} 
+                saleData={generateSaleData()}
+              />
             )}
           </DataStateWrapper>
         </div>
