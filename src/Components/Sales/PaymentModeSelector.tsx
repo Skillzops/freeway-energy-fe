@@ -9,6 +9,7 @@ interface PaymentModeSelectorProps {
   saleId?: string;
   amount?: number;
   onAmountChange?: (amount: number) => void;
+  onNotesChange?: (notes: string) => void;
 }
 
 const PaymentModeSelector: React.FC<PaymentModeSelectorProps> = ({
@@ -18,6 +19,7 @@ const PaymentModeSelector: React.FC<PaymentModeSelectorProps> = ({
   saleId,
   amount,
   onAmountChange,
+  onNotesChange,
 }) => {
   const [paymentAmount, setPaymentAmount] = useState(amount?.toString() || "");
   const [notes, setNotes] = useState("");
@@ -34,6 +36,14 @@ const PaymentModeSelector: React.FC<PaymentModeSelectorProps> = ({
     setPaymentAmount(newAmount);
     if (onAmountChange) {
       onAmountChange(Number(newAmount));
+    }
+  };
+
+  const handleNotesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newNotes = e.target.value;
+    setNotes(newNotes);
+    if (onNotesChange) {
+      onNotesChange(newNotes);
     }
   };
 
@@ -69,7 +79,7 @@ const PaymentModeSelector: React.FC<PaymentModeSelectorProps> = ({
             name="notes"
             label="PAYMENT NOTES"
             value={notes}
-            onChange={(e) => setNotes(e.target.value)}
+            onChange={handleNotesChange}
             placeholder="Enter payment notes"
             required={false}
           />

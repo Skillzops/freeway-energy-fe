@@ -56,22 +56,38 @@ const ParametersForm = ({
 
   // Get product details for calculation
   const product = SaleStore.getProductById(currentProductId);
-  console.log("Product for calculation:", product);
-  console.log("Product price string:", product?.productPrice);
   
   // Parse product price properly - remove any currency symbols and commas
   const productPriceString = product?.productPrice || "0";
   const cleanPriceString = productPriceString.toString().replace(/[₦,]/g, '');
   const productPrice = parseFloat(cleanPriceString) || 0;
   
-  console.log("Parsed product price:", productPrice);
-  
   const miscellaneousCosts = SaleStore.getMiscellaneousByProductId(currentProductId)?.costs || {};
   
-  // Properly handle MobX observable Map
-  const totalMiscellaneousCosts = miscellaneousCosts instanceof Map 
-    ? Array.from(miscellaneousCosts.values()).reduce((sum, cost) => sum + (Number(cost) || 0), 0)
-    : Object.values(miscellaneousCosts).reduce((sum, cost) => sum + (Number(cost) || 0), 0);
+  // Properly handle MobX State Tree Map (MSTMap2)
+  const totalMiscellaneousCosts = (() => {
+    if (miscellaneousCosts && typeof miscellaneousCosts === 'object' && 'data_' in miscellaneousCosts) {
+      // Handle MSTMap2 - access the internal data_ Map and extract values from ObservableValue2
+      const mstMap = miscellaneousCosts as any;
+      return Array.from(mstMap.data_.values()).reduce((sum: number, cost: any) => {
+        // Extract value from ObservableValue2 using .get() method
+        let costValue = cost && typeof cost === 'object' && 'get' in cost ? cost.get() : cost;
+        
+        // If costValue is still a ScalarNode2, extract its value
+        if (costValue && typeof costValue === 'object' && 'value' in costValue) {
+          costValue = costValue.value;
+        }
+        
+        return sum + (Number(costValue) || 0);
+      }, 0);
+    } else if (miscellaneousCosts instanceof Map) {
+      // Handle standard Map
+      return Array.from(miscellaneousCosts.values()).reduce((sum: number, cost: any) => sum + (Number(cost) || 0), 0);
+    } else {
+      // Handle plain object
+      return Object.values(miscellaneousCosts || {}).reduce((sum: number, cost: any) => sum + (Number(cost) || 0), 0);
+    }
+  })();
 
   // Calculate installment amount when relevant fields change
   useEffect(() => {
@@ -259,12 +275,20 @@ const ParametersForm = ({
             <p className="font-semibold mb-2">Calculation Breakdown:</p>
             <div className="space-y-1">
               <p>Product Price: ₦{productPrice.toLocaleString()}</p>
-              {/* <p>Discount ({formData.discount || 0}%): -₦{(((formData.discount || 0) / 100) * productPrice).toLocaleString()}</p> */}
-              {/* <p>Discounted Price: ₦{(productPrice - (((formData.discount || 0) / 100) * productPrice)).toLocaleString()}</p> */}
+              {(formData.discount || 0) > 0 && (
+                <p>Discount ({formData.discount}%): -₦{(((formData.discount || 0) / 100) * productPrice).toLocaleString()}</p>
+              )}
+              {(formData.discount || 0) > 0 && (
+                <p>Discounted Price: ₦{(productPrice - (((formData.discount || 0) / 100) * productPrice)).toLocaleString()}</p>
+              )}
               {/* <p>Miscellaneous Costs: +₦{totalMiscellaneousCosts.toLocaleString()}</p> */}
               <p className="font-semibold">Total Amount: ₦{(productPrice - (((formData.discount || 0) / 100) * productPrice) + totalMiscellaneousCosts).toLocaleString()}</p>
               <p>Initial Payment: ₦{(formData.installmentStartingPrice || 0).toLocaleString()}</p>
-              <p className="font-semibold text-green-600">Remaining Balance: ₦{((productPrice - (((formData.discount || 0) / 100) * productPrice) + totalMiscellaneousCosts) - (formData.installmentStartingPrice || 0)).toLocaleString()}</p>
+              <p className="font-semibold text-blue-600">
+                Total Initial Deposit: ₦{((formData.installmentStartingPrice || 0) + totalMiscellaneousCosts).toLocaleString()}
+                <span className="block text-xs font-normal text-gray-500">(Initial Payment + Miscellaneous Costs)</span>
+              </p>
+              <p className="font-semibold text-red-600">Remaining Balance: ₦{((productPrice - (((formData.discount || 0) / 100) * productPrice) + totalMiscellaneousCosts) - ((formData.installmentStartingPrice || 0) + totalMiscellaneousCosts)).toLocaleString()}</p>
               <p className="font-semibold">Monthly Installment: ₦{Math.round(((productPrice - (((formData.discount || 0) / 100) * productPrice) + totalMiscellaneousCosts) - (formData.installmentStartingPrice || 0)) / (formData.installmentDuration || 1)).toLocaleString()} × {formData.installmentDuration || 0} months</p>
             </div>
           </div>

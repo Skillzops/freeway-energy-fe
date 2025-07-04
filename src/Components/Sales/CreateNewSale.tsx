@@ -185,8 +185,15 @@ const CreateNewSale = observer(
         // Step 3: Refresh sales list
         await allSalesRefresh();
 
+        console.log("Step 4: Processing payment information...");
+        console.log("API Response:", response);
+        console.log("Response data:", response?.data);
+        
         // Step 4: Handle save payment information
         const paymentData = response?.data?.paymentData;
+        console.log("Payment data extracted:", paymentData);
+        
+        console.log("Public key check:", { public_key, exists: !!public_key });
         
         if (!public_key) {
           console.error("Flutterwave public key not configured");
@@ -194,34 +201,53 @@ const CreateNewSale = observer(
           return;
         }
         
-        const newPaymentData: FlutterwaveConfig = {
-          public_key,
-          tx_ref: paymentData?.tx_ref || `sale_${Date.now()}`,
+        console.log("Creating payment data object...");
+        const newPaymentData = {
+          publicKey: public_key,
+          email: SaleStore?.customer?.email || paymentData?.customer?.email || "",
           amount: paymentData?.amount || 0,
           currency: "NGN",
-          payment_options: "card,banktransfer,ussd",
-          customer: {
-            email: SaleStore?.customer?.email || paymentData?.customer?.email || "",
-            name: SaleStore.customer?.customerName || paymentData?.customer?.name || "",
-            phone_number: SaleStore?.customer?.phone || "",
-          },
-          customizations: {
-            title: "Sale Payment",
-            description: "Payment for sale",
-            logo: "https://yourdomain.com/logo.png", // Optional - update with your logo
-          },
-          meta: {
+          reference: paymentData?.tx_ref || `sale_${Date.now()}`,
+          metadata: {
             saleId: paymentData?.saleId || "",
             customerName: SaleStore.customer?.customerName || "",
             phoneNumber: SaleStore?.customer?.phone || "",
+            tx_ref: paymentData?.tx_ref || `sale_${Date.now()}`,
+            payment_options: "card,banktransfer,ussd",
+            customer: {
+              email: SaleStore?.customer?.email || paymentData?.customer?.email || "",
+              name: SaleStore.customer?.customerName || paymentData?.customer?.name || "",
+              phone_number: SaleStore?.customer?.phone || "",
+            },
+            customizations: {
+              title: "Sale Payment",
+              description: "Payment for sale",
+              logo: "https://yourdomain.com/logo.png",
+            },
           },
+          callback: null,
+          onClose: null,
+          channels: ["card", "bank", "ussd"],
         };
         
+        console.log("Payment data created:", newPaymentData);
+        console.log("Payment amount check:", { amount: paymentData?.amount, hasAmount: paymentData?.amount && paymentData?.amount > 0 });
+        
         if (paymentData?.amount && paymentData?.amount > 0 && validatedData.paymentMethod === "ONLINE") {
-          SaleStore.addPaymentDetails(newPaymentData);
-          setSummaryState(true);
+          console.log("Adding payment details to store and setting summary state...");
+          try {
+            SaleStore.addPaymentDetails(newPaymentData);
+            console.log("Payment details added to store successfully");
+            setSummaryState(true);
+            console.log("Summary state set to true successfully");
+          } catch (storeError) {
+            console.error("Error in store operations:", storeError);
+            setApiError("Error processing payment information. Please try again.");
+            return;
+          }
         } else {
-          // If no payment is required or it's a cash payment, just close the modal
+          console.log("Cash payment or no payment required, closing modal...");
+          // For cash payments or no payment required, just close the modal
           resetSaleModalState();
         }
       } catch (error) {
@@ -420,109 +446,108 @@ const CreateNewSale = observer(
                         : getFieldError("products")
                     }
                   />
+                  <Input
+                    type="text"
+                    name="bvn"
+                    label="BANK VERIFICATION NUMBER"
+                    value={formData.bvn as string}
+                    onChange={(e) => {
+                      const numericValue = e.target.value.replace(
+                        /\D/g,
+                        ""
+                      ); // Remove non-numeric characters
+                      if (numericValue.length <= 11) {
+                        handleInputChange(e.target.name, numericValue);
+                      }
+                    }}
+                    placeholder="Enter 11 digit BVN (Optional)"
+                    required={false}
+                    errorMessage={getFieldError("bvn")}
+                    maxLength={11}
+                    description="BVN must be exactly 11 digits (numbers only)"
+                  />
+                  {/* <ModalInput
+                    type="button"
+                    name="identificationDetails"
+                    label="IDENTIFICATION DETAILS"
+                    onClick={() => {
+                      setExtraInfoModal("identification");
+                    }}
+                    placeholder="Enter Identification"
+                    required={false}
+                    isItemsSelected={Boolean(
+                      SaleStore.identificationDetails.idNumber
+                    )}
+                    customSelectedText="Update Identification Details"
+                    itemsSelected={
+                      <div className="flex flex-col w-full gap-2 bg-[#F9F9F9] p-3 border-[0.6px] border-strokeGreyThree rounded-md">
+                        {SaleStore.identificationDetails.idNumber && (
+                          <ExtraInfoSection
+                            label="Identification"
+                            onClear={() =>
+                              SaleStore.removeIdentificationDetails()
+                            }
+                          />
+                        )}
+                      </div>
+                    }
+                    errorMessage={getFieldError("identificationDetails")}
+                  /> */}
+                  {/* <ModalInput
+                    type="button"
+                    name="nextOfKinDetails"
+                    label="NEXT OF KIN DETAILS"
+                    onClick={() => {
+                      setExtraInfoModal("nextOfKin");
+                    }}
+                    placeholder="Enter Next of Kin"
+                    required={false}
+                    isItemsSelected={Boolean(
+                      SaleStore.nextOfKinDetails.fullName
+                    )}
+                    customSelectedText="Update Next of Kin"
+                    itemsSelected={
+                      <div className="flex flex-col w-full gap-2 bg-[#F9F9F9] p-3 border-[0.6px] border-strokeGreyThree rounded-md">
+                        {SaleStore.nextOfKinDetails.fullName && (
+                          <ExtraInfoSection
+                            label="Next of Kin"
+                            onClear={() =>
+                              SaleStore.removeNextOfKinDetails()
+                            }
+                          />
+                        )}
+                      </div>
+                    }
+                    errorMessage={getFieldError("nextOfKinDetails")}
+                  /> */}
                   {SaleStore.doesSaleItemHaveInstallment() && (
-                    <>
-                      <Input
-                        type="text"
-                        name="bvn"
-                        label="BANK VERIFICATION NUMBER"
-                        value={formData.bvn as string}
-                        onChange={(e) => {
-                          const numericValue = e.target.value.replace(
-                            /\D/g,
-                            ""
-                          ); // Remove non-numeric characters
-                          if (numericValue.length <= 11) {
-                            handleInputChange(e.target.name, numericValue);
-                          }
-                        }}
-                        placeholder="Enter 11 digit BVN (Optional)"
-                        required={false}
-                        errorMessage={getFieldError("bvn")}
-                        maxLength={11}
-                      />
-                      {/* <ModalInput
-                        type="button"
-                        name="identificationDetails"
-                        label="IDENTIFICATION DETAILS"
-                        onClick={() => {
-                          setExtraInfoModal("identification");
-                        }}
-                        placeholder="Enter Identification"
-                        required={false}
-                        isItemsSelected={Boolean(
-                          SaleStore.identificationDetails.idNumber
-                        )}
-                        customSelectedText="Update Identification Details"
-                        itemsSelected={
-                          <div className="flex flex-col w-full gap-2 bg-[#F9F9F9] p-3 border-[0.6px] border-strokeGreyThree rounded-md">
-                            {SaleStore.identificationDetails.idNumber && (
-                              <ExtraInfoSection
-                                label="Identification"
-                                onClear={() =>
-                                  SaleStore.removeIdentificationDetails()
-                                }
-                              />
-                            )}
-                          </div>
-                        }
-                        errorMessage={getFieldError("identificationDetails")}
-                      /> */}
-                      {/* <ModalInput
-                        type="button"
-                        name="nextOfKinDetails"
-                        label="NEXT OF KIN DETAILS"
-                        onClick={() => {
-                          setExtraInfoModal("nextOfKin");
-                        }}
-                        placeholder="Enter Next of Kin"
-                        required={false}
-                        isItemsSelected={Boolean(
-                          SaleStore.nextOfKinDetails.fullName
-                        )}
-                        customSelectedText="Update Next of Kin"
-                        itemsSelected={
-                          <div className="flex flex-col w-full gap-2 bg-[#F9F9F9] p-3 border-[0.6px] border-strokeGreyThree rounded-md">
-                            {SaleStore.nextOfKinDetails.fullName && (
-                              <ExtraInfoSection
-                                label="Next of Kin"
-                                onClear={() =>
-                                  SaleStore.removeNextOfKinDetails()
-                                }
-                              />
-                            )}
-                          </div>
-                        }
-                        errorMessage={getFieldError("nextOfKinDetails")}
-                      /> */}
-                      <ModalInput
-                        type="button"
-                        name="guarantorDetails"
-                        label="GUARANTOR DETAILS"
-                        onClick={() => {
-                          setExtraInfoModal("guarantor");
-                        }}
-                        placeholder="Enter Guarantor"
-                        required={false}
-                        isItemsSelected={Boolean(
-                          SaleStore.guarantorDetails.fullName
-                        )}
-                        customSelectedText="Update Guarantor"
-                        itemsSelected={
-                          <div className="flex flex-col w-full gap-2 bg-[#F9F9F9] p-3 border-[0.6px] border-strokeGreyThree rounded-md">
-                            {SaleStore.guarantorDetails.fullName && (
-                              <ExtraInfoSection
-                                label="Guarantor"
-                                onClear={() =>
-                                  SaleStore.removeGuarantorDetails()
-                                }
-                              />
-                            )}
-                          </div>
-                        }
-                        errorMessage={getFieldError("guarantorDetails")}
-                      />
-                    </>
+                    <ModalInput
+                      type="button"
+                      name="guarantorDetails"
+                      label="GUARANTOR DETAILS"
+                      onClick={() => {
+                        setExtraInfoModal("guarantor");
+                      }}
+                      placeholder="Enter Guarantor"
+                      required={false}
+                      isItemsSelected={Boolean(
+                        SaleStore.guarantorDetails.fullName
+                      )}
+                      customSelectedText="Update Guarantor"
+                      itemsSelected={
+                        <div className="flex flex-col w-full gap-2 bg-[#F9F9F9] p-3 border-[0.6px] border-strokeGreyThree rounded-md">
+                          {SaleStore.guarantorDetails.fullName && (
+                            <ExtraInfoSection
+                              label="Guarantor"
+                              onClear={() =>
+                                SaleStore.removeGuarantorDetails()
+                              }
+                            />
+                          )}
+                        </div>
+                      }
+                      errorMessage={getFieldError("guarantorDetails")}
+                    />
                   )}
 
                   <div className="flex items-center justify-between gap-2 w-full">
@@ -553,6 +578,7 @@ const CreateNewSale = observer(
                   getIsFormFilled={getIsFormFilled}
                   apiErrorMessage={<ApiErrorMessage apiError={apiError} />}
                   payload={getPayload()}
+                  refreshTable={allSalesRefresh}
                 />
               )}
             </div>
