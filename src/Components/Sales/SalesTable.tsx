@@ -16,18 +16,32 @@ type SalesEntries = {
   no: string;
   saleId?: string;
   paymentMode: string;
-  dateCreated: string;
+  transactionDate: string;
   customer: string;
   status: string;
   amount: number;
+  amountPaid: number;
+  balance: number;
 };
 
 // Helper function to map the API data to the desired format
 const generateSalesEntries = (data: any): SalesEntries[] => {
+  console.log("=== SALES TABLE DATA DEBUG ===");
+  console.log("Full data:", JSON.stringify(data, null, 2));
+  
   const entries: SalesEntries[] = data?.saleItems?.map(
     (item: any, index: number) => {
+      console.log(`Item ${index}:`, JSON.stringify(item, null, 2));
+      console.log(`Item sale:`, JSON.stringify(item?.sale, null, 2));
+      
       const customerKey = item?.sale?.customer;
       const customerName = `${customerKey?.firstname} ${customerKey?.lastname}`;
+      const totalAmount = item?.sale?.totalPrice || 0;
+      const paidAmount = item?.sale?.totalPaid || 0;
+      const balance = totalAmount - paidAmount;
+      
+      console.log(`Calculated values - Total: ${totalAmount}, Paid: ${paidAmount}, Balance: ${balance}`);
+      
       return {
         no: index + 1,
         saleId: item?.id,
@@ -35,13 +49,16 @@ const generateSalesEntries = (data: any): SalesEntries[] => {
           item?.paymentMode === "ONE_OFF"
             ? "SINGLE DEPOSIT"
             : item?.paymentMode,
-        dateCreated: item?.createdAt,
+        transactionDate: item?.createdAt,
         customer: customerName,
         status: item?.sale?.status,
-        amount: item?.sale?.totalPrice,
+        amount: totalAmount,
+        amountPaid: paidAmount,
+        balance: balance,
       };
     }
   );
+  console.log("=== END SALES TABLE DATA DEBUG ===");
   return entries;
 };
 
@@ -107,7 +124,7 @@ const SalesTable = ({
     },
     {
       title: "DATE CREATED",
-      key: "dateCreated",
+      key: "transactionDate",
       valueIsAComponent: true,
       customValue: (value: string) => {
         return <DateTimeTag datetime={value} showAll={false} />;
@@ -153,7 +170,7 @@ const SalesTable = ({
           <div className="flex items-center gap-1">
             <NairaSymbol />
             <span className="text-textBlack">
-              {value && formatNumberWithCommas(value)}
+              {value !== undefined && value !== null ? formatNumberWithCommas(value) : "0"}
             </span>
           </div>
         );
@@ -175,6 +192,36 @@ const SalesTable = ({
         </svg>
       ),
     },
+    {
+      title: "AMOUNT PAID",
+      key: "amountPaid",
+      valueIsAComponent: true,
+      customValue: (value: number) => {
+        return (
+          <div className="flex items-center gap-1">
+            <NairaSymbol />
+            <span className="text-textBlack">
+              {value !== undefined && value !== null ? formatNumberWithCommas(value) : "0"}
+            </span>
+          </div>
+        );
+      },
+    },
+    // {
+    //   title: "BALANCE",
+    //   key: "balance",
+    //   valueIsAComponent: true,
+    //   customValue: (value: number) => {
+    //     return (
+    //       <div className="flex items-center gap-1">
+    //         <NairaSymbol />
+    //         <span className="text-textBlack">
+    //           {value !== undefined && value !== null ? formatNumberWithCommas(value) : "0"}
+    //         </span>
+    //       </div>
+    //     );
+    //   },
+    // },
     {
       title: "ACTIONS",
       key: "actions",

@@ -31,36 +31,36 @@ interface PaymentSummaryProps {
   totalAmount: number;
   totalPaid: number;
   remainingBalance: number;
-  paymentProgress: number;
   isInstallment: boolean;
   totalInstallments?: number;
   paymentsMade?: number;
+  paymentProgress?: number;
 }
 
 const PaymentSummary: React.FC<PaymentSummaryProps> = ({
   totalAmount,
   totalPaid,
   remainingBalance,
-  paymentProgress,
   isInstallment,
   totalInstallments = 0,
-  paymentsMade = 0
+  paymentsMade = 0,
+  paymentProgress = 0
 }) => {
   if (!isInstallment) return null;
 
-  // Calculate installment progress
+  // Calculate installment progress based on installments made
   const installmentProgress = totalInstallments > 0 ? (paymentsMade / totalInstallments) * 100 : 0;
   const remainingInstallments = Math.max(totalInstallments - paymentsMade, 0);
 
   return (
     <div className="flex flex-col p-4 gap-3 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg mb-4">
-      <h3 className="text-sm font-semibold text-gray-700 mb-2">Payment Progress</h3>
+      <h3 className="text-sm font-bold text-gray-700 mb-2">Payment Progress</h3>
       
-      {/* Progress Bar - Now based on installment count */}
+      {/* Progress Bar - Based on payment amount */}
       <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
         <div 
           className="bg-gradient-to-r from-gold to-primary h-2 rounded-full transition-all duration-300"
-          style={{ width: `${Math.min(installmentProgress, 100)}%` }}
+          style={{ width: `${Math.min(paymentProgress, 100)}%` }}
         ></div>
       </div>
 
@@ -149,6 +149,7 @@ const SaleTransactions = ({
     paymentMode: string;
     totalInstallments?: number;
     paymentsMade?: number;
+    paymentProgress?: number;
   };
 }) => {
   const { apiCall } = useApiCall();
@@ -171,15 +172,16 @@ const SaleTransactions = ({
       totalAmount,
       totalPaid,
       remainingBalance,
-      paymentProgress,
       isInstallment,
-      totalInstallments: saleData?.totalInstallments,
-      paymentsMade: saleData?.paymentsMade
+      totalInstallments: saleData?.totalInstallments || 0,
+      paymentsMade: saleData?.paymentsMade || 0,
+      paymentProgress
     };
 
     console.log('=== calculatePaymentSummary result ===');
     console.log('result:', result);
     console.log('saleData?.totalInstallments:', saleData?.totalInstallments);
+    console.log('paymentProgress:', paymentProgress);
     console.log('=== End ===');
 
     return result;
