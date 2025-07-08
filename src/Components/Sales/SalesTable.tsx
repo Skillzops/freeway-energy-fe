@@ -26,21 +26,19 @@ type SalesEntries = {
 
 // Helper function to map the API data to the desired format
 const generateSalesEntries = (data: any): SalesEntries[] => {
-  console.log("=== SALES TABLE DATA DEBUG ===");
-  console.log("Full data:", JSON.stringify(data, null, 2));
-  
   const entries: SalesEntries[] = data?.saleItems?.map(
     (item: any, index: number) => {
-      console.log(`Item ${index}:`, JSON.stringify(item, null, 2));
-      console.log(`Item sale:`, JSON.stringify(item?.sale, null, 2));
-      
       const customerKey = item?.sale?.customer;
       const customerName = `${customerKey?.firstname} ${customerKey?.lastname}`;
       const totalAmount = item?.sale?.totalPrice || 0;
-      const paidAmount = item?.sale?.totalPaid || 0;
+      // Calculate total paid from completed payment transactions if available
+      let paidAmount = 0;
+      if (item?.sale?.payment && Array.isArray(item.sale.payment)) {
+        paidAmount = item.sale.payment
+          .filter((payment: any) => payment.paymentStatus === "COMPLETED")
+          .reduce((sum: number, payment: any) => sum + (payment.amount || 0), 0);
+      }
       const balance = totalAmount - paidAmount;
-      
-      console.log(`Calculated values - Total: ${totalAmount}, Paid: ${paidAmount}, Balance: ${balance}`);
       
       return {
         no: index + 1,
@@ -58,7 +56,6 @@ const generateSalesEntries = (data: any): SalesEntries[] => {
       };
     }
   );
-  console.log("=== END SALES TABLE DATA DEBUG ===");
   return entries;
 };
 
@@ -268,6 +265,7 @@ const SalesTable = ({
               isOpen={isOpen}
               setIsOpen={setIsOpen}
               salesID={salesID}
+              refreshTable={refreshTable}
             />
           )}
         </div>
