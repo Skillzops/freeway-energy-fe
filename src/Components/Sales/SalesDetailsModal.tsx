@@ -50,10 +50,12 @@ const SalesDetailsModal = ({
   isOpen,
   setIsOpen,
   salesID,
+  refreshTable,
 }: {
   isOpen: boolean;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   salesID: string;
+  refreshTable?: () => Promise<any>;
 }) => {
   const [tabContent, setTabContent] = useState<string>("details");
 
@@ -131,13 +133,6 @@ const SalesDetailsModal = ({
   const generateSaleData = () => {
     const saleData = fetchSingleSale?.data;
     const sale = saleData?.sale;
-    
-    console.log('=== generateSaleData Debug ===');
-    console.log('saleData:', JSON.stringify(saleData, null, 2));
-    console.log('sale:', JSON.stringify(sale, null, 2));
-    console.log('installmentDuration:', saleData?.installmentDuration);
-    console.log('totalInstallmentDuration:', sale?.totalInstallmentDuration);
-    console.log('=== End generateSaleData Debug ===');
     
     if (!sale) return undefined;
     
@@ -242,6 +237,8 @@ const SalesDetailsModal = ({
               <SaleTransactions 
                 data={generateSaleTransactionEntries()} 
                 saleData={generateSaleData()}
+                refreshTable={refreshTable}
+                refreshSingleSale={fetchSingleSale?.mutate}
               />
             )}
           </DataStateWrapper>

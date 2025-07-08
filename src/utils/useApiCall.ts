@@ -206,7 +206,7 @@ export const useGetAllDevices = (revalidate = true) => {
 
   return {
     ...useSWR(
-      `${apiClient.defaults.baseURL}/api/v1/device?limit=1000`,
+      `${apiClient.defaults.baseURL}/api/v1/device`, // removed ?limit=1000
       fetcher,
       swrConfig
     ),
