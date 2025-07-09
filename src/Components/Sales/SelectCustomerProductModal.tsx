@@ -58,16 +58,16 @@ const generateListDataEntries = (data: any): ListDataType[] => {
 };
 
 const generateCustomerListDataEntries = (data: any): any[] => {
-  return data?.customers.map((item: Customer, index: number) => ({
+  return data?.customers?.map((item: Customer, index: number) => ({
     sn: index + 1,
     customerId: item?.id || "",
     customerName: `${item?.firstname} ${item?.lastname}`,
     firstname: item?.firstname,
     lastname: item?.lastname,
     location: item?.location || "",
-    email: item?.email,
-    phone: item?.phone,
-  }));
+    email: item?.email || "",
+    phone: item?.phone || "",
+  })) || [];
 };
 
 const SelectCustomerProductModal = observer(

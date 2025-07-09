@@ -57,7 +57,7 @@ const LoginPage = () => {
 
   useEffect(() => {
     if (userId || remember_token) {
-      console.log("User ID or token changed");
+      // User ID or token changed - no logging for security
     }
   }, [userId, remember_token]);
 

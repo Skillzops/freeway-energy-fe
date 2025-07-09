@@ -20,6 +20,8 @@ import CreateNewSale from "@/Components/Sales/CreateNewSale";
 import { useGetRequest, useApiCall } from "@/utils/useApiCall";
 import { observer } from "mobx-react-lite";
 import { SaleStore } from "@/stores/SaleStore";
+import BatchUploadSales from "@/Components/Sales/BatchUploadSales";
+import { DropDown } from "@/Components/DropDownComponent/DropDown";
 
 const SalesTable = lazy(() => import("@/Components/Sales/SalesTable"));
 
@@ -35,6 +37,8 @@ const Sales = observer(() => {
     string,
     any
   > | null>({});
+
+  const [isBatchOpen, setIsBatchOpen] = useState<boolean>(false);
 
   const queryString = Object.entries(tableQueryParams || {})
     .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
@@ -106,6 +110,20 @@ const Sales = observer(() => {
   //   showCustomButton: true,
   // };
 
+  const dropDownList = {
+    items: ["Batch Upload Sales"], // Changed to be sales-specific
+    onClickLink: (index: number) => {
+      switch (index) {
+        case 0:
+          setIsBatchOpen(true);
+          break;
+        default:
+          break;
+      }
+    },
+    showCustomButton: true,
+  };
+
   const salesPaths = ["all"];
 
   const tx_ref_param = searchParams.get("tx_ref")?.toString();
@@ -119,7 +137,7 @@ const Sales = observer(() => {
     }
 
     try {
-      console.log("Verifying payment with params:", { tx_ref_param, transaction_id });
+      
       
       const response = await apiCall({
         endpoint: "/v1/payment/verify/callback",
@@ -131,22 +149,20 @@ const Sales = observer(() => {
         showToast: false,
       });
 
-      console.log("Payment verification response:", response);
+      
       
       if (response?.data) {
-        console.log("Payment verified successfully");
-        console.log("Full verification response:", response);
-        console.log("Verification response data:", response.data);
+        
         
         // Check what the response contains
         if (response.data.status) {
-          console.log("Verification status:", response.data.status);
+
         }
         if (response.data.saleId) {
-          console.log("Sale ID from verification:", response.data.saleId);
+          
         }
         if (response.data.paymentStatus) {
-          console.log("Payment status from verification:", response.data.paymentStatus);
+          
         }
         
         // Refresh sales data to show updated status
@@ -178,7 +194,7 @@ const Sales = observer(() => {
 
   useEffect(() => {
     if (tx_ref_param && transaction_id) {
-      console.log("Payment verification triggered with:", { tx_ref_param, transaction_id });
+      
       verifyPayment();
     } else if (tx_ref_param || transaction_id) {
       console.warn("Incomplete payment verification params:", { tx_ref_param, transaction_id });
@@ -206,7 +222,7 @@ const Sales = observer(() => {
                 setIsOpen(true);
               }}
             />
-            {/* <DropDown {...dropDownList} /> */}
+            <DropDown {...dropDownList} />
           </div>
         </section>
         <div className="flex flex-col w-full px-2 py-8 gap-4 lg:flex-row md:p-8">
@@ -247,6 +263,12 @@ const Sales = observer(() => {
       <CreateNewSale
         isOpen={isOpen}
         setIsOpen={setIsOpen}
+        allSalesRefresh={allSalesRefresh}
+      />
+
+      <BatchUploadSales
+        isOpen={isBatchOpen}
+        setIsOpen={setIsBatchOpen}
         allSalesRefresh={allSalesRefresh}
       />
     </>

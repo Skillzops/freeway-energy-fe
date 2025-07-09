@@ -171,11 +171,11 @@ const CustomerDetails = ({
       });
 
       if (photoFile) {
-        formDataToSend.append("passportPhotoUrl", photoFile);
+        formDataToSend.append("passportPhoto", photoFile);
       }
 
       if (idImageFile) {
-        formDataToSend.append("idImageUrl", idImageFile);
+        formDataToSend.append("idImage", idImageFile);
       }
 
       await apiCall({

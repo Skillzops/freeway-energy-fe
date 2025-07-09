@@ -3,7 +3,6 @@ import Cookies from "js-cookie";
 const useTokens = () => {
   // Safely get and parse userData from cookies
   const userData = Cookies.get("userData");
-  console.log({userData});
   try {
     const parsedData = userData ? JSON.parse(userData) : null;
     // Safely access token and other properties

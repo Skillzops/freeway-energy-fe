@@ -40,6 +40,12 @@ const generateSalesEntries = (data: any): SalesEntries[] => {
       }
       const balance = totalAmount - paidAmount;
       
+      // Auto-update status to COMPLETED when total amount equals amount paid
+      let status = item?.sale?.status;
+      if (totalAmount > 0 && paidAmount >= totalAmount) {
+        status = "COMPLETED";
+      }
+      
       return {
         no: index + 1,
         saleId: item?.id,
@@ -47,9 +53,9 @@ const generateSalesEntries = (data: any): SalesEntries[] => {
           item?.paymentMode === "ONE_OFF"
             ? "SINGLE DEPOSIT"
             : item?.paymentMode,
-        transactionDate: item?.createdAt,
+        transactionDate: item?.sale?.transactionDate || item?.createdAt,
         customer: customerName,
-        status: item?.sale?.status,
+        status: status,
         amount: totalAmount,
         amountPaid: paidAmount,
         balance: balance,
