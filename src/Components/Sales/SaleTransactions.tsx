@@ -246,7 +246,7 @@ const SaleTransactions = ({
   // Verify payment with backend
   const verifyPayment = async (tx_ref: string, transaction_id?: string) => {
     try {
-      console.log('Verifying payment with tx_ref:', tx_ref, 'transaction_id:', transaction_id);
+      
 
       // Build the endpoint with required parameters
       let endpoint = `/v1/payment/verify/callback?tx_ref=${tx_ref}`;
@@ -260,7 +260,7 @@ const SaleTransactions = ({
         showToast: false,
       }) as { data: PaymentVerificationResponse };
 
-      console.log('Payment verification response:', response);
+      
 
       // Check for successful verification or processing status
       if (response?.data?.status === "successful" ||
@@ -356,7 +356,7 @@ const SaleTransactions = ({
 
     handleFlutterPayment({
       callback: async (response: any) => {
-        console.log("Flutterwave payment response:", response);
+
         
         if (response.status === "successful") {
           // Pass both tx_ref and transaction_id for verification

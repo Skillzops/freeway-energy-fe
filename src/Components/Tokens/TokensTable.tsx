@@ -24,19 +24,14 @@ export type TokenEntries = {
 
 // Helper function to map the API data to the desired format
 const generateTokenEntries = (data: any): TokenEntries[] => {
-  console.log("Raw tokens data:", data); // Debug log
-  
   if (!data) {
-    console.log("No data received");
     return [];
   }
   
   // Check different possible data structures
   const tokensArray = data?.tokens || data?.data || data;
-  console.log("Tokens array:", tokensArray);
   
   if (!Array.isArray(tokensArray)) {
-    console.log("Tokens data is not an array:", tokensArray);
     return [];
   }
   
@@ -60,7 +55,6 @@ const generateTokenEntries = (data: any): TokenEntries[] => {
     }
   );
   
-  console.log("Generated entries:", entries);
   return entries || [];
 };
 
@@ -187,8 +181,6 @@ const TokensTable = ({
   ];
 
   const getTableData = () => {
-    console.log("TokensTable - Getting table data:", { tokensData, errorData });
-    
     // Check if there are any error states
     const hasErrors = errorData?.errorStates?.some(state => state.errorExists) || 
                      errorData?.isNetworkError || 
@@ -196,19 +188,16 @@ const TokensTable = ({
     
     // If there's an error, return empty array
     if (hasErrors) {
-      console.log("TokensTable - API error detected:", errorData);
       return [];
     }
     
     // If no data yet (loading), return empty array
     if (!tokensData) {
-      console.log("TokensTable - No data available yet");
       return [];
     }
     
     // Use the generateTokenEntries function to process real API data
     const processedEntries = generateTokenEntries(tokensData);
-    console.log("TokensTable - Processed entries:", processedEntries);
     
     return processedEntries;
   };

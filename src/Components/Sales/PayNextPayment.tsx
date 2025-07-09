@@ -66,7 +66,6 @@ const PayNextPayment: React.FC<PayNextPaymentProps> = ({
       });
 
       if (response?.data) {
-        toast.success(`✅ Payment of ₦${formatNumberWithCommas(paymentAmount)} recorded successfully!`);
         onPaymentSuccess();
         onClose();
       }
@@ -78,12 +77,6 @@ const PayNextPayment: React.FC<PayNextPaymentProps> = ({
     } finally {
       setIsProcessingPayment(false);
     }
-  };
-
-  const handleOnlinePayment = () => {
-    // For now, just show a message that online payment will be implemented
-    toast.info("Online payment for next payment will be implemented soon.");
-    // TODO: Implement online payment flow
   };
 
   const handlePaymentMethodSubmit = () => {

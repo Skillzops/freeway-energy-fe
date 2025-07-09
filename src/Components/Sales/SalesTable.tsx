@@ -39,7 +39,7 @@ const generateSalesEntries = (data: any): SalesEntries[] => {
           .reduce((sum: number, payment: any) => sum + (payment.amount || 0), 0);
       }
       const balance = totalAmount - paidAmount;
-      
+     
       return {
         no: index + 1,
         saleId: item?.id,
@@ -47,9 +47,9 @@ const generateSalesEntries = (data: any): SalesEntries[] => {
           item?.paymentMode === "ONE_OFF"
             ? "SINGLE DEPOSIT"
             : item?.paymentMode,
-        transactionDate: item?.createdAt,
+        transactionDate: item?.sale?.transactionDate || item?.createdAt,
         customer: customerName,
-        status: item?.sale?.status,
+        status: status,
         amount: totalAmount,
         amountPaid: paidAmount,
         balance: balance,

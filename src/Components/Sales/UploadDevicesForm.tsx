@@ -208,7 +208,7 @@ const UploadDevicesForm = observer(
       
       // Fallback to API call if no client-side data
       const searchParams = new URLSearchParams(newParams);
-      searchParams.set('limit', '1000'); // Ensure we get all devices
+      searchParams.set('limit', '6000'); // Ensure we get all devices
       const endpoint = `/v1/device?${searchParams.toString()}`;
       console.log("Full endpoint:", endpoint); // Debug log
       

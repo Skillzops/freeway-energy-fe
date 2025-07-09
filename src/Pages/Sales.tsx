@@ -137,7 +137,7 @@ const Sales = observer(() => {
     }
 
     try {
-      console.log("Verifying payment with params:", { tx_ref_param, transaction_id });
+      
       
       const response = await apiCall({
         endpoint: "/v1/payment/verify/callback",
@@ -149,22 +149,20 @@ const Sales = observer(() => {
         showToast: false,
       });
 
-      console.log("Payment verification response:", response);
+      
       
       if (response?.data) {
-        console.log("Payment verified successfully");
-        console.log("Full verification response:", response);
-        console.log("Verification response data:", response.data);
+        
         
         // Check what the response contains
         if (response.data.status) {
-          console.log("Verification status:", response.data.status);
+
         }
         if (response.data.saleId) {
-          console.log("Sale ID from verification:", response.data.saleId);
+          
         }
         if (response.data.paymentStatus) {
-          console.log("Payment status from verification:", response.data.paymentStatus);
+          
         }
         
         // Refresh sales data to show updated status
@@ -196,7 +194,7 @@ const Sales = observer(() => {
 
   useEffect(() => {
     if (tx_ref_param && transaction_id) {
-      console.log("Payment verification triggered with:", { tx_ref_param, transaction_id });
+      
       verifyPayment();
     } else if (tx_ref_param || transaction_id) {
       console.warn("Incomplete payment verification params:", { tx_ref_param, transaction_id });

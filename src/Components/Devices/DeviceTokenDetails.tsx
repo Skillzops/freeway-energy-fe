@@ -31,7 +31,7 @@ const DeviceTokenDetails = ({
 
     const duration = parseInt(tokenDuration);
 
-    console.log({duration, tokenDuration})
+
 
     if (isNaN(duration)) {
       setApiError("Please enter a valid number for token duration");
@@ -72,7 +72,7 @@ const DeviceTokenDetails = ({
     try {
       await navigator.clipboard.writeText(token);
       // You might want to add a toast notification here
-      console.log("Token copied to clipboard");
+      
     } catch (error) {
       console.error("Failed to copy token:", error);
     }

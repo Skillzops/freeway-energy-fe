@@ -121,11 +121,7 @@ const GenerateTokens = ({ isOpen, setIsOpen, allDevicesRefresh, formType, isToke
                     tokenDuration: Number(validatedData.tokenDuration)
                 };
                 
-                console.log('Sending API request with:', {
-                    endpoint: `/v1/device/${validatedData.deviceID}/generate-token`,
-                    data: apiData,
-                    selectedDevice: selectedDevice
-                });
+
                 
                 const response = await apiCall({
                     endpoint: `/v1/device/${validatedData.deviceID}/generate-token`,
@@ -135,7 +131,6 @@ const GenerateTokens = ({ isOpen, setIsOpen, allDevicesRefresh, formType, isToke
                 });
 
                 // Store the generated token response with device info
-                console.log('Token generation response:', response);
                 const tokenData = {
                     ...response?.data,
                     deviceSerialNumber: selectedDevice.serialNumber,
@@ -164,7 +159,6 @@ const GenerateTokens = ({ isOpen, setIsOpen, allDevicesRefresh, formType, isToke
                 });
 
                 // Store the batch generation response
-                console.log('Batch token generation response:', response);
                 setGeneratedToken(response?.data || response);
             }
 

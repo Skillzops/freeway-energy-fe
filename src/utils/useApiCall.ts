@@ -76,7 +76,6 @@ export const useApiCall = () => {
       //   setToastShown
       // // );
       // throw error;
-          console.log({error});
     }
   };
 
