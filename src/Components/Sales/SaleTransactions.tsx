@@ -141,7 +141,7 @@ const PaymentSummary: React.FC<PaymentSummaryProps> = ({
               onClick={onPayNextPayment}
               className="mt-2 px-3 py-1 text-xs bg-primaryGradient text-white rounded-md hover:bg-primary-dark transition-colors font-medium"
             >
-              Pay Next - ₦{formatNumberWithCommas(Math.min(remainingBalance, totalAmount * 0.1))}
+              Pay Next - ₦{formatNumberWithCommas(Math.min(remainingBalance, 6000))}
             </button>
           )}
         </div>
@@ -520,7 +520,7 @@ const SaleTransactions = ({
   const getDropdownItems = (paymentStatus: string) => {
     switch (paymentStatus) {
       case "PENDING":
-        return ["Make Payment"];
+        return ["Make Payment", "Pay Next Payment"];
       case "INCOMPLETE":
         return ["Complete Payment"];
       case "COMPLETED":
@@ -575,7 +575,7 @@ const SaleTransactions = ({
           // Set up next payment data with suggested amount
           const suggestedAmount = Math.min(
             paymentSummary.remainingBalance,
-            paymentSummary.totalAmount * 0.1 // 10% of total or remaining balance
+            6000 // Standard ₦6,000 or remaining balance if less
           );
           
           setNextPaymentData({
@@ -658,6 +658,7 @@ const SaleTransactions = ({
             />
           );
         })}
+        
         
         {/* Show message when all payments are completed */}
         {paymentSummary.remainingBalance <= 0 && data?.entries?.length > 0 && (

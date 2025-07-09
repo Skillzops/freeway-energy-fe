@@ -178,7 +178,7 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
     saleId: string,
     amount: number,
     notes: string = "",
-    status: string = "PAID"
+    status: string = "COMPLETED"
   ) => {
     console.log('Recording cash payment with status:', { saleId, amount, notes, status });
 
@@ -209,8 +209,14 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
 
     try {
       if (SaleStore.paymentMethod === "CASH") {
-        // Handle cash payment - create sale with payment included
-        const paymentAmount = SaleStore.paymentDetails?.amount || 0;
+        // Handle cash payment - create sale first, then record payment
+        console.log('Creating sale for cash payment...');
+
+        // Create sale first to get the total amount
+        const { saleId, totalAmount } = await createSale();
+        
+        // For cash payments, use the total amount from the sale
+        const paymentAmount = totalAmount;
         
         // Validate payment amount for cash payments
         if (paymentAmount <= 0) {
@@ -219,13 +225,10 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
         
         const notes = paymentNotes || `Cash payment of ₦${formatNumberWithCommas(paymentAmount)}.`;
         
-        console.log('Creating sale and recording cash payment separately:', { paymentAmount, notes });
+        console.log('Recording cash payment separately:', { saleId, paymentAmount, notes });
 
-        // Create sale first, then record cash payment separately
-        const { saleId, totalAmount } = await createSale();
-        
         // Record cash payment separately
-        await recordCashPayment(saleId, paymentAmount, notes, "PAID");
+        await recordCashPayment(saleId, paymentAmount, notes, "COMPLETED");
 
         // Refresh table data to show updated status
         if (refreshTable) {

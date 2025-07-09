@@ -65,6 +65,9 @@ interface PaymentData {
 
 interface ApiResponse {
   data: {
+    sale?: {
+      id: string | number;
+    };
     paymentData: {
       amount: number;
       tx_ref: string;
@@ -245,9 +248,35 @@ const CreateNewSale = observer(
             setApiError("Error processing payment information. Please try again.");
             return;
           }
+        } else if (validatedData.paymentMethod === "CASH") {
+          console.log("Cash payment - recording payment immediately...");
+          try {
+            // For cash payments, record the payment immediately
+            const saleId = response?.data?.sale?.id;
+            const amount = paymentData?.amount || 0;
+            
+            if (saleId && amount > 0) {
+              await apiCall({
+                endpoint: "/v1/sales/record-cash-payment",
+                method: "post",
+                data: {
+                  saleId: String(saleId),
+                  amount: amount,
+                  status: "COMPLETED",
+                  paymentNote: `Cash payment of ₦${amount}`
+                },
+                successMessage: "Cash payment recorded successfully!",
+              });
+            }
+            
+            resetSaleModalState();
+          } catch (paymentError) {
+            console.error("Error recording cash payment:", paymentError);
+            setApiError("Error recording cash payment. Please try again.");
+            return;
+          }
         } else {
-          console.log("Cash payment or no payment required, closing modal...");
-          // For cash payments or no payment required, just close the modal
+          console.log("No payment required, closing modal...");
           resetSaleModalState();
         }
       } catch (error) {
