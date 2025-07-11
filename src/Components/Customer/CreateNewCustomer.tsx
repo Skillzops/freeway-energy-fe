@@ -293,16 +293,6 @@ const CreateNewCustomer = ({
             stateError={getFieldError("state")}
             lgaError={getFieldError("lga")}
           />
-          <Input
-            type="text"
-            name="installationAddress"
-            label="* Address"
-            value={formData.installationAddress}
-            onChange={handleInputChange}
-            placeholder="Installation address"
-            required={true}
-            errorMessage={getFieldError("installationAddress")}
-          />
           <IdTypeSelect
             value={formData.idType || ""}
             onChange={(selectedValue) => handleSelectChange("idType", selectedValue)}
@@ -336,6 +326,16 @@ const CreateNewCustomer = ({
             placeholder="Home Address"
             required={true}
             errorMessage={getFieldError("location")}
+          />
+          <Input
+            type="text"
+            name="installationAddress"
+            label="* Address"
+            value={formData.installationAddress}
+            onChange={handleInputChange}
+            placeholder="Installation address"
+            required={false}
+            errorMessage={getFieldError("installationAddress")}
           />
           <Input
             type="text"

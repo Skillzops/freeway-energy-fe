@@ -8,6 +8,7 @@ import PaymentModeSelector from "./PaymentModeSelector";
 import { formatNumberWithCommas } from "@/utils/helpers";
 import { NairaSymbol } from "../CardComponents/CardComponent";
 import PayNextPayment from "./PayNextPayment";
+import settingsicon from "../../assets/settings.svg";
 
 type PaymentInfo = {
   id: string;
@@ -60,9 +61,9 @@ const PaymentSummary: React.FC<PaymentSummaryProps> = ({
       <h3 className="text-sm font-bold text-gray-700 mb-2">Payment Progress</h3>
       
       {/* Progress Bar - Based on payment amount */}
-      <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
+      <div className="w-full bg-gray-200 rounded-full h-1 mb-3">
         <div 
-          className={`h-2 rounded-full transition-all duration-300 ${
+          className={`h-1 rounded-full transition-all duration-300 ${
             totalPaid > totalAmount 
               ? "bg-gradient-to-r from-green-500 to-green-600" 
               : "bg-gradient-to-r from-gold to-primary"
@@ -71,9 +72,9 @@ const PaymentSummary: React.FC<PaymentSummaryProps> = ({
         ></div>
         {/* Overpayment indicator */}
         {totalPaid > totalAmount && (
-          <div className="w-full bg-yellow-200 rounded-full h-1 mt-1">
+          <div className="w-full bg-yellow-200 rounded-full h-0.5 mt-1">
             <div 
-              className="bg-yellow-500 h-1 rounded-full"
+              className="bg-yellow-500 h-0.5 rounded-full"
               style={{ width: `${Math.min(((totalPaid - totalAmount) / totalAmount) * 100, 100)}%` }}
             ></div>
           </div>
@@ -104,7 +105,7 @@ const PaymentSummary: React.FC<PaymentSummaryProps> = ({
           <div className="flex items-center justify-center gap-1">
             <NairaSymbol color="#374151" />
             <span className="text-sm font-bold text-gray-700">
-              {formatNumberWithCommas(totalAmount)}
+              {formatNumberWithCommas(totalAmount.toString())}
             </span>
           </div>
         </div>
@@ -115,7 +116,7 @@ const PaymentSummary: React.FC<PaymentSummaryProps> = ({
           <div className="flex items-center justify-center gap-1">
             <NairaSymbol color="#059669" />
             <span className="text-sm font-bold text-green-600">
-              {formatNumberWithCommas(totalPaid)}
+              {formatNumberWithCommas(totalPaid.toString())}
             </span>
           </div>
         </div>
@@ -126,13 +127,13 @@ const PaymentSummary: React.FC<PaymentSummaryProps> = ({
           <div className="flex items-center justify-center gap-1">
             <NairaSymbol color={remainingBalance > 0 ? "#DC2626" : "#059669"} />
             <span className={`text-sm font-bold ${remainingBalance > 0 ? "text-red-600" : "text-green-600"}`}>
-              {remainingBalance > 0 ? formatNumberWithCommas(remainingBalance) : "Fully Paid"}
+              {remainingBalance > 0 ? formatNumberWithCommas(remainingBalance.toString()) : "Fully Paid"}
             </span>
           </div>
           {/* Overpayment Warning */}
           {totalPaid > totalAmount && (
             <div className="mt-1 px-2 py-1 bg-yellow-100 border border-yellow-300 rounded text-xs text-yellow-800">
-              Overpaid: ₦{formatNumberWithCommas(totalPaid - totalAmount)}
+              Overpaid: ₦{formatNumberWithCommas((totalPaid - totalAmount).toString())}
             </div>
           )}
           {/* Pay Next Payment Button - Small button directly under balance */}
@@ -141,7 +142,7 @@ const PaymentSummary: React.FC<PaymentSummaryProps> = ({
               onClick={onPayNextPayment}
               className="mt-2 px-3 py-1 text-xs bg-primaryGradient text-white rounded-md hover:bg-primary-dark transition-colors font-medium"
             >
-              Pay Next - ₦{formatNumberWithCommas(Math.min(remainingBalance, totalAmount * 0.1))}
+              Pay Next - ₦{formatNumberWithCommas(Math.min(remainingBalance, 6000).toString())}
             </button>
           )}
         </div>
@@ -183,6 +184,7 @@ const SaleTransactions = ({
     totalInstallments?: number;
     paymentsMade?: number;
     paymentProgress?: number;
+    miscellaneousCost?: number;
   };
   refreshTable?: () => Promise<any>;
   refreshSingleSale?: () => Promise<any>;
@@ -213,16 +215,20 @@ const SaleTransactions = ({
     let paymentsMade = completedPayments.length;
     const totalInstallments = saleData?.totalInstallments || 0;
     
+    // For installment payments, the progress should be based on the full amount
+    // but we need to handle the display correctly
+    let displayTotalAmount = totalAmount;
+    
     // If the sale is fully paid (totalPaid >= totalAmount), show all installments as completed
     if (totalPaid >= totalAmount && totalInstallments > 0) {
       paymentsMade = totalInstallments;
     }
     
-    const remainingBalance = Math.max(totalAmount - totalPaid, 0);
-    const paymentProgress = totalAmount > 0 ? (totalPaid / totalAmount) * 100 : 0;
+    const remainingBalance = Math.max(displayTotalAmount - totalPaid, 0);
+    const paymentProgress = displayTotalAmount > 0 ? (totalPaid / displayTotalAmount) * 100 : 0;
 
     return {
-      totalAmount,
+      totalAmount: displayTotalAmount,
       totalPaid,
       remainingBalance,
       isInstallment,
@@ -309,71 +315,71 @@ const SaleTransactions = ({
     }
   };
 
-  const handlePayment = useCallback((paymentId: string) => {
-    const selectedPaymentData = data?.paymentInfo?.find(
-      (p) => p.id === paymentId
-    );
+  // const handlePayment = useCallback((paymentId: string) => {
+  //   const selectedPaymentData = data?.paymentInfo?.find(
+  //     (p) => p.id === paymentId
+  //   );
 
-    if (!selectedPaymentData) {
-      setPaymentError("Payment information not found.");
-      return;
-    }
+  //   if (!selectedPaymentData) {
+  //     setPaymentError("Payment information not found.");
+  //     return;
+  //   }
 
-    if (!data.customer.email) {
-      setPaymentError("Customer email is required for payment.");
-      return;
-    }
+  //   if (!data.customer.email) {
+  //     setPaymentError("Customer email is required for payment.");
+  //     return;
+  //   }
 
-    if (!selectedPaymentData.amount || selectedPaymentData.amount <= 0) {
-      setPaymentError("Invalid payment amount.");
-      return;
-    }
+  //   if (!selectedPaymentData.amount || selectedPaymentData.amount <= 0) {
+  //     setPaymentError("Invalid payment amount.");
+  //     return;
+  //   }
 
-    setPaymentError(null);
+  //   setPaymentError(null);
 
-    // Use Flutterwave hook with configuration
-    const handleFlutterPayment = useFlutterwave({
-      public_key,
-      tx_ref: selectedPaymentData.transactionRef,
-      amount: selectedPaymentData.amount,
-      currency: "NGN",
-      redirect_url: `${window.location.origin}/sales`,
-      payment_options: "banktransfer, card, ussd, account",
-      customer: {
-        email: data.customer.email,
-        name: data.customer.name,
-        phone_number: data.customer.phone_number,
-      },
-      customizations: {
-        title: "Product Purchase",
-        description: `Payment for sale ${selectedPaymentData.saleId}`,
-        logo: "https://res.cloudinary.com/bluebberies/image/upload/v1726242207/Screenshot_2024-09-04_at_2.43.01_PM_fcjlf3.png",
-      },
-      meta: {
-        saleId: selectedPaymentData.saleId,
-      },
-    });
+  //   // Use Flutterwave hook with configuration
+  //   const handleFlutterPayment = useFlutterwave({
+  //     public_key,
+  //     tx_ref: selectedPaymentData.transactionRef,
+  //     amount: selectedPaymentData.amount,
+  //     currency: "NGN",
+  //     redirect_url: `${window.location.origin}/sales`,
+  //     payment_options: "banktransfer, card, ussd, account",
+  //     customer: {
+  //       email: data.customer.email,
+  //       name: data.customer.name,
+  //       phone_number: data.customer.phone_number,
+  //     },
+  //     customizations: {
+  //       title: "Product Purchase",
+  //       description: `Payment for sale ${selectedPaymentData.saleId}`,
+  //       logo: "https://res.cloudinary.com/bluebberies/image/upload/v1726242207/Screenshot_2024-09-04_at_2.43.01_PM_fcjlf3.png",
+  //     },
+  //     meta: {
+  //       saleId: selectedPaymentData.saleId,
+  //     },
+  //   });
 
-    handleFlutterPayment({
-      callback: async (response: any) => {
+  //   handleFlutterPayment({
+  //     callback: async (response: any) => {
 
         
-        if (response.status === "successful") {
-          // Pass both tx_ref and transaction_id for verification
-          const isVerified = await verifyPayment(response.tx_ref, response.transaction_id);
-          if (!isVerified) {
-            setPaymentError("Payment completed but verification failed. Please contact support with reference: " + response.tx_ref);
-          }
-        } else {
-          toast.error("Payment failed. Please try again.");
-          setPaymentError("Payment was not successful. Please try again.");
-        }
-      },
-      onClose: () => {
-        toast.info("Payment was cancelled");
-      },
-    });
-  }, [data, verifyPayment]);
+  //       if (response.status === "successful") {
+  //         // Pass both tx_ref and transaction_id for verification
+  //         const isVerified = await verifyPayment(response.tx_ref, response.transaction_id);
+  //         if (!isVerified) {
+  //           setPaymentError("Payment completed but verification failed. Please contact support with reference: " + response.tx_ref);
+  //         }
+  //       } else {
+  //         toast.error("Payment failed. Please try again.");
+  //         setPaymentError("Payment was not successful. Please try again.");
+  //       }
+  //     },
+  //     onClose: () => {
+  //       toast.info("Payment was cancelled");
+  //     },
+  //   });
+  // }, [data, verifyPayment]);
 
   const handleCompletePayment = async (paymentId: string) => {
     const selectedPaymentData = data?.paymentInfo?.find(
@@ -470,13 +476,13 @@ const SaleTransactions = ({
           paymentMethod: "CASH",
           amount: paymentAmount,
           status: "COMPLETED", // Mark this individual payment as completed
-          paymentNote: `Cash payment of ₦${formatNumberWithCommas(paymentAmount)}`
+          paymentNote: `Cash payment of ₦${formatNumberWithCommas(paymentAmount.toString())}`
         },
-        successMessage: `✅ Payment of ₦${formatNumberWithCommas(paymentAmount)} recorded successfully!`,
+        successMessage: `✅ Payment of ₦${formatNumberWithCommas(paymentAmount.toString())} recorded successfully!`,
       });
 
       if (response?.data) {
-        toast.success(`✅ Payment of ₦${formatNumberWithCommas(paymentAmount)} recorded successfully!`);
+        toast.success(`✅ Payment of ₦${formatNumberWithCommas(paymentAmount.toString())} recorded successfully!`);
         setShowPaymentSelector(false);
         setSelectedPaymentId(null);
         
@@ -498,7 +504,7 @@ const SaleTransactions = ({
     }
   };
 
-  const handleOnlinePayment = () => {
+  const handleOnlinePayment = (paymentId: string) => {
     if (!selectedPaymentId) {
       setPaymentError("Payment information missing.");
       return;
@@ -506,21 +512,21 @@ const SaleTransactions = ({
 
     // Close the payment selector and trigger online payment
     setShowPaymentSelector(false);
-    handlePayment(selectedPaymentId);
+    handleOnlinePayment(paymentId);
   };
 
   const handlePaymentMethodSubmit = () => {
     if (paymentMethod === "CASH") {
       handleCashPayment();
     } else {
-      handleOnlinePayment();
+      handleOnlinePayment(selectedPaymentId);
     }
   };
 
   const getDropdownItems = (paymentStatus: string) => {
     switch (paymentStatus) {
       case "PENDING":
-        return ["Make Payment"];
+        return ["Make Payment", "Pay Next Payment"];
       case "INCOMPLETE":
         return ["Complete Payment"];
       case "COMPLETED":
@@ -540,7 +546,7 @@ const SaleTransactions = ({
 
       switch (action) {
         case "Make Payment":
-          handlePayment(cardData?.productId);
+          handleOnlinePayment(cardData?.productId);
           break;
         case "Complete Payment":
           handleCompletePayment(cardData?.productId);
@@ -575,7 +581,7 @@ const SaleTransactions = ({
           // Set up next payment data with suggested amount
           const suggestedAmount = Math.min(
             paymentSummary.remainingBalance,
-            paymentSummary.totalAmount * 0.1 // 10% of total or remaining balance
+            6000 // Standard ₦6,000 or remaining balance if less
           );
           
           setNextPaymentData({
@@ -598,7 +604,7 @@ const SaleTransactions = ({
                   <span className="text-gray-600">Remaining Balance:</span>
                   <div className="flex items-center gap-1 font-semibold text-dark-700">
                     <NairaSymbol />
-                    <span>{formatNumberWithCommas(paymentSummary.remainingBalance)}</span>
+                    <span>{formatNumberWithCommas(paymentSummary.remainingBalance.toString())}</span>
                   </div>
                 </div>
               </div>
@@ -640,6 +646,22 @@ const SaleTransactions = ({
         </div>
       )}
 
+      {/* Miscellaneous Cost Display - match installation details style */}
+      <div className="w-full mt-2">
+        <p className="flex gap-1 w-max text-textLightGrey text-xs font-medium pb-2">
+          <img src={settingsicon} alt="Settings Icon" /> MISCELLANEOUS COST
+        </p>  
+        <div className="flex flex-col p-2.5 gap-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px]">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-textDarkGrey">Total Miscellaneous Cost</span>
+            <span className="text-xs font-bold text-textDarkGrey flex items-center gap-1">
+              <NairaSymbol />
+              {formatNumberWithCommas(saleData?.miscellaneousCost ?? 0)}
+            </span>
+          </div>
+        </div>
+      </div>
+      {/* Transaction Cards */}
       <div className="flex flex-wrap items-center gap-4">
         {data?.entries?.map((item, index) => {
           return (
@@ -658,6 +680,7 @@ const SaleTransactions = ({
             />
           );
         })}
+        
         
         {/* Show message when all payments are completed */}
         {paymentSummary.remainingBalance <= 0 && data?.entries?.length > 0 && (

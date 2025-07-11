@@ -26,14 +26,12 @@ import {
 import { revalidateStore } from "@/utils/helpers";
 import SalesSummary from "./SalesSummary";
 import ApiErrorMessage from "../ApiErrorMessage";
-import { FlutterwaveConfig } from "flutterwave-react-v3/dist/types";
 import { toJS } from "mobx";
 import axios from "axios";
 
 const public_key =
   import.meta.env.VITE_FLW_PUBLIC_KEY ||
   "FLWPUBK_TEST-720d3bd8434091e9b28a01452ebdd2e0-X";
-const base_url = import.meta.env.VITE_API_BASE_URL;
 
 type CreateSalesType = {
   isOpen: boolean;
@@ -53,29 +51,7 @@ export type ExtraInfoType =
   | "guarantor"
   | "";
 
-interface PaymentData {
-  amount: number;
-  tx_ref: string;
-  saleId: string;
-  customer: {
-    email: string;
-    name: string;
-  };
-}
 
-interface ApiResponse {
-  data: {
-    paymentData: {
-      amount: number;
-      tx_ref: string;
-      saleId: string;
-      customer: {
-        name: string;
-        email: string;
-      };
-    };
-  };
-}
 
 const CreateNewSale = observer(
   ({ isOpen, setIsOpen, allSalesRefresh }: CreateSalesType) => {
@@ -167,56 +143,28 @@ const CreateNewSale = observer(
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       setLoading(true);
-      console.log(payload);
 
       try {
         // Step 1: Validate data
         const validatedData = formSchema.parse(payload);
 
-        // Step 2: API call
-        console.log("Sending payload to API:", getPayload());
-        const response = await apiCall({
-          endpoint: "/v1/sales/create",
-          method: "post",
-          data: getPayload(),
-          successMessage: "Sale created successfully!",
-        }) as ApiResponse;
-
-        // Step 3: Refresh sales list
-        await allSalesRefresh();
-
-        console.log("Step 4: Processing payment information...");
-        console.log("API Response:", response);
-        console.log("Response data:", response?.data);
-        
-        // Step 4: Handle save payment information
-        const paymentData = response?.data?.paymentData;
-        console.log("Payment data extracted:", paymentData);
-        
-        console.log("Public key check:", { public_key, exists: !!public_key });
-        
-        if (!public_key) {
-          console.error("Flutterwave public key not configured");
-          setApiError("Payment system configuration error. Please contact support.");
-          return;
-        }
-        
+        // Step 2: Store payment details for SalesSummary
         console.log("Creating payment data object...");
         const newPaymentData = {
           publicKey: public_key,
-          email: SaleStore?.customer?.email || paymentData?.customer?.email || "",
-          amount: paymentData?.amount || 0,
+          email: SaleStore?.customer?.email || "",
+          amount: 0, // Will be calculated in SalesSummary
           currency: "NGN",
-          reference: paymentData?.tx_ref || `sale_${Date.now()}`,
+          reference: `sale_${Date.now()}`,
           metadata: {
-            saleId: paymentData?.saleId || "",
+            saleId: "",
             customerName: SaleStore.customer?.customerName || "",
             phoneNumber: SaleStore?.customer?.phone || "",
-            tx_ref: paymentData?.tx_ref || `sale_${Date.now()}`,
+            tx_ref: `sale_${Date.now()}`,
             payment_options: "card,banktransfer,ussd",
             customer: {
-              email: SaleStore?.customer?.email || paymentData?.customer?.email || "",
-              name: SaleStore.customer?.customerName || paymentData?.customer?.name || "",
+              email: SaleStore?.customer?.email || "",
+              name: SaleStore.customer?.customerName || "",
               phone_number: SaleStore?.customer?.phone || "",
             },
             customizations: {
@@ -231,33 +179,26 @@ const CreateNewSale = observer(
         };
         
         console.log("Payment data created:", newPaymentData);
-        console.log("Payment amount check:", { amount: paymentData?.amount, hasAmount: paymentData?.amount && paymentData?.amount > 0 });
         
-        if (paymentData?.amount && paymentData?.amount > 0 && validatedData.paymentMethod === "ONLINE") {
-          console.log("Adding payment details to store and setting summary state...");
-          try {
-            SaleStore.addPaymentDetails(newPaymentData);
-            console.log("Payment details added to store successfully");
-            setSummaryState(true);
-            console.log("Summary state set to true successfully");
-          } catch (storeError) {
-            console.error("Error in store operations:", storeError);
-            setApiError("Error processing payment information. Please try again.");
-            return;
-          }
-        } else {
-          console.log("Cash payment or no payment required, closing modal...");
-          // For cash payments or no payment required, just close the modal
-          resetSaleModalState();
+        // Step 3: Add payment details to store and go to summary
+        try {
+          SaleStore.addPaymentDetails(newPaymentData);
+          console.log("Payment details added to store successfully");
+          setSummaryState(true);
+          console.log("Summary state set to true successfully");
+        } catch (storeError) {
+          console.error("Error in store operations:", storeError);
+          setApiError("Error processing payment information. Please try again.");
+          return;
         }
       } catch (error) {
         if (error instanceof z.ZodError) {
           setFormErrors(error.issues);
         } else if (axios.isAxiosError(error)) {
-          const message = error.response?.data?.message || "Sale Creation Failed: Internal Server Error";
+          const message = error.response?.data?.message || "Form validation failed. Please check your inputs.";
           setApiError(message);
         } else {
-          setApiError("Sale Creation Failed: Internal Server Error");
+          setApiError("Form validation failed. Please check your inputs.");
         }
       } finally {
         setLoading(false);
