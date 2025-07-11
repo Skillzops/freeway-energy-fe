@@ -49,7 +49,7 @@ const generateSalesEntries = (data: any): SalesEntries[] => {
             : item?.paymentMode,
         transactionDate: item?.sale?.transactionDate || item?.createdAt,
         customer: customerName,
-        status: status,
+        status: item?.sale.status,
         amount: totalAmount,
         amountPaid: paidAmount,
         balance: balance,
