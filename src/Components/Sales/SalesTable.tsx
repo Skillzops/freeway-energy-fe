@@ -39,6 +39,12 @@ const generateSalesEntries = (data: any): SalesEntries[] => {
           .reduce((sum: number, payment: any) => sum + (payment.amount || 0), 0);
       }
       const balance = totalAmount - paidAmount;
+      
+      // Auto-update status to COMPLETED when total amount equals amount paid
+      let status = item?.sale?.status;
+      if (totalAmount > 0 && paidAmount >= totalAmount) {
+        status = "COMPLETED";
+      }
      
       return {
         no: index + 1,
