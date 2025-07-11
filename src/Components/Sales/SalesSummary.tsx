@@ -72,8 +72,6 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
 
   const paymentInfo = SaleStore.paymentDetails;
 
-  // Remove old unused Flutterwave config code
-
   // Helper function to determine if payment is installment
   const isInstallmentPayment = useCallback(() => {
     return SaleStore.products.some(item => {
@@ -82,14 +80,7 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
     });
   }, []);
 
-  // Helper function to get success message
-  const getSuccessMessage = useCallback((paymentAmount: number, totalAmount: number) => {
-    const isInstallment = isInstallmentPayment();
-    const isPartialPayment = paymentAmount < totalAmount;
-    return (isInstallment || isPartialPayment) ? 
-      "Initial payment recorded successfully!" : 
-      "Payment completed successfully!";
-  }, [isInstallmentPayment]);
+
 
   // Helper function to calculate total initial deposit (including miscellaneous costs)
   const getTotalInitialDeposit = useCallback(() => {
@@ -129,6 +120,12 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
 
     console.log('Creating sale with payload:', freshPayload);
     console.log('Payment method in payload:', freshPayload.paymentMethod);
+    console.log('=== Payment Amount Debug ===');
+    console.log('isInstallmentPayment():', isInstallmentPayment());
+    console.log('getTotalInitialDeposit():', getTotalInitialDeposit());
+    console.log('SaleStore.getTotal():', SaleStore.getTotal());
+    console.log('Amount being sent to backend:', isInstallmentPayment() ? getTotalInitialDeposit() : SaleStore.getTotal());
+    console.log('=== End Payment Amount Debug ===');
 
     const saleResponse = await apiCall({
       endpoint: "/v1/sales/create",
@@ -173,14 +170,11 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
     };
   };
 
-  // Record cash payment for existing sale with status
-  const recordCashPayment = async (
-    saleId: string,
-    amount: number,
-    notes: string = "",
-    status: string = "COMPLETED"
-  ) => {
-    console.log('Recording cash payment with status:', { saleId, amount, notes, status });
+
+
+  // Record cash payment for existing sale
+  const recordCashPayment = async (saleId: string, amount: number, notes: string = "") => {
+    console.log('Recording cash payment:', { saleId, amount, notes });
 
     const paymentResponse = await apiCall({
       endpoint: "/v1/sales/record-cash-payment",
@@ -189,16 +183,14 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
         saleId,
         amount,
         notes,
-        status
+        status: "COMPLETED" // Always use COMPLETED for cash payments
       },
-      successMessage: "Cash payment recorded successfully!",
+      successMessage: "", // Remove duplicate success message
     });
 
     console.log('Cash payment record response:', paymentResponse);
     return paymentResponse;
   };
-
-
 
 
 
@@ -209,27 +201,15 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
 
     try {
       if (SaleStore.paymentMethod === "CASH") {
-        // Handle cash payment - create sale first, then record payment
+        // Step 1: Create the sale first (will be PENDING)
         console.log('Creating sale for cash payment...');
-
-        // Create sale first to get the total amount
         const { saleId, totalAmount } = await createSale();
         
-        // For cash payments, use the total amount from the sale
-        const paymentAmount = totalAmount;
+        // Step 2: Record cash payment with COMPLETED status
+        console.log('Recording cash payment...');
+        const notes = paymentNotes || `Cash payment of ₦${formatNumberWithCommas(totalAmount)}`;
+        await recordCashPayment(saleId, totalAmount, notes);
         
-        // Validate payment amount for cash payments
-        if (paymentAmount <= 0) {
-          throw new Error("Please enter a valid payment amount for cash payment.");
-        }
-        
-        const notes = paymentNotes || `Cash payment of ₦${formatNumberWithCommas(paymentAmount)}.`;
-        
-        console.log('Recording cash payment separately:', { saleId, paymentAmount, notes });
-
-        // Record cash payment separately
-        await recordCashPayment(saleId, paymentAmount, notes, "COMPLETED");
-
         // Refresh table data to show updated status
         if (refreshTable) {
           try {
@@ -241,16 +221,18 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
           }
         }
 
-        toast.success(getSuccessMessage(paymentAmount, totalAmount));
+        toast.success("Cash payment completed successfully!");
         resetSaleModalState();
       } else {
-        // Handle online payment with Flutterwave (EXACTLY like SaleTransactions)
+        // Handle online payment with Flutterwave
         if (!SaleStore.customer?.email) {
           throw new Error("Customer email is required for online payment. Please update customer details.");
         }
 
-        // First create the sale
+        // Create sale first for online payments
+        console.log('Creating sale for online payment...');
         const { saleId, totalAmount, tx_ref } = await createSale();
+        
         const paymentAmount = totalAmount;
         
         console.log('Initiating Flutterwave payment:', { saleId, paymentAmount, tx_ref });
@@ -499,9 +481,9 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
               SaleStore.setPaymentMethod(value as "CASH" | "ONLINE");
             }}
             saleId={SaleStore.paymentDetails?.metadata?.saleId}
-            amount={SaleStore.paymentDetails?.amount}
+            // Use initial deposit for installment, otherwise use total
+            amount={isInstallmentPayment() ? getTotalInitialDeposit() : SaleStore.getTotal()}
             onAmountChange={(newAmount) => {
-              // Update the payment amount in the store
               if (SaleStore.paymentDetails) {
                 SaleStore.paymentDetails.amount = newAmount;
               }
