@@ -5,6 +5,13 @@ import PaymentModeSelector from "./PaymentModeSelector";
 import { formatNumberWithCommas } from "@/utils/helpers";
 import { NairaSymbol } from "../CardComponents/CardComponent";
 
+interface PaymentVerificationResponse {
+  status?: string;
+  message?: string;
+  jobId?: string;
+  paymentStatus?: "PENDING" | "INCOMPLETE" | "COMPLETED"
+}
+
 interface PayNextPaymentProps {
   isOpen: boolean;
   onClose: () => void;

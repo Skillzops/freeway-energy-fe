@@ -136,17 +136,25 @@ const SalesDetailsModal = ({
     
     if (!sale) return undefined;
     
+    // Calculate total miscellaneous costs from the sale item
+    const miscellaneousCost = saleData?.miscellaneousPrices ? 
+      Object.values(saleData.miscellaneousPrices).reduce((sum: number, cost: any) => sum + (Number(cost) || 0), 0) : 0;
+    
+    // Calculate the correct total price (should include miscellaneous costs like in SalesSummary)
+    const baseTotalPrice = sale.totalPrice || 0;
+    const correctTotalPrice = baseTotalPrice + miscellaneousCost;
+    
     return {
-      totalPrice: sale.totalPrice || 0,
+      totalPrice: correctTotalPrice,
       totalPaid: sale.totalPaid || 0,
       paymentMode: saleData.paymentMode || "",
       totalInstallments:
         saleData.installmentDuration || sale.totalInstallmentDuration || 0,
-      remainingInstallments:
-        saleData.remainingInstallments || 0,
+      remainingInstallments: saleData.remainingInstallments || 0,
       paymentsMade:
         sale.payment?.filter((p: any) => p.paymentStatus === "COMPLETED")
           .length || 0,
+      miscellaneousCost: miscellaneousCost,
     };
   };
 
