@@ -59,7 +59,7 @@ const SalesDetailsModal = ({
 }) => {
   const [tabContent, setTabContent] = useState<string>("details");
 
-  const fetchSingleSale = useGetRequest(`/v1/sales/${salesID}`, false);
+  const fetchSingleSale = useGetRequest(`/v1/sales/${salesID}`, true);
 
   const fetchProductCategories = useGetRequest(
     `/v1/products/categories/all`,
@@ -150,7 +150,8 @@ const SalesDetailsModal = ({
       paymentMode: saleData.paymentMode || "",
       totalInstallments:
         saleData.installmentDuration || sale.totalInstallmentDuration || 0,
-      remainingInstallments: saleData.remainingInstallments || 0,
+      remainingInstallments:
+        saleData.remainingInstallments || sale.remainingInstallments || 0,
       paymentsMade:
         sale.payment?.filter((p: any) => p.paymentStatus === "COMPLETED")
           .length || 0,
