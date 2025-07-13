@@ -140,8 +140,13 @@ const SalesDetailsModal = ({
       totalPrice: sale.totalPrice || 0,
       totalPaid: sale.totalPaid || 0,
       paymentMode: saleData.paymentMode || "",
-      totalInstallments: saleData.installmentDuration || sale.totalInstallmentDuration || 0,
-      paymentsMade: sale.payment?.filter((p: any) => p.paymentStatus === "COMPLETED").length || 0,
+      totalInstallments:
+        saleData.installmentDuration || sale.totalInstallmentDuration || 0,
+      remainingInstallments:
+        saleData.remainingInstallments || 0,
+      paymentsMade:
+        sale.payment?.filter((p: any) => p.paymentStatus === "COMPLETED")
+          .length || 0,
     };
   };
 
