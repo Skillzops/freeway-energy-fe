@@ -142,11 +142,13 @@ const SalesDetailsModal = ({
     
     // Calculate the correct total price (should include miscellaneous costs like in SalesSummary)
     const baseTotalPrice = sale.totalPrice || 0;
-    const correctTotalPrice = baseTotalPrice + miscellaneousCost;
+    // const correctTotalPrice = baseTotalPrice + miscellaneousCost;
+    const correctTotalPrice = baseTotalPrice;
     
     return {
       totalPrice: correctTotalPrice,
-      totalPaid: sale.totalPaid || 0,
+      // totalPaid: sale.totalPaid || 0,
+      totalPaid: Math.max(0, sale.totalPaid - sale.totalMiscellaneousPrice),
       paymentMode: saleData.paymentMode || "",
       totalInstallments:
         saleData.installmentDuration || sale.totalInstallmentDuration || 0,

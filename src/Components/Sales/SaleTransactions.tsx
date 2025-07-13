@@ -121,7 +121,7 @@ const PaymentSummary: React.FC<PaymentSummaryProps> = ({
 
         {/* Amount Paid */}
         <div className="text-center">
-          <p className="text-xs text-gray-500 mb-1">Amount Paid</p>
+          <p className="text-xs text-gray-500 mb-1">Installment Amount Paid</p>
           <div className="flex items-center justify-center gap-1">
             <NairaSymbol color="#059669" />
             <span className="text-sm font-bold text-green-600">
@@ -228,10 +228,11 @@ const SaleTransactions = ({
       data?.paymentInfo?.filter(
         (payment) => payment.paymentStatus === "COMPLETED"
       ) || [];
-    const totalPaid = completedPayments.reduce(
-      (sum, payment) => sum + payment.amount,
-      0
-    );
+    const totalPaid = saleData?.totalPaid || 0;
+    // const totalPaid = completedPayments.reduce(
+    //   (sum, payment) => sum + payment.amount,
+    //   0
+    // );
 
     // Calculate payments made - if fully paid, show total installments, otherwise show actual completed payments
     let paymentsMade = completedPayments.length;
@@ -241,7 +242,7 @@ const SaleTransactions = ({
     
     // For installment payments, the progress should be based on the full amount
     // but we need to handle the display correctly
-    let displayTotalAmount = totalAmount;
+    const displayTotalAmount = totalAmount;
     
     // If the sale is fully paid (totalPaid >= totalAmount), show all installments as completed
     if (totalPaid >= totalAmount && totalInstallments > 0) {
