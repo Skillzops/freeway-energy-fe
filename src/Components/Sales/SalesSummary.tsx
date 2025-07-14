@@ -209,7 +209,7 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
         console.log('Recording cash payment...');
         const notes = paymentNotes || `Cash payment of ₦${formatNumberWithCommas(totalAmount)}`;
         await recordCashPayment(saleId, totalAmount, notes);
-        
+
         // Refresh table data to show updated status
         if (refreshTable) {
           try {
@@ -385,12 +385,6 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
           </div>
           {SaleStore.products.map((item, index) => {
             const params = SaleStore.getParametersByProductId(item?.productId);
-            const paramList = [
-              "Payment Mode",
-              "Number of Installments",
-              "Initial Deposit",
-              "Discount",
-            ];
             const recipient = SaleStore.getRecipientByProductId(
               item?.productId
             );
@@ -427,23 +421,29 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
                 />
 
                 <div className="flex flex-col w-full gap-2 bg-[#F9F9F9] p-3 border-[0.6px] border-strokeGreyThree rounded-[20px]">
-                  {Object.entries(params || {}).map(([key, value], paramIndex) =>
-                    !value ? null : (
+                  {/* Show parameters based on payment mode */}
+                  <ProductDetailRow
+                    label="Payment Mode"
+                    value={params?.paymentMode === "ONE_OFF" ? "Single Deposit" : "Installment"}
+                  />
+                  {params?.paymentMode === "INSTALLMENT" && (
+                    <>
                       <ProductDetailRow
-                        key={key}
-                        label={paramList[paramIndex]}
-                        value={
-                          paramList[paramIndex] === "Discount"
-                            ? `${value}%`
-                            : paramList[paramIndex] === "Initial Deposit"
-                              ? formatNumberWithCommas(value)
-                              : typeof value === 'number' && value >= 1
-                                ? formatNumberWithCommas(value)
-                                : value
-                        }
-                        showNaira={paramList[paramIndex] === "Initial Deposit"}
+                        label="Number of Installments"
+                        value={formatNumberWithCommas(params?.installmentDuration)}
                       />
-                    )
+                      <ProductDetailRow
+                        label="Initial Deposit"
+                        value={formatNumberWithCommas(params?.installmentStartingPrice)}
+                        showNaira={true}
+                      />
+                    </>
+                  )}
+                  {(params?.discount || 0) > 0 && (
+                    <ProductDetailRow
+                      label="Discount"
+                      value={`${params?.discount}%`}
+                    />
                   )}
                 </div>
 

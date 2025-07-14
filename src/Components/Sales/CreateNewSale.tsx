@@ -181,15 +181,15 @@ const CreateNewSale = observer(
         console.log("Payment data created:", newPaymentData);
         
         // Step 3: Add payment details to store and go to summary
-        try {
-          SaleStore.addPaymentDetails(newPaymentData);
-          console.log("Payment details added to store successfully");
-          setSummaryState(true);
-          console.log("Summary state set to true successfully");
-        } catch (storeError) {
-          console.error("Error in store operations:", storeError);
-          setApiError("Error processing payment information. Please try again.");
-          return;
+          try {
+            SaleStore.addPaymentDetails(newPaymentData);
+            console.log("Payment details added to store successfully");
+            setSummaryState(true);
+            console.log("Summary state set to true successfully");
+          } catch (storeError) {
+            console.error("Error in store operations:", storeError);
+            setApiError("Error processing payment information. Please try again.");
+            return;
         }
       } catch (error) {
         if (error instanceof z.ZodError) {
