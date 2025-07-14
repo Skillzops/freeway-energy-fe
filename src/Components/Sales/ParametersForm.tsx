@@ -89,30 +89,19 @@ const ParametersForm = ({
     }
   })();
 
-  // Calculate installment amount when relevant fields change
+  // Keep initial payment as default ₦6,000 when switching to installment mode
   useEffect(() => {
-    if (formData.paymentMode === "INSTALLMENT" && 
-        formData.installmentDuration && 
-        formData.installmentDuration > 0) {
-      
-      // Only auto-calculate if the user hasn't manually set a custom initial payment
-      // or if this is the first time setting installment duration
+    if (formData.paymentMode === "INSTALLMENT") {
+      // Only set default if no value is currently set
       const currentInitialPayment = SaleStore.getParametersByProductId(currentProductId)?.installmentStartingPrice;
       if (!currentInitialPayment || currentInitialPayment === 0) {
-        const calculatedAmount = calculateInstallmentAmount(
-          productPrice,
-          formData.discount || 0,
-          totalMiscellaneousCosts,
-          formData.installmentDuration
-        );
-        
         setFormData(prev => ({
           ...prev,
-          installmentStartingPrice: calculatedAmount
+          installmentStartingPrice: 6000 // Fixed default initial payment - users can modify this
         }));
       }
     }
-  }, [formData.paymentMode, formData.installmentDuration, formData.discount, productPrice, totalMiscellaneousCosts, currentProductId]);
+  }, [formData.paymentMode, currentProductId]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
