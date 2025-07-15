@@ -54,6 +54,7 @@ const CustomerModal = ({
       type: data?.type || "",
       passportPhotoUrl: data?.passportPhotoUrl || "",
       idImageUrl: data?.idImageUrl || "",
+      contractFormImageUrl: data?.contractFormImageUrl || "",
     };
   };
 

@@ -443,7 +443,7 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
                     <ProductDetailRow
                       label="Discount"
                       value={`${params?.discount}%`}
-                    />
+                      />
                   )}
                 </div>
 

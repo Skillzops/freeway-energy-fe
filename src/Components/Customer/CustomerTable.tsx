@@ -79,6 +79,7 @@ export type CustomerType = {
   role: Role;
   passportPhotoUrl?: string;
   idImageUrl?: string;
+  contractFormImageUrl?: string;
 };
 
 // Helper function to map the API data to the desired format
