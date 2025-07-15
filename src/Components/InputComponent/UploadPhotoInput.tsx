@@ -17,7 +17,7 @@ export const UploadPhotoInput: React.FC<UploadPhotoInputProps> = ({
   onChange,
   errorMessage,
   required = false,
-  accept = "image/*",
+  accept = ".jpeg,.jpg,.png,.svg",
   maxSizeInMB = 5,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -25,10 +25,21 @@ export const UploadPhotoInput: React.FC<UploadPhotoInputProps> = ({
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+    
+    // Check file size
     if (file.size > maxSizeInMB * 1024 * 1024) {
       alert(`File size must be less than ${maxSizeInMB}MB`);
       return;
     }
+    
+    // Check file extension to match backend validation
+    const allowedExtensions = ['jpeg', 'jpg', 'png', 'svg'];
+    const fileExtension = file.name.toLowerCase().split('.').pop();
+    if (!fileExtension || !allowedExtensions.includes(fileExtension)) {
+      alert(`File type not supported. Please use files with extensions: ${allowedExtensions.join(', ')}`);
+      return;
+    }
+    
     onChange(file);
   };
 

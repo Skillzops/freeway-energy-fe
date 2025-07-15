@@ -32,6 +32,7 @@ export type DetailsType = {
   type?: string;
   passportPhotoUrl?: string;
   idImageUrl?: string;
+  contractFormImageUrl?: string;
 };
 
 interface CustomerDetailsProps extends DetailsType {
@@ -73,9 +74,11 @@ const CustomerDetails = ({
     type: data.type || "",
     passportPhotoUrl: data.passportPhotoUrl || "",
     idImageUrl: data.idImageUrl || "",
+    contractFormImageUrl: data.contractFormImageUrl || "",
   });
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [idImageFile, setIdImageFile] = useState<File | null>(null);
+  const [contractFile, setContractFile] = useState<File | null>(null);
   const [selectedImage, setSelectedImage] = useState<{ url: string; title: string } | null>(null);
   const [showImageModal, setShowImageModal] = useState<boolean>(false);
 
@@ -83,6 +86,7 @@ const CustomerDetails = ({
   useEffect(() => {
     setPhotoFile(null);
     setIdImageFile(null);
+    setContractFile(null);
     setSelectedImage(null);
     setShowImageModal(false);
     setApiError(""); // Clear any previous errors
@@ -108,8 +112,9 @@ const CustomerDetails = ({
       type: data.type || "",
       passportPhotoUrl: data.passportPhotoUrl || "",
       idImageUrl: data.idImageUrl || "",
+      contractFormImageUrl: data.contractFormImageUrl || "",
     });
-  }, [data.customerId || data.id, data.firstname, data.lastname, data.email, data.phoneNumber, data.phone, data.alternatePhone, data.gender, data.addressType, data.installationAddress, data.lga, data.state, data.location, data.longitude, data.latitude, data.idType, data.idNumber, data.type, data.passportPhotoUrl, data.idImageUrl]);
+  }, [data.customerId || data.id, data.firstname, data.lastname, data.email, data.phoneNumber, data.phone, data.alternatePhone, data.gender, data.addressType, data.installationAddress, data.lga, data.state, data.location, data.longitude, data.latitude, data.idType, data.idNumber, data.type, data.passportPhotoUrl, data.idImageUrl, data.contractFormImageUrl]);
 
   // Cleanup object URLs on unmount
   useEffect(() => {
@@ -120,8 +125,11 @@ const CustomerDetails = ({
       if (idImageFile) {
         URL.revokeObjectURL(URL.createObjectURL(idImageFile));
       }
+      if (contractFile) { 
+        URL.revokeObjectURL(URL.createObjectURL(contractFile));
+      }
     };
-  }, [photoFile, idImageFile]);
+  }, [photoFile, idImageFile, contractFile]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -152,6 +160,11 @@ const CustomerDetails = ({
     setApiError("");
   };
 
+  const handleContractFileChange = (file: File | null) => {
+    setContractFile(file);
+    setApiError("");
+  };
+
   const handleViewImage = (url: string, title: string) => {
     setSelectedImage({ url, title });
     setShowImageModal(true);
@@ -165,7 +178,7 @@ const CustomerDetails = ({
     try {
       const formDataToSend = new FormData();
       Object.entries(formData).forEach(([key, value]) => {
-        if (value !== undefined && value !== "" && key !== "passportPhotoUrl" && key !== "idImageUrl") {
+        if (value !== undefined && value !== "" && key !== "passportPhotoUrl" && key !== "idImageUrl" && key !== "contractFormImageUrl") {
           formDataToSend.append(key, value);
         }
       });
@@ -176,6 +189,10 @@ const CustomerDetails = ({
 
       if (idImageFile) {
         formDataToSend.append("idImage", idImageFile);
+      }
+
+      if (contractFile) {
+        formDataToSend.append("contractFormImage", contractFile);
       }
 
       await apiCall({
@@ -334,6 +351,8 @@ const CustomerDetails = ({
         </div>
       </div>
 
+      
+
       {/* Other Details Section */}
       <div className="flex flex-col p-2.5 gap-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px]">
         <p className="flex gap-1 w-max text-textLightGrey text-xs font-medium pb-2">
@@ -423,6 +442,78 @@ const CustomerDetails = ({
                   onClick={() => handleViewImage(data.idImageUrl!, "ID Image")}
                   className="px-2 py-1 text-xs bg-primaryGradient text-white rounded-full hover:bg-primaryGradient/80 transition-colors"
                   title="View ID Image"
+                >
+                  View
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Contract Details Section */}
+      <div className="flex flex-col p-2.5 gap-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px]">
+        <p className="flex gap-1 w-max text-textLightGrey text-xs font-medium pb-2">
+          <img src={customericon} alt="Contract Details Icon" /> CONTRACT DETAILS
+        </p>
+        <div className="flex items-center justify-between">
+          <Tag name="Contract Document" />
+          {displayInput ? (
+            <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center max-w-[40px] h-[40px] border-[0.6px] border-strokeCream rounded-full overflow-clip">
+                {contractFile ? (
+                  <img
+                    src={URL.createObjectURL(contractFile)}
+                    alt="New Contract File"
+                    className="w-full h-full object-cover rounded-full"
+                  />
+                ) : data.contractFormImageUrl ? (
+                  <img
+                    src={data.contractFormImageUrl}
+                    alt="Contract File"
+                    className="w-full h-full object-cover rounded-full"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-50 flex items-center justify-center rounded-full">
+                    <span className="text-[10px] text-textLightGrey">No Contract Document</span>
+                  </div>
+                )}
+              </div>
+              <UploadPhotoInput value={contractFile} onChange={handleContractFileChange} maxSizeInMB={2} />
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center max-w-[40px] h-[40px] border-[0.6px] border-strokeCream rounded-full overflow-clip">
+                {data.contractFormImageUrl ? (
+                  <>
+                    <img
+                      src={data.contractFormImageUrl}
+                      alt="Contract File"
+                      className="w-full h-full object-cover rounded-full"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        const fallback = document.getElementById('contract-fallback');
+                        if (fallback) fallback.classList.remove('hidden');
+                      }}
+                    />
+                    <div className="w-full h-full bg-gray-50 flex items-center justify-center rounded-full hidden" id="contract-fallback">
+                      <span className="text-[10px] text-textLightGrey">Error</span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="w-full h-full bg-gray-50 flex items-center justify-center rounded-full">
+                    <span className="text-[10px] text-textLightGrey">No Contract Document</span>
+                  </div>
+                )}
+              </div>
+              {data.contractFormImageUrl && (
+                <button
+                  onClick={() => handleViewImage(data.contractFormImageUrl!, "Contract Document")}
+                  className="px-2 py-1 text-xs bg-primaryGradient text-white rounded-full hover:bg-primaryGradient/80 transition-colors"
+                  title="View Contract Document"
                 >
                   View
                 </button>
