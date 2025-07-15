@@ -220,7 +220,7 @@ export type SalePayload = {
 export const defaultSaleFormData: SalePayload = {
   category: "PRODUCT",
   customerId: "",
-  applyMargin: true,
+  applyMargin: false,
   bvn: undefined,
   saleItems: [],
   paymentMethod: "ONLINE",
@@ -255,7 +255,7 @@ export const formSchema = z
     identificationDetails: identificationDetailsSchema.optional(),
     nextOfKinDetails: nextOfKinDetailsSchema.optional(),
     guarantorDetails: guarantorDetailsSchema.optional(),
-    applyMargin: z.boolean().default(true),
+    applyMargin: z.boolean().default(false),
     paymentMethod: z.enum(["ONLINE", "CASH"], {
       message: "Payment method is required",
     }),

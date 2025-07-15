@@ -888,7 +888,7 @@ const saleStore = types
         customerId: self.customer?.customerId,
         saleItems: this.getTransformedSaleItems(),
         paymentMethod: self.paymentMethod,
-        applyMargin: true, // Default to true as per schema
+        applyMargin: false, // Default to false as per schema
       };
 
       // If any sale item has installment payment mode, include additional required fields

@@ -49,6 +49,7 @@ const customerSchema = z.object({
   type: z.string().optional(),
   passportPhoto: z.instanceof(File).optional(),
   idImage: z.instanceof(File).optional(),
+  contractFormImage: z.instanceof(File).optional(),
 });
 
 type CustomerFormData = z.infer<typeof customerSchema>;
@@ -72,6 +73,7 @@ const defaultFormData: CustomerFormData = {
   type: "",
   passportPhoto: undefined,
   idImage: undefined,
+  contractFormImage: undefined,
 };
 
 const CreateNewCustomer = ({
@@ -110,6 +112,14 @@ const CreateNewCustomer = ({
       idImage: file || undefined,
     }));
     resetFormErrors("idImage");
+  };
+
+  const handleContractFormImageChange = (file: File | null) => {
+    setFormData((prev) => ({
+      ...prev,
+      contractFormImage: file || undefined,
+    }));
+    resetFormErrors("contractFormImage");
   };
 
   const handleSelectChange = (name: string, values: string) => {
@@ -314,6 +324,14 @@ const CreateNewCustomer = ({
             value={formData.idImage}
             onChange={handleIdImageChange}
             errorMessage={getFieldError("idImage")}
+            required={false}
+            maxSizeInMB={2}
+          />
+          <UploadPhotoInput
+            label="Contract Form Image"
+            value={formData.contractFormImage}
+            onChange={handleContractFormImageChange}
+            errorMessage={getFieldError("contractFormImage")}
             required={false}
             maxSizeInMB={2}
           />
