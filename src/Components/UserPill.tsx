@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import sampleimage from "../assets/sampleuserimage.svg";
+import avatar from "../assets/avatar.svg";
 
 const UserPill = ({ role }: { role: string }) => {
   return (
@@ -9,7 +9,7 @@ const UserPill = ({ role }: { role: string }) => {
       onClick={() => {}}
     >
       <img
-        src={sampleimage}
+        src={avatar}
         alt="User Image"
         className="w-[24px] h-[24px] border-[0.2px] border-[#A58730] rounded-full"
       />
