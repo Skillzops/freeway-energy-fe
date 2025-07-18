@@ -45,7 +45,7 @@ const generateSalesEntries = (data: any): SalesEntries[] => {
       if (totalAmount > 0 && paidAmount >= totalAmount) {
         status = "COMPLETED";
       }
-     
+      
       return {
         no: index + 1,
         saleId: item?.id,
