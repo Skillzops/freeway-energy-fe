@@ -90,10 +90,10 @@ export default function ErrorPage({
                 If this problem persists, please contact our support team by
                 sending an email to{" "}
                 <a
-                  href="mailto:support@a4tpowersolutions.com"
+                  href="mailto:support@Inrelipowersolutions.com"
                   className="text-primary hover:underline"
                 >
-                  support@a4tpowersolutions.com
+                  support@Inrelipowersolutions.com
                 </a>
                 .
               </p>
