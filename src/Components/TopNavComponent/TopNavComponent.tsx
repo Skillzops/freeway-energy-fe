@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import logoplain from "../../assets/logoplain.svg";
+import logoplain from "../../assets/logo.svg";
 import { useNavigate } from "react-router-dom";
 import { MenuButton } from "../MenuComponent/MenuButton";
 import UserProfile from "../UserPill";
