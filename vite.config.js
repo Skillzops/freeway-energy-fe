@@ -22,12 +22,12 @@ export default defineConfig({
       usePolling: true,
       followSymlinks: false,
     },
-    allowedHosts: ["inreli-energy-cmvgn.ondigitalocean.app"], 
+    allowedHosts: ["inreli-energy-cmvgn.ondigitalocean.app", "inrelicrm.com"], 
   },
   preview: {
     host: "0.0.0.0",
     port: 5173,
-    allowedHosts: ["inreli-energy-cmvgn.ondigitalocean.app"],
+    allowedHosts: ["inreli-energy-cmvgn.ondigitalocean.app", "inrelicrm.com"],
   },
   plugins: [react(), tsconfigPaths()], 
   resolve: {
