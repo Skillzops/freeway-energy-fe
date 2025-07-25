@@ -18,20 +18,27 @@ const agentSchema = z.object({
   firstname: z.string().min(1, "First name is required"),
   lastname: z.string().min(1, "Last name is required"),
   email: z.string().email("Invalid email address"),
-  phoneNumber: z
-    .string()
+  phone: z.string()
     .trim()
-    .max(20, "Phone number cannot be more than 20 digits")
-    .transform((val) => val.replace(/\s+/g, ""))
-    .optional(),
+    .min(10, "Phone number must be at least 10 digits"),
   addressType: z
     .enum(["HOME", "WORK"], {
       errorMap: () => ({ message: "Please select an address type" }),
     })
     .default("HOME"),
   location: z.string().min(1, "Location is required"),
-  longitude: z.string().optional(),
-  latitude: z.string().optional(),
+  longitude: z.string()
+    .optional()
+    .default(""),
+  latitude: z.string()
+    .optional()
+    .default(""),
+  category: z.enum(["SALES", "INSTALLER", "BUSINESS"]),
+  bvn: z.string()
+    .trim()
+    .length(11, "BVN must be exactly 11 digits")
+    .optional()
+    .default(""),
   emailVerified: z.boolean(),
 });
 
@@ -41,11 +48,13 @@ const defaultAgentsFormData = {
   firstname: "",
   lastname: "",
   email: "",
-  phoneNumber: "",
+  phone: "",
   addressType: "HOME" as "HOME" | "WORK",
   location: "",
   longitude: "",
   latitude: "",
+  category: "SALES" as "SALES" | "INSTALLER" | "BUSINESS",
+  bvn: "",
   emailVerified: true,
 };
 
@@ -157,6 +166,16 @@ const CreateNewAgents = ({
           errorMessage={getFieldError("email")}
         />
         <Input
+          type="tel"
+          name="phone"
+          label="Phone Number"
+          value={formData.phone}
+          onChange={handleInputChange}
+          placeholder="Phone Number"
+          required={true}
+          errorMessage={getFieldError("phone")}
+        />
+        <Input
             type="text"
             name="location"
             label="Location"
@@ -183,6 +202,54 @@ const CreateNewAgents = ({
             }));
           }}
         /> */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+          <Input
+            type="text"
+            name="longitude"
+            label="Longitude"
+            value={formData.longitude}
+            onChange={handleInputChange}
+            placeholder="Longitude"
+            required={false}
+            errorMessage={getFieldError("longitude")}
+          />
+          <Input
+            type="text"
+            name="latitude"
+            label="Latitude"
+            value={formData.latitude}
+            onChange={handleInputChange}
+            placeholder="Latitude"
+            required={false}
+            errorMessage={getFieldError("latitude")}
+          />
+        </div>
+        <Input
+          type="text"
+          name="bvn"
+          label="BVN"
+          value={formData.bvn}
+          onChange={handleInputChange}
+          placeholder="Enter BVN number"
+          required={false}
+          maxLength={11}
+          errorMessage={getFieldError("bvn")}
+        />
+        <SelectInput
+          label="Agent Category"
+          options={[
+            { label: "Sales", value: "SALES" },
+            { label: "Installer", value: "INSTALLER" },
+            { label: "Business", value: "BUSINESS" },
+          ]}
+          value={formData.category}
+          onChange={(selectedValue) =>
+            handleSelectChange("category", selectedValue)
+          }
+          required={true}
+          placeholder="Agent category"
+          errorMessage={getFieldError("category")}
+        />
         <SelectInput
           label="Address Type (Home/Work)"
           options={[
