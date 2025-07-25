@@ -26,11 +26,6 @@ const formSchema = z.object({
     .optional()
     .default(""),
   category: z.enum(["SALES", "INSTALLER", "BUSINESS"]),
-  bvn: z.string()
-    .trim()
-    .length(11, "BVN must be exactly 11 digits")
-    .optional()
-    .default(""),
   emailVerified: z.boolean(),
 });
 
@@ -44,7 +39,6 @@ const defaultFormData = {
   longitude: "",
   latitude: "",
   category: "SALES" as "SALES" | "INSTALLER" | "BUSINESS",
-  bvn: "",
   emailVerified: true,
 };
 
@@ -224,17 +218,7 @@ const AddNewAgentModal: React.FC<AddNewAgentModalProps> = ({ isOpen, onClose, on
               errorMessage={getFieldError("latitude")}
             />
           </div>
-          <Input
-            type="text"
-            name="bvn"
-            label="BVN"
-            value={formData.bvn}
-            onChange={handleInputChange}
-            placeholder="Enter BVN number"
-            required={false}
-            maxLength={11}
-            errorMessage={getFieldError("bvn")}
-          />
+
           <SelectInput
             label="Agent Category"
             options={[
