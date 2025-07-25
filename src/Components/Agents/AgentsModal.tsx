@@ -8,7 +8,10 @@ import AgentDetails, { AgentUserType } from "./AgentDetails";
 import AssignCustomersModal from "./AssignCustomersModal";
 import AssignProductsModal from "./AssignProductsModal";
 import AssignInstallersModal from "./AssignInstallersModal";
+import TopUpWalletForm from "../TopUp/TopWalletForm";
+import walletIcon from "../../assets/agents/wallet.svg";
 import { KeyedMutator } from "swr";
+import { toast } from "react-toastify";
 
 // Extend the AgentUserType to include category
 interface ExtendedAgentUserType extends AgentUserType {
@@ -168,8 +171,9 @@ const AgentModal = ({
           setIsAssignInstallersModalOpen(true);
           break;
         case 3:
-          console.log("Top Up wallet");
+          console.log("Top Up wallet clicked - setting modal to open");
           setIsWalletTopUpModalOpen(true);
+          console.log("Modal state should now be true");
           break;
         case 4:
           console.log("Block Sales Agent");
@@ -311,6 +315,35 @@ const AgentModal = ({
           fetchSingleAgent.mutate();
         }}
       />
+
+      {/* Top Up Wallet Modal */}
+      <Modal
+        isOpen={isWalletTopUpModalOpen}
+        onClose={() => {
+          setIsWalletTopUpModalOpen(false);
+        }}
+        layout="right"
+        size="small"
+        bodyStyle="pb-44"
+      >
+        <div className="flex flex-col items-center bg-white">
+          <div className="flex items-center justify-center gap-3 px-4 w-full min-h-[64px] border-b-[0.6px] border-strokeGreyThree bg-paleGrayGradientLeft">
+            <img src={walletIcon} alt="wallet" className="w-6 h-6" />
+            <h2 className="text-xl text-textBlack font-semibold font-secondary">
+              Top Up Wallet
+            </h2> 
+          </div>
+          
+          <div className="flex flex-col items-center justify-center w-full px-4 gap-4 py-8">
+            <TopUpWalletForm
+              handleClose={() => {
+                setIsWalletTopUpModalOpen(false);
+              }}
+              refreshTable={fetchSingleAgent.mutate}
+            />
+          </div>
+        </div>
+      </Modal>
     </>
   );
 };

@@ -287,7 +287,7 @@ const AgentDetails = observer(({
         {/* Assigned Installers */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className={`w-3 h-3 rounded-full ${assignedData?.installers?.length > 0 ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+            <div className={`w-3 h-3 rounded-full ${assignedData?.installers?.length && assignedData.installers.length > 0 ? 'bg-green-500' : 'bg-gray-300'}`}></div>
             <span className="text-xs font-medium text-textDarkGrey">Assigned Installers</span>
           </div>
           <div className="flex items-center gap-2">
