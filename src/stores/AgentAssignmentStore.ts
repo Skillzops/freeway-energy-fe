@@ -44,7 +44,7 @@ const agentAssignmentStore = types
           assignment.customers.push({
             id: customer.id,
             name: `${customer.firstname} ${customer.lastname}`,
-            email: customer.email,
+            email: customer.email || "",
           });
         }
       });

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Modal } from "../ModalComponent/Modal";
-import { useGetRequest } from "../../utils/useApiCall";
+import { useGetRequest, useApiCall } from "../../utils/useApiCall";
 import { DataStateWrapper } from "../Loaders/DataStateWrapper";
 import rootStore from "../../stores/rootStore";
 
@@ -22,6 +22,7 @@ const AssignCustomersModal: React.FC<AssignCustomersModalProps> = ({
   const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
 
   const { agentAssignmentStore } = rootStore;
+  const { apiCall } = useApiCall();
 
   // Fetch customers data
   const {
@@ -46,15 +47,24 @@ const AssignCustomersModal: React.FC<AssignCustomersModalProps> = ({
 
   const handleSubmit = async () => {
     try {
-      // Get the selected customer objects
+      // Get the selected customer IDs
+      const customerIds = selectedCustomers;
+
+      // Call the API to assign customers
+      await apiCall({
+        endpoint: `/v1/agents/${agentID}/assign-customers`,
+        method: 'post',
+        data: { customerIds },
+        successMessage: 'Customers assigned successfully',
+      });
+
+      // Get the selected customer objects for store
       const selectedCustomerObjects = customersData?.customers?.filter((customer: any) => 
         selectedCustomers.includes(customer.id)
       ) || [];
 
-      // Add customers to the store
+      // Add customers to the store for UI updates
       agentAssignmentStore.addCustomers(agentID, selectedCustomerObjects);
-
-      console.log('Assigned customers:', selectedCustomerObjects, 'to agent:', agentID);
 
       onSuccess?.();
       onClose();

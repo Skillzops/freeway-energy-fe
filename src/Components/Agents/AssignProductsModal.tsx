@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Modal } from "../ModalComponent/Modal";
-import { useGetRequest } from "../../utils/useApiCall";
+import { useGetRequest, useApiCall } from "../../utils/useApiCall";
 import { DataStateWrapper } from "../Loaders/DataStateWrapper";
 import rootStore from "../../stores/rootStore";
 
@@ -22,6 +22,7 @@ const AssignProductsModal: React.FC<AssignProductsModalProps> = ({
   const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
 
   const { agentAssignmentStore } = rootStore;
+  const { apiCall } = useApiCall();
 
   // Fetch products data
   const {
@@ -46,15 +47,24 @@ const AssignProductsModal: React.FC<AssignProductsModalProps> = ({
 
   const handleSubmit = async () => {
     try {
-      // Get the selected product objects
+      // Get the selected product IDs
+      const productIds = selectedProducts;
+
+      // Call the API to assign products
+      await apiCall({
+        endpoint: `/v1/agents/${agentID}/assign-products`,
+        method: 'post',
+        data: { productIds },
+        successMessage: 'Products assigned successfully',
+      });
+
+      // Get the selected product objects for store
       const selectedProductObjects = productsData?.updatedResults?.filter((product: any) => 
         selectedProducts.includes(product.id)
       ) || [];
 
-      // Add products to the store
+      // Add products to the store for UI updates
       agentAssignmentStore.addProducts(agentID, selectedProductObjects);
-
-      console.log('Assigned products:', selectedProductObjects, 'to agent:', agentID);
 
       onSuccess?.();
       onClose();
