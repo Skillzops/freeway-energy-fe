@@ -43,12 +43,19 @@ const AgentDetails = observer(({
     emailVerified: data.emailVerified,
   });
 
-  // Get assigned data from store
+  // Get assigned data from store - access directly to ensure MobX tracking
   const { agentAssignmentStore } = rootStore;
-  const assignedData = agentAssignmentStore.getAgentAssignment(data.id);
+  
+  // Access the assignments array directly to ensure MobX tracks changes
+  const assignments = agentAssignmentStore.assignments;
+  const assignedData = assignments.find(a => a.agentId === data.id);
   
   // Check if all items are assigned
-  const allAssigned = agentAssignmentStore.isAllAssigned(data.id);
+  const allAssigned = assignedData ? 
+    (assignedData.customers.length > 0 && assignedData.products.length > 0 && assignedData.installers.length > 0) : 
+    false;
+
+
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
