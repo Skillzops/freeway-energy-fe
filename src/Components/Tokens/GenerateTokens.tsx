@@ -1,5 +1,5 @@
 import { useApiCall, useGetRequest } from "@/utils/useApiCall";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { KeyedMutator } from "swr";
 import { z } from "zod";
 import { Modal } from "../ModalComponent/Modal";
@@ -32,6 +32,157 @@ const DeviceFormSchema = z.object({
         }),
 });
 
+// Searchable Select Component
+const SearchableSelect = ({ 
+    options, 
+    value, 
+    onChange, 
+    placeholder, 
+    disabled, 
+    errorMessage 
+}: {
+    options: { label: string; value: string; serialNumber: string; hardwareModel: string }[];
+    value: string;
+    onChange: (value: string) => void;
+    placeholder: string;
+    disabled: boolean;
+    errorMessage?: string;
+}) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [valueLabel, setValueLabel] = useState("");
+    const dropdownRef = useRef<HTMLDivElement>(null);
+    const searchInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        const selectedOption = options.find((option) => option.value === value);
+        if (selectedOption) {
+            setValueLabel(selectedOption.label);
+        }
+    }, [value, options]);
+
+    useEffect(() => {
+        const handleClickOutside = (event: Event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+                setSearchTerm("");
+            }
+        };
+
+        if (isOpen) {
+            document.addEventListener("mousedown", handleClickOutside as EventListener);
+            // Focus search input when dropdown opens
+            setTimeout(() => {
+                searchInputRef.current?.focus();
+            }, 100);
+        } else {
+            document.removeEventListener("mousedown", handleClickOutside as EventListener);
+        }
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside as EventListener);
+        };
+    }, [isOpen]);
+
+    const handleSelect = (selectedValue: string) => {
+        onChange(selectedValue);
+        setIsOpen(false);
+        setSearchTerm("");
+    };
+
+    const filteredOptions = options.filter((option) => {
+        const searchLower = searchTerm.toLowerCase();
+        return (
+            option.serialNumber.toLowerCase().includes(searchLower) ||
+            option.hardwareModel.toLowerCase().includes(searchLower) ||
+            option.label.toLowerCase().includes(searchLower)
+        );
+    });
+
+    return (
+        <div className="w-full">
+            <div ref={dropdownRef} className="relative w-full max-w-full">
+                <div
+                    className={`relative flex items-center
+                        w-full max-w-full h-[48px] px-[1.25em] py-[1.25em] 
+                        rounded-3xl text-sm text-textGrey border-[0.6px] gap-1 cursor-pointer
+                        transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
+                        ${disabled ? "bg-gray-200 cursor-not-allowed" : "bg-white"}
+                        ${value ? "border-strokeCream" : "border-strokeGrey"}`}
+                    onClick={() => !disabled && setIsOpen(!isOpen)}
+                >
+                    <span
+                        className={`absolute flex -top-2 items-center justify-center text-sm text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] transition-opacity duration-500 ease-in-out
+                            ${value ? "opacity-100" : "opacity-0"}`}
+                    >
+                        DEVICE
+                    </span>
+
+                    <div className="w-full">
+                        {value ? (
+                            <span className="font-semibold text-textBlack uppercase">
+                                {valueLabel}
+                            </span>
+                        ) : (
+                            <span className="text-textGrey italic">{placeholder}</span>
+                        )}
+                    </div>
+
+                    <span className="text-lg absolute right-3 p-[0.3em]">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </span>
+                </div>
+                
+                {isOpen && (
+                    <div className="absolute mt-1.5 flex flex-col bg-white p-2 border border-strokeGreyTwo rounded-[20px] w-full max-h-60 overflow-hidden shadow-lg z-50">
+                        {/* Search Input */}
+                        <div className="relative mb-2">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <FiSearch className="h-4 w-4 text-gray-400" />
+                            </div>
+                            <input
+                                ref={searchInputRef}
+                                type="text"
+                                placeholder="Search devices..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm"
+                                onClick={(e) => e.stopPropagation()}
+                            />
+                        </div>
+                        
+                        {/* Options List */}
+                        <div className="flex flex-col gap-1 max-h-40 overflow-y-auto">
+                            {filteredOptions.length > 0 ? (
+                                filteredOptions.map((option) => (
+                                    <div
+                                        key={option.value}
+                                        className="text-xs capitalize text-textDarkGrey cursor-pointer px-2 py-1 border border-transparent hover:bg-[#F6F8FA] hover:border hover:border-strokeGreyTwo hover:rounded-full"
+                                        onClick={() => handleSelect(option.value)}
+                                    >
+                                        {option.label}
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="text-xs text-gray-500 px-2 py-1 text-center">
+                                    No devices found
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+            </div>
+            {errorMessage && (
+                <p className="mt-1 px-[1.3em] text-xs text-errorTwo font-semibold w-full">
+                    {errorMessage}
+                </p>
+            )}
+        </div>
+    );
+};
+
 const GenerateTokens = ({ isOpen, setIsOpen, allDevicesRefresh, formType, isTokenable }: GenerateTokensProps) => {
     const { apiCall } = useApiCall();
     const [loading, setLoading] = useState(false);
@@ -39,7 +190,6 @@ const GenerateTokens = ({ isOpen, setIsOpen, allDevicesRefresh, formType, isToke
     const [apiError, setApiError] = useState<string | Record<string, string[]>>("");
     const [generatedToken, setGeneratedToken] = useState<any>(null);
     const [copySuccess, setCopySuccess] = useState(false);
-    const [deviceSearch, setDeviceSearch] = useState("");
     const [formData, setFormData] = useState({
         deviceID: "",
         tokenDuration: "",
@@ -63,16 +213,6 @@ const GenerateTokens = ({ isOpen, setIsOpen, allDevicesRefresh, formType, isToke
             serialNumber: device.serialNumber,
             hardwareModel: device.hardwareModel,
         })) || [];
-
-    // Filter device options based on search term
-    const deviceOptions = allDeviceOptions.filter((device: any) => {
-        const searchTerm = deviceSearch.toLowerCase();
-        return (
-            device.serialNumber.toLowerCase().includes(searchTerm) ||
-            device.hardwareModel.toLowerCase().includes(searchTerm) ||
-            device.label.toLowerCase().includes(searchTerm)
-        );
-    });
 
     const handleCopyToClipboard = async (text: string) => {
         try {
@@ -205,10 +345,7 @@ const GenerateTokens = ({ isOpen, setIsOpen, allDevicesRefresh, formType, isToke
         setFormErrors(prev => prev.filter(error => error.path[0] !== "deviceID"));
     };
 
-    // Handle device search input
-    const handleDeviceSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setDeviceSearch(e.target.value);
-    };
+    // Handle device search input - no longer needed as SearchableSelect handles search internally
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0] || null;
@@ -497,33 +634,18 @@ const GenerateTokens = ({ isOpen, setIsOpen, allDevicesRefresh, formType, isToke
                                         ) : (
                                             <>
                                                 {/* Device Search Input */}
-                                                <div className="relative mb-3">
-                                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                        <FiSearch className="h-4 w-4 text-gray-400" />
-                                                    </div>
-                                                    <input
-                                                        type="text"
-                                                        placeholder="Search devices by serial number or model..."
-                                                        value={deviceSearch}
-                                                        onChange={handleDeviceSearch}
-                                                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm"
-                                                    />
-                                                </div>
-                                                
-                                                <SelectInput
-                                                    label=""
+                                                <SearchableSelect
+                                                    options={allDeviceOptions}
                                                     value={formData.deviceID}
                                                     onChange={handleDeviceSelect}
-                                                    required={true}
+                                                    placeholder={devicesLoading ? "Loading devices..." : "Select a device"}
+                                                    disabled={devicesLoading || allDeviceOptions.length === 0}
                                                     errorMessage={getFieldError("deviceID")}
-                                                    options={deviceOptions}
-                                                    placeholder={devicesLoading ? "Loading devices..." : deviceSearch ? `Searching... (${deviceOptions.length} found)` : "Select a device"}
-                                                    disabled={devicesLoading || deviceOptions.length === 0}
                                                 />
                                             </>
                                         )}
                                         
-                                        {deviceOptions.length === 0 && !devicesLoading && !devicesError && (
+                                        {allDeviceOptions.length === 0 && !devicesLoading && !devicesError && (
                                             <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
                                                 <p className="text-sm text-yellow-600">
                                                     No tokenable devices available.
