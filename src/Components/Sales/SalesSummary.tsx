@@ -185,7 +185,7 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
         notes,
         status: "COMPLETED" // Always use COMPLETED for cash payments
       },
-      successMessage: "", // Remove duplicate success message
+      showToast: false,
     });
 
     console.log('Cash payment record response:', paymentResponse);
@@ -199,6 +199,7 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
     setPaymentError(null);
     setIsSubmitting(true);
 
+
     try {
       if (SaleStore.paymentMethod === "CASH") {
         // Step 1: Create the sale first (will be PENDING)
@@ -208,7 +209,12 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
         // Step 2: Record cash payment with COMPLETED status
         console.log('Recording cash payment...');
         const notes = paymentNotes || `Cash payment of ₦${formatNumberWithCommas(totalAmount)}`;
-        await recordCashPayment(saleId, totalAmount, notes);
+
+        await recordCashPayment(
+          saleId,
+          SaleStore?.paymentDetails?.amount || totalAmount,
+          notes
+        );
 
         // Refresh table data to show updated status
         if (refreshTable) {
@@ -484,9 +490,13 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
             // Use initial deposit for installment, otherwise use total
             amount={isInstallmentPayment() ? getTotalInitialDeposit() : SaleStore.getTotal()}
             onAmountChange={(newAmount) => {
-              if (SaleStore.paymentDetails) {
-                SaleStore.paymentDetails.amount = newAmount;
-              }
+              // if (SaleStore.paymentDetails) {
+              //   SaleStore.paymentDetails.amount = newAmount;
+              // }
+              SaleStore.addPaymentDetails({
+                ...SaleStore.paymentDetails,
+                amount: newAmount,
+              });
             }}
             onNotesChange={(notes: string) => {
               setPaymentNotes(notes);

@@ -222,6 +222,14 @@ const SaleDetails = ({ data }: { data: SaleDetailsType }) => {
           <img src={creditcardicon} alt="Card Icon" /> GENERAL DETAILS
         </p>
         <div className="flex items-center justify-between">
+          <Tag name="Created By" />
+          <p className="text-xs font-bold text-textDarkGrey capitalize">
+            {data.sale.creatorDetails
+              ? `${data.sale.creatorDetails.firstname} ${data.sale.creatorDetails.lastname}`
+              : "N/A"}
+          </p>
+        </div>
+        <div className="flex items-center justify-between">
           <Tag name="Date Created" />
           <p className="text-xs font-bold text-textDarkGrey">
             {formatDateTime("date", data.datetime)}
@@ -235,7 +243,13 @@ const SaleDetails = ({ data }: { data: SaleDetailsType }) => {
         </div>
         <div className="flex items-center justify-between">
           <Tag name="Agent" />
-          <NameTag name={data.agent} />
+          <NameTag
+            name={
+              data.sale.agentName? data.sale.agentName: data.sale.agent
+                ? `${data.sale?.agent?.user?.firstname} ${data.sale?.agent?.user?.firstname}`
+                : "N/A"
+            }
+          />
         </div>
       </div>
     </div>

@@ -59,7 +59,7 @@ const SalesDetailsModal = ({
 }) => {
   const [tabContent, setTabContent] = useState<string>("details");
 
-  const fetchSingleSale = useGetRequest(`/v1/sales/${salesID}`, false);
+  const fetchSingleSale = useGetRequest(`/v1/sales/${salesID}`, true);
 
   const fetchProductCategories = useGetRequest(
     `/v1/products/categories/all`,
@@ -142,14 +142,21 @@ const SalesDetailsModal = ({
     
     // Calculate the correct total price (should include miscellaneous costs like in SalesSummary)
     const baseTotalPrice = sale.totalPrice || 0;
-    const correctTotalPrice = baseTotalPrice + miscellaneousCost;
+    // const correctTotalPrice = baseTotalPrice + miscellaneousCost;
+    const correctTotalPrice = baseTotalPrice;
     
     return {
       totalPrice: correctTotalPrice,
-      totalPaid: sale.totalPaid || 0,
+      // totalPaid: sale.totalPaid || 0,
+      totalPaid: Math.max(0, sale.totalPaid - sale.totalMiscellaneousPrice),
       paymentMode: saleData.paymentMode || "",
-      totalInstallments: saleData.installmentDuration || sale.totalInstallmentDuration || 0,
-      paymentsMade: sale.payment?.filter((p: any) => p.paymentStatus === "COMPLETED").length || 0,
+      totalInstallments:
+        saleData.installmentDuration || sale.totalInstallmentDuration || 0,
+      remainingInstallments:
+        saleData.remainingInstallments || sale.remainingInstallments || 0,
+      paymentsMade:
+        sale.payment?.filter((p: any) => p.paymentStatus === "COMPLETED")
+          .length || 0,
       miscellaneousCost: miscellaneousCost,
     };
   };

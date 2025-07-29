@@ -26,7 +26,7 @@ interface PaymentVerificationResponse {
   status?: string;
   message?: string;
   jobId?: string;
-  paymentStatus?: "PENDING" | "INCOMPLETE" | "COMPLETED"
+  paymentStatus?: "PENDING" | "INCOMPLETE" | "COMPLETED";
 }
 
 interface PaymentSummaryProps {
@@ -35,6 +35,7 @@ interface PaymentSummaryProps {
   remainingBalance: number;
   isInstallment: boolean;
   totalInstallments?: number;
+  remainingInstallments?: number;
   paymentsMade?: number;
   paymentProgress?: number;
   onPayNextPayment?: () => void;
@@ -46,20 +47,22 @@ const PaymentSummary: React.FC<PaymentSummaryProps> = ({
   remainingBalance,
   isInstallment,
   totalInstallments = 0,
+  remainingInstallments = 0,
   paymentsMade = 0,
   paymentProgress = 0,
-  onPayNextPayment
+  onPayNextPayment,
 }) => {
   if (!isInstallment) return null;
 
   // Calculate installment progress based on installments made
-  const installmentProgress = totalInstallments > 0 ? (paymentsMade / totalInstallments) * 100 : 0;
-  const remainingInstallments = Math.max(totalInstallments - paymentsMade, 0);
+  const installmentProgress =
+    totalInstallments > 0 ? (paymentsMade / totalInstallments) * 100 : 0;
+  // const remainingInstallments = Math.max(totalInstallments - paymentsMade, 0);
 
   return (
     <div className="flex flex-col p-4 gap-3 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg mb-4">
       <h3 className="text-sm font-bold text-gray-700 mb-2">Payment Progress</h3>
-      
+
       {/* Progress Bar - Based on payment amount */}
       <div className="w-full bg-gray-200 rounded-full h-1 mb-3">
         <div 
@@ -85,16 +88,22 @@ const PaymentSummary: React.FC<PaymentSummaryProps> = ({
       <div className="flex justify-between items-center mb-3 p-2 bg-white rounded-lg border">
         <div className="text-center">
           <p className="text-xs text-gray-500 mb-1">Installments Made</p>
-          <span className="text-lg font-bold text-green-600">{paymentsMade}</span>
+          <span className="text-lg font-bold text-green-600">
+            {paymentsMade}
+          </span>
         </div>
         <div className="text-gray-400 text-xl">/</div>
         <div className="text-center">
           <p className="text-xs text-gray-500 mb-1">Total Required</p>
-          <span className="text-lg font-bold text-gray-700">{totalInstallments}</span>
+          <span className="text-lg font-bold text-gray-700">
+            {totalInstallments}
+          </span>
         </div>
         <div className="text-center">
           <p className="text-xs text-gray-500 mb-1">Remaining</p>
-          <span className="text-lg font-bold text-red-600">{remainingInstallments}</span>
+          <span className="text-lg font-bold text-red-600">
+            {remainingInstallments}
+          </span>
         </div>
       </div>
 
@@ -112,7 +121,7 @@ const PaymentSummary: React.FC<PaymentSummaryProps> = ({
 
         {/* Amount Paid */}
         <div className="text-center">
-          <p className="text-xs text-gray-500 mb-1">Amount Paid</p>
+          <p className="text-xs text-gray-500 mb-1">Installment Amount Paid</p>
           <div className="flex items-center justify-center gap-1">
             <NairaSymbol color="#059669" />
             <span className="text-sm font-bold text-green-600">
@@ -182,6 +191,7 @@ const SaleTransactions = ({
     totalPaid: number;
     paymentMode: string;
     totalInstallments?: number;
+    remainingInstallments?: number;
     paymentsMade?: number;
     paymentProgress?: number;
     miscellaneousCost?: number;
@@ -191,11 +201,17 @@ const SaleTransactions = ({
 }) => {
   const { apiCall } = useApiCall();
   const [paymentError, setPaymentError] = useState<string | null>(null);
-  const [showPaymentSelector, setShowPaymentSelector] = useState<boolean>(false);
-  const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<"ONLINE" | "CASH">("ONLINE");
+  const [showPaymentSelector, setShowPaymentSelector] =
+    useState<boolean>(false);
+  const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(
+    null
+  );
+  const [paymentMethod, setPaymentMethod] = useState<"ONLINE" | "CASH">(
+    "ONLINE"
+  );
   const [paymentAmount, setPaymentAmount] = useState<number>(0);
-  const [isProcessingPayment, setIsProcessingPayment] = useState<boolean>(false);
+  const [isProcessingPayment, setIsProcessingPayment] =
+    useState<boolean>(false);
   const [showPayNextPayment, setShowPayNextPayment] = useState<boolean>(false);
   const [nextPaymentData, setNextPaymentData] = useState<{
     saleId: string;
@@ -206,18 +222,27 @@ const SaleTransactions = ({
   const calculatePaymentSummary = () => {
     const isInstallment = saleData?.paymentMode === "INSTALLMENT";
     const totalAmount = saleData?.totalPrice || 0;
-    
+
     // Calculate total paid and payments made from completed payment transactions
-    const completedPayments = data?.paymentInfo?.filter(payment => payment.paymentStatus === "COMPLETED") || [];
-    const totalPaid = completedPayments.reduce((sum, payment) => sum + payment.amount, 0);
-    
+    const completedPayments =
+      data?.paymentInfo?.filter(
+        (payment) => payment.paymentStatus === "COMPLETED"
+      ) || [];
+    const totalPaid = saleData?.totalPaid || 0;
+    // const totalPaid = completedPayments.reduce(
+    //   (sum, payment) => sum + payment.amount,
+    //   0
+    // );
+
     // Calculate payments made - if fully paid, show total installments, otherwise show actual completed payments
     let paymentsMade = completedPayments.length;
     const totalInstallments = saleData?.totalInstallments || 0;
+    const remainingInstallments = saleData?.remainingInstallments || 0;
+
     
     // For installment payments, the progress should be based on the full amount
     // but we need to handle the display correctly
-    let displayTotalAmount = totalAmount;
+    const displayTotalAmount = totalAmount;
     
     // If the sale is fully paid (totalPaid >= totalAmount), show all installments as completed
     if (totalPaid >= totalAmount && totalInstallments > 0) {
@@ -233,8 +258,9 @@ const SaleTransactions = ({
       remainingBalance,
       isInstallment,
       totalInstallments: totalInstallments,
+      remainingInstallments,
       paymentsMade: paymentsMade,
-      paymentProgress
+      paymentProgress,
     };
   };
 
@@ -244,34 +270,38 @@ const SaleTransactions = ({
   useEffect(() => {
     if (selectedPaymentId && paymentSummary.isInstallment) {
       // For installments, default to remaining balance or minimum payment
-      const suggestedAmount = Math.min(paymentSummary.remainingBalance, paymentSummary.totalAmount * 0.1); // 10% minimum or remaining balance
+      const suggestedAmount = Math.min(
+        paymentSummary.remainingBalance,
+        paymentSummary.totalAmount * 0.1
+      ); // 10% minimum or remaining balance
       setPaymentAmount(suggestedAmount > 0 ? suggestedAmount : 0);
     }
-  }, [selectedPaymentId, paymentSummary.remainingBalance, paymentSummary.isInstallment]);
+  }, [
+    selectedPaymentId,
+    paymentSummary.remainingBalance,
+    paymentSummary.isInstallment,
+  ]);
 
   // Verify payment with backend
   const verifyPayment = async (tx_ref: string, transaction_id?: string) => {
     try {
-      
-
       // Build the endpoint with required parameters
       let endpoint = `/v1/payment/verify/callback?tx_ref=${tx_ref}`;
       if (transaction_id) {
         endpoint += `&transaction_id=${transaction_id}`;
       }
 
-      const response = await apiCall({
+      const response = (await apiCall({
         endpoint,
         method: "get",
         showToast: false,
-      }) as { data: PaymentVerificationResponse };
-
-      
+      })) as { data: PaymentVerificationResponse };
 
       // Check for successful verification or processing status
-      if (response?.data?.status === "successful" ||
-        response?.data?.status === "processing") {
-
+      if (
+        response?.data?.status === "successful" ||
+        response?.data?.status === "processing"
+      ) {
         // If payment status is COMPLETED, show success message
         if (response?.data?.paymentStatus === "COMPLETED") {
           toast.success("Payment completed successfully!");
@@ -294,7 +324,10 @@ const SaleTransactions = ({
         }
         return true;
       } else {
-        console.error("Payment verification failed - unexpected response:", response);
+        console.error(
+          "Payment verification failed - unexpected response:",
+          response
+        );
         throw new Error("Payment verification failed - invalid response");
       }
     } catch (error: any) {
@@ -302,11 +335,17 @@ const SaleTransactions = ({
 
       // More detailed error handling
       if (error?.response?.status === 404) {
-        toast.error("Payment verification endpoint not found. Please contact support.");
+        toast.error(
+          "Payment verification endpoint not found. Please contact support."
+        );
       } else if (error?.response?.status === 500) {
-        toast.error("Server error during payment verification. Please contact support.");
+        toast.error(
+          "Server error during payment verification. Please contact support."
+        );
       } else if (error?.response?.data?.message) {
-        toast.error(`Payment verification failed: ${error.response.data.message}`);
+        toast.error(
+          `Payment verification failed: ${error.response.data.message}`
+        );
       } else {
         toast.error("Payment verification failed. Please contact support.");
       }
@@ -398,7 +437,7 @@ const SaleTransactions = ({
     // For "Pay Next Payment", suggest a reasonable installment amount
     if (paymentSummary.remainingBalance > 0) {
       const suggestedAmount = Math.min(
-        selectedPaymentData.amount, 
+        selectedPaymentData.amount,
         paymentSummary.remainingBalance
       );
       setPaymentAmount(suggestedAmount);
@@ -421,7 +460,7 @@ const SaleTransactions = ({
 
     // Set up next payment data
     const suggestedAmount = Math.min(
-      selectedPaymentData.amount, 
+      selectedPaymentData.amount,
       paymentSummary.remainingBalance
     );
 
@@ -485,7 +524,7 @@ const SaleTransactions = ({
         toast.success(`✅ Payment of ₦${formatNumberWithCommas(paymentAmount.toString())} recorded successfully!`);
         setShowPaymentSelector(false);
         setSelectedPaymentId(null);
-        
+
         // Refresh the data instead of reloading the page
         if (refreshTable) {
           await refreshTable();
@@ -496,7 +535,9 @@ const SaleTransactions = ({
       }
     } catch (error: any) {
       console.error("Error processing cash payment:", error);
-      const errorMessage = error?.response?.data?.message || "Failed to process cash payment. Please try again.";
+      const errorMessage =
+        error?.response?.data?.message ||
+        "Failed to process cash payment. Please try again.";
       setPaymentError(errorMessage);
       toast.error(errorMessage);
     } finally {
@@ -542,8 +583,6 @@ const SaleTransactions = ({
       const items = getDropdownItems(paymentStatus);
       const action = items[index];
 
-
-
       switch (action) {
         case "Make Payment":
           handleOnlinePayment(cardData?.productId);
@@ -562,7 +601,6 @@ const SaleTransactions = ({
     showCustomButton: true,
   });
 
-
   // Display error if any
   const displayError = paymentError;
 
@@ -575,15 +613,15 @@ const SaleTransactions = ({
       )}
 
       {/* Payment Summary for Installments */}
-      <PaymentSummary 
-        {...paymentSummary} 
+      <PaymentSummary
+        {...paymentSummary}
         onPayNextPayment={() => {
           // Set up next payment data with suggested amount
           const suggestedAmount = Math.min(
             paymentSummary.remainingBalance,
             6000 // Standard ₦6,000 or remaining balance if less
           );
-          
+
           setNextPaymentData({
             saleId: data?.paymentInfo?.[0]?.saleId || "",
             suggestedAmount: suggestedAmount,
@@ -631,15 +669,19 @@ const SaleTransactions = ({
               </button>
               <button
                 onClick={handlePaymentMethodSubmit}
-                disabled={isProcessingPayment || !paymentAmount || (paymentSummary.isInstallment && paymentAmount > paymentSummary.remainingBalance)}
+                disabled={
+                  isProcessingPayment ||
+                  !paymentAmount ||
+                  (paymentSummary.isInstallment &&
+                    paymentAmount > paymentSummary.remainingBalance)
+                }
                 className="flex-1 px-4 py-2 bg-primaryGradient text-white rounded-md hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isProcessingPayment
                   ? "Processing..."
                   : paymentMethod === "CASH"
-                    ? "Record Cash Payment"
-                    : "Pay Online"
-                }
+                  ? "Record Cash Payment"
+                  : "Pay Online"}
               </button>
             </div>
           </div>
@@ -688,8 +730,12 @@ const SaleTransactions = ({
             <div className="flex items-center gap-2">
               <span className="text-2xl">🎉</span>
               <div>
-                <h3 className="text-green-800 font-semibold">Payment Complete!</h3>
-                <p className="text-green-600 text-sm">All payments have been successfully completed.</p>
+                <h3 className="text-green-800 font-semibold">
+                  Payment Complete!
+                </h3>
+                <p className="text-green-600 text-sm">
+                  All payments have been successfully completed.
+                </p>
               </div>
             </div>
           </div>
