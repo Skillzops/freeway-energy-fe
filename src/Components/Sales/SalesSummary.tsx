@@ -111,11 +111,16 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
     }, 0);
   }, []);
 
+  const [paymentGateway, setPaymentGateway] = useState<
+    "OGARANYA" | "FLUTTERWAVE"
+  >("OGARANYA");
+
   // Create sale for both cash and online payments
   const createSale = async (): Promise<{ saleId: string; totalAmount: number; tx_ref: string }> => {
     const freshPayload = {
       ...payload,
       paymentMethod: SaleStore.paymentMethod,
+      paymentGateway: paymentGateway,
     };
 
     console.log('Creating sale with payload:', freshPayload);
@@ -501,6 +506,8 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
             onNotesChange={(notes: string) => {
               setPaymentNotes(notes);
             }}
+            paymentGateway={paymentGateway} // your gateway state
+            onPaymentGatewayChange={setPaymentGateway}
           />
 
           {/* Display error messages */}

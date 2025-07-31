@@ -10,6 +10,8 @@ interface PaymentModeSelectorProps {
   amount?: number;
   onAmountChange?: (amount: number) => void;
   onNotesChange?: (notes: string) => void;
+  paymentGateway?: "OGARANYA" | "FLUTTERWAVE";
+  onPaymentGatewayChange?: (gateway: "OGARANYA" | "FLUTTERWAVE") => void;
 }
 
 const PaymentModeSelector: React.FC<PaymentModeSelectorProps> = ({
@@ -20,9 +22,14 @@ const PaymentModeSelector: React.FC<PaymentModeSelectorProps> = ({
   amount,
   onAmountChange,
   onNotesChange,
+  paymentGateway,
+  onPaymentGatewayChange,
 }) => {
   const [paymentAmount, setPaymentAmount] = useState(amount?.toString() || "");
   const [notes, setNotes] = useState("");
+  const [selectedGateway, setSelectedGateway] = useState<
+    "OGARANYA" | "FLUTTERWAVE"
+  >(paymentGateway || "OGARANYA");
 
   // Update local state when amount prop changes
   useEffect(() => {
@@ -47,6 +54,14 @@ const PaymentModeSelector: React.FC<PaymentModeSelectorProps> = ({
     }
   };
 
+  const handleGatewayChange = (gateway: string) => {
+    const gatewayValue = gateway as "OGARANYA" | "FLUTTERWAVE";
+    setSelectedGateway(gatewayValue);
+    if (onPaymentGatewayChange) {
+      onPaymentGatewayChange(gatewayValue);
+    }
+  };
+
   return (
     <div className="flex flex-col w-full p-2.5 gap-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px]">
       <p className="flex gap-1 w-max text-textLightGrey text-xs font-medium pb-2">
@@ -62,6 +77,17 @@ const PaymentModeSelector: React.FC<PaymentModeSelectorProps> = ({
         ]}
         errorMessage={errorMessage}
       />
+      {value === "ONLINE" && (
+        <SelectInput
+          label="Payment Gateway"
+          value={selectedGateway}
+          onChange={handleGatewayChange}
+          options={[
+            { label: "Ogaranya", value: "OGARANYA" },
+            { label: "Flutterwave", value: "FLUTTERWAVE" },
+          ]}
+        />
+      )}
 
       {value === "CASH" && (
         <div className="flex flex-col gap-4 mt-4">
@@ -92,4 +118,4 @@ const PaymentModeSelector: React.FC<PaymentModeSelectorProps> = ({
   );
 };
 
-export default PaymentModeSelector; 
+export default PaymentModeSelector;
