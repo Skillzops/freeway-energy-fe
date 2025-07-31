@@ -12,6 +12,7 @@ import settingsbadge from "../assets/settings/settingsbadge.png";
 import { useGetRequest } from "../utils/useApiCall";
 import PageLayout from "./PageLayout";
 import CreateNewUserModal from "@/Components/Settings/CreateNewUserModal";
+import AddNewAgentModal from "@/Components/Settings/AddNewAgentModal";
 
 const RoleAndPermissions = lazy(
   () => import("../Components/Settings/RoleAndPermissions")
@@ -23,6 +24,7 @@ const Users = lazy(() => import("../Components/Settings/Users"));
 
 const Settings = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isAgentModalOpen, setIsAgentModalOpen] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
   const [tableQueryParams, setTableQueryParams] = useState<Record<
@@ -79,11 +81,16 @@ const Settings = () => {
   ];
 
   const dropDownList = {
-    items: ["Add new user"],
+    items: ["Add new user", "Add New Agent"],
     onClickLink: (index: number) => {
+      console.log('Dropdown clicked:', index);  // Debug log
       switch (index) {
         case 0:
           setIsOpen(true);
+          break;
+        case 1:
+          console.log('Setting agent modal to open');  // Debug log
+          setIsAgentModalOpen(true);
           break;
         default:
           break;
@@ -171,6 +178,11 @@ const Settings = () => {
         allUsersRefresh={fetchAllUsers.mutate}
         allRolesError={fetchAllRoles.error}
         allRolesErrorStates={fetchAllRoles.errorStates}
+      />
+      <AddNewAgentModal
+        isOpen={isAgentModalOpen}
+        onClose={() => setIsAgentModalOpen(false)}
+        onSuccess={() => { }}
       />
     </>
   );
