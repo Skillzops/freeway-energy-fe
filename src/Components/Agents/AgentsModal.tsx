@@ -23,94 +23,115 @@ const InstallersTable = ({ agentID }: { agentID: string }) => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [entriesPerPage, setEntriesPerPage] = useState<number>(10);
   
-  // Mock data for installers
-  const mockInstallersData = [
-    {
-      id: "1",
-      name: "Naomi Gambo",
-      location: "Kaduna",
-      installations: 1
-    },
-    {
-      id: "2", 
-      name: "Elizabeth Anigbogu",
-      location: "Kaduna",
-      installations: 5
-    },
-    {
-      id: "3",
-      name: "Stephen Akinyemi", 
-      location: "Kaduna",
-      installations: 3
-    },
-    {
-      id: "4",
-      name: "John Doe",
-      location: "Lagos",
-      installations: 2
-    },
-    {
-      id: "5",
-      name: "Jane Smith",
-      location: "Abuja",
-      installations: 4
-    }
-  ];
+  // First fetch agents data from API
+  const {
+    data: agentsData,
+    isLoading: agentsLoading,
+    error: agentsError,
+    errorStates: agentsErrorStates,
+    mutate: refreshAgents
+  } = useGetRequest(
+    `/v1/agents?category=INSTALLER`,
+    true,
+    60000
+  );
+
+  // Then fetch installers data for the specific agent
+  const {
+    data: installersData,
+    isLoading: installersLoading,
+    error: installersError,
+    errorStates: installersErrorStates,
+    mutate: refreshInstallers
+  } = useGetRequest(
+    agentID ? `/v1/agents/${agentID}` : null,
+    !!agentID,
+    60000
+  );
+
+  const isLoading = agentsLoading || installersLoading;
+  const error = agentsError || installersError;
+  const errorStates = agentsErrorStates || installersErrorStates;
 
   return (
     <div className="flex flex-col p-2.5 gap-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px]">
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-gray-100">
-              <th className="text-left p-3 text-sm font-medium text-textDarkGrey">
-                <div className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-strokeGreyTwo rounded-full"></div>
-                  S/N
-                </div>
-              </th>
-              <th className="text-left p-3 text-sm font-medium text-textDarkGrey">
-                <div className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-strokeGreyTwo rounded-full"></div>
-                  NAME
-                </div>
-              </th>
-              <th className="text-left p-3 text-sm font-medium text-textDarkGrey">
-                <div className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-strokeGreyTwo rounded-full"></div>
-                  LOCATION
-                </div>
-              </th>
-              <th className="text-left p-3 text-sm font-medium text-textDarkGrey">
-                <div className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-strokeGreyTwo rounded-full"></div>
-                  NO OF INSTALLATIONS
-                </div>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {mockInstallersData.map((installer, index) => (
-              <tr key={installer.id} className="border-b border-gray-50 hover:bg-gray-50">
-                <td className="p-3 text-sm text-textDarkGrey">
-                  {String(index + 1).padStart(2, '0')}
-                </td>
-                <td className="p-3 text-sm text-textDarkGrey">
-                  {installer.name}
-                </td>
-                <td className="p-3 text-sm text-textDarkGrey">
-                  {installer.location}
-                </td>
-                <td className="p-3 text-sm text-textDarkGrey">
-                  <span className="inline-flex items-center justify-center w-6 h-6 bg-gray-100 border border-gray-300 rounded-full text-xs font-medium">
-                    {String(installer.installations).padStart(2, '0')}
-                  </span>
-                </td>
+      <DataStateWrapper
+        isLoading={isLoading}
+        error={error}
+        errorStates={errorStates}
+        refreshData={async () => {
+          await Promise.all([refreshAgents(), refreshInstallers()]);
+        }}
+        errorMessage="Failed to fetch data"
+      >
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-gray-100">
+                <th className="text-left p-3 text-sm font-medium text-textDarkGrey">
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-strokeGreyTwo rounded-full"></div>
+                    S/N
+                  </div>
+                </th>
+                <th className="text-left p-3 text-sm font-medium text-textDarkGrey">
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-strokeGreyTwo rounded-full"></div>
+                    AGENT NAME
+                  </div>
+                </th>
+                <th className="text-left p-3 text-sm font-medium text-textDarkGrey">
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-strokeGreyTwo rounded-full"></div>
+                    LOCATION
+                  </div>
+                </th>
+                <th className="text-left p-3 text-sm font-medium text-textDarkGrey">
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-strokeGreyTwo rounded-full"></div>
+                    ASSIGNED INSTALLERS
+                  </div>
+                </th>
+                <th className="text-left p-3 text-sm font-medium text-textDarkGrey">
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-strokeGreyTwo rounded-full"></div>
+                    STATUS
+                  </div>
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {agentsData?.agents?.map((agent: any, index: number) => (
+                <tr key={agent.id} className="border-b border-gray-50 hover:bg-gray-50">
+                  <td className="p-3 text-sm text-textDarkGrey">
+                    {String(index + 1).padStart(2, '0')}
+                  </td>
+                  <td className="p-3 text-sm text-textDarkGrey">
+                    {agent.user?.firstname} {agent.user?.lastname}
+                  </td>
+                  <td className="p-3 text-sm text-textDarkGrey">
+                    {agent.user?.location || 'N/A'}
+                  </td>
+                  <td className="p-3 text-sm text-textDarkGrey">
+                    <span className="inline-flex items-center justify-center w-6 h-6 bg-gray-100 border border-gray-300 rounded-full text-xs font-medium">
+                      {String(agent.installers?.length || 0).padStart(2, '0')}
+                    </span>
+                  </td>
+                  <td className="p-3 text-sm text-textDarkGrey">
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                      agent.user?.status === 'active' 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-red-100 text-red-800'
+                    }`}>
+                      {agent.user?.status?.toUpperCase() || 'INACTIVE'}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </DataStateWrapper>
     </div>
   );
 };
