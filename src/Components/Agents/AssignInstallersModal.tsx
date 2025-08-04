@@ -30,11 +30,11 @@ const AssignInstallersModal: React.FC<AssignInstallersModalProps> = ({
     errorStates,
     mutate: refreshInstallers
   } = useGetRequest(
-    `/v1/agents/installers`,
+    `/v1/agents?category=INSTALLER`,
     isOpen,
     60000
   );
-
+console.log(installersData)
   const handleInstallerSelect = (installerId: string) => {
     setSelectedInstallers(prev => 
       prev.includes(installerId) 
@@ -57,7 +57,7 @@ const AssignInstallersModal: React.FC<AssignInstallersModalProps> = ({
       });
 
       // Get the selected installer objects for store
-      const selectedInstallerObjects = installersData?.installers?.filter((installer: any) => 
+      const selectedInstallerObjects = installersData?.agents?.filter((installer: any) => 
         selectedInstallers.includes(installer.id)
       ) || [];
 
@@ -111,23 +111,23 @@ const AssignInstallersModal: React.FC<AssignInstallersModalProps> = ({
                 </div>
 
                 <div className="max-h-96 overflow-y-auto border border-strokeGreyTwo rounded-lg bg-white shadow-sm">
-                  {installersData?.installers?.map((installer: any) => (
+                  {installersData?.agents?.map((agent: any) => (
                     <div
-                      key={installer.id}
+                      key={agent.id}
                       className={`flex items-center justify-between p-4 border-b border-strokeGreyTwo cursor-pointer transition-all duration-200 ${
-                        selectedInstallers.includes(installer.id) 
+                        selectedInstallers.includes(agent.id) 
                           ? 'bg-gradient-to-r from-[#FEF5DA] to-[#F8CB48]/20 border-l-4 border-l-[#A58730] shadow-sm' 
                           : 'hover:bg-gray-50 hover:shadow-sm'
                       }`}
-                      onClick={() => handleInstallerSelect(installer.id)}
+                      onClick={() => handleInstallerSelect(agent.id)}
                     >
                       <div className="flex items-center gap-4">
                         <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200 ${
-                          selectedInstallers.includes(installer.id)
+                          selectedInstallers.includes(agent.id)
                             ? 'bg-[#A58730] border-[#A58730] shadow-sm'
                             : 'border-strokeGreyTwo bg-white hover:border-[#A58730]/50'
                         }`}>
-                          {selectedInstallers.includes(installer.id) && (
+                          {selectedInstallers.includes(agent.id) && (
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-white">
                               <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
                             </svg>
@@ -135,21 +135,21 @@ const AssignInstallersModal: React.FC<AssignInstallersModalProps> = ({
                         </div>
                         <div className="flex flex-col gap-1">
                           <p className={`text-sm font-semibold ${
-                            selectedInstallers.includes(installer.id) ? 'text-[#A58730]' : 'text-textBlack'
+                            selectedInstallers.includes(agent.id) ? 'text-[#A58730]' : 'text-textBlack'
                           }`}>
-                            {installer.firstname} {installer.lastname}
+                            {agent.user.firstname} {agent.user.lastname}
                           </p>
                           <p className="text-xs text-textGrey font-medium">
-                            {installer.email}
+                            {agent.user.email}
                           </p>
                         </div>
                       </div>
                       <div className="text-sm font-semibold text-textDarkGrey">
-                        {installer.location}
+                        {agent.user.location}
                       </div>
                     </div>
                   ))}
-                  {(!installersData?.installers || installersData.installers.length === 0) && (
+                  {(!installersData?.agents || installersData.agents.length === 0) && (
                     <div className="flex items-center justify-center p-8 text-center">
                       <div className="flex flex-col items-center gap-2">
                         <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
