@@ -46,6 +46,10 @@ export type CardComponentProps = {
   paymentStatus?: "Completed" | "Successful" | "Defaulted";
   daysDue?: number;
   transactionId?: string;
+  transactionRef?: string;
+  ogaranyaOrderRef?: string | null;
+  ogaranyaSmsMessage?: string | null;
+  paymentMethod?: string;
   transactionStatus?: string;
   datetime?: string;
   transactionAmount?: number;
@@ -356,6 +360,10 @@ export const CardComponent = ({
   paymentStatus,
   daysDue,
   transactionId,
+  transactionRef,
+  ogaranyaOrderRef,
+  ogaranyaSmsMessage,
+  paymentMethod,
   transactionStatus,
   datetime,
   transactionAmount,
@@ -551,6 +559,13 @@ export const CardComponent = ({
             </div>
             <div className="flex items-center justify-between w-full gap-1">
               <SimpleTag
+                text="REFERENCE"
+                containerClass="text-[#49526A] font-light"
+              />
+              <p className="text-textBlack text-xs">{transactionRef}</p>
+            </div>
+            <div className="flex items-center justify-between w-full gap-1">
+              <SimpleTag
                 text="DATE & TIME"
                 containerClass="text-[#49526A] font-light"
               />
@@ -579,6 +594,31 @@ export const CardComponent = ({
                 </p>
               </div>
             </div>
+            {paymentMethod === "ONLINE" && ogaranyaOrderRef && (
+              <div className="flex items-center justify-between w-full gap-1">
+                <SimpleTag
+                  text="ORDER REF"
+                  containerClass="text-[#49526A] font-light"
+                />
+                <p className="text-textBlack text-xs font-bold">
+                  {ogaranyaOrderRef}
+                </p>
+              </div>
+            )}
+
+            {paymentMethod === "ONLINE" && ogaranyaSmsMessage && (
+              <div className="flex flex-col w-full gap-1">
+                <SimpleTag
+                  text="PAYMENT INSTRUCTIONS"
+                  containerClass="text-[#49526A] font-light"
+                />
+                <div className="bg-blue-50 p-2 rounded-lg border border-blue-200">
+                  <p className="text-textBlack text-xs leading-relaxed">
+                    {ogaranyaSmsMessage}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <NameTag
@@ -731,7 +771,9 @@ export const CardComponent = ({
                   {productTag}
                 </p>
               )}
-              <p className="text-textDarkGrey text-xs capitalize">{productName}</p>
+              <p className="text-textDarkGrey text-xs capitalize">
+                {productName}
+              </p>
               {quantity && (
                 <p className="text-textDarkGrey font-medium text-xs">
                   Quantity: {quantity}

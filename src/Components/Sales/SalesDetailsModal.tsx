@@ -39,6 +39,7 @@ export type SaleDetailsType = {
 
 export type SaleTransactionsType = {
   transactionId: string;
+  transactionRef: string;
   paymentStatus: string;
   datetime: string;
   productCategory: string;
@@ -107,8 +108,15 @@ const SalesDetailsModal = ({
   const generateSaleTransactionEntries = () => {
     const data = fetchSingleSale?.data;
     const entries = data?.sale?.payment.map(
-      (p: { id: any; paymentStatus: any; paymentDate: any; amount: any }) => ({
+      (p: {
+        id: any;
+        paymentStatus: any;
+        transactionRef: string;
+        paymentDate: any;
+        amount: any;
+      }) => ({
         transactionId: p?.id,
+        transactionRef: p?.transactionRef,
         paymentStatus: p?.paymentStatus,
         datetime: p?.paymentDate,
         productCategory: data?.sale?.category,
