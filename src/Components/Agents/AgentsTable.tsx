@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "react-router-dom";
 import { PaginationType, Table } from "../TableComponent/Table";
 import { CardComponent } from "../CardComponents/CardComponent";
 import AgentsModal from "./AgentsModal";
@@ -89,10 +90,29 @@ const AgentsTable = ({
     React.SetStateAction<Record<string, any> | null>
   >;
 }) => {
+  const location = useLocation();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [agentId, setAgentId] = useState<string>("");
   const [queryValue, setQueryValue] = useState<string>("");
   const [isSearchQuery, setIsSearchQuery] = useState<boolean>(false);
+
+  // Determine table title based on current location
+  const getTableTitle = () => {
+    switch (location.pathname) {
+      case "/agents/all":
+        return "ALL AGENTS";
+      case "/agents/sales":
+        return "SALES AGENTS";
+      case "/agents/installation":
+        return "INSTALLER AGENTS";
+      case "/agents/business":
+        return "BUSINESS AGENTS";
+      case "/agents/barred":
+        return "BARRED AGENTS";
+      default:
+        return "ALL AGENTS";
+    }
+  };
 
   const filterList = [
     // {
@@ -162,7 +182,7 @@ const AgentsTable = ({
         <div className="w-full">
           <Table
             tableType="card"
-            tableTitle="ALL AGENTS"
+            tableTitle={getTableTitle()}
             tableClassname="flex flex-wrap items-center gap-4"
             tableData={getTableData()}
             loading={isLoading}
