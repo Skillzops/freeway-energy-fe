@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Modal } from "../ModalComponent/Modal";
 import TabComponent from "../TabComponent/TabComponent";
 import { DropDown } from "../DropDownComponent/DropDown";
 import { useGetRequest } from "../../utils/useApiCall";
 import { DataStateWrapper } from "../Loaders/DataStateWrapper";
+import ListPagination from "../PaginationComponent/ListPagination";
 import AgentDetails, { AgentUserType } from "./AgentDetails";
 import AssignCustomersModal from "./AssignCustomersModal";
 import AssignProductsModal from "./AssignProductsModal";
@@ -13,18 +14,175 @@ import walletIcon from "../../assets/agents/wallet.svg";
 import InstallationHistoryModal from "./InstallationHistoryModal";
 import TaskHistoryModal from "./TaskHistoryModal";
 import { KeyedMutator } from "swr";
-import { toast } from "react-toastify";
 
 // Extend the AgentUserType to include category
 interface ExtendedAgentUserType extends AgentUserType {
   category?: string;
 }
 
+// Customer Table Component
+const CustomerTable = () => {
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [entriesPerPage] = useState<number>(12);
+
+  // Mock data for demonstration
+  const mockData = {
+    data: [
+      {
+        id: 1,
+        user: { firstname: "Naomi", lastname: "Gambo" },
+        product: { type: "EAAS", paymentType: "RECHARGE" },
+        status: "DUE",
+        dueDate: "SEPT 11 2024"
+      },
+      {
+        id: 2,
+        user: { firstname: "John", lastname: "Ajirioghene Okor" },
+        product: { type: "SHS", paymentType: "INSTALMENT" },
+        status: "COMPLETED"
+      },
+      {
+        id: 3,
+        user: { firstname: "Grace", lastname: "Obubra" },
+        product: { type: "ROOFTOP", paymentType: "INSTALMENT" },
+        status: "DEFAULTED",
+        daysDefaulted: 29
+      },
+      {
+        id: 4,
+        user: { firstname: "John", lastname: "Wakili" },
+        product: { type: "ROOFTOP", paymentType: "INSTALMENT" },
+        status: "DEFAULTED",
+        daysDefaulted: 29
+      },
+      {
+        id: 5,
+        user: { firstname: "Elizabeth", lastname: "Anigbogu" },
+        product: { type: "SHS", paymentType: "INSTALMENT" },
+        status: "DUE",
+        dueDate: "SEPT 11 2024"
+      },
+      {
+        id: 6,
+        user: { firstname: "Priscilla", lastname: "Amakiri" },
+        product: { type: "EAAS", paymentType: "RECHARGE" },
+        status: "DEFAULTED",
+        daysDefaulted: 29
+      },
+      {
+        id: 7,
+        user: { firstname: "Deborah", lastname: "Ebizi" },
+        product: { type: "ROOFTOP", paymentType: "ONE-OFF" },
+        status: "COMPLETED"
+      },
+      {
+        id: 8,
+        user: { firstname: "Stephen", lastname: "Akinyemi" },
+        product: { type: "ROOFTOP", paymentType: "ONE-OFF" },
+        status: "COMPLETED"
+      },
+      {
+        id: 9,
+        user: { firstname: "David", lastname: "Iwalewa" },
+        product: { type: "SHS", paymentType: "ONE-OFF" },
+        status: "DEFAULTED",
+        daysDefaulted: 29
+      },
+      {
+        id: 10,
+        user: { firstname: "Rebecca", lastname: "Abam" },
+        product: { type: "EAAS", paymentType: "RECHARGE" },
+        status: "DUE",
+        dueDate: "SEPT 11 2024"
+      }
+    ]
+  };
+
+  // Using mock data instead of API call
+  const customersData = mockData;
+
+  return (
+    <div className="flex flex-col p-2.5 gap-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px]">
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            <tr className="border-b border-gray-100">
+              <th className="text-left p-3 text-sm font-medium text-[#8990A5]">S/N</th>
+              <th className="text-left p-3 text-sm font-medium text-[#8990A5]">NAME</th>
+              <th className="text-left p-3 text-sm font-medium text-[#8990A5]">PRODUCT</th>
+              <th className="text-left p-3 text-sm font-medium text-[#8990A5]">STATUS</th>
+              <th className="text-left p-3 text-sm font-medium text-[#8990A5]">ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody>
+            {customersData?.data?.slice((currentPage - 1) * entriesPerPage, currentPage * entriesPerPage).map((customer: any, index: number) => (
+              <tr key={customer.id} className="border-b border-[#F6F8FA]">
+                <td className="p-3 text-sm text-textDarkGrey">
+                  {String(index + 1).padStart(2, '0')}
+                </td>
+                <td className="p-3 text-sm text-textDarkGrey">
+                  {customer?.user?.firstname} {customer?.user?.lastname}
+                </td>
+                <td className="p-3 text-sm">
+                  <div className="flex items-center gap-2">
+                    <span className={`px-2 py-1 rounded-full text-xs ${
+                      customer?.product?.type === 'EAAS' ? 'bg-[#E3FAD6]' :
+                      customer?.product?.type === 'SHS' ? 'bg-[#FDEEC2]' :
+                      'bg-[#FDEEC2]'
+                    }`}>
+                      {customer?.product?.type || 'N/A'}
+                    </span>
+                    <span className="text-textDarkGrey">
+                      {customer?.product?.paymentType || 'N/A'}
+                    </span>
+                  </div>
+                </td>
+                <td className="p-3 text-sm">
+                                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs whitespace-nowrap ${
+                    customer?.status === 'COMPLETED' ? 'bg-[#F6F8FA] text-[#00AF50]' :
+                    customer?.status === 'DEFAULTED' ? 'bg-[#F6F8FA] text-[#FC4C5D]' :
+                    'bg-[#F6F8FA] text-[#00AF50]'
+                  }`}>
+                    {customer?.status === 'DEFAULTED' ? `DEFAULTED: ${customer?.daysDefaulted || 29} DAYS` :
+                     customer?.status === 'DUE' ? `DUE: ${customer?.dueDate || 'SEPT 11 2024'}` :
+                     customer?.status || 'N/A'}
+                  </span>
+                </td>
+                <td className="p-3">
+                  <button className="px-4 py-1 text-xs bg-[#F6F8FA] text-textDarkGrey rounded-full hover:bg-gray-200">
+                    View
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="flex items-center justify-between px-4 py-3">
+        <div className="flex items-center gap-2">
+          <p className="text-xs text-textGrey">
+            Showing <span className="font-semibold">{(currentPage - 1) * entriesPerPage + 1}</span> to{" "}
+            <span className="font-semibold">{Math.min(currentPage * entriesPerPage, customersData.data.length)}</span> of{" "}
+            <span className="font-semibold">{customersData.data.length}</span> Customers
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-textGrey">Page</span>
+          <ListPagination
+            currentPage={currentPage}
+            totalItems={customersData.data.length}
+            itemsPerPage={entriesPerPage}
+            onPageChange={setCurrentPage}
+            label="Customers"
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Installers Table Component
 const InstallersTable = ({ agentID }: { agentID: string }) => {
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [entriesPerPage, setEntriesPerPage] = useState<number>(10);
-  
   // First fetch agents data from API
   const {
     data: agentsData,
@@ -181,6 +339,11 @@ const AgentModal = ({
 
   // const handleCancelClick = () => setDisplayInput(false);
 
+  // Mock data for customer count
+  const mockCustomersData = {
+    data: new Array(15) // 15 customers total
+  };
+
   // Get agent category to determine which tabs to show
   const agentCategory = fetchSingleAgent?.data?.category || fetchSingleAgent?.data?.user?.category || "SALES";
 
@@ -287,7 +450,7 @@ const AgentModal = ({
     } else {
       return [
         { name: "Agent Details", key: "agentDetails", count: null },
-        { name: "Customer", key: "customer", count: 0 },
+        { name: "Customer", key: "customer", count: mockCustomersData?.data?.length || 0 },
         { name: "Installers", key: "installers", count: 5 },
         { name: "Inventory", key: "inventory", count: 0 },
         { name: "Products", key: "products", count: 0 },
@@ -370,6 +533,8 @@ const AgentModal = ({
                   displayInput={false}
                 />
               </DataStateWrapper>
+            ) : tabContent === "customer" ? (
+              <CustomerTable />
             ) : tabContent === "installers" ? (
               <InstallersTable agentID={agentID} />
             ) : tabContent === "installationHistory" ? (

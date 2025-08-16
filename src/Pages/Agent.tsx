@@ -9,7 +9,7 @@ import wallet from "../assets/agents/wallet.svg";
 import cancelled from "../assets/cancelled.svg";
 import circleAction from "../assets/settings/addCircle.svg";
 import ActionButton from "@/Components/ActionButtonComponent/ActionButton";
-// import { DropDown } from "@/Components/DropDownComponent/DropDown";
+import { DropDown } from "@/Components/DropDownComponent/DropDown";
 import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
 import CreateNewAgents from "@/Components/Agents/CreateNewAgents";
 import { useGetRequest } from "@/utils/useApiCall";
@@ -130,19 +130,22 @@ const Agent = () => {
     },
   ];
 
-  // const dropDownList = {
-  //   items: ["Export List"],
-  //   onClickLink: (index: number) => {
-  //     switch (index) {
-  //       case 0:
-  //         console.log("Exporting list...");
-  //         break;
-  //       default:
-  //         break;
-  //     }
-  //   },
-  //   showCustomButton: true,
-  // };
+  const dropDownList = {
+    items: ["Export List", "Add Existing Agent"],
+    onClickLink: (index: number) => {
+      switch (index) {
+        case 0:
+          console.log("Exporting list...");
+          break;
+        case 1:
+          console.log("Adding existing agent...");
+          break;
+        default:
+          break;
+      }
+    },
+    showCustomButton: true,
+  };
 
   // const agentsPaths = ["all", "active", "barred"];
   const agentsPaths = ["all", "sales", "installation", "business", "barred"];
@@ -188,7 +191,7 @@ const Agent = () => {
               icon={<img src={circleAction} />}
               onClick={() => setIsOpen(true)}
             />
-            {/* <DropDown {...dropDownList} /> */}
+            <DropDown {...dropDownList} />
           </div>
         </section>
         <div className="flex flex-col w-full px-2 py-8 gap-4 lg:flex-row md:p-8">
