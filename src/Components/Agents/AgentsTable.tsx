@@ -24,6 +24,7 @@ type User = {
   isBlocked: boolean;
   status: "active" | string;
   roleId: string;
+  category: string;
   createdAt: string;
   updatedAt: string;
   deletedAt: null | string;
@@ -37,6 +38,10 @@ type AgentType = {
   createdAt: string;
   updatedAt: string;
   deletedAt: null | string;
+  category?: string;
+  pendingTasks?: number;
+  totalTasks?: number;
+  totalInstallations?: number;
   user: User;
 };
 
@@ -45,27 +50,42 @@ interface AgentEntries {
   datetime: string;
   name: string;
   status: string;
+  category: string;
   onGoingSales: number;
   inventoryInPossession: number;
   sales: number;
   registeredCustomers: number;
   email: string;
   phone: string;
+  // Additional fields for installer agents
+  pendingTasks?: number;
+  totalTasks?: number;
+  totalInstallations?: number;
+  location?: string;
 }
 
 const generateAgentEntries = (data: any): AgentEntries[] => {
   const entries: AgentEntries[] = data?.agents?.map((agent: AgentType) => {
+    const isInstaller = (agent?.user?.category || agent?.category) === "INSTALLER";
     return {
       id: agent?.id,
       datetime: agent?.createdAt,
       name: `${agent?.user?.firstname} ${agent?.user?.lastname}`,
       status: agent?.user?.status,
-      onGoingSales: 0,
-      inventoryInPossession: 0,
-      sales: 0,
-      registeredCustomers: 0,
+      category: `${(agent?.user?.category || agent?.category || "SALES").charAt(0).toUpperCase()}${(agent?.user?.category || agent?.category || "SALES").slice(1).toLowerCase()} agent`,
+      onGoingSales: isInstaller ? undefined : 0,
+      inventoryInPossession: isInstaller ? undefined : 0,
+      sales: isInstaller ? undefined : 0,
+      registeredCustomers: isInstaller ? undefined : 0,
       email: agent?.user?.email,
       phone: agent?.user?.phone,
+      // Additional fields for installer agents
+      ...(isInstaller && {
+        pendingTasks: agent?.pendingTasks || 0,
+        totalTasks: agent?.totalTasks || 0,
+        totalInstallations: agent?.totalInstallations || 0,
+        location: agent?.user?.location || "N/A"
+      })
     };
   });
   return entries;
@@ -195,6 +215,7 @@ const AgentsTable = ({
                   productId={item.id}
                   name={item.name}
                   status={item.status}
+                  category={item.category}
                   onGoingSales={item.onGoingSales}
                   inventoryInPossession={item.inventoryInPossession}
                   sales={item.sales}
