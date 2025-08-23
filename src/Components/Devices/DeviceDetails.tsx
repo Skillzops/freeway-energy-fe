@@ -29,6 +29,7 @@ const DeviceFormSchema = z.object({
   hardwareModel: z.string().trim(),
   firmwareVersion: z.string().trim(),
   isTokenable: z.boolean(),
+  saleItemId: z.string().trim().optional(),
 });
 
 type DeviceFormData = z.infer<typeof DeviceFormSchema>;
@@ -59,6 +60,7 @@ const DeviceDetails = ({
       hardwareModel: deviceData?.hardwareModel,
       firmwareVersion: deviceData?.firmwareVersion,
       isTokenable: deviceData?.isTokenable ?? false,
+      saleItemId: deviceData?.saleItemId ?? "",
     };
   }, [deviceData]);
 
@@ -385,6 +387,25 @@ const DeviceDetails = ({
                     : "Device cannot generate tokens"}
                 </span>
               </div>
+            )
+          }
+        />
+
+        <DetailComponent
+          label="Installation Status"
+          value={defaultFormData.saleItemId ? "Installed" : "Not Installed"}
+          parentClass="border-none p-0"
+          inputComponent={
+            !displayInput ? null : (
+              <SmallInput
+                type="text"
+                name="saleItemId"
+                value={formData.saleItemId}
+                onChange={handleInputChange}
+                placeholder="Sale Item ID"
+                required={false}
+                errorMessage={getFieldError("saleItemId")}
+              />
             )
           }
         />
