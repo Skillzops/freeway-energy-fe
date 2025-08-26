@@ -5,6 +5,7 @@ import { useState } from "react";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 import { SmallInput } from "../InputComponent/Input";
 import ApiErrorMessage from "../ApiErrorMessage";
+import { BiTrash } from "react-icons/bi";
 
 const DeviceTokenDetails = ({
   deviceData,
@@ -16,11 +17,15 @@ const DeviceTokenDetails = ({
   refreshListView: KeyedMutator<any>;
 }) => {
   const { apiCall } = useApiCall();
-  const [tokens] = useState<TokenEntry[]>(deviceData.tokens || []);
+  const tokens: TokenEntry[] = deviceData.tokens || [];
   const [generatingToken, setGeneratingToken] = useState(false);
-  const [tokenDuration, setTokenDuration] = useState<string>('30');
+  const [tokenDuration, setTokenDuration] = useState<string>("30");
   const [apiError, setApiError] = useState<string>("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [tokenToDelete, setTokenToDelete] = useState<TokenEntry | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
+  console.log({ tokens });
   const generateNewToken = async () => {
     if (!deviceData.isTokenable) {
       setApiError(
@@ -30,8 +35,6 @@ const DeviceTokenDetails = ({
     }
 
     const duration = parseInt(tokenDuration);
-
-
 
     if (isNaN(duration)) {
       setApiError("Please enter a valid number for token duration");
@@ -72,11 +75,37 @@ const DeviceTokenDetails = ({
     try {
       await navigator.clipboard.writeText(token);
       // You might want to add a toast notification here
-      
     } catch (error) {
       console.error("Failed to copy token:", error);
     }
   };
+
+  const handleDeleteToken = async () => {
+    if (!tokenToDelete) return;
+
+    setDeleting(true);
+    setApiError("");
+
+    try {
+      await apiCall({
+        endpoint: `/v1/device/${deviceData.id}/token/${tokenToDelete.id}`,
+        method: "post", // your backend expects POST
+        successMessage: "Token deleted successfully!",
+      });
+
+      await refreshTable();
+      await refreshListView();
+      setShowDeleteModal(false);
+      setTokenToDelete(null);
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.message || "Failed to delete token";
+      setApiError(message);
+    } finally {
+      setDeleting(false);
+    }
+  };
+  
 
   return (
     <div className="space-y-4">
@@ -152,13 +181,22 @@ const DeviceTokenDetails = ({
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                        Token #{tokens.length - index}
-                      </span>
-                      <span className="text-xs text-gray-500">
-                        {getDurationText(token.duration)}
-                      </span>
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                          Token #{tokens.length - index}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {getDurationText(token.duration)}
+                        </span>
+                      </div>
+                      <BiTrash
+                        onClick={() => {
+                          setTokenToDelete(token);
+                          setShowDeleteModal(true);
+                        }}
+                        className="text-red-400 hover:scale-105 cursor-pointer text-xl"
+                      />
                     </div>
 
                     <div className="bg-gray-100 rounded p-2 mb-2">
@@ -169,6 +207,17 @@ const DeviceTokenDetails = ({
 
                     <p className="text-xs text-gray-500">
                       Generated: {formatDate(token.createdAt)}
+                    </p>
+                    <p className="text-xs font-bold text-gray-500 ">
+                      Created by:{" "}
+                      {token?.creator ? (
+                        <span className="uppercase">
+                          {token?.creator?.firstname} {token?.creator?.lastname}{" "}
+                          ({token?.creator?.role.role})
+                        </span>
+                      ) : (
+                        "Unknown User"
+                      )}
                     </p>
                   </div>
 
@@ -194,6 +243,36 @@ const DeviceTokenDetails = ({
                 </div>
               </div>
             ))}
+          </div>
+        )}
+        {showDeleteModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+            <div className="bg-white rounded-2xl shadow-lg p-6 w-full max-w-md animate-fade-in">
+              <h2 className="text-lg font-semibold text-gray-800 mb-2">
+                Confirm Deletion
+              </h2>
+              <p className="text-sm text-gray-600 mb-4">
+                Are you sure you want to delete this token? This action cannot
+                be undone.
+              </p>
+
+              <div className="flex justify-end gap-3">
+                <button
+                  className="px-4 py-2 text-sm rounded-lg border hover:bg-gray-100"
+                  onClick={() => setShowDeleteModal(false)}
+                  disabled={deleting}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="px-4 py-2 text-sm rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
+                  onClick={handleDeleteToken}
+                  disabled={deleting}
+                >
+                  {deleting ? "Deleting..." : "Delete"}
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>

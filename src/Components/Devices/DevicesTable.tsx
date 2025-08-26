@@ -9,6 +9,7 @@ export interface TokenEntry {
   id: string;
   token: string;
   duration: number;
+  creator: Record<string, any>;
   createdAt: string;
 }
 export type DeviceEntries = {
