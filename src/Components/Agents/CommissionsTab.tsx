@@ -35,13 +35,7 @@ const CommissionsTab: React.FC<Props> = ({ agentID }) => {
   })();
 
   // Fetch
-  const {
-    data,
-    isLoading,
-    error,
-    errorStates,
-    mutate,
-  } = useGetRequest(
+  const { data, isLoading, error, errorStates, mutate } = useGetRequest(
     agentID ? `/v1/agents/${agentID}/commissions${qs}` : null,
     !!agentID,
     60000
@@ -67,34 +61,55 @@ const CommissionsTab: React.FC<Props> = ({ agentID }) => {
         <div className="flex items-center justify-between w-full h-[40px] rounded-full border-[0.6px] px-4 py-2 bg-paleGrayGradient border-strokeGreyThree">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <label htmlFor="comm-start" className="text-xs font-medium text-textGrey">Start</label>
+              <label
+                htmlFor="comm-start"
+                className="text-xs font-medium text-textGrey"
+              >
+                Start
+              </label>
               <input
                 id="comm-start"
                 type="date"
                 value={start}
-                onChange={(e) => { setStart(e.target.value); setPage(1); }}
+                onChange={(e) => {
+                  setStart(e.target.value);
+                  setPage(1);
+                }}
                 className="text-xs font-medium text-textGrey pl-2 pr-2 py-1 bg-[#F9F9F9] border-[0.6px] border-strokeGreyThree rounded-full"
               />
             </div>
             <div className="flex items-center gap-2">
-              <label htmlFor="comm-end" className="text-xs font-medium text-textGrey">End</label>
+              <label
+                htmlFor="comm-end"
+                className="text-xs font-medium text-textGrey"
+              >
+                End
+              </label>
               <input
                 id="comm-end"
                 type="date"
                 value={end}
-                onChange={(e) => { setEnd(e.target.value); setPage(1); }}
+                onChange={(e) => {
+                  setEnd(e.target.value);
+                  setPage(1);
+                }}
                 className="text-xs font-medium text-textGrey pl-2 pr-2 py-1 bg-[#F9F9F9] border-[0.6px] border-strokeGreyThree rounded-full"
               />
             </div>
             <div className="relative flex w-max">
               <select
                 value={limit}
-                onChange={(e) => { setLimit(Number(e.target.value)); setPage(1); }}
+                onChange={(e) => {
+                  setLimit(Number(e.target.value));
+                  setPage(1);
+                }}
                 className="text-xs font-medium text-textGrey pl-2 pr-6 py-1 bg-[#F9F9F9] border-[0.6px] border-strokeGreyThree rounded-full appearance-none"
                 title="Items per page"
               >
                 {LIMITS.map((n) => (
-                  <option key={n} value={n}>{n} / page</option>
+                  <option key={n} value={n}>
+                    {n} / page
+                  </option>
                 ))}
               </select>
             </div>
@@ -106,20 +121,22 @@ const CommissionsTab: React.FC<Props> = ({ agentID }) => {
               Clear Filters
             </button>
           </div>
-
-          <div className="flex items-center gap-2 pl-2 pr-1 bg-primaryGradient border-[0.6px] border-strokeGreyThree rounded-full">
-            <span className="text-xs font-medium text-white">
-              TOTAL COMMISSION: {money(summary?.totalCommission ?? 0)}
-            </span>
-          </div>
         </div>
+      </div>
+
+      <div className="flex items-center gap-2 pl-2 pr-1 bg-primaryGradient border-[0.6px] border-strokeGreyThree rounded-full">
+        <span className="text-xs font-medium text-white">
+          TOTAL COMMISSION: {money(summary?.totalCommission ?? 0)}
+        </span>
       </div>
 
       {/* Quick stats */}
       <div className="flex flex-wrap gap-2">
         <div className="flex items-center gap-2 pl-3 pr-3 py-1.5 rounded-full bg-[#F9F9F9] border-[0.6px] border-strokeGreyThree text-[11px]">
           <span className="text-textGrey">Total Payments</span>
-          <span className="font-semibold text-textBlack">{summary?.totalPayments ?? 0}</span>
+          <span className="font-semibold text-textBlack">
+            {summary?.totalPayments ?? 0}
+          </span>
         </div>
         <div className="flex items-center gap-2 pl-3 pr-3 py-1.5 rounded-full bg-[#F9F9F9] border-[0.6px] border-strokeGreyThree text-[11px]">
           <span className="text-textGrey">Commission Rate</span>
@@ -158,7 +175,9 @@ const CommissionsTab: React.FC<Props> = ({ agentID }) => {
               <tbody className="divide-y divide-gray-100">
                 {rows.map((r: any) => (
                   <tr key={r.id} className="hover:bg-[#FAFAFA]">
-                    <td className="px-4 py-3 whitespace-nowrap">{when(r.paymentDate)}</td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      {when(r.paymentDate)}
+                    </td>
                     <td className="px-4 py-3">{r.transactionRef}</td>
                     <td className="px-4 py-3">{r.customer?.name ?? "—"}</td>
                     <td className="px-4 py-3">{r.customer?.phone ?? "—"}</td>
@@ -182,8 +201,8 @@ const CommissionsTab: React.FC<Props> = ({ agentID }) => {
       {/* Pagination */}
       <div className="mt-4 flex items-center justify-between">
         <div className="text-xs text-gray-500">
-          Showing {(rows.length && (page - 1) * limit + 1) || 0}–{(page - 1) * limit + rows.length} of{" "}
-          {Number(total).toLocaleString()}
+          Showing {(rows.length && (page - 1) * limit + 1) || 0}–
+          {(page - 1) * limit + rows.length} of {Number(total).toLocaleString()}
         </div>
         <ListPagination
           totalItems={total}
