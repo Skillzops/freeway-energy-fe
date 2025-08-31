@@ -497,7 +497,8 @@ const AgentModal = ({
         { name: "Transactions", key: "transactions", count: 0 },
         { name: "Stats", key: "stats", count: 0 },
         { name: "Sales", key: "sales", count: 0 },
-        { name: "Tickets", key: "tickets", count: 0 }
+        { name: "Tickets", key: "tickets", count: 0 },
+        { name: "Commissions", key: "commissions", count: null },
       ];
     }
   };
