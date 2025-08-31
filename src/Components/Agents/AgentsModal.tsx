@@ -15,6 +15,7 @@ import InstallationHistoryModal from "./InstallationHistoryModal";
 import TaskHistoryModal from "./TaskHistoryModal";
 import { KeyedMutator } from "swr";
 import rootStore from "../../stores/rootStore";
+import CommissionsTab from "./CommissionsTab";
 
 // Extend the AgentUserType to include category
 interface ExtendedAgentUserType extends AgentUserType {
@@ -482,6 +483,7 @@ const AgentModal = ({
       return [
         { name: "Agent Details", key: "agentDetails", count: null },
         { name: "Installation History", key: "installationHistory", count: installationData?.total || 0 },
+        { name: "Commissions", key: "commissions", count: null }, // <- new
         { name: "Task History", key: "taskHistory", count: taskData?.total || 0 }
       ];
     } else {
@@ -628,6 +630,8 @@ const AgentModal = ({
                   </DataStateWrapper>
                 </div>
               </div>
+            ) : tabContent === "commissions" ? (
+              <CommissionsTab agentID={agentID} />
             ) : tabContent === "taskHistory" ? (
               <div className="flex flex-col p-2.5 gap-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px]">
                 <div className="flex items-center justify-between p-4">
