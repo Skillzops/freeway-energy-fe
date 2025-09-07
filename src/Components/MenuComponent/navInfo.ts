@@ -21,11 +21,6 @@ export const navData = [
     link: "/home",
   },
   {
-    title: "Dashboard",
-    icon: DashboardIcon,
-    link: "/dashboard",
-  },
-  {
     title: "Sales",
     icon: SalesIcon,
     link: "/sales",
