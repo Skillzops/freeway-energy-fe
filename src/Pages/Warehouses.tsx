@@ -68,17 +68,20 @@ export default function Warehouses() {
   const { data: stats, isLoading: statsLoading } = useWarehouseStats();
   const isMobile = useBreakpoint("max", 640);
   
+  // Ensure warehouses is always an array
+  const warehousesArray = Array.isArray(warehouses) ? warehouses : [];
+  
   // Calculate totals from warehouses data
-  const totalItems = warehouses.reduce((sum, warehouse) => sum + warehouse.totalItems, 0);
-  const totalValue = warehouses.reduce((sum, warehouse) => sum + warehouse.totalValue, 0);
+  const totalItems = warehousesArray.reduce((sum, warehouse) => sum + warehouse.totalItems, 0);
+  const totalValue = warehousesArray.reduce((sum, warehouse) => sum + warehouse.totalValue, 0);
   
   // Use stats from API if available, otherwise calculate from warehouses
-  const warehouseCount = stats?.totalWarehouses || warehouses.length;
+  const warehouseCount = stats?.totalWarehouses || warehousesArray.length;
   const totalInventoryItems = stats?.totalItems || totalItems;
   const totalInventoryValue = stats?.totalValue || totalValue;
 
   // Filter warehouses based on search
-  const filteredWarehouses = warehouses.filter(warehouse =>
+  const filteredWarehouses = warehousesArray.filter(warehouse =>
     warehouse.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     warehouse.location.toLowerCase().includes(searchTerm.toLowerCase())
   );

@@ -31,6 +31,7 @@ export function NewWarehouseModal({ open, onOpenChange }: NewWarehouseModalProps
   const [isMainWarehouse, setIsMainWarehouse] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { addWarehouse } = useWarehouse();
   const isMobile = useBreakpoint("max", 640);
@@ -55,7 +56,7 @@ export function NewWarehouseModal({ open, onOpenChange }: NewWarehouseModalProps
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!name || !location) {
@@ -63,30 +64,38 @@ export function NewWarehouseModal({ open, onOpenChange }: NewWarehouseModalProps
       return;
     }
 
-    // Add warehouse to context
-    addWarehouse({
-      name,
-      location,
-      totalItems: 0,
-      totalValue: 0,
-      isMainWarehouse,
-      isActive: true,
-      image: imagePreview || '/assets/Images/logo.png', // Default image if none selected
-    });
+    setIsLoading(true);
+    try {
+      // Add warehouse to context
+      await addWarehouse({
+        name,
+        location,
+        totalItems: 0,
+        totalValue: 0,
+        isMainWarehouse,
+        isActive: true,
+        image: imagePreview, 
+      });
 
-    toast.success(`${name} has been added successfully`);
+      toast.success(`${name} has been added successfully`);
 
-    // Reset form and close modal
-    setName("");
-    setLocation("");
-    setDescription("");
-    setIsMainWarehouse(false);
-    setSelectedImage(null);
-    setImagePreview("");
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+      // Reset form and close modal
+      setName("");
+      setLocation("");
+      setDescription("");
+      setIsMainWarehouse(false);
+      setSelectedImage(null);
+      setImagePreview("");
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      onOpenChange(false);
+    } catch (error: any) {
+      console.error('Failed to create warehouse:', error);
+      toast.error('Failed to create warehouse. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
-    onOpenChange(false);
   };
 
   return (
@@ -209,9 +218,10 @@ export function NewWarehouseModal({ open, onOpenChange }: NewWarehouseModalProps
             </button>
             <button
               type="submit"
-              className="w-full sm:w-auto px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm sm:text-base"
+              disabled={isLoading}
+              className="w-full sm:w-auto px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Create Warehouse
+              {isLoading ? "Creating..." : "Create Warehouse"}
             </button>
           </div>
         </form>

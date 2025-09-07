@@ -266,7 +266,18 @@ export const useWarehouseApi = () => {
 
 // Data fetching hooks using SWR
 export const useWarehouses = (revalidate = true) => {
-  return useGetRequest(WAREHOUSE_ENDPOINTS.WAREHOUSES, revalidate);
+  const result = useGetRequest(WAREHOUSE_ENDPOINTS.WAREHOUSES, revalidate);
+  
+  // Handle different API response structures
+  const processedData = result.data ?
+    (Array.isArray(result.data) ? result.data :
+     Array.isArray(result.data.data) ? result.data.data :
+     Array.isArray(result.data.warehouses) ? result.data.warehouses : []) : [];
+  
+  return {
+    ...result,
+    data: processedData
+  };
 };
 
 export const useWarehouse = (id: string | null, revalidate = true) => {
