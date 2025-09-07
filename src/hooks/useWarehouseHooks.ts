@@ -1,7 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useWarehouseApi, useWarehouses, useProducts, useTransferRequests } from '../services/warehouseApi';
+import { useWarehouseApi, useWarehouses, useProducts, useTransferRequests, useWarehouseStats, useWarehouseManagers } from '../services/warehouseApi';
 import { toast } from 'react-toastify';
 import type { Warehouse, Product, TransferRequest } from '../data/warehouseData';
+
+// Export the useWarehouseManagers hook for external use
+export { useWarehouseManagers } from '../services/warehouseApi';
 
 // Real-time warehouse management hook
 export const useWarehouseManagement = () => {
@@ -92,6 +95,34 @@ export const useWarehouseManagement = () => {
     }
   };
 
+  const activateWarehouse = async (id: string) => {
+    setIsLoading(true);
+    try {
+      await warehouseApi.activateWarehouse(id);
+      await mutateWarehouses(); // Refresh data
+      toast.success('Warehouse activated successfully');
+    } catch (error) {
+      toast.error('Failed to activate warehouse');
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const deactivateWarehouse = async (id: string) => {
+    setIsLoading(true);
+    try {
+      await warehouseApi.deactivateWarehouse(id);
+      await mutateWarehouses(); // Refresh data
+      toast.success('Warehouse deactivated successfully');
+    } catch (error) {
+      toast.error('Failed to deactivate warehouse');
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return {
     warehouses: paginatedWarehouses,
     allWarehouses: warehouses,
@@ -107,6 +138,8 @@ export const useWarehouseManagement = () => {
     updateWarehouse,
     deleteWarehouse,
     toggleWarehouseStatus,
+    activateWarehouse,
+    deactivateWarehouse,
     refreshData: mutateWarehouses,
   };
 };
@@ -255,14 +288,28 @@ export const useTransferManagement = () => {
     }
   };
 
-  const fulfillTransferRequest = async (id: string, fulfilledQuantity: number, status: 'fulfilled' | 'partial' | 'rejected', notes?: string) => {
+  const fulfillTransferRequest = async (id: string, fulfilledQuantity?: number, notes?: string) => {
     setIsLoading(true);
     try {
-      await warehouseApi.fulfillTransferRequest(id, fulfilledQuantity, status, notes);
+      await warehouseApi.fulfillTransferRequest(id, fulfilledQuantity, notes);
       await mutateTransfers(); // Refresh data
-      toast.success('Transfer request updated successfully');
+      toast.success('Transfer request fulfilled successfully');
     } catch (error) {
-      toast.error('Failed to update transfer request');
+      toast.error('Failed to fulfill transfer request');
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const rejectTransferRequest = async (id: string, reason?: string) => {
+    setIsLoading(true);
+    try {
+      await warehouseApi.rejectTransferRequest(id, reason);
+      await mutateTransfers(); // Refresh data
+      toast.success('Transfer request rejected successfully');
+    } catch (error) {
+      toast.error('Failed to reject transfer request');
       throw error;
     } finally {
       setIsLoading(false);
@@ -305,6 +352,7 @@ export const useTransferManagement = () => {
     setWarehouseFilter,
     createTransferRequest,
     fulfillTransferRequest,
+    rejectTransferRequest,
     updateTransferRequest,
     getWarehouseName,
     getProductName,
@@ -317,11 +365,12 @@ export const useDashboardMetrics = () => {
   const { data: warehouses = [], isLoading: warehousesLoading } = useWarehouses();
   const { data: products = [], isLoading: productsLoading } = useProducts();
   const { data: transfers = [], isLoading: transfersLoading } = useTransferRequests();
+  const { data: stats, isLoading: statsLoading } = useWarehouseStats();
 
-  const isLoading = warehousesLoading || productsLoading || transfersLoading;
+  const isLoading = warehousesLoading || productsLoading || transfersLoading || statsLoading;
 
-  // Calculate comprehensive metrics
-  const metrics = {
+  // Use API stats if available, otherwise calculate from local data
+  const metrics = stats || {
     warehouses: {
       total: warehouses.length,
       active: warehouses.filter((w: Warehouse) => w.isActive).length,
@@ -486,6 +535,44 @@ export const useBulkOperations = () => {
 };
 
 // Export functionality hook
+// Warehouse manager operations hook
+export const useWarehouseManagerOperations = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const warehouseApi = useWarehouseApi();
+
+  const assignManagers = async (warehouseId: string, managerIds: string[]) => {
+    setIsLoading(true);
+    try {
+      await warehouseApi.assignWarehouseManagers(warehouseId, managerIds);
+      toast.success('Warehouse managers assigned successfully');
+    } catch (error) {
+      toast.error('Failed to assign warehouse managers');
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const unassignManager = async (managerId: string) => {
+    setIsLoading(true);
+    try {
+      await warehouseApi.unassignWarehouseManager(managerId);
+      toast.success('Warehouse manager unassigned successfully');
+    } catch (error) {
+      toast.error('Failed to unassign warehouse manager');
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return {
+    isLoading,
+    assignManagers,
+    unassignManager,
+  };
+};
+
 export const useWarehouseExport = () => {
   const [isExporting, setIsExporting] = useState(false);
 
@@ -493,7 +580,7 @@ export const useWarehouseExport = () => {
     setIsExporting(true);
     try {
       // This would typically call an API endpoint that generates the export
-      const response = await fetch(`/api/v1/warehouses/export?format=${format}`, {
+      const response = await fetch(`/v1/warehouses/export?format=${format}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
@@ -525,7 +612,7 @@ export const useWarehouseExport = () => {
   const exportInventory = async (warehouseId: string, format: 'csv' | 'excel' | 'pdf' = 'csv') => {
     setIsExporting(true);
     try {
-      const response = await fetch(`/api/v1/warehouses/${warehouseId}/inventory/export?format=${format}`, {
+      const response = await fetch(`/v1/warehouses/${warehouseId}/inventory/export?format=${format}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('authToken')}`,

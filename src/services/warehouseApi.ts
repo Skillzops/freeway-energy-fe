@@ -1,17 +1,23 @@
 import { useApiCall, useGetRequest } from '../utils/useApiCall';
 import type { Warehouse, Product, TransferRequest } from '../data/warehouseData';
 
-// API endpoints for warehouse operations
+// API endpoints for warehouse operations - Updated to match new API structure
 const WAREHOUSE_ENDPOINTS = {
   WAREHOUSES: '/v1/warehouses',
   WAREHOUSE_BY_ID: (id: string) => `/v1/warehouses/${id}`,
-  WAREHOUSE_INVENTORY: (id: string) => `/v1/warehouses/${id}/inventory`,
+  WAREHOUSE_STATS: '/v1/warehouses/stats',
+  WAREHOUSE_ACTIVATE: (id: string) => `/v1/warehouses/${id}/activate`,
+  WAREHOUSE_DEACTIVATE: (id: string) => `/v1/warehouses/${id}/deactivate`,
+  WAREHOUSE_MANAGERS: (id: string) => `/v1/warehouses/${id}/managers`,
+  UNASSIGN_MANAGER: (managerId: string) => `/v1/warehouses/managers/${managerId}`,
+  TRANSFER_REQUESTS: '/v1/warehouses/transfer-requests',
+  TRANSFER_REQUEST_BY_ID: (id: string) => `/v1/warehouses/transfer-requests/${id}`,
+  TRANSFER_REQUEST_FULFILL: (id: string) => `/v1/warehouses/transfer-requests/${id}/fulfill`,
+  TRANSFER_REQUEST_REJECT: (id: string) => `/v1/warehouses/transfer-requests/${id}/reject`,
+  // Legacy endpoints for backward compatibility
   PRODUCTS: '/v1/products',
   PRODUCT_BY_ID: (id: string) => `/v1/products/${id}`,
-  TRANSFER_REQUESTS: '/v1/transfer-requests',
-  TRANSFER_REQUEST_BY_ID: (id: string) => `/v1/transfer-requests/${id}`,
-  WAREHOUSE_METRICS: '/v1/warehouses/metrics',
-  WAREHOUSE_TRANSFERS: (id: string) => `/v1/warehouses/${id}/transfers`,
+  WAREHOUSE_INVENTORY: (id: string) => `/v1/warehouses/${id}/inventory`,
 };
 
 // Warehouse API service
@@ -24,6 +30,9 @@ export const useWarehouseApi = () => {
       endpoint: WAREHOUSE_ENDPOINTS.WAREHOUSES,
       method: 'post',
       data: warehouseData,
+      headers: {
+        'Accept': 'application/json'
+      },
       successMessage: 'Warehouse created successfully',
     });
   };
@@ -31,8 +40,11 @@ export const useWarehouseApi = () => {
   const updateWarehouse = async (id: string, warehouseData: Partial<Warehouse>) => {
     return await apiCall({
       endpoint: WAREHOUSE_ENDPOINTS.WAREHOUSE_BY_ID(id),
-      method: 'put',
+      method: 'patch',
       data: warehouseData,
+      headers: {
+        'Accept': 'application/json'
+      },
       successMessage: 'Warehouse updated successfully',
     });
   };
@@ -41,17 +53,39 @@ export const useWarehouseApi = () => {
     return await apiCall({
       endpoint: WAREHOUSE_ENDPOINTS.WAREHOUSE_BY_ID(id),
       method: 'delete',
+      headers: {
+        'Accept': 'application/json',
+      },
       successMessage: 'Warehouse deleted successfully',
     });
   };
 
-  const toggleWarehouseStatus = async (id: string, isActive: boolean) => {
+  const activateWarehouse = async (id: string) => {
     return await apiCall({
-      endpoint: `${WAREHOUSE_ENDPOINTS.WAREHOUSE_BY_ID(id)}/status`,
+      endpoint: WAREHOUSE_ENDPOINTS.WAREHOUSE_ACTIVATE(id),
       method: 'patch',
-      data: { isActive },
-      successMessage: `Warehouse ${isActive ? 'activated' : 'deactivated'} successfully`,
+      data: {},
+      headers: {
+        'Accept': 'application/json'
+      },
+      successMessage: 'Warehouse activated successfully',
     });
+  };
+
+  const deactivateWarehouse = async (id: string) => {
+    return await apiCall({
+      endpoint: WAREHOUSE_ENDPOINTS.WAREHOUSE_DEACTIVATE(id),
+      method: 'patch',
+      data: {},
+      headers: {
+        'Accept': 'application/json'
+      },
+      successMessage: 'Warehouse deactivated successfully',
+    });
+  };
+
+  const toggleWarehouseStatus = async (id: string, isActive: boolean) => {
+    return isActive ? activateWarehouse(id) : deactivateWarehouse(id);
   };
 
   // Product operations
@@ -60,6 +94,9 @@ export const useWarehouseApi = () => {
       endpoint: WAREHOUSE_ENDPOINTS.PRODUCTS,
       method: 'post',
       data: productData,
+      headers: {
+        'Accept': 'application/json'
+      },
       successMessage: 'Product created successfully',
     });
   };
@@ -69,6 +106,9 @@ export const useWarehouseApi = () => {
       endpoint: WAREHOUSE_ENDPOINTS.PRODUCT_BY_ID(id),
       method: 'put',
       data: productData,
+      headers: {
+        'Accept': 'application/json'
+      },
       successMessage: 'Product updated successfully',
     });
   };
@@ -77,6 +117,9 @@ export const useWarehouseApi = () => {
     return await apiCall({
       endpoint: WAREHOUSE_ENDPOINTS.PRODUCT_BY_ID(id),
       method: 'delete',
+      headers: {
+        'Accept': 'application/json',
+      },
       successMessage: 'Product deleted successfully',
     });
   };
@@ -87,6 +130,9 @@ export const useWarehouseApi = () => {
       endpoint: WAREHOUSE_ENDPOINTS.TRANSFER_REQUESTS,
       method: 'post',
       data: transferData,
+      headers: {
+        'Accept': 'application/json'
+      },
       successMessage: 'Transfer request created successfully',
     });
   };
@@ -96,16 +142,34 @@ export const useWarehouseApi = () => {
       endpoint: WAREHOUSE_ENDPOINTS.TRANSFER_REQUEST_BY_ID(id),
       method: 'put',
       data: transferData,
+      headers: {
+        'Accept': 'application/json'
+      },
       successMessage: 'Transfer request updated successfully',
     });
   };
 
-  const fulfillTransferRequest = async (id: string, fulfilledQuantity: number, status: 'fulfilled' | 'partial' | 'rejected', notes?: string) => {
+  const fulfillTransferRequest = async (id: string, fulfilledQuantity?: number, notes?: string) => {
     return await apiCall({
-      endpoint: `${WAREHOUSE_ENDPOINTS.TRANSFER_REQUEST_BY_ID(id)}/fulfill`,
+      endpoint: WAREHOUSE_ENDPOINTS.TRANSFER_REQUEST_FULFILL(id),
       method: 'patch',
-      data: { fulfilledQuantity, status, notes },
+      data: { fulfilledQuantity, notes },
+      headers: {
+        'Accept': 'application/json'
+      },
       successMessage: 'Transfer request fulfilled successfully',
+    });
+  };
+
+  const rejectTransferRequest = async (id: string, reason?: string) => {
+    return await apiCall({
+      endpoint: WAREHOUSE_ENDPOINTS.TRANSFER_REQUEST_REJECT(id),
+      method: 'patch',
+      data: { reason },
+      headers: {
+        'Accept': 'application/json'
+      },
+      successMessage: 'Transfer request rejected successfully',
     });
   };
 
@@ -115,6 +179,9 @@ export const useWarehouseApi = () => {
       endpoint: WAREHOUSE_ENDPOINTS.WAREHOUSE_INVENTORY(warehouseId),
       method: 'post',
       data: inventoryData,
+      headers: {
+        'Accept': 'application/json'
+      },
       successMessage: 'Inventory item added successfully',
     });
   };
@@ -124,6 +191,9 @@ export const useWarehouseApi = () => {
       endpoint: `${WAREHOUSE_ENDPOINTS.WAREHOUSE_INVENTORY(warehouseId)}/${itemId}`,
       method: 'put',
       data: inventoryData,
+      headers: {
+        'Accept': 'application/json'
+      },
       successMessage: 'Inventory item updated successfully',
     });
   };
@@ -132,7 +202,34 @@ export const useWarehouseApi = () => {
     return await apiCall({
       endpoint: `${WAREHOUSE_ENDPOINTS.WAREHOUSE_INVENTORY(warehouseId)}/${itemId}`,
       method: 'delete',
+      headers: {
+        'Accept': 'application/json',
+      },
       successMessage: 'Inventory item deleted successfully',
+    });
+  };
+
+  // Warehouse manager operations
+  const assignWarehouseManagers = async (warehouseId: string, managerIds: string[]) => {
+    return await apiCall({
+      endpoint: WAREHOUSE_ENDPOINTS.WAREHOUSE_MANAGERS(warehouseId),
+      method: 'post',
+      data: { managerIds },
+      headers: {
+        'Accept': 'application/json'
+      },
+      successMessage: 'Warehouse managers assigned successfully',
+    });
+  };
+
+  const unassignWarehouseManager = async (managerId: string) => {
+    return await apiCall({
+      endpoint: WAREHOUSE_ENDPOINTS.UNASSIGN_MANAGER(managerId),
+      method: 'delete',
+      headers: {
+        'Accept': 'application/json',
+      },
+      successMessage: 'Warehouse manager unassigned successfully',
     });
   };
 
@@ -142,6 +239,12 @@ export const useWarehouseApi = () => {
     updateWarehouse,
     deleteWarehouse,
     toggleWarehouseStatus,
+    activateWarehouse,
+    deactivateWarehouse,
+    
+    // Warehouse manager operations
+    assignWarehouseManagers,
+    unassignWarehouseManager,
     
     // Product operations
     createProduct,
@@ -152,6 +255,7 @@ export const useWarehouseApi = () => {
     createTransferRequest,
     updateTransferRequest,
     fulfillTransferRequest,
+    rejectTransferRequest,
     
     // Inventory operations
     addInventoryItem,
@@ -201,13 +305,24 @@ export const useTransferRequest = (id: string | null, revalidate = true) => {
   );
 };
 
+export const useWarehouseStats = (revalidate = true) => {
+  return useGetRequest(WAREHOUSE_ENDPOINTS.WAREHOUSE_STATS, revalidate);
+};
+
 export const useWarehouseMetrics = (revalidate = true) => {
-  return useGetRequest(WAREHOUSE_ENDPOINTS.WAREHOUSE_METRICS, revalidate);
+  return useWarehouseStats(revalidate);
+};
+
+export const useWarehouseManagers = (warehouseId: string | null, revalidate = true) => {
+  return useGetRequest(
+    warehouseId ? WAREHOUSE_ENDPOINTS.WAREHOUSE_MANAGERS(warehouseId) : null,
+    revalidate
+  );
 };
 
 export const useWarehouseTransfers = (warehouseId: string | null, revalidate = true) => {
   return useGetRequest(
-    warehouseId ? WAREHOUSE_ENDPOINTS.WAREHOUSE_TRANSFERS(warehouseId) : null,
+    warehouseId ? `${WAREHOUSE_ENDPOINTS.WAREHOUSE_BY_ID(warehouseId)}/transfers` : null,
     revalidate
   );
 };

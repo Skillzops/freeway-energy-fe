@@ -3,7 +3,7 @@ import PageLayout from "./PageLayout";
 import { MetricCard } from "../Components/WareHouses/MetricCard";
 import { WarehouseCard } from "../Components/WareHouses/WarehouseCard";
 import { useWarehouse } from "../contexts/WarehouseContext";
-import { useMockWarehouseMetrics, useMockTransferRequests } from "../services/mockWarehouseApi";
+import { useWarehouseStats, useTransferRequests } from "../services/warehouseApi";
 import { Link } from "react-router-dom";
 import dashboardbadge from "../assets/dashboard/dashboardbadge.png";
 
@@ -46,8 +46,8 @@ const PlusIcon = () => (
 
 const Dashboard = () => {
   const { warehouses, isLoading } = useWarehouse();
-  const { data: metrics, isLoading: metricsLoading } = useMockWarehouseMetrics();
-  const { data: transferRequests = [] } = useMockTransferRequests();
+  const { data: stats, isLoading: statsLoading } = useWarehouseStats();
+  const { data: transferRequests = [] } = useTransferRequests();
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-NG', {
@@ -57,8 +57,8 @@ const Dashboard = () => {
     }).format(amount);
   };
 
-  const totalItems = metrics?.totalItems || warehouses.reduce((sum, warehouse) => sum + warehouse.totalItems, 0);
-  const totalValue = metrics?.totalValue || warehouses.reduce((sum, warehouse) => sum + warehouse.totalValue, 0);
+  const totalItems = stats?.totalItems || warehouses.reduce((sum, warehouse) => sum + warehouse.totalItems, 0);
+  const totalValue = stats?.totalValue || warehouses.reduce((sum, warehouse) => sum + warehouse.totalValue, 0);
   const pendingRequests = transferRequests.filter((req: any) => req.status === 'pending').length;
 
   return (
@@ -75,7 +75,7 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <MetricCard
             title="Total Inventory Items"
-            value={metricsLoading ? "..." : totalItems.toLocaleString()}
+            value={statsLoading ? "..." : totalItems.toLocaleString()}
             icon={<PackageIcon />}
             trend={{ value: "+12% from last month", isPositive: true }}
           />
@@ -92,7 +92,7 @@ const Dashboard = () => {
           />
           <MetricCard
             title="Total Inventory Value"
-            value={metricsLoading ? "..." : formatCurrency(totalValue)}
+            value={statsLoading ? "..." : formatCurrency(totalValue)}
             icon={<TrendingUpIcon />}
             trend={{ value: "+8% from last month", isPositive: true }}
           />

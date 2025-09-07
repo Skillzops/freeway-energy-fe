@@ -18,6 +18,34 @@ export interface Warehouse {
   isMainWarehouse: boolean;
   image: string;
   isActive?: boolean;
+  managers?: WarehouseManager[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface WarehouseManager {
+  id: string;
+  userId: string;
+  warehouseId: string;
+  assignedAt: string;
+  user?: {
+    id: string;
+    name: string;
+    email: string;
+  };
+}
+
+export interface WarehouseStats {
+  totalWarehouses: number;
+  activeWarehouses: number;
+  inactiveWarehouses: number;
+  mainWarehouses: number;
+  totalItems: number;
+  totalValue: number;
+  lowStockItems: number;
+  pendingTransfers: number;
+  fulfilledTransfers: number;
+  rejectedTransfers: number;
 }
 
 export interface TransferRequest {
@@ -26,10 +54,17 @@ export interface TransferRequest {
   toWarehouse: string;
   productId: string;
   requestedQuantity: number;
-  fulfilledQuantity: number;
+  fulfilledQuantity?: number;
   status: 'pending' | 'partial' | 'fulfilled' | 'rejected';
   requestDate: string;
+  fulfilledDate?: string;
+  rejectedDate?: string;
   notes?: string;
+  rejectionReason?: string;
+  requestedBy?: string;
+  fulfilledBy?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 import mainWarehouseImg from '../assets/Images/logo.png';

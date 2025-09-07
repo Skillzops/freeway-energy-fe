@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Modal } from "../ModalComponent/Modal";
-import { useMockWarehouses, useMockProducts, useMockWarehouseApi } from "../../services/mockWarehouseApi";
+import { useWarehouses, useProducts, useWarehouseApi } from "../../services/warehouseApi";
 import { toast } from "react-toastify";
 import useBreakpoint from "../../hooks/useBreakpoint";
 
@@ -18,9 +18,9 @@ export function NewRequestModal({ open, onOpenChange }: NewRequestModalProps) {
   const isMobile = useBreakpoint("max", 640);
 
   // Fetch data using mock API
-  const { data: warehouses = [] } = useMockWarehouses();
-  const { data: products = [] } = useMockProducts();
-  const { createTransferRequest } = useMockWarehouseApi();
+  const { data: warehouses = [] } = useWarehouses();
+  const { data: products = [] } = useProducts();
+  const { createTransferRequest } = useWarehouseApi();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

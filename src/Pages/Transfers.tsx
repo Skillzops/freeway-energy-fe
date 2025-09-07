@@ -1,44 +1,30 @@
 import React, { useState } from "react";
 import PageLayout from "./PageLayout";
-import { MetricCard } from "../Components/WareHouses/MetricCard";
-import { PaginationInfo } from "../Components/WareHouses/PaginationInfo";
-import { FulfillRequestModal } from "../Components/WareHouses/FulfillRequestModal";
-import { NewRequestModal } from "../Components/WareHouses/NewRequestModal";
-import { useMockTransferRequests, useMockWarehouses, useMockProducts } from "../services/mockWarehouseApi";
+import { TransferRequestModal } from "../Components/WareHouses/TransferRequestModal";
+import { useTransferManagement } from "../hooks/useWarehouseHooks";
 import type { TransferRequest } from "../data/warehouseData";
 import useBreakpoint from "../hooks/useBreakpoint";
-import { toast } from "react-toastify";
-import warehouseBadge from "../assets/inventory/inventorybadge.png";
+import transferBadge from "../assets/inventory/inventorybadge.png";
 
 // Icons
-const ArrowLeftRightIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M8 3L4 7l4 4"/>
-    <path d="m4 7h16"/>
-    <path d="m16 21 4-4-4-4"/>
-    <path d="M20 17H4"/>
+const ArrowRightIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <line x1="5" y1="12" x2="19" y2="12"/>
+    <polyline points="12,5 19,12 12,19"/>
   </svg>
 );
 
-const ClockIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="12" cy="12" r="10"/>
-    <polyline points="12,6 12,12 16,14"/>
+const FilterIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
   </svg>
 );
 
-const AlertTriangleIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
-    <path d="M12 9v4"/>
-    <path d="m12 17.02.01 0"/>
-  </svg>
-);
-
-const CheckCircleIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-    <polyline points="22,4 12,14.01 9,11.01"/>
+const RefreshIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <polyline points="23 4 23 10 17 10"/>
+    <polyline points="1 20 1 14 7 14"/>
+    <path d="m3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
   </svg>
 );
 
@@ -49,95 +35,62 @@ const PlusIcon = () => (
   </svg>
 );
 
-const SearchIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="11" cy="11" r="8"/>
-    <path d="m21 21-4.35-4.35"/>
-  </svg>
-);
-
-const FilterIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
-  </svg>
-);
-
-const EyeIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-    <circle cx="12" cy="12" r="3"/>
-  </svg>
-);
-
-const CheckIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-    <polyline points="22,4 12,14.01 9,11.01"/>
-  </svg>
-);
-
 export default function Transfers() {
-  const [newRequestOpen, setNewRequestOpen] = useState(false);
-  const [fulfillRequestOpen, setFulfillRequestOpen] = useState(false);
-  const [selectedRequest, setSelectedRequest] = useState<TransferRequest | undefined>();
-  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedTransfer, setSelectedTransfer] = useState<TransferRequest | null>(null);
+  const [transferModalOpen, setTransferModalOpen] = useState(false);
+  const [newTransferModalOpen, setNewTransferModalOpen] = useState(false);
+  
+  const {
+    transfers,
+    transferMetrics,
+    isLoading,
+    statusFilter,
+    warehouseFilter,
+    setStatusFilter,
+    setWarehouseFilter,
+    warehouses,
+    getWarehouseName,
+    getProductName,
+    refreshData,
+  } = useTransferManagement();
+  
   const isMobile = useBreakpoint("max", 640);
 
-  // Fetch data using mock API
-  const { data: transferRequests = [], isLoading, error } = useMockTransferRequests();
-  const { data: warehouses = [] } = useMockWarehouses();
-  const { data: products = [] } = useMockProducts();
-
-  // Filter transfers based on search
-  const filteredTransfers = transferRequests.filter((request: TransferRequest) =>
-    request.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    getWarehouseName(request.fromWarehouse).toLowerCase().includes(searchTerm.toLowerCase()) ||
-    getWarehouseName(request.toWarehouse).toLowerCase().includes(searchTerm.toLowerCase()) ||
-    getProductName(request.productId).toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const pendingRequests = transferRequests.filter((req: TransferRequest) => req.status === 'pending').length;
-  const partialRequests = transferRequests.filter((req: TransferRequest) => req.status === 'partial').length;
-  const fulfilledRequests = transferRequests.filter((req: TransferRequest) => req.status === 'fulfilled').length;
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "fulfilled": return "text-success bg-success/10";
-      case "partial": return "text-warning bg-warning/10";
-      case "pending": return "text-primary bg-primary/10";
-      case "rejected": return "text-errorTwo bg-errorTwo/10";
-      default: return "text-textDarkGrey bg-gray-100";
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'fulfilled':
+        return 'bg-green-100 text-green-800';
+      case 'partial':
+        return 'bg-blue-100 text-blue-800';
+      case 'rejected':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const getWarehouseName = (id: string) => {
-    return warehouses.find((w: any) => w.id === id)?.name || "Unknown";
+  const handleTransferClick = (transfer: TransferRequest) => {
+    setSelectedTransfer(transfer);
+    setTransferModalOpen(true);
   };
 
-  const getProductName = (id: string) => {
-    return products.find((p: any) => p.id === id)?.name || "Unknown";
+  const handleTransferUpdate = () => {
+    refreshData();
   };
 
-  const handleFulfillRequest = (request: TransferRequest) => {
-    setSelectedRequest(request);
-    setFulfillRequestOpen(true);
-  };
-
-  const handleViewRequest = (request: TransferRequest) => {
-    setSelectedRequest(request);
-    toast.info(`Viewing transfer request ${request.id}`);
-  };
-
-  const handleRequestUpdated = () => {
-    // This would trigger a data refresh in a real implementation
-    setFulfillRequestOpen(false);
-    setSelectedRequest(undefined);
-  };
-
-  // Show loading state
   if (isLoading) {
     return (
-      <PageLayout pageName="Transfer Requests" badge={warehouseBadge}>
+      <PageLayout pageName="Transfer Requests" badge={transferBadge}>
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
@@ -148,27 +101,8 @@ export default function Transfers() {
     );
   }
 
-  // Show error state
-  if (error) {
-    return (
-      <PageLayout pageName="Transfer Requests" badge={warehouseBadge}>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <p className="text-errorTwo mb-4">Failed to load transfer requests</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="bg-primary text-white px-4 py-2 rounded-full hover:bg-primary/90 transition-colors"
-            >
-              Retry
-            </button>
-          </div>
-        </div>
-      </PageLayout>
-    );
-  }
-
   return (
-    <PageLayout pageName="Transfer Requests" badge={warehouseBadge} className="w-full px-2 py-8 md:p-8">
+    <PageLayout pageName="Transfer Requests" badge={transferBadge} className="w-full px-2 py-8 md:p-8">
       <div className="space-y-6 sm:space-y-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -177,131 +111,169 @@ export default function Transfers() {
             <p className="text-textDarkGrey text-sm sm:text-base">Manage warehouse transfer requests</p>
           </div>
           <button
-            onClick={() => setNewRequestOpen(true)}
-            className="bg-primary text-white px-4 py-2 rounded-full flex items-center gap-2 hover:bg-primary/90 transition-colors text-sm sm:text-base"
+            onClick={() => setNewTransferModalOpen(true)}
+            className="bg-primary text-white px-4 py-2 rounded-full flex items-center gap-2 hover:bg-primary/90 transition-colors text-sm sm:text-base w-full sm:w-auto justify-center"
           >
             <PlusIcon />
-            {isMobile ? "New" : "New Request"}
+            {isMobile ? "New Request" : "New Transfer Request"}
           </button>
         </div>
 
         {/* Metrics */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          <MetricCard
-            title="Total Requests"
-            value={transferRequests.length}
-            icon={<ArrowLeftRightIcon />}
-          />
-          <MetricCard
-            title="Pending"
-            value={pendingRequests}
-            icon={<ClockIcon />}
-            trend={pendingRequests > 0 ? { value: "Needs attention", isPositive: false } : undefined}
-          />
-          <MetricCard
-            title="Partial"
-            value={partialRequests}
-            icon={<AlertTriangleIcon />}
-          />
-          <MetricCard
-            title="Fulfilled"
-            value={fulfilledRequests}
-            icon={<CheckCircleIcon />}
-          />
-        </div>
-
-        {/* Search and Filters */}
-        <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
-          <div className="flex-1 max-w-full sm:max-w-sm">
-            <div className="relative">
-              <input
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search requests..."
-                className="pl-10 pr-4 py-2 border border-strokeGreyThree rounded-full w-full focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm"
-              />
-              <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-textDarkGrey">
-                <SearchIcon />
-              </div>
-            </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="bg-white p-4 rounded-lg border border-strokeGreyThree">
+            <div className="text-2xl font-bold text-textBlack">{transferMetrics.total}</div>
+            <div className="text-sm text-textDarkGrey">Total Requests</div>
           </div>
-          <button className="border border-strokeGreyThree text-textBlack py-2 px-3 sm:px-4 rounded-full flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors text-sm">
-            <FilterIcon />
-            {!isMobile && "Filters"}
-          </button>
+          <div className="bg-white p-4 rounded-lg border border-strokeGreyThree">
+            <div className="text-2xl font-bold text-yellow-600">{transferMetrics.pending}</div>
+            <div className="text-sm text-textDarkGrey">Pending</div>
+          </div>
+          <div className="bg-white p-4 rounded-lg border border-strokeGreyThree">
+            <div className="text-2xl font-bold text-green-600">{transferMetrics.fulfilled}</div>
+            <div className="text-sm text-textDarkGrey">Fulfilled</div>
+          </div>
+          <div className="bg-white p-4 rounded-lg border border-strokeGreyThree">
+            <div className="text-2xl font-bold text-red-600">{transferMetrics.rejected}</div>
+            <div className="text-sm text-textDarkGrey">Rejected</div>
+          </div>
         </div>
 
-        {/* Requests Table */}
-        <div className="bg-white border-[0.4px] border-strokeGreyTwo rounded-[20px] overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b border-strokeGreyTwo">
-                <tr>
-                  <th className="text-left py-3 px-4 font-medium text-textBlack">Request ID</th>
-                  <th className="text-left py-3 px-4 font-medium text-textBlack">From</th>
-                  <th className="text-left py-3 px-4 font-medium text-textBlack">To</th>
-                  <th className="text-left py-3 px-4 font-medium text-textBlack">Inventory Item</th>
-                  <th className="text-left py-3 px-4 font-medium text-textBlack">Requested</th>
-                  <th className="text-left py-3 px-4 font-medium text-textBlack">Fulfilled</th>
-                  <th className="text-left py-3 px-4 font-medium text-textBlack">Status</th>
-                  <th className="text-left py-3 px-4 font-medium text-textBlack">Date</th>
-                  <th className="text-left py-3 px-4 font-medium text-textBlack">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredTransfers.length === 0 ? (
+        {/* Filters */}
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+          <div className="flex gap-2 items-center">
+            <FilterIcon />
+            <span className="text-sm font-medium text-textBlack">Filters:</span>
+          </div>
+          
+          <div className="flex flex-wrap gap-2">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="px-3 py-2 border border-strokeGreyThree rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+            >
+              <option value="">All Status</option>
+              <option value="pending">Pending</option>
+              <option value="fulfilled">Fulfilled</option>
+              <option value="partial">Partial</option>
+              <option value="rejected">Rejected</option>
+            </select>
+
+            <select
+              value={warehouseFilter}
+              onChange={(e) => setWarehouseFilter(e.target.value)}
+              className="px-3 py-2 border border-strokeGreyThree rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+            >
+              <option value="">All Warehouses</option>
+              {warehouses.map((warehouse: any) => (
+                <option key={warehouse.id} value={warehouse.id}>
+                  {warehouse.name}
+                </option>
+              ))}
+            </select>
+
+            <button
+              onClick={refreshData}
+              className="border border-strokeGreyThree text-textBlack py-2 px-4 rounded-full flex items-center gap-2 hover:bg-gray-50 transition-colors text-sm"
+            >
+              <RefreshIcon />
+              Refresh
+            </button>
+          </div>
+        </div>
+
+        {/* Transfer Requests List */}
+        <div className="bg-white rounded-lg border border-strokeGreyThree overflow-hidden">
+          {transfers.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-textDarkGrey mb-4">No transfer requests found</p>
+              <button
+                onClick={() => setNewTransferModalOpen(true)}
+                className="bg-primary text-white px-4 py-2 rounded-full hover:bg-primary/90 transition-colors"
+              >
+                Create Your First Transfer Request
+              </button>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50">
                   <tr>
-                    <td colSpan={9} className="py-8 text-center">
-                      <p className="text-textDarkGrey">
-                        {searchTerm ? "No requests match your search" : "No transfer requests found"}
-                      </p>
-                    </td>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-textDarkGrey uppercase tracking-wider">
+                      Request ID
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-textDarkGrey uppercase tracking-wider">
+                      Transfer Route
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-textDarkGrey uppercase tracking-wider">
+                      Product
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-textDarkGrey uppercase tracking-wider">
+                      Quantity
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-textDarkGrey uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-textDarkGrey uppercase tracking-wider">
+                      Date
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-textDarkGrey uppercase tracking-wider">
+                      Actions
+                    </th>
                   </tr>
-                ) : (
-                  filteredTransfers.map((request: TransferRequest) => (
-                    <tr key={request.id} className="border-b border-strokeGreyTwo">
-                      <td className="py-3 px-4 font-medium text-textBlack">{request.id}</td>
-                      <td className="py-3 px-4 text-textDarkGrey">{getWarehouseName(request.fromWarehouse)}</td>
-                      <td className="py-3 px-4 text-textDarkGrey">{getWarehouseName(request.toWarehouse)}</td>
-                      <td className="py-3 px-4 text-textDarkGrey">{getProductName(request.productId)}</td>
-                      <td className="py-3 px-4 text-textDarkGrey">{request.requestedQuantity}</td>
-                      <td className="py-3 px-4 text-textDarkGrey">{request.fulfilledQuantity}</td>
-                      <td className="py-3 px-4">
-                        <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(request.status)}`}>
-                          {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
-                        </span>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {transfers.map((transfer: TransferRequest) => (
+                    <tr key={transfer.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-textBlack">
+                        {transfer.id}
                       </td>
-                      <td className="py-3 px-4 text-textDarkGrey">{new Date(request.requestDate).toLocaleDateString()}</td>
-                      <td className="py-3 px-4">
-                        <div className="flex gap-2">
-                          <button className="border border-strokeGreyThree text-textBlack py-1 px-3 rounded-full text-sm flex items-center gap-1 hover:bg-gray-50 transition-colors">
-                            <EyeIcon />
-                            View
-                          </button>
-                          {request.status !== 'fulfilled' && request.status !== 'rejected' && (
-                            <button
-                              onClick={() => handleFulfillRequest(request)}
-                              className="bg-primary text-white py-1 px-3 rounded-full text-sm flex items-center gap-1 hover:bg-primary/90 transition-colors"
-                            >
-                              <CheckIcon />
-                              Fulfill
-                            </button>
-                          )}
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-textDarkGrey">
+                        <div className="flex items-center gap-2">
+                          <span>{getWarehouseName(transfer.fromWarehouse)}</span>
+                          <ArrowRightIcon />
+                          <span>{getWarehouseName(transfer.toWarehouse)}</span>
                         </div>
                       </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-textDarkGrey">
+                        {getProductName(transfer.productId)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-textDarkGrey">
+                        {transfer.fulfilledQuantity || 0} / {transfer.requestedQuantity}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(transfer.status)}`}>
+                          {transfer.status.charAt(0).toUpperCase() + transfer.status.slice(1)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-textDarkGrey">
+                        {formatDate(transfer.requestDate)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <button
+                          onClick={() => handleTransferClick(transfer)}
+                          className="text-primary hover:text-primary/80 font-medium"
+                        >
+                          View Details
+                        </button>
+                      </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-          <PaginationInfo
-            currentPage={1}
-            totalPages={Math.ceil(transferRequests.length / 10)}
-            itemsPerPage={10}
-            totalItems={transferRequests.length}
-          />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
+
+        {/* Transfer Request Modal */}
+        {selectedTransfer && (
+          <TransferRequestModal
+            open={transferModalOpen}
+            onOpenChange={setTransferModalOpen}
+            transferRequest={selectedTransfer}
+            onUpdate={handleTransferUpdate}
+          />
+        )}
       </div>
     </PageLayout>
   );

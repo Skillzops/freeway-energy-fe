@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Modal } from "../ModalComponent/Modal";
-import { useMockWarehouseApi } from "../../services/mockWarehouseApi";
+import { useWarehouseApi } from "../../services/warehouseApi";
 import { toast } from "react-toastify";
 import useBreakpoint from "../../hooks/useBreakpoint";
 import type { TransferRequest } from "../../data/warehouseData";
@@ -17,7 +17,7 @@ export function FulfillRequestModal({ open, onOpenChange, request, onRequestUpda
   const [status, setStatus] = useState<"fulfilled" | "partial" | "rejected">("fulfilled");
   const [notes, setNotes] = useState("");
   const isMobile = useBreakpoint("max", 640);
-  const { fulfillTransferRequest } = useMockWarehouseApi();
+  const { fulfillTransferRequest } = useWarehouseApi();
 
   if (!request) return null;
 

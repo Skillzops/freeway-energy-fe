@@ -1,6 +1,6 @@
 import React, { createContext, useContext, ReactNode } from 'react';
 import type { Warehouse } from '../data/warehouseData';
-import { useMockWarehouses, useMockWarehouseApi } from '../services/mockWarehouseApi';
+import { useWarehouses, useWarehouseApi } from '../services/warehouseApi';
 import { toast } from 'react-toastify';
 
 interface WarehouseContextType {
@@ -17,50 +17,47 @@ interface WarehouseContextType {
 const WarehouseContext = createContext<WarehouseContextType | undefined>(undefined);
 
 export function WarehouseProvider({ children }: { children: ReactNode }) {
-  // Use mock API while waiting for real endpoints
-  const { data: warehouses = [], isLoading, error, mutate } = useMockWarehouses();
+  // Use real API endpoints
+  const { data: warehouses = [], isLoading, error, mutate } = useWarehouses();
   
-  // Get mock API functions
+  // Get real API functions
   const {
     createWarehouse,
     updateWarehouse: updateWarehouseApi,
     deleteWarehouse: deleteWarehouseApi,
     toggleWarehouseStatus: toggleWarehouseStatusApi,
-  } = useMockWarehouseApi();
+  } = useWarehouseApi();
 
   const addWarehouse = async (warehouse: Omit<Warehouse, 'id'>) => {
     try {
-      const response = await createWarehouse(warehouse);
+      await createWarehouse(warehouse);
       // Revalidate the data after successful creation
       await mutate();
-      toast.success(response.message || 'Warehouse created successfully');
     } catch (error: any) {
       console.error('Failed to create warehouse:', error);
-      toast.error(error.response?.data?.message || 'Failed to create warehouse');
+      throw error; // Let the API service handle the toast messages
     }
   };
 
   const updateWarehouse = async (id: string, updates: Partial<Warehouse>) => {
     try {
-      const response = await updateWarehouseApi(id, updates);
+      await updateWarehouseApi(id, updates);
       // Revalidate the data after successful update
       await mutate();
-      toast.success(response.message || 'Warehouse updated successfully');
     } catch (error: any) {
       console.error('Failed to update warehouse:', error);
-      toast.error(error.response?.data?.message || 'Failed to update warehouse');
+      throw error; // Let the API service handle the toast messages
     }
   };
 
   const deleteWarehouse = async (id: string) => {
     try {
-      const response = await deleteWarehouseApi(id);
+      await deleteWarehouseApi(id);
       // Revalidate the data after successful deletion
       await mutate();
-      toast.success(response.message || 'Warehouse deleted successfully');
     } catch (error: any) {
       console.error('Failed to delete warehouse:', error);
-      toast.error(error.response?.data?.message || 'Failed to delete warehouse');
+      throw error; // Let the API service handle the toast messages
     }
   };
 
@@ -68,14 +65,13 @@ export function WarehouseProvider({ children }: { children: ReactNode }) {
     try {
       const warehouse = warehouses.find((w: Warehouse) => w.id === id);
       if (warehouse) {
-        const response = await toggleWarehouseStatusApi(id, !warehouse.isActive);
+        await toggleWarehouseStatusApi(id, !warehouse.isActive);
         // Revalidate the data after successful status toggle
         await mutate();
-        toast.success(response.message || `Warehouse ${!warehouse.isActive ? 'activated' : 'deactivated'} successfully`);
       }
     } catch (error: any) {
       console.error('Failed to toggle warehouse status:', error);
-      toast.error(error.response?.data?.message || 'Failed to toggle warehouse status');
+      throw error; // Let the API service handle the toast messages
     }
   };
 

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import type { Warehouse } from "../../data/warehouseData";
 import { useWarehouse } from "../../contexts/WarehouseContext";
+import { WarehouseManagerModal } from "./WarehouseManagerModal";
 import { toast } from "react-toastify";
 import useBreakpoint from "../../hooks/useBreakpoint";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
@@ -12,6 +13,7 @@ interface WarehouseCardProps {
 
 export function WarehouseCard({ warehouse }: WarehouseCardProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [managerModalOpen, setManagerModalOpen] = useState(false);
   const { updateWarehouse, deleteWarehouse, toggleWarehouseStatus } = useWarehouse();
   const isMobile = useBreakpoint("max", 640);
   const navigate = useNavigate();
@@ -55,6 +57,7 @@ export function WarehouseCard({ warehouse }: WarehouseCardProps) {
 
   const dropDownItems = [
     warehouse.isActive ? 'Deactivate' : 'Activate',
+    'Manage Managers',
     'Settings',
     'Archive',
     'Delete'
@@ -66,13 +69,16 @@ export function WarehouseCard({ warehouse }: WarehouseCardProps) {
         handleToggleStatus();
         break;
       case 1:
+        setManagerModalOpen(true);
+        break;
+      case 2:
         // Settings functionality
         toast.info('Settings feature coming soon');
         break;
-      case 2:
+      case 3:
         handleArchive();
         break;
-      case 3:
+      case 4:
         handleDelete();
         break;
     }
@@ -141,6 +147,16 @@ export function WarehouseCard({ warehouse }: WarehouseCardProps) {
                 {warehouse.isActive ? 'Active' : 'Inactive'}
               </span>
             </div>
+            
+            {/* Manager Count */}
+            {warehouse.managers && warehouse.managers.length > 0 && (
+              <div className="flex items-center justify-between text-xs mt-1">
+                <span className="text-textDarkGrey">Managers:</span>
+                <span className="font-medium text-primary">
+                  {warehouse.managers.length}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -225,6 +241,14 @@ export function WarehouseCard({ warehouse }: WarehouseCardProps) {
           </div>
         </div>
       )}
+
+      {/* Manager Modal */}
+      <WarehouseManagerModal
+        open={managerModalOpen}
+        onOpenChange={setManagerModalOpen}
+        warehouseId={warehouse.id}
+        warehouseName={warehouse.name}
+      />
     </div>
   );
 }

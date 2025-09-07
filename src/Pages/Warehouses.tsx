@@ -5,7 +5,7 @@ import { WarehouseCard } from "../Components/WareHouses/WarehouseCard";
 import { PaginationInfo } from "../Components/WareHouses/PaginationInfo";
 import { NewWarehouseModal } from "../Components/WareHouses/NewWarehouseModal";
 import { useWarehouse } from "../contexts/WarehouseContext";
-import { useMockWarehouseMetrics } from "../services/mockWarehouseApi";
+import { useWarehouseStats } from "../services/warehouseApi";
 import useBreakpoint from "../hooks/useBreakpoint";
 import warehouseBadge from "../assets/inventory/inventorybadge.png";
 
@@ -65,17 +65,17 @@ export default function Warehouses() {
   const [newWarehouseOpen, setNewWarehouseOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const { warehouses, isLoading, error } = useWarehouse();
-  const { data: metrics, isLoading: metricsLoading } = useMockWarehouseMetrics();
+  const { data: stats, isLoading: statsLoading } = useWarehouseStats();
   const isMobile = useBreakpoint("max", 640);
   
   // Calculate totals from warehouses data
   const totalItems = warehouses.reduce((sum, warehouse) => sum + warehouse.totalItems, 0);
   const totalValue = warehouses.reduce((sum, warehouse) => sum + warehouse.totalValue, 0);
   
-  // Use metrics from API if available, otherwise calculate from warehouses
-  const warehouseCount = metrics?.totalWarehouses || warehouses.length;
-  const totalInventoryItems = metrics?.totalItems || totalItems;
-  const totalInventoryValue = metrics?.totalValue || totalValue;
+  // Use stats from API if available, otherwise calculate from warehouses
+  const warehouseCount = stats?.totalWarehouses || warehouses.length;
+  const totalInventoryItems = stats?.totalItems || totalItems;
+  const totalInventoryValue = stats?.totalValue || totalValue;
 
   // Filter warehouses based on search
   const filteredWarehouses = warehouses.filter(warehouse =>
@@ -146,17 +146,17 @@ export default function Warehouses() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           <MetricCard
             title="All Warehouses"
-            value={metricsLoading ? "..." : warehouseCount}
+            value={statsLoading ? "..." : warehouseCount}
             icon={<WarehouseIcon />}
           />
           <MetricCard
             title="Total Items"
-            value={metricsLoading ? "..." : totalInventoryItems.toLocaleString()}
+            value={statsLoading ? "..." : totalInventoryItems.toLocaleString()}
             icon={<PackageIcon />}
           />
           <MetricCard
             title="Total Value"
-            value={metricsLoading ? "..." : formatCurrency(totalInventoryValue)}
+            value={statsLoading ? "..." : formatCurrency(totalInventoryValue)}
             icon={<TrendingUpIcon />}
           />
         </div>
@@ -166,8 +166,10 @@ export default function Warehouses() {
           <div className="flex-1 max-w-sm">
             <div className="relative">
               
-              <input 
-                placeholder="Search warehouses..." 
+              <input
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search warehouses..."
                 className="pl-10 pr-4 py-2 border border-strokeGreyThree rounded-full w-full focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
               />
               <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-textDarkGrey">

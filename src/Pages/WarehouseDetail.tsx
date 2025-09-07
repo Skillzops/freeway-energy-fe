@@ -7,7 +7,7 @@ import { NewInventoryModal } from "../Components/WareHouses/NewInventoryModal";
 import { NewRequestModal } from "../Components/WareHouses/NewRequestModal";
 import { FulfillRequestModal } from "../Components/WareHouses/FulfillRequestModal";
 import { ViewInventoryModal } from "../Components/WareHouses/ViewInventoryModal";
-import { useMockWarehouses, useMockProducts, useMockTransferRequests } from "../services/mockWarehouseApi";
+import { useWarehouses, useProducts, useTransferRequests } from "../services/warehouseApi";
 import type { TransferRequest, Product } from "../data/warehouseData";
 import useBreakpoint from "../hooks/useBreakpoint";
 import { toast } from "react-toastify";
@@ -94,9 +94,9 @@ export default function WarehouseDetail() {
   const isTablet = useBreakpoint("max", 1024);
   
   // Fetch warehouse data using mock API
-  const { data: warehouses = [], isLoading: warehouseLoading, error: warehouseError } = useMockWarehouses();
-  const { data: inventory = [], isLoading: inventoryLoading } = useMockProducts();
-  const { data: transfers = [], isLoading: transfersLoading } = useMockTransferRequests();
+  const { data: warehouses = [], isLoading: warehouseLoading, error: warehouseError } = useWarehouses();
+  const { data: inventory = [], isLoading: inventoryLoading } = useProducts();
+  const { data: transfers = [], isLoading: transfersLoading } = useTransferRequests();
   
   const warehouse = warehouses.find((w: any) => w.id === id);
 

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Modal } from "../ModalComponent/Modal";
-import { useMockWarehouseApi } from "../../services/mockWarehouseApi";
+import { useWarehouseApi } from "../../services/warehouseApi";
 import { toast } from "react-toastify";
 import { useParams } from "react-router-dom";
 import useBreakpoint from "../../hooks/useBreakpoint";
@@ -24,7 +24,7 @@ export function NewInventoryModal({ open, onOpenChange, warehouseId }: NewInvent
   const [costOfItem, setCostOfItem] = useState("");
   const [priceOfItem, setPriceOfItem] = useState("");
 
-  const { addInventoryItem } = useMockWarehouseApi();
+  const { addInventoryItem } = useWarehouseApi();
 
   const formatCurrency = (value: string) => {
     const numericValue = value.replace(/[^\d]/g, "");
