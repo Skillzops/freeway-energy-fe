@@ -52,6 +52,8 @@ export const useApiCall = () => {
       params,
       data,
       headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
         ...headers,
         Authorization: `Bearer ${token}`,
       },
@@ -65,17 +67,17 @@ export const useApiCall = () => {
       updateErrorState(endpoint, false, true);
       return response;
     } catch (error: any) {
-      // handleApiError(
-      //   error,
-      //   location,
-      //   setIsNetworkError,
-      //   setIsPermissionError,
-      //   endpoint,
-      //   errorStates,
-      //   updateErrorState,
-      //   setToastShown
-      // // );
-      // throw error;
+      handleApiError(
+        error,
+        location,
+        setIsNetworkError,
+        setIsPermissionError,
+        endpoint,
+        errorStates,
+        updateErrorState,
+        setToastShown
+      );
+      throw error;
     }
   };
 
@@ -105,6 +107,7 @@ export const useGetRequest = (
     try {
       const response = await apiClient.get(url, {
         headers: {
+          'Accept': 'application/json',
           Authorization: `Bearer ${token}`,
         },
       });
@@ -167,6 +170,7 @@ export const useGetAllDevices = (revalidate = true) => {
     try {
       const response = await apiClient.get(url, {
         headers: {
+          'Accept': 'application/json',
           Authorization: `Bearer ${token}`,
         },
       });

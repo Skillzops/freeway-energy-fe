@@ -1,6 +1,6 @@
 import { Route, Routes } from "react-router-dom";
 import Home from "./Pages/Home";
-// import Dashboard from "./Pages/Dashboard";
+import Dashboard from "./Pages/Dashboard";
 import Sales from "./Pages/Sales";
 // import Transactions from "./Pages/Transactions";
 import Customers from "./Pages/Customers";
@@ -10,6 +10,9 @@ import Inventory from "./Pages/Inventory";
 import Devices from "./Pages/Devices";
 import Contracts from "./Pages/Contracts";
 import Settings from "./Pages/Settings";
+import Warehouses from "./Pages/Warehouses";
+import WarehouseDetail from "./Pages/WarehouseDetail";
+import Transfers from "./Pages/Transfers";
 import LoginPage from "./Pages/LoginPage";
 import CreatePassword from "./Pages/CreatePassword";
 import PageNotFound from "./Pages/PageNotFound";
@@ -19,10 +22,11 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { ErrorBoundary } from "react-error-boundary";
 import ErrorPage from "./Pages/ErrorPage";
+import { WarehouseProvider } from "./contexts/WarehouseContext";
 
 function App() {
   return (
-    <>
+    <WarehouseProvider>
       <ToastContainer autoClose={2000} />
       <ErrorBoundary
         fallbackRender={({ error, resetErrorBoundary }) => (
@@ -33,7 +37,7 @@ function App() {
           {/* Protected Routes */}
           <Route element={<ProtectedRouteWrapper />}>
             <Route path="/home" element={<Home />} />
-            {/* <Route path="/dashboard" element={<Dashboard />} /> */}
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/sales/*" element={<Sales />} />
             {/* <Route path="/transactions/*" element={<Transactions />} /> */}
             <Route path="/customers/*" element={<Customers />} />
@@ -43,6 +47,9 @@ function App() {
             <Route path="/devices/*" element={<Devices />} />
             <Route path="/contracts/*" element={<Contracts />} />
             <Route path="/settings/*" element={<Settings />} />
+            <Route path="/warehouses" element={<Warehouses />} />
+            <Route path="/warehouses/:id" element={<WarehouseDetail />} />
+            <Route path="/transfers" element={<Transfers />} />
             {/* Other protected routes */}
           </Route>
 
@@ -62,7 +69,7 @@ function App() {
           <Route path="*" element={<PageNotFound />} />
         </Routes>
       </ErrorBoundary>
-    </>
+    </WarehouseProvider>
   );
 }
 
