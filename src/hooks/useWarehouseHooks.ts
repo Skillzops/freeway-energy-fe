@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useWarehouseApi, useWarehouses, useProducts, useTransferRequests, useWarehouseStats, useWarehouseManagers } from '../services/warehouseApi';
+import { useInventory } from '../services/inventoryApi';
 import { toast } from 'react-toastify';
 import type { Warehouse, Product, TransferRequest } from '../data/warehouseData';
 
@@ -151,7 +152,7 @@ export const useInventoryManagement = (warehouseId?: string) => {
   const [categoryFilter, setCategoryFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
-  const { data: products = [], mutate: mutateProducts } = useProducts();
+  const { data: products = [], mutate: mutateProducts } = useInventory();
   const warehouseApi = useWarehouseApi();
 
   // Filter products based on search and filters
@@ -253,7 +254,7 @@ export const useTransferManagement = () => {
 
   const { data: transfers = [], mutate: mutateTransfers } = useTransferRequests();
   const { data: warehouses = [] } = useWarehouses();
-  const { data: products = [] } = useProducts();
+  const { data: products = [] } = useInventory();
   const warehouseApi = useWarehouseApi();
 
   // Filter transfers
@@ -363,7 +364,7 @@ export const useTransferManagement = () => {
 // Real-time dashboard metrics hook
 export const useDashboardMetrics = () => {
   const { data: warehouses = [], isLoading: warehousesLoading } = useWarehouses();
-  const { data: products = [], isLoading: productsLoading } = useProducts();
+  const { data: products = [], isLoading: productsLoading } = useInventory();
   const { data: transfers = [], isLoading: transfersLoading } = useTransferRequests();
   const { data: stats, isLoading: statsLoading } = useWarehouseStats();
 
@@ -413,7 +414,7 @@ export const useDashboardMetrics = () => {
 export const useWarehouseNotifications = () => {
   const [notifications, setNotifications] = useState<any[]>([]);
   const { data: transfers = [] } = useTransferRequests();
-  const { data: products = [] } = useProducts();
+  const { data: products = [] } = useInventory();
 
   useEffect(() => {
     const newNotifications = [];

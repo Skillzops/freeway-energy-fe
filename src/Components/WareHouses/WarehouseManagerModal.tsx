@@ -39,8 +39,11 @@ export const WarehouseManagerModal: React.FC<WarehouseManagerModalProps> = ({
   const [newManagerEmail, setNewManagerEmail] = useState('');
   const [availableUsers, setAvailableUsers] = useState<any[]>([]);
   
-  const { data: managers = [], mutate: mutateManagers } = useWarehouseManagers(warehouseId);
+  const { data: managersData = [], mutate: mutateManagers } = useWarehouseManagers(warehouseId);
   const { isLoading, assignManagers, unassignManager } = useWarehouseManagerOperations();
+  
+  // Ensure managers is always an array
+  const managers = Array.isArray(managersData) ? managersData : [];
 
   // Mock available users - in real app, this would come from an API
   useEffect(() => {
