@@ -7,7 +7,10 @@ import { NewInventoryModal } from "../Components/WareHouses/NewInventoryModal";
 import { NewRequestModal } from "../Components/WareHouses/NewRequestModal";
 import { FulfillRequestModal } from "../Components/WareHouses/FulfillRequestModal";
 import { ViewInventoryModal } from "../Components/WareHouses/ViewInventoryModal";
-import { useWarehouses, useProducts, useTransferRequests } from "../services/warehouseApi";
+import { useWarehouses, useTransferRequests } from "../services/warehouseApi";
+import { useWarehouseInventory } from "../services/inventoryApi";
+import { AddInventoryToWarehouseModal } from "../Components/WareHouses/AddInventoryToWarehouseModal";
+import { AddStockToWarehouseModal } from "../Components/WareHouses/AddStockToWarehouseModal";
 import type { TransferRequest, Product } from "../data/warehouseData";
 import useBreakpoint from "../hooks/useBreakpoint";
 import { toast } from "react-toastify";
@@ -85,6 +88,7 @@ const CheckCircleIcon = () => (
 export default function WarehouseDetail() {
   const { id } = useParams();
   const [newInventoryOpen, setNewInventoryOpen] = useState(false);
+  const [addStockOpen, setAddStockOpen] = useState(false);
   const [newRequestOpen, setNewRequestOpen] = useState(false);
   const [fulfillRequestOpen, setFulfillRequestOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<TransferRequest | undefined>();
@@ -95,7 +99,7 @@ export default function WarehouseDetail() {
   
   // Fetch warehouse data using mock API
   const { data: warehouses = [], isLoading: warehouseLoading, error: warehouseError } = useWarehouses();
-  const { data: inventory = [], isLoading: inventoryLoading } = useProducts();
+  const { data: inventory = [], isLoading: inventoryLoading, mutate: mutateInventory } = useWarehouseInventory(id || null);
   const { data: transfers = [], isLoading: transfersLoading } = useTransferRequests();
   
   const warehouse = warehouses.find((w: any) => w.id === id);
@@ -164,18 +168,22 @@ export default function WarehouseDetail() {
     return `Warehouse ${warehouseId}`;
   };
 
+  // Ensure all data is arrays
+  const inventoryArray = Array.isArray(inventory) ? inventory : [];
+  const transfersArray = Array.isArray(transfers) ? transfers : [];
+
   const getProductName = (productId: string) => {
-    const product = inventory.find((p: Product) => p.id === productId);
+    const product = inventoryArray.find((p: Product) => p.id === productId);
     return product?.name || "Unknown Product";
   };
 
-  const lowStockItems = inventory.filter((product: Product) => (product.stockLevel / product.maxCapacity) < 0.3);
-  const totalItems = inventory.reduce((sum: number, product: Product) => sum + product.stockLevel, 0);
-  const totalValue = inventory.reduce((sum: number, product: Product) => sum + product.inventoryValue, 0);
+  const lowStockItems = inventoryArray.filter((product: Product) => (product.stockLevel / product.maxCapacity) < 0.3);
+  const totalItems = inventoryArray.reduce((sum: number, product: Product) => sum + product.stockLevel, 0);
+  const totalValue = inventoryArray.reduce((sum: number, product: Product) => sum + product.inventoryValue, 0);
 
   // Get requests for this warehouse
-  const incomingRequests = transfers.filter((req: TransferRequest) => req.fromWarehouse === warehouse.id);
-  const outgoingRequests = transfers.filter((req: TransferRequest) => req.toWarehouse === warehouse.id);
+  const incomingRequests = transfersArray.filter((req: TransferRequest) => req.fromWarehouse === warehouse.id);
+  const outgoingRequests = transfersArray.filter((req: TransferRequest) => req.toWarehouse === warehouse.id);
   const pendingIncoming = incomingRequests.filter((req: TransferRequest) => req.status === 'pending').length;
 
   const handleFulfillRequest = (request: TransferRequest) => {
@@ -241,6 +249,13 @@ export default function WarehouseDetail() {
               >
                 <PlusIcon />
                 {isMobile ? "Add Item" : "New Inventory Item"}
+              </button>
+              <button
+                onClick={() => setAddStockOpen(true)}
+                className="bg-green-600 text-white py-2 px-4 rounded-full flex items-center justify-center gap-2 hover:bg-green-700 transition-colors text-sm"
+              >
+                <PlusIcon />
+                {isMobile ? "Add Stock" : "Add Stock to Warehouse"}
               </button>
             </div>
           </div>
@@ -410,7 +425,7 @@ export default function WarehouseDetail() {
                       </td>
                     </tr>
                   ) : (
-                    inventory.map((product: Product, index: number) => {
+                    inventoryArray.map((product: Product, index: number) => {
                       const stockStatus = getStockStatus(product.stockLevel, product.maxCapacity);
                       return (
                         <tr key={product.id} className="border-b border-strokeGreyTwo">
@@ -472,6 +487,12 @@ export default function WarehouseDetail() {
           open={newInventoryOpen}
           onOpenChange={setNewInventoryOpen}
           warehouseId={id}
+        />
+        <AddStockToWarehouseModal
+          open={addStockOpen}
+          onOpenChange={setAddStockOpen}
+          warehouseId={id}
+          onSuccess={() => mutateInventory()}
         />
         <NewRequestModal
           open={newRequestOpen}

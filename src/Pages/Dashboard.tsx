@@ -4,6 +4,7 @@ import { MetricCard } from "../Components/WareHouses/MetricCard";
 import { WarehouseCard } from "../Components/WareHouses/WarehouseCard";
 import { useWarehouse } from "../contexts/WarehouseContext";
 import { useWarehouseStats, useTransferRequests } from "../services/warehouseApi";
+import { useInventory } from "../services/inventoryApi";
 import { Link } from "react-router-dom";
 import dashboardbadge from "../assets/dashboard/dashboardbadge.png";
 

@@ -1,35 +1,16 @@
 // Warehouse system configuration
 export const WAREHOUSE_CONFIG = {
   // API Configuration
-  USE_MOCK_API: import.meta.env.VITE_USE_MOCK_API === 'true' || true, // Default to mock until real API is ready
-  API_BASE_URL: import.meta.env.VITE_API_URL || 'http://localhost:3001',
-  WS_URL: import.meta.env.VITE_WS_URL || 'ws://localhost:3001/ws',
+  USE_MOCK_API: import.meta.env.VITE_USE_MOCK_API === 'false', // Use real API by default
+  API_BASE_URL: import.meta.env.VITE_API_URL,
+  WS_URL: import.meta.env.VITE_WS_URL,
   
   // Feature flags
-  FEATURES: {
-    REAL_TIME_UPDATES: import.meta.env.VITE_WAREHOUSE_FEATURES_REAL_TIME === 'true' || true,
-    BULK_OPERATIONS: import.meta.env.VITE_WAREHOUSE_FEATURES_BULK_OPS === 'true' || true,
-    ANALYTICS: import.meta.env.VITE_WAREHOUSE_FEATURES_ANALYTICS === 'true' || true,
-    NOTIFICATIONS: import.meta.env.VITE_WAREHOUSE_FEATURES_NOTIFICATIONS === 'true' || true,
-    EXPORT: import.meta.env.VITE_WAREHOUSE_FEATURES_EXPORT === 'true' || true,
-    BARCODE_SCANNING: import.meta.env.VITE_WAREHOUSE_FEATURES_BARCODE === 'true' || false,
-  },
   
   // UI Configuration
-  UI: {
-    DEFAULT_PAGE_SIZE: parseInt(import.meta.env.VITE_DEFAULT_PAGE_SIZE || '10'),
-    MAX_PAGE_SIZE: parseInt(import.meta.env.VITE_MAX_PAGE_SIZE || '100'),
-    ANIMATION_DURATION: 300,
-    DEBOUNCE_DELAY: 500,
-  },
-  
+
   // Cache Configuration
-  CACHE: {
-    WAREHOUSES_TTL: parseInt(import.meta.env.VITE_CACHE_WAREHOUSES_TTL || '300000'), // 5 minutes
-    PRODUCTS_TTL: parseInt(import.meta.env.VITE_CACHE_PRODUCTS_TTL || '600000'),    // 10 minutes
-    TRANSFERS_TTL: parseInt(import.meta.env.VITE_CACHE_TRANSFERS_TTL || '120000'),  // 2 minutes
-    METRICS_TTL: parseInt(import.meta.env.VITE_CACHE_METRICS_TTL || '60000'),       // 1 minute
-  },
+
   
   // File upload configuration
   UPLOAD: {
@@ -46,13 +27,7 @@ export const WAREHOUSE_CONFIG = {
   },
   
   // Mock API configuration
-  MOCK: {
-    API_DELAY_MIN: 500,
-    API_DELAY_MAX: 1500,
-    ERROR_RATE: 0.05, // 5% chance of simulated errors
-    ENABLE_WEBSOCKET_SIMULATION: true,
-    WEBSOCKET_EVENT_INTERVAL: 30000, // 30 seconds
-  },
+
 };
 
 // Environment detection

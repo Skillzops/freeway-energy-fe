@@ -257,7 +257,7 @@ export const useWarehouseApi = () => {
     fulfillTransferRequest,
     rejectTransferRequest,
     
-    // Inventory operations
+    // Legacy inventory operations
     addInventoryItem,
     updateInventoryItem,
     deleteInventoryItem,
@@ -294,8 +294,62 @@ export const useWarehouseInventory = (warehouseId: string | null, revalidate = t
   );
 };
 
+// Inventory API hooks
+export const useInventory = (revalidate = true) => {
+  const result = useGetRequest(WAREHOUSE_ENDPOINTS.INVENTORY, revalidate);
+  
+  // Handle different API response structures
+  const processedData = result.data ?
+    (Array.isArray(result.data) ? result.data :
+     Array.isArray(result.data.data) ? result.data.data :
+     Array.isArray(result.data.inventory) ? result.data.inventory : []) : [];
+  
+  return {
+    ...result,
+    data: processedData
+  };
+};
+
+export const useInventoryById = (id: string | null, revalidate = true) => {
+  return useGetRequest(
+    id ? WAREHOUSE_ENDPOINTS.INVENTORY_BY_ID(id) : null,
+    revalidate
+  );
+};
+
+export const useInventoryStats = (revalidate = true) => {
+  const result = useGetRequest(WAREHOUSE_ENDPOINTS.INVENTORY_STATS, revalidate);
+  return result;
+};
+
+export const useInventoryCategories = (revalidate = true) => {
+  const result = useGetRequest(WAREHOUSE_ENDPOINTS.INVENTORY_CATEGORIES, revalidate);
+  
+  // Handle different API response structures
+  const processedData = result.data ?
+    (Array.isArray(result.data) ? result.data :
+     Array.isArray(result.data.data) ? result.data.data :
+     Array.isArray(result.data.categories) ? result.data.categories : []) : [];
+  
+  return {
+    ...result,
+    data: processedData
+  };
+};
+
 export const useProducts = (revalidate = true) => {
-  return useGetRequest(WAREHOUSE_ENDPOINTS.PRODUCTS, revalidate);
+  const result = useGetRequest(WAREHOUSE_ENDPOINTS.PRODUCTS, revalidate);
+  
+  // Handle different API response structures
+  const processedData = result.data ?
+    (Array.isArray(result.data) ? result.data :
+     Array.isArray(result.data.data) ? result.data.data :
+     Array.isArray(result.data.products) ? result.data.products : []) : [];
+  
+  return {
+    ...result,
+    data: processedData
+  };
 };
 
 export const useProduct = (id: string | null, revalidate = true) => {
@@ -306,7 +360,19 @@ export const useProduct = (id: string | null, revalidate = true) => {
 };
 
 export const useTransferRequests = (revalidate = true) => {
-  return useGetRequest(WAREHOUSE_ENDPOINTS.TRANSFER_REQUESTS, revalidate);
+  const result = useGetRequest(WAREHOUSE_ENDPOINTS.TRANSFER_REQUESTS, revalidate);
+  
+  // Handle different API response structures
+  const processedData = result.data ?
+    (Array.isArray(result.data) ? result.data :
+     Array.isArray(result.data.data) ? result.data.data :
+     Array.isArray(result.data.transferRequests) ? result.data.transferRequests :
+     Array.isArray(result.data.transfers) ? result.data.transfers : []) : [];
+  
+  return {
+    ...result,
+    data: processedData
+  };
 };
 
 export const useTransferRequest = (id: string | null, revalidate = true) => {
@@ -325,10 +391,21 @@ export const useWarehouseMetrics = (revalidate = true) => {
 };
 
 export const useWarehouseManagers = (warehouseId: string | null, revalidate = true) => {
-  return useGetRequest(
+  const result = useGetRequest(
     warehouseId ? WAREHOUSE_ENDPOINTS.WAREHOUSE_MANAGERS(warehouseId) : null,
     revalidate
   );
+  
+  // Handle different API response structures
+  const processedData = result.data ?
+    (Array.isArray(result.data) ? result.data :
+     Array.isArray(result.data.data) ? result.data.data :
+     Array.isArray(result.data.managers) ? result.data.managers : []) : [];
+  
+  return {
+    ...result,
+    data: processedData
+  };
 };
 
 export const useWarehouseTransfers = (warehouseId: string | null, revalidate = true) => {
