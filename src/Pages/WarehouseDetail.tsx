@@ -7,7 +7,7 @@ import { NewInventoryModal } from "../Components/WareHouses/NewInventoryModal";
 import { NewRequestModal } from "../Components/WareHouses/NewRequestModal";
 import { FulfillRequestModal } from "../Components/WareHouses/FulfillRequestModal";
 import { ViewInventoryModal } from "../Components/WareHouses/ViewInventoryModal";
-import { useWarehouses, useTransferRequests } from "../services/warehouseApi";
+import { useWarehouses, useWarehouseTransferRequests } from "../services/warehouseApi";
 import { useWarehouseInventory } from "../services/inventoryApi";
 import { AddInventoryToWarehouseModal } from "../Components/WareHouses/AddInventoryToWarehouseModal";
 import { AddStockToWarehouseModal } from "../Components/WareHouses/AddStockToWarehouseModal";
@@ -100,9 +100,16 @@ export default function WarehouseDetail() {
   // Fetch warehouse data using mock API
   const { data: warehouses = [], isLoading: warehouseLoading, error: warehouseError } = useWarehouses();
   const { data: inventory = [], isLoading: inventoryLoading, mutate: mutateInventory } = useWarehouseInventory(id || null);
-  const { data: transfers = [], isLoading: transfersLoading } = useTransferRequests();
   
   const warehouse = warehouses.find((w: any) => w.id === id);
+  
+  // For main warehouse: show outgoing requests (fromWarehouseId)
+  // For branch warehouse: show incoming requests (toWarehouseId)
+  const { data: transferRequests = [], isLoading: transfersLoading } = useWarehouseTransferRequests(
+    warehouse?.isMainWarehouse
+      ? { fromWarehouseId: id || undefined }
+      : { toWarehouseId: id || undefined }
+  );
 
   // Show loading state
   if (warehouseLoading) {
@@ -164,15 +171,20 @@ export default function WarehouseDetail() {
   };
 
   const getWarehouseName = (warehouseId: string) => {
-    // In a real implementation, you might want to fetch warehouse names from API
-    return `Warehouse ${warehouseId}`;
+    const warehouse = warehouses.find((w: any) => w.id === warehouseId);
+    return warehouse?.name || `Warehouse ${warehouseId}`;
   };
 
   // Ensure all data is arrays
   const inventoryArray = Array.isArray(inventory) ? inventory : [];
-  const transfersArray = Array.isArray(transfers) ? transfers : [];
+  const transfersArray = Array.isArray(transferRequests) ? transferRequests : [];
 
-  const getProductName = (productId: string) => {
+  const getProductName = (productId: string, inventoryItem?: any) => {
+    // If inventory item is provided in the API response, use it
+    if (inventoryItem?.name) {
+      return inventoryItem.name;
+    }
+    // Fallback to searching in local inventory
     const product = inventoryArray.find((p: any) => p.id === productId);
     return product?.name || "Unknown Product";
   };
@@ -189,10 +201,9 @@ export default function WarehouseDetail() {
     return sum + (salePrice * stockLevel);
   }, 0);
 
-  // Get requests for this warehouse
-  const incomingRequests = transfersArray.filter((req: TransferRequest) => req.fromWarehouse === warehouse.id);
-  const outgoingRequests = transfersArray.filter((req: TransferRequest) => req.toWarehouse === warehouse.id);
-  const pendingIncoming = incomingRequests.filter((req: TransferRequest) => req.status === 'pending').length;
+  // Get requests for this warehouse - data is already filtered by API
+  const requests = transfersArray; // Already filtered by API based on warehouse type
+  const pendingRequests = requests.filter((req: any) => req.status === 'PENDING').length;
 
   const handleFulfillRequest = (request: TransferRequest) => {
     setSelectedRequest(request);
@@ -301,69 +312,86 @@ export default function WarehouseDetail() {
           {warehouse.isMainWarehouse && (
             <MetricCard
               title="Pending Requests"
-              value={transfersLoading ? "..." : pendingIncoming}
+              value={transfersLoading ? "..." : pendingRequests}
               icon={<ClockIcon />}
-              trend={pendingIncoming > 0 ? { value: "Needs fulfillment", isPositive: false } : undefined}
+              trend={pendingRequests > 0 ? { value: "Needs fulfillment", isPositive: false } : undefined}
             />
           )}
         </div>
 
-        {/* Incoming Requests for Main Warehouse */}
-        {warehouse.isMainWarehouse && incomingRequests.length > 0 && (
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-semibold text-textBlack">Incoming Requests</h2>
-              <Link 
-                to="/transfers"
-                className="border border-strokeGreyThree text-textBlack py-2 px-4 rounded-full hover:bg-gray-50 transition-colors"
-              >
-                View All Requests
-              </Link>
-            </div>
+        {/* Transfer Requests Section */}
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-semibold text-textBlack">
+              {warehouse?.isMainWarehouse ? "Outgoing Requests" : "Incoming Requests"}
+            </h2>
+            <Link
+              to="/transfers"
+              className="border border-strokeGreyThree text-textBlack py-2 px-4 rounded-full hover:bg-gray-50 transition-colors"
+            >
+              View All Requests
+            </Link>
+          </div>
 
-            <div className="bg-white border-[0.6px] border-strokeGreyThree rounded-[20px] overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50 border-b border-strokeGreyTwo">
+          <div className="bg-white border-[0.6px] border-strokeGreyThree rounded-[20px] overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-strokeGreyTwo">
+                  <tr>
+                    <th className="text-left py-3 px-4 font-medium text-textBlack">Request ID</th>
+                    <th className="text-left py-3 px-4 font-medium text-textBlack">
+                      {warehouse?.isMainWarehouse ? "To Warehouse" : "From Warehouse"}
+                    </th>
+                    <th className="text-left py-3 px-4 font-medium text-textBlack">Inventory Item</th>
+                    <th className="text-left py-3 px-4 font-medium text-textBlack">Requested</th>
+                    <th className="text-left py-3 px-4 font-medium text-textBlack">Fulfilled</th>
+                    <th className="text-left py-3 px-4 font-medium text-textBlack">Status</th>
+                    <th className="text-left py-3 px-4 font-medium text-textBlack">Date</th>
+                    <th className="text-left py-3 px-4 font-medium text-textBlack">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {requests.length === 0 ? (
                     <tr>
-                      <th className="text-left py-3 px-4 font-medium text-textBlack">Request ID</th>
-                      <th className="text-left py-3 px-4 font-medium text-textBlack">From Warehouse</th>
-                      <th className="text-left py-3 px-4 font-medium text-textBlack">Inventory Item</th>
-                      <th className="text-left py-3 px-4 font-medium text-textBlack">Requested</th>
-                      <th className="text-left py-3 px-4 font-medium text-textBlack">Fulfilled</th>
-                      <th className="text-left py-3 px-4 font-medium text-textBlack">Status</th>
-                      <th className="text-left py-3 px-4 font-medium text-textBlack">Date</th>
-                      <th className="text-left py-3 px-4 font-medium text-textBlack">Actions</th>
+                      <td colSpan={8} className="py-8 text-center">
+                        <p className="text-textDarkGrey">
+                          {warehouse?.isMainWarehouse ? "No outgoing transfer requests" : "No incoming transfer requests"}
+                        </p>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {incomingRequests.map((request: TransferRequest) => (
+                  ) : (
+                    requests.map((request: any) => (
                       <tr key={request.id} className="border-b border-strokeGreyTwo">
-                        <td className="py-3 px-4 font-medium text-textBlack">{request.id}</td>
-                        <td className="py-3 px-4 text-textDarkGrey">{getWarehouseName(request.toWarehouse)}</td>
-                        <td className="py-3 px-4 text-textDarkGrey">{getProductName(request.productId)}</td>
+                        <td className="py-3 px-4 font-medium text-textBlack">{request.requestId || request.id}</td>
+                        <td className="py-3 px-4 text-textDarkGrey">
+                          {warehouse?.isMainWarehouse
+                            ? (request.toWarehouse?.name || getWarehouseName(request.toWarehouseId))
+                            : (request.fromWarehouse?.name || getWarehouseName(request.fromWarehouseId))
+                          }
+                        </td>
+                        <td className="py-3 px-4 text-textDarkGrey">{getProductName(request.inventoryId, request.inventory)}</td>
                         <td className="py-3 px-4 text-textDarkGrey">{request.requestedQuantity}</td>
                         <td className="py-3 px-4 text-textDarkGrey">{request.fulfilledQuantity}</td>
                         <td className="py-3 px-4">
-                          <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(request.status)}`}>
-                            {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                          <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(request.status.toLowerCase())}`}>
+                            {request.status.charAt(0).toUpperCase() + request.status.slice(1).toLowerCase()}
                           </span>
                         </td>
-                        <td className="py-3 px-4 text-textDarkGrey">{new Date(request.requestDate).toLocaleDateString()}</td>
+                        <td className="py-3 px-4 text-textDarkGrey">{new Date(request.createdAt).toLocaleDateString()}</td>
                         <td className="py-3 px-4">
                           <div className="flex gap-2">
                             <button
                               onClick={() => {
                                 setSelectedRequest(request);
                                 // In a real app, this would open a view modal
-                                toast.info(`Viewing request ${request.id}`);
+                                toast.info(`Viewing request ${request.requestId || request.id}`);
                               }}
                               className="border border-strokeGreyThree text-textBlack py-1 px-3 rounded-full text-sm flex items-center gap-1 hover:bg-gray-50 transition-colors"
                             >
                               <EyeIcon />
                               View
                             </button>
-                            {request.status !== 'fulfilled' && request.status !== 'rejected' && (
+                            {warehouse?.isMainWarehouse && request.status !== 'FULFILLED' && request.status !== 'REJECTED' && (
                               <button
                                 onClick={() => handleFulfillRequest(request)}
                                 className="bg-primary text-white py-1 px-3 rounded-full text-sm flex items-center gap-1 hover:bg-primary/90 transition-colors"
@@ -375,19 +403,19 @@ export default function WarehouseDetail() {
                           </div>
                         </td>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <PaginationInfo
-                currentPage={1}
-                totalPages={Math.ceil(incomingRequests.length / 10)}
-                itemsPerPage={10}
-                totalItems={incomingRequests.length}
-              />
+                    ))
+                  )}
+                </tbody>
+              </table>
             </div>
+            <PaginationInfo
+              currentPage={1}
+              totalPages={Math.ceil(requests.length / 10)}
+              itemsPerPage={10}
+              totalItems={requests.length}
+            />
           </div>
-        )}
+        </div>
 
         {/* Inventory Table */}
         <div className="space-y-4">

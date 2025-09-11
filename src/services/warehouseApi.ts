@@ -416,6 +416,39 @@ export const useFilteredTransferRequests = (filters: { status?: string; warehous
   );
 };
 
+export const useWarehouseTransferRequests = (filters: {
+  fromWarehouseId?: string;
+  toWarehouseId?: string;
+  status?: string;
+  page?: number;
+  limit?: number;
+}, revalidate = true) => {
+  const queryParams = new URLSearchParams();
+  if (filters.fromWarehouseId) queryParams.append('fromWarehouseId', filters.fromWarehouseId);
+  if (filters.toWarehouseId) queryParams.append('toWarehouseId', filters.toWarehouseId);
+  if (filters.status) queryParams.append('status', filters.status);
+  if (filters.page) queryParams.append('page', filters.page.toString());
+  if (filters.limit) queryParams.append('limit', filters.limit.toString());
+  
+  const queryString = queryParams.toString();
+  const result = useGetRequest(
+    queryString ? `${WAREHOUSE_ENDPOINTS.TRANSFER_REQUESTS}?${queryString}` : WAREHOUSE_ENDPOINTS.TRANSFER_REQUESTS,
+    revalidate
+  );
+  
+  // Handle different API response structures
+  const processedData = result.data ?
+    (Array.isArray(result.data) ? result.data :
+     Array.isArray(result.data.data) ? result.data.data :
+     Array.isArray(result.data.transferRequests) ? result.data.transferRequests :
+     Array.isArray(result.data.transfers) ? result.data.transfers : []) : [];
+  
+  return {
+    ...result,
+    data: processedData
+  };
+};
+
 // Pagination hooks
 export const usePaginatedWarehouses = (page: number, limit: number = 10, revalidate = true) => {
   return useGetRequest(
