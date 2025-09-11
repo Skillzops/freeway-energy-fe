@@ -6,7 +6,7 @@ import type { Product } from "../../data/warehouseData";
 interface ViewInventoryModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  product?: Product;
+  product?: any; // Using any to handle API response structure
 }
 
 export function ViewInventoryModal({ open, onOpenChange, product }: ViewInventoryModalProps) {
@@ -45,7 +45,7 @@ export function ViewInventoryModal({ open, onOpenChange, product }: ViewInventor
       leftHeaderComponents={
         <div className="flex items-center gap-2">
           <span className={`px-2 py-1 rounded-full text-xs border border-strokeGreyThree`}>
-            {product.status.toUpperCase()}
+            {(product.status || 'active').toUpperCase()}
           </span>
           <h2 className="text-lg font-semibold text-textBlack">{product.name}</h2>
         </div>
@@ -104,22 +104,26 @@ export function ViewInventoryModal({ open, onOpenChange, product }: ViewInventor
                       <div className="flex justify-between">
                         <span className="text-textDarkGrey">Class</span>
                         <span className="px-2 py-1 bg-gray-100 text-xs rounded-full">
-                          {product.status.toUpperCase()}
+                          {(product.status || 'active').toUpperCase()}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-textDarkGrey">Category</span>
                         <span className="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">
-                          {product.category.toUpperCase()}
+                          {(product.category?.name || product.categoryName || 'N/A').toUpperCase()}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-textDarkGrey">Sale Price</span>
-                        <span className="text-success font-medium">{formatCurrency(product.salePrice)}</span>
+                        <span className="text-success font-medium">
+                          {formatCurrency(product.salePrice?.minimumInventoryBatchPrice || product.salePrice?.maximumInventoryBatchPrice || 0)}
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-textDarkGrey">Stock Level</span>
-                        <span className="text-textBlack">{product.stockLevel}/{product.maxCapacity}</span>
+                        <span className="text-textBlack">
+                          {product.totalRemainingQuantities || 0}/{product.totalInitialQuantities || product.totalRemainingQuantities || 0}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -138,7 +142,7 @@ export function ViewInventoryModal({ open, onOpenChange, product }: ViewInventor
                     </div>
                     <div>
                       <p className="text-sm text-textDarkGrey">Total Initial Quantities</p>
-                      <p className="text-2xl font-bold text-textBlack">{product.maxCapacity}</p>
+                      <p className="text-2xl font-bold text-textBlack">{product.totalInitialQuantities || 0}</p>
                     </div>
                   </div>
                 </div>
@@ -150,7 +154,7 @@ export function ViewInventoryModal({ open, onOpenChange, product }: ViewInventor
                     </div>
                     <div>
                       <p className="text-sm text-textDarkGrey">Remaining Quantities</p>
-                      <p className="text-2xl font-bold text-textBlack">{product.stockLevel}</p>
+                      <p className="text-2xl font-bold text-textBlack">{product.totalRemainingQuantities || 0}</p>
                     </div>
                   </div>
                 </div>
@@ -162,7 +166,9 @@ export function ViewInventoryModal({ open, onOpenChange, product }: ViewInventor
                     </div>
                     <div>
                       <p className="text-sm text-textDarkGrey">Total Value</p>
-                      <p className="text-2xl font-bold text-success">{formatCurrency(product.inventoryValue)}</p>
+                      <p className="text-2xl font-bold text-success">
+                        {formatCurrency((product.salePrice?.minimumInventoryBatchPrice || product.salePrice?.maximumInventoryBatchPrice || 0) * (product.totalRemainingQuantities || 0))}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -175,7 +181,7 @@ export function ViewInventoryModal({ open, onOpenChange, product }: ViewInventor
                     <div>
                       <p className="text-sm text-textDarkGrey">Stock Percentage</p>
                       <p className="text-2xl font-bold text-textBlack">
-                        {Math.round((product.stockLevel / product.maxCapacity) * 100)}%
+                        {Math.round(((product.totalRemainingQuantities || 0) / (product.totalInitialQuantities || product.totalRemainingQuantities || 1)) * 100)}%
                       </p>
                     </div>
                   </div>

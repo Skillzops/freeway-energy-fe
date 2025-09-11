@@ -173,13 +173,21 @@ export default function WarehouseDetail() {
   const transfersArray = Array.isArray(transfers) ? transfers : [];
 
   const getProductName = (productId: string) => {
-    const product = inventoryArray.find((p: Product) => p.id === productId);
+    const product = inventoryArray.find((p: any) => p.id === productId);
     return product?.name || "Unknown Product";
   };
 
-  const lowStockItems = inventoryArray.filter((product: Product) => (product.stockLevel / product.maxCapacity) < 0.3);
-  const totalItems = inventoryArray.reduce((sum: number, product: Product) => sum + product.stockLevel, 0);
-  const totalValue = inventoryArray.reduce((sum: number, product: Product) => sum + product.inventoryValue, 0);
+  const lowStockItems = inventoryArray.filter((product: any) => {
+    const stockLevel = product.totalRemainingQuantities || 0;
+    const maxCapacity = product.totalInitialQuantities || stockLevel || 1;
+    return (stockLevel / maxCapacity) < 0.3;
+  });
+  const totalItems = inventoryArray.reduce((sum: number, product: any) => sum + (product.totalRemainingQuantities || 0), 0);
+  const totalValue = inventoryArray.reduce((sum: number, product: any) => {
+    const salePrice = product.salePrice?.minimumInventoryBatchPrice || product.salePrice?.maximumInventoryBatchPrice || 0;
+    const stockLevel = product.totalRemainingQuantities || 0;
+    return sum + (salePrice * stockLevel);
+  }, 0);
 
   // Get requests for this warehouse
   const incomingRequests = transfersArray.filter((req: TransferRequest) => req.fromWarehouse === warehouse.id);
@@ -425,32 +433,42 @@ export default function WarehouseDetail() {
                       </td>
                     </tr>
                   ) : (
-                    inventoryArray.map((product: Product, index: number) => {
-                      const stockStatus = getStockStatus(product.stockLevel, product.maxCapacity);
+                    inventoryArray.map((product: any, index: number) => {
+                      // Map API response fields to display values
+                      const salePrice = product.salePrice?.minimumInventoryBatchPrice || product.salePrice?.maximumInventoryBatchPrice || 0;
+                      const stockLevel = product.totalRemainingQuantities || 0;
+                      const maxCapacity = product.totalInitialQuantities || stockLevel || 1; // Fallback to prevent division by zero
+                      const inventoryValue = salePrice * stockLevel; // Calculate inventory value
+                      
+                      const stockStatus = getStockStatus(stockLevel, maxCapacity);
                       return (
                         <tr key={product.id} className="border-b border-strokeGreyTwo">
                           <td className="py-3 px-4 text-textDarkGrey">{index + 1}</td>
                           <td className="py-3 px-4">
                             <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                              <span className="text-gray-400 text-xs">📷</span>
+                              {product.image ? (
+                                <img src={product.image} alt={product.name} className="w-full h-full object-cover rounded-lg" />
+                              ) : (
+                                <span className="text-gray-400 text-xs">📷</span>
+                              )}
                             </div>
                           </td>
                           <td className="py-3 px-4 font-medium text-textBlack">{product.name}</td>
                           <td className="py-3 px-4">
                             <span className="border border-strokeGreyThree px-2 py-1 rounded-full text-xs capitalize">
-                              {product.status}
+                              {product.status || 'active'}
                             </span>
                           </td>
                           <td className="py-3 px-4 text-success font-medium">
-                            {formatCurrency(product.salePrice)}
+                            {salePrice > 0 ? formatCurrency(salePrice) : 'N/A'}
                           </td>
                           <td className="py-3 px-4 text-success font-medium">
-                            {formatCurrency(product.inventoryValue)}
+                            {inventoryValue > 0 ? formatCurrency(inventoryValue) : 'N/A'}
                           </td>
                           <td className="py-3 px-4">
                             <div className="flex items-center gap-2">
                               <span className="text-sm text-textDarkGrey">
-                                {product.stockLevel}/{product.maxCapacity}
+                                {stockLevel}/{maxCapacity}
                               </span>
                               <span className={`px-2 py-1 rounded-full text-xs bg-success text-white`}>
                                 {stockStatus.label}

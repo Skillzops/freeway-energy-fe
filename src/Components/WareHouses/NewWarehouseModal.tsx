@@ -72,9 +72,9 @@ export function NewWarehouseModal({ open, onOpenChange }: NewWarehouseModalProps
         location,
         totalItems: 0,
         totalValue: 0,
-        isMainWarehouse,
+        isMain: isMainWarehouse, // Correct parameter for backend
         isActive: true,
-        image: imagePreview, 
+        image: imagePreview,
       });
 
       toast.success(`${name} has been added successfully`);

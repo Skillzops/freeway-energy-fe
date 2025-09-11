@@ -126,10 +126,19 @@ export const useWarehouseApi = () => {
 
   // Transfer request operations
   const createTransferRequest = async (transferData: Omit<TransferRequest, 'id' | 'requestDate' | 'fulfilledQuantity' | 'status'>) => {
+    // Map field names to what the API expects
+    const apiData = {
+      fromWarehouseId: transferData.fromWarehouse,
+      toWarehouseId: transferData.toWarehouse,
+      inventoryId: transferData.productId,
+      requestedQuantity: transferData.requestedQuantity,
+      notes: transferData.notes,
+    };
+
     return await apiCall({
       endpoint: WAREHOUSE_ENDPOINTS.TRANSFER_REQUESTS,
       method: 'post',
-      data: transferData,
+      data: apiData,
       headers: {
         'Accept': 'application/json'
       },
@@ -268,11 +277,17 @@ export const useWarehouseApi = () => {
 export const useWarehouses = (revalidate = true) => {
   const result = useGetRequest(WAREHOUSE_ENDPOINTS.WAREHOUSES, revalidate);
   
-  // Handle different API response structures
-  const processedData = result.data ?
+  // Handle different API response structures and map fields
+  const rawData = result.data ?
     (Array.isArray(result.data) ? result.data :
      Array.isArray(result.data.data) ? result.data.data :
      Array.isArray(result.data.warehouses) ? result.data.warehouses : []) : [];
+  
+  // Map API response fields to UI expected fields
+  const processedData = rawData.map((warehouse: any) => ({
+    ...warehouse,
+    isMainWarehouse: warehouse.isMain || warehouse.isMainWarehouse || false, // Map 'isMain' field to 'isMainWarehouse'
+  }));
   
   return {
     ...result,
@@ -294,48 +309,7 @@ export const useWarehouseInventory = (warehouseId: string | null, revalidate = t
   );
 };
 
-// Inventory API hooks
-export const useInventory = (revalidate = true) => {
-  const result = useGetRequest(WAREHOUSE_ENDPOINTS.INVENTORY, revalidate);
-  
-  // Handle different API response structures
-  const processedData = result.data ?
-    (Array.isArray(result.data) ? result.data :
-     Array.isArray(result.data.data) ? result.data.data :
-     Array.isArray(result.data.inventory) ? result.data.inventory : []) : [];
-  
-  return {
-    ...result,
-    data: processedData
-  };
-};
-
-export const useInventoryById = (id: string | null, revalidate = true) => {
-  return useGetRequest(
-    id ? WAREHOUSE_ENDPOINTS.INVENTORY_BY_ID(id) : null,
-    revalidate
-  );
-};
-
-export const useInventoryStats = (revalidate = true) => {
-  const result = useGetRequest(WAREHOUSE_ENDPOINTS.INVENTORY_STATS, revalidate);
-  return result;
-};
-
-export const useInventoryCategories = (revalidate = true) => {
-  const result = useGetRequest(WAREHOUSE_ENDPOINTS.INVENTORY_CATEGORIES, revalidate);
-  
-  // Handle different API response structures
-  const processedData = result.data ?
-    (Array.isArray(result.data) ? result.data :
-     Array.isArray(result.data.data) ? result.data.data :
-     Array.isArray(result.data.categories) ? result.data.categories : []) : [];
-  
-  return {
-    ...result,
-    data: processedData
-  };
-};
+// Note: Inventory API hooks are now in inventoryApi.ts
 
 export const useProducts = (revalidate = true) => {
   const result = useGetRequest(WAREHOUSE_ENDPOINTS.PRODUCTS, revalidate);

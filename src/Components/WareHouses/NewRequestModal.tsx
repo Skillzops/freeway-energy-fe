@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Modal } from "../ModalComponent/Modal";
-import { useWarehouses, useProducts, useWarehouseApi } from "../../services/warehouseApi";
+import { useWarehouses, useWarehouseApi } from "../../services/warehouseApi";
+import { useWarehouseInventory } from "../../services/inventoryApi";
 import { toast } from "react-toastify";
 import useBreakpoint from "../../hooks/useBreakpoint";
 
@@ -10,22 +11,22 @@ interface NewRequestModalProps {
 }
 
 export function NewRequestModal({ open, onOpenChange }: NewRequestModalProps) {
-  const [fromWarehouse, setFromWarehouse] = useState("main"); // Default to main warehouse
+  const [fromWarehouse, setFromWarehouse] = useState(""); // Allow selecting any warehouse
   const [toWarehouse, setToWarehouse] = useState("");
   const [productId, setProductId] = useState("");
   const [quantity, setQuantity] = useState("");
   const [notes, setNotes] = useState("");
   const isMobile = useBreakpoint("max", 640);
 
-  // Fetch data using mock API
+  // Fetch data using API
   const { data: warehouses = [] } = useWarehouses();
-  const { data: products = [] } = useProducts();
+  const { data: inventory = [] } = useWarehouseInventory(fromWarehouse || null); // Fetch inventory for selected warehouse
   const { createTransferRequest } = useWarehouseApi();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!toWarehouse || !productId || !quantity) {
+    if (!fromWarehouse || !toWarehouse || !productId || !quantity) {
       toast.error("Please fill in all required fields");
       return;
     }
@@ -46,7 +47,7 @@ export function NewRequestModal({ open, onOpenChange }: NewRequestModalProps) {
       });
 
       // Reset form and close modal
-      setFromWarehouse("main");
+      setFromWarehouse("");
       setToWarehouse("");
       setProductId("");
       setQuantity("");
@@ -58,8 +59,8 @@ export function NewRequestModal({ open, onOpenChange }: NewRequestModalProps) {
     }
   };
 
-  const mainWarehouse = warehouses.find((w: any) => w.isMainWarehouse);
-  const branchWarehouses = warehouses.filter((w: any) => !w.isMainWarehouse);
+  const selectedFromWarehouse = warehouses.find((w: any) => w.id === fromWarehouse);
+  const availableToWarehouses = warehouses.filter((w: any) => w.id !== fromWarehouse);
 
   return (
     <Modal
@@ -68,7 +69,7 @@ export function NewRequestModal({ open, onOpenChange }: NewRequestModalProps) {
       size={isMobile ? "large" : "medium"}
       layout="right"
       leftHeaderComponents={
-        <h2 className="text-lg font-semibold text-textBlack">Request from Main Warehouse</h2>
+        <h2 className="text-lg font-semibold text-textBlack">Create Transfer Request</h2>
       }
     >
       <div className="p-4 sm:p-6 h-full overflow-y-auto">
@@ -76,7 +77,9 @@ export function NewRequestModal({ open, onOpenChange }: NewRequestModalProps) {
           <div className="space-y-2">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
               <span className="text-sm font-medium text-textBlack">From:</span>
-              <span className="text-sm text-textDarkGrey">{mainWarehouse?.name}</span>
+              <span className="text-sm text-textDarkGrey">
+                {selectedFromWarehouse?.name || "Select source warehouse below"}
+              </span>
             </div>
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
               <span className="text-sm font-medium text-textBlack">To:</span>
@@ -86,6 +89,28 @@ export function NewRequestModal({ open, onOpenChange }: NewRequestModalProps) {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+          <div className="space-y-2">
+            <label htmlFor="from-warehouse" className="block text-sm font-medium text-textBlack">
+              Source Warehouse *
+            </label>
+            <select
+              id="from-warehouse"
+              value={fromWarehouse}
+              onChange={(e) => {
+                setFromWarehouse(e.target.value);
+                setProductId(""); // Reset product selection when warehouse changes
+              }}
+              className="w-full px-3 py-2 sm:py-3 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm sm:text-base"
+            >
+              <option value="">Select source warehouse</option>
+              {warehouses.map((warehouse: any) => (
+                <option key={warehouse.id} value={warehouse.id}>
+                  {warehouse.name} {warehouse.isMainWarehouse ? "(Main)" : "(Branch)"}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div className="space-y-2">
             <label htmlFor="to-warehouse" className="block text-sm font-medium text-textBlack">
               Destination Warehouse *
@@ -97,9 +122,9 @@ export function NewRequestModal({ open, onOpenChange }: NewRequestModalProps) {
               className="w-full px-3 py-2 sm:py-3 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm sm:text-base"
             >
               <option value="">Select destination warehouse</option>
-              {branchWarehouses.map((warehouse: any) => (
+              {availableToWarehouses.map((warehouse: any) => (
                 <option key={warehouse.id} value={warehouse.id}>
-                  {warehouse.name}
+                  {warehouse.name} {warehouse.isMainWarehouse ? "(Main)" : "(Branch)"}
                 </option>
               ))}
             </select>
@@ -114,11 +139,14 @@ export function NewRequestModal({ open, onOpenChange }: NewRequestModalProps) {
               value={productId}
               onChange={(e) => setProductId(e.target.value)}
               className="w-full px-3 py-2 sm:py-3 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm sm:text-base"
+              disabled={!fromWarehouse}
             >
-              <option value="">Select inventory item</option>
-              {products.map((product: any) => (
-                <option key={product.id} value={product.id}>
-                  {product.name} - Available: {product.stockLevel}
+              <option value="">
+                {!fromWarehouse ? "Select source warehouse first" : "Select inventory item"}
+              </option>
+              {inventory.map((item: any) => (
+                <option key={item.id} value={item.id}>
+                  {item.name} - Available: {item.totalRemainingQuantities || 0}
                 </option>
               ))}
             </select>

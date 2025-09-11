@@ -185,9 +185,10 @@ export const useWarehouseInventory = (warehouseId: string | null, revalidate = t
     revalidate
   );
   
-  // Handle different API response structures
+  // Handle different API response structures - inventory items are in 'inventories' array
   const processedData = result.data ?
     (Array.isArray(result.data) ? result.data :
+     Array.isArray(result.data.inventories) ? result.data.inventories :
      Array.isArray(result.data.data) ? result.data.data :
      Array.isArray(result.data.inventory) ? result.data.inventory : []) : [];
   
