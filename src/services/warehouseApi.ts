@@ -57,13 +57,20 @@ formData.append('isMainWarehouse', warehouseData.isMainWarehouse.toString());
       successMessage: 'Warehouse created successfully',
     });
   };
-  const updateWarehouse = async (id: string, warehouseData: Partial<Warehouse>) => {
+  const updateWarehouse = async (id: string, warehouseData: Partial<Warehouse> | FormData) => {
+    // Check if it's FormData (for file uploads) or regular object
+    const isFormData = warehouseData instanceof FormData;
+    
     return await apiCall({
       endpoint: WAREHOUSE_ENDPOINTS.WAREHOUSE_BY_ID(id),
       method: 'patch',
       data: warehouseData,
-      headers: {
+      headers: isFormData ? {
         'Accept': 'application/json'
+        // Don't set Content-Type for FormData - let browser set it with boundary
+      } : {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
       },
       successMessage: 'Warehouse updated successfully',
     });

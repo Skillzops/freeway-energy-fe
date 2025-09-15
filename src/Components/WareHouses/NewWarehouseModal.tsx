@@ -156,43 +156,24 @@ export function NewWarehouseModal({ open, onOpenChange }: NewWarehouseModalProps
             <label className="block text-sm font-medium text-textBlack">
               Warehouse Image
             </label>
-            {imagePreview ? (
-              <div className="relative">
-                <img
-                  src={imagePreview}
-                  alt="Warehouse preview"
-                  className={`w-full ${isMobile ? 'h-24' : 'h-32'} object-cover rounded-lg border border-strokeGreyThree`}
-                />
-                <button
-                  type="button"
-                  onClick={removeImage}
-                  className="absolute top-2 right-2 bg-errorTwo text-white p-1 rounded-full hover:bg-errorTwo/90 transition-colors"
-                >
-                  <XIcon />
-                </button>
-              </div>
-            ) : (
-              <div
-                className={`w-full ${isMobile ? 'h-24' : 'h-32'} border-2 border-dashed border-strokeGreyThree rounded-lg flex items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors`}
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <div className="text-center">
-                  <div className="text-textDarkGrey mb-2 flex justify-center">
-                    <UploadIcon />
-                  </div>
-                  <p className="text-xs sm:text-sm text-textDarkGrey">
-                    {isMobile ? "Upload image" : "Click to upload image"}
-                  </p>
+            <div className="space-y-3">
+              {imagePreview && (
+                <div className="w-full h-32 rounded-lg overflow-hidden">
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-              </div>
-            )}
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleImageSelect}
-              className="hidden"
-            />
+              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageSelect}
+                className="block w-full text-sm text-textDarkGrey file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary/90"
+              />
+            </div>
           </div>
 
           <div className="flex items-center space-x-2">
@@ -219,7 +200,7 @@ export function NewWarehouseModal({ open, onOpenChange }: NewWarehouseModalProps
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full sm:w-auto px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full sm:w-auto bg-primaryGradient text-white px-4 py-2 rounded-lg hover:opacity-90 transition-all text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? "Creating..." : "Create Warehouse"}
             </button>

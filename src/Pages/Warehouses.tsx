@@ -138,10 +138,10 @@ export default function Warehouses() {
           </div>
           <button
             onClick={() => setNewWarehouseOpen(true)}
-            className="bg-primary text-white px-4 py-2 rounded-full flex items-center gap-2 hover:bg-primary/90 transition-colors text-sm sm:text-base w-full sm:w-auto justify-center"
+            className="bg-primaryGradient text-white px-6 py-3 rounded-full hover:opacity-90 transition-all flex items-center gap-2"
           >
             <PlusIcon />
-            {isMobile ? "New" : "New Warehouse"}
+            New Warehouse
           </button>
         </div>
 
@@ -199,7 +199,7 @@ export default function Warehouses() {
               </p>
               <button
                 onClick={() => setNewWarehouseOpen(true)}
-                className="bg-primary text-white px-4 py-2 rounded-full hover:bg-primary/90 transition-colors"
+                className="bg-primaryGradient text-white px-4 py-2 rounded-full hover:opacity-90 transition-all"
               >
                 Create Your First Warehouse
               </button>

@@ -262,20 +262,24 @@ export default function WarehouseDetail() {
                   {isMobile ? "Request" : "Request from Main"}
                 </button>
               )}
-              <button
-                onClick={() => setNewInventoryOpen(true)}
-                className="bg-primary text-white py-2 px-4 rounded-full flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors text-sm"
-              >
-                <PlusIcon />
-                {isMobile ? "Add Item" : "New Inventory Item"}
-              </button>
-              <button
-                onClick={() => setAddStockOpen(true)}
-                className="bg-green-600 text-white py-2 px-4 rounded-full flex items-center justify-center gap-2 hover:bg-green-700 transition-colors text-sm"
-              >
-                <PlusIcon />
-                {isMobile ? "Add Stock" : "Add Stock to Warehouse"}
-              </button>
+              {warehouse.isMainWarehouse && (
+                <>
+                  <button
+                    onClick={() => setNewInventoryOpen(true)}
+                    className="bg-primary text-white py-2 px-4 rounded-full flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors text-sm"
+                  >
+                    <PlusIcon />
+                    {isMobile ? "Add Item" : "New Inventory Item"}
+                  </button>
+                  <button
+                    onClick={() => setAddStockOpen(true)}
+                    className="bg-green-600 text-white py-2 px-4 rounded-full flex items-center justify-center gap-2 hover:bg-green-700 transition-colors text-sm"
+                  >
+                    <PlusIcon />
+                    {isMobile ? "Add Stock" : "Add Stock to Warehouse"}
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
