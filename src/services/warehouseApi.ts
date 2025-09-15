@@ -27,17 +27,36 @@ export const useWarehouseApi = () => {
 
   // Warehouse CRUD operations
   const createWarehouse = async (warehouseData: Omit<Warehouse, 'id'>) => {
+    // Create FormData for multipart/form-data request
+    const formData = new FormData();
+    
+    // Append all warehouse data fields
+    formData.append('name', warehouseData.name);
+    formData.append('location', warehouseData.location);
+    formData.append('totalItems', warehouseData.totalItems.toString());
+    formData.append('totalValue', warehouseData.totalValue.toString());
+
+formData.append('isMainWarehouse', warehouseData.isMainWarehouse.toString());
+    if (warehouseData.isActive !== undefined) {
+      formData.append('isActive', warehouseData.isActive.toString());
+    }
+    
+    // Append the image file if it exists
+    if (warehouseData.image && warehouseData.image instanceof File) {
+      formData.append('image', warehouseData.image);
+    }
+    
     return await apiCall({
       endpoint: WAREHOUSE_ENDPOINTS.WAREHOUSES,
       method: 'post',
-      data: warehouseData,
+      data: formData,
       headers: {
         'Accept': 'application/json'
+        // Don't set Content-Type, let the browser set it with the boundary for FormData
       },
       successMessage: 'Warehouse created successfully',
     });
   };
-
   const updateWarehouse = async (id: string, warehouseData: Partial<Warehouse>) => {
     return await apiCall({
       endpoint: WAREHOUSE_ENDPOINTS.WAREHOUSE_BY_ID(id),
@@ -290,9 +309,18 @@ export const useWarehouses = (revalidate = true) => {
     isMainWarehouse: warehouse.isMain || warehouse.isMainWarehouse || false, // Map 'isMain' field to 'isMainWarehouse'
   }));
   
+  // Sort warehouses so that main warehouses appear first
+  const sortedData = processedData.sort((a: any, b: any) => {
+    // Main warehouses first (true comes before false)
+    if (a.isMainWarehouse && !b.isMainWarehouse) return -1;
+    if (!a.isMainWarehouse && b.isMainWarehouse) return 1;
+    // If both are main or both are not main, maintain original order
+    return 0;
+  });
+  
   return {
     ...result,
-    data: processedData
+    data: sortedData
   };
 };
 

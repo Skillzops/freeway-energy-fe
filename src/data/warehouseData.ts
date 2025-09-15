@@ -16,7 +16,7 @@ export interface Warehouse {
   totalItems: number;
   totalValue: number;
   isMainWarehouse: boolean;
-  image: string;
+  image: string | File;
   isActive?: boolean;
   managers?: WarehouseManager[];
   createdAt?: string;

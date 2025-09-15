@@ -66,15 +66,15 @@ export function NewWarehouseModal({ open, onOpenChange }: NewWarehouseModalProps
 
     setIsLoading(true);
     try {
-      // Add warehouse to context
+      // Add warehouse to context - now passing the actual file for FormData
       await addWarehouse({
         name,
         location,
         totalItems: 0,
         totalValue: 0,
-        isMain: isMainWarehouse, // Correct parameter for backend
+        isMainWarehouse: isMainWarehouse, // Correct parameter for backend
         isActive: true,
-        image: imagePreview,
+        image: selectedImage, // Pass the actual File object instead of base64 string
       });
 
       toast.success(`${name} has been added successfully`);

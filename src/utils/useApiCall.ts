@@ -53,7 +53,8 @@ export const useApiCall = () => {
       data,
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/json',
+        // Only set Content-Type for non-FormData requests
+        ...(!(data instanceof FormData) && { 'Content-Type': 'application/json' }),
         ...headers,
         Authorization: `Bearer ${token}`,
       },
