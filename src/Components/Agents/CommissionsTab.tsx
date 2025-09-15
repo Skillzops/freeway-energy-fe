@@ -135,13 +135,13 @@ const CommissionsTab: React.FC<Props> = ({ agentID }) => {
         <div className="flex items-center gap-2 pl-3 pr-3 py-1.5 rounded-full bg-[#F9F9F9] border-[0.6px] border-strokeGreyThree text-[11px]">
           <span className="text-textGrey">Total Payments</span>
           <span className="font-semibold text-textBlack">
-            {summary?.totalPayments ?? 0}
+            {summary?.totalPayments ?? summary?.totalCompletedTasks}
           </span>
         </div>
         <div className="flex items-center gap-2 pl-3 pr-3 py-1.5 rounded-full bg-[#F9F9F9] border-[0.6px] border-strokeGreyThree text-[11px]">
           <span className="text-textGrey">Commission Rate</span>
           <span className="font-semibold text-textBlack">
-            {Number(summary?.commissionRate ?? 0).toFixed(2)}%
+            {summary?.commissionRate? <>{Number(summary?.commissionRate ?? 0).toFixed(2)}%</>: <>{summary?.commissionPerTask}</> }
           </span>
         </div>
       </div>
