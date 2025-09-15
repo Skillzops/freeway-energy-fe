@@ -51,6 +51,7 @@ export const WarehouseManagerModal: React.FC<WarehouseManagerModalProps> = ({
       await assignManagers(warehouseId, [userId]);
       await mutateManagers();
       setNewManagerEmail('');
+      // Keep the modal open after assigning a manager
     } catch (error) {
       console.error('Failed to assign manager:', error);
     }
@@ -76,8 +77,8 @@ export const WarehouseManagerModal: React.FC<WarehouseManagerModalProps> = ({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => onOpenChange(false)}>
+      <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-6">
           <div>
             <h2 className="text-xl font-semibold text-textBlack">Warehouse Managers</h2>
@@ -121,7 +122,7 @@ export const WarehouseManagerModal: React.FC<WarehouseManagerModalProps> = ({
                         {manager.user?.email || 'No email'}
                       </p>
                       <p className="text-xs text-textDarkGrey">
-                        Assigned: {formatDate(manager.assignedAt)}
+                        Assigned: {formatDate(manager.createdAt)}
                       </p>
                     </div>
                   </div>
@@ -142,9 +143,20 @@ export const WarehouseManagerModal: React.FC<WarehouseManagerModalProps> = ({
         {/* Add New Manager */}
         <div>
           <h3 className="text-lg font-medium text-textBlack mb-3">Add New Manager</h3>
+          <input
+            type="text"
+            placeholder="Search for a user..."
+            value={newManagerEmail}
+            onChange={(e) => setNewManagerEmail(e.target.value)}
+            className="w-full px-3 py-2 border border-strokeGreyThree rounded-lg mb-3"
+          />
           <div className="space-y-3">
             {availableUsers
-              .filter((user: any) => !managers.some((m: WarehouseManager) => m.user?.id === user.id))
+              .filter((user: any) => {
+                const fullName = `${user.firstname} ${user.lastname}`.toLowerCase();
+                return fullName.includes(newManagerEmail.toLowerCase()) &&
+                       !managers.some((m: WarehouseManager) => m.userId === user.id);
+              })
               .map((user: any) => (
                 <div
                   key={user.id}
@@ -155,7 +167,7 @@ export const WarehouseManagerModal: React.FC<WarehouseManagerModalProps> = ({
                       <UserIcon />
                     </div>
                     <div>
-                      <p className="font-medium text-textBlack">{user.name}</p>
+                      <p className="font-medium text-textBlack">{`${user.firstname} ${user.lastname}`}</p>
                       <p className="text-sm text-textDarkGrey">{user.email}</p>
                     </div>
                   </div>

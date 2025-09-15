@@ -27,11 +27,14 @@ export interface WarehouseManager {
   id: string;
   userId: string;
   warehouseId: string;
-  assignedAt: string;
+  createdAt: string;
   user?: {
     id: string;
-    name: string;
+    firstname: string;
+    lastname: string;
     email: string;
+    phone?: string;
+    status: string;
   };
 }
 
