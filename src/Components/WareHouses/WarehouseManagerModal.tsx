@@ -115,7 +115,7 @@ export const WarehouseManagerModal: React.FC<WarehouseManagerModalProps> = ({
                     </div>
                     <div>
                       <p className="font-medium text-textBlack">
-                        {manager.user?.name || 'Unknown User'}
+                        {manager.user ? `${manager.user.firstname} ${manager.user.lastname}` : 'Unknown User'}
                       </p>
                       <p className="text-sm text-textDarkGrey">
                         {manager.user?.email || 'No email'}

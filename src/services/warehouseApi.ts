@@ -220,11 +220,11 @@ export const useWarehouseApi = () => {
   };
 
   // Warehouse manager operations
-  const assignWarehouseManagers = async (warehouseId: string, managerIds: string[]) => {
+  const assignWarehouseManagers = async (warehouseId: string, userIds: string[]) => {
     return await apiCall({
       endpoint: WAREHOUSE_ENDPOINTS.WAREHOUSE_MANAGERS(warehouseId),
       method: 'post',
-      data: { managerIds },
+      data: { userIds },
       headers: {
         'Accept': 'application/json'
       },
