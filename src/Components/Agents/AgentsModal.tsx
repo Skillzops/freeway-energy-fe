@@ -483,7 +483,8 @@ const AgentModal = ({
       return [
         { name: "Agent Details", key: "agentDetails", count: null },
         { name: "Installation History", key: "installationHistory", count: installationData?.total || 0 },
-        { name: "Task History", key: "taskHistory", count: taskData?.total || 0 }
+        { name: "Task History", key: "taskHistory", count: taskData?.total || 0 },
+        { name: "Commissions", key: "commissions", count: null },
       ];
     } else {
       return [
