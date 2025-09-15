@@ -176,7 +176,7 @@ const CommissionsTab: React.FC<Props> = ({ agentID }) => {
                 {rows.map((r: any) => (
                   <tr key={r.id} className="hover:bg-[#FAFAFA]">
                     <td className="px-4 py-3 whitespace-nowrap">
-                      {when(r.paymentDate) when(r.completedDate)}
+                      {when(r.paymentDate)} {when(r.completedDate)}
                     </td>
                     <td className="px-4 py-3">{r?.transactionRef ?? r?.saleId}</td>
                     <td className="px-4 py-3">{r.customer?.name ?? "—"}</td>
