@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useWarehouseManagers, useWarehouseManagerOperations } from '../../hooks/useWarehouseHooks';
+import { useUsers } from '../../services/warehouseApi';
 import type { WarehouseManager } from '../../data/warehouseData';
 
 interface WarehouseManagerModalProps {
@@ -37,22 +38,13 @@ export const WarehouseManagerModal: React.FC<WarehouseManagerModalProps> = ({
   warehouseName,
 }) => {
   const [newManagerEmail, setNewManagerEmail] = useState('');
-  const [availableUsers, setAvailableUsers] = useState<any[]>([]);
   
   const { data: managersData = [], mutate: mutateManagers } = useWarehouseManagers(warehouseId);
   const { isLoading, assignManagers, unassignManager } = useWarehouseManagerOperations();
+  const { data: availableUsers = [] } = useUsers();
   
   // Ensure managers is always an array
   const managers = Array.isArray(managersData) ? managersData : [];
-
-  // Mock available users - in real app, this would come from an API
-  useEffect(() => {
-    setAvailableUsers([
-      { id: '1', name: 'John Doe', email: 'john@example.com' },
-      { id: '2', name: 'Jane Smith', email: 'jane@example.com' },
-      { id: '3', name: 'Mike Johnson', email: 'mike@example.com' },
-    ]);
-  }, []);
 
   const handleAssignManager = async (userId: string) => {
     try {
@@ -152,8 +144,8 @@ export const WarehouseManagerModal: React.FC<WarehouseManagerModalProps> = ({
           <h3 className="text-lg font-medium text-textBlack mb-3">Add New Manager</h3>
           <div className="space-y-3">
             {availableUsers
-              .filter(user => !managers.some((m: WarehouseManager) => m.user?.id === user.id))
-              .map((user) => (
+              .filter((user: any) => !managers.some((m: WarehouseManager) => m.user?.id === user.id))
+              .map((user: any) => (
                 <div
                   key={user.id}
                   className="flex items-center justify-between p-3 border border-strokeGreyThree rounded-lg"

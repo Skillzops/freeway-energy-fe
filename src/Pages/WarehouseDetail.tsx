@@ -466,7 +466,7 @@ export default function WarehouseDetail() {
                       const salePrice = product.salePrice?.minimumInventoryBatchPrice || product.salePrice?.maximumInventoryBatchPrice || 0;
                       const stockLevel = product.totalRemainingQuantities || 0;
                       const maxCapacity = product.totalInitialQuantities || stockLevel || 1; // Fallback to prevent division by zero
-                      const inventoryValue = salePrice * stockLevel; // Calculate inventory value
+                      const inventoryValue = product.inventoryValue || 0; // Use API-provided inventory value
                       
                       const stockStatus = getStockStatus(stockLevel, maxCapacity);
                       return (
@@ -488,10 +488,10 @@ export default function WarehouseDetail() {
                             </span>
                           </td>
                           <td className="py-3 px-4 text-success font-medium">
-                            {salePrice > 0 ? formatCurrency(salePrice) : 'N/A'}
+                            {formatCurrency(salePrice)}
                           </td>
                           <td className="py-3 px-4 text-success font-medium">
-                            {inventoryValue > 0 ? formatCurrency(inventoryValue) : 'N/A'}
+                            {formatCurrency(inventoryValue)}
                           </td>
                           <td className="py-3 px-4">
                             <div className="flex items-center gap-2">

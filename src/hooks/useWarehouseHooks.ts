@@ -289,10 +289,10 @@ export const useTransferManagement = () => {
     }
   };
 
-  const fulfillTransferRequest = async (id: string, fulfilledQuantity?: number, notes?: string) => {
+  const fulfillTransferRequest = async (id: string, quantity?: number, notes?: string) => {
     setIsLoading(true);
     try {
-      await warehouseApi.fulfillTransferRequest(id, fulfilledQuantity, notes);
+      await warehouseApi.fulfillTransferRequest(id, quantity, notes);
       await mutateTransfers(); // Refresh data
       toast.success('Transfer request fulfilled successfully');
     } catch (error) {

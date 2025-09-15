@@ -18,6 +18,7 @@ const WAREHOUSE_ENDPOINTS = {
   PRODUCTS: '/v1/products',
   PRODUCT_BY_ID: (id: string) => `/v1/products/${id}`,
   WAREHOUSE_INVENTORY: (id: string) => `/v1/warehouses/${id}/inventory`,
+  USERS: '/v1/users',
 };
 
 // Warehouse API service
@@ -158,11 +159,11 @@ export const useWarehouseApi = () => {
     });
   };
 
-  const fulfillTransferRequest = async (id: string, fulfilledQuantity?: number, notes?: string) => {
+  const fulfillTransferRequest = async (id: string, quantity?: number, notes?: string) => {
     return await apiCall({
       endpoint: WAREHOUSE_ENDPOINTS.TRANSFER_REQUEST_FULFILL(id),
       method: 'patch',
-      data: { fulfilledQuantity, notes },
+      data: { quantity, notes },
       headers: {
         'Accept': 'application/json'
       },
@@ -303,10 +304,21 @@ export const useWarehouse = (id: string | null, revalidate = true) => {
 };
 
 export const useWarehouseInventory = (warehouseId: string | null, revalidate = true) => {
-  return useGetRequest(
+  const result = useGetRequest(
     warehouseId ? WAREHOUSE_ENDPOINTS.WAREHOUSE_INVENTORY(warehouseId) : null,
     revalidate
   );
+  
+  // Handle the new API response structure
+  const processedData = result.data ?
+    (Array.isArray(result.data) ? result.data :
+     Array.isArray(result.data.inventories) ? result.data.inventories :
+     Array.isArray(result.data.data) ? result.data.data : []) : [];
+  
+  return {
+    ...result,
+    data: processedData
+  };
 };
 
 // Note: Inventory API hooks are now in inventoryApi.ts
@@ -469,4 +481,19 @@ export const usePaginatedTransferRequests = (page: number, limit: number = 10, r
     `${WAREHOUSE_ENDPOINTS.TRANSFER_REQUESTS}?page=${page}&limit=${limit}`,
     revalidate
   );
+};
+
+export const useUsers = (revalidate = true) => {
+  const result = useGetRequest(WAREHOUSE_ENDPOINTS.USERS, revalidate);
+  
+  // Handle different API response structures
+  const processedData = result.data ?
+    (Array.isArray(result.data) ? result.data :
+     Array.isArray(result.data.data) ? result.data.data :
+     Array.isArray(result.data.users) ? result.data.users : []) : [];
+  
+  return {
+    ...result,
+    data: processedData
+  };
 };
