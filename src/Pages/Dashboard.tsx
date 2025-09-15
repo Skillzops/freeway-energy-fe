@@ -1,130 +1,309 @@
-import React from "react";
+// src/Pages/Dashboard.tsx
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import PageLayout from "./PageLayout";
-import { MetricCard } from "../Components/WareHouses/MetricCard";
-import { WarehouseCard } from "../Components/WareHouses/WarehouseCard";
-import { useWarehouse } from "../contexts/WarehouseContext";
-import { useWarehouseStats, useTransferRequests } from "../services/warehouseApi";
-import { useInventory } from "../services/inventoryApi";
-import { Link } from "react-router-dom";
-import dashboardbadge from "../assets/dashboard/dashboardbadge.png";
 
-// Icons
-const PackageIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M16.5 9.4L7.55 4.24C7.21 4.07 6.79 4.07 6.45 4.24L2.5 6.5v11l4 2.26c.34.17.76.17 1.1 0L16.5 15.5V4.24z"/>
-  </svg>
-);
+// Top metrics + charts
+import Icon from "@/assets/agents/Icon.png";
+import Icon1 from "@/assets/agents/Icon1.png";
+import Icon2 from "@/assets/agents/Icon2.png";
+import Icon3 from "@/assets/agents/Icon3.png";
 
-const WarehouseIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M3 21h18"/>
-    <path d="M5 21V7l8-4v18"/>
-    <path d="M19 21V11l-6-4"/>
-  </svg>
-);
+import dashboardbadge from "@/assets/dashboard/dashboardbadge.png";
+import DashboardCard from "@/Components/DashBoardCard/DashBoard";
+import SalesChart, { SalesGraphPoint } from "@/Components/DashBoardCard/SaleSGraph";
+import SalesCategoryPie from "@/Components/DashBoardCard/SalesCategoryPie";
+import TransactionsInsights from "@/Components/DashBoardCard/TransactionInsight";
 
-const ArrowLeftRightIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M8 3L4 7l4 4"/>
-    <path d="m4 7h16"/>
-    <path d="m16 21 4-4-4-4"/>
-    <path d="M20 17H4"/>
-  </svg>
-);
 
-const TrendingUpIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
-  </svg>
-);
+// Small UI bits
+import dropdown from "@/assets/table/dropdown.svg";
+import dateIcon from "@/assets/table/date.svg";
 
-const PlusIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <line x1="12" y1="5" x2="12" y2="19"/>
-    <line x1="5" y1="12" x2="19" y2="12"/>
-  </svg>
-);
+// App infra
+import { useApiCall } from "@/utils/useApiCall";
 
-const Dashboard = () => {
-  const { warehouses, isLoading } = useWarehouse();
-  const { data: stats, isLoading: statsLoading } = useWarehouseStats();
-  const { data: transferRequests = [] } = useTransferRequests();
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-NG', {
-      style: 'currency',
-      currency: 'NGN',
-      minimumFractionDigits: 0,
-    }).format(amount);
-  };
+// Installer Drawer bits (uses your Modal & shared UI)
 
-  const totalItems = stats?.totalItems || warehouses.reduce((sum, warehouse) => sum + warehouse.totalItems, 0);
-  const totalValue = stats?.totalValue || warehouses.reduce((sum, warehouse) => sum + warehouse.totalValue, 0);
-  const pendingRequests = transferRequests.filter((req: any) => req.status === 'pending').length;
+import AgentLeaderboard from "@/Components/DashBoardCard/AgentLeaderboard";
+import useGetAdminOverviewQuery from "@/redux/AdminOverview";
+import InventaryTable from "@/Components/DashBoardCard/InventaryTable";
+
+// Data hook
+
+type ExtendedSalesPoint = SalesGraphPoint & {
+  category?: string;
+  paymentMode?: string; // legacy fallback
+  status?: "COMPLETED" | "IN_INSTALLMENT" | "UNPAID" | "CANCELLED";
+};
+
+
+const STATUS_OPTIONS: Array<"ALL" | "COMPLETED" | "IN_INSTALLMENT" | "UNPAID" | "CANCELLED"> = [
+  "ALL",
+  "COMPLETED",
+  "IN_INSTALLMENT",
+  "UNPAID",
+  "CANCELLED",
+];
+
+const MONTH_OPTIONS = [
+  "ALL", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+] as const;
+
+const Dashboard: React.FC = () => {
+  // ======= Sales/Transactions filters =======
+  const [status, setStatus] = useState<string>("ALL");
+  const [monthFilter, setMonthFilter] = useState<string>("ALL");
+
+  const overviewFilters = useMemo(() => {
+    return {
+      status: (status === "ALL" ? undefined : (status as ExtendedSalesPoint["status"])) ?? undefined,
+      month: monthFilter === "ALL" ? undefined : monthFilter,
+      productType: undefined,
+    };
+  }, [status, monthFilter]);
+
+  const { data, isFetching, refetch } = useGetAdminOverviewQuery(overviewFilters);
+
+  const totalRevenue = data?.overview?.totalRevenue ?? 0;
+  const totalSales = data?.overview?.totalSales ?? 0;
+  const totalCustomers = data?.overview?.totalCustomers ?? 0;
+  const totalAgent = data?.overview?.totalAgent ?? 0;
+
+
+  // const errorFallback = {} as ApiErrorStatesType;
+  // const paginationFallback = {} as PaginationType;
+
+
+
+  const salesGraph: ExtendedSalesPoint[] = (data as any)?.charts?.salesGraph ?? [];
+
+  const filteredSales = useMemo(() => {
+    let rows = salesGraph;
+    if (monthFilter !== "ALL") rows = rows.filter((r) => r.month === monthFilter);
+    if (status !== "ALL") {
+      rows = rows.filter((r) => {
+        const rowStatus = (r.status ?? r.paymentMode ?? "").toString().toUpperCase();
+        return rowStatus === status;
+      });
+    }
+    return rows;
+  }, [salesGraph, monthFilter, status]);
+
+  const badgeLabel =
+    monthFilter === "ALL" ? "YEARLY SALES COUNT" : `${monthFilter.toUpperCase()} SALES COUNT`;
+
+  // ======= Tasks (right column card) =======
+  const { apiCall } = useApiCall();
+  const apiRef = useRef(apiCall);
+  useEffect(() => {
+    apiRef.current = apiCall;
+  }, [apiCall]);
+
+
+  // ======= Product Categories Pie =======
+  type ProductCategorySlice = { name: string; count: number; value: number; percentage: string };
+  const productCategoriesPie: ProductCategorySlice[] =
+    (data as any)?.charts?.productCategoriesPieChart ?? [];
 
   return (
     <PageLayout pageName="Dashboard" badge={dashboardbadge}>
-      <div className="space-y-8">
-        <div className="flex justify-between items-center">
+      <section className="w-full px-4 md:px-8 py-10 space-y-8">
+        {/* ===== Top Cards ===== */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full max-w-[1375px] mx-auto">
+          <DashboardCard
+            title="Revenue"
+            icon={Icon}
+            bgColor="bg-[#F6F7FE]"
+            value={isFetching ? "—" : totalRevenue.toLocaleString()}
+            prefix="₦"
+            description="Value of Total "
+          />
+          <DashboardCard
+            title="Sales"
+            icon={Icon1}
+            bgColor="bg-[#F4FEF9]"
+            value={isFetching ? "—" : totalSales}
+            description="Total Count For "
+          />
+          <DashboardCard
+            title="Customers"
+            icon={Icon2}
+            description="Total Assigned "
+            value={isFetching ? "—" : totalCustomers}
+            bgColor="bg-[#FFFDF7]"
+          />
+          <DashboardCard
+            title="Agents"
+            icon={Icon3}
+            bgColor="bg-[#FFFFFF]"
+            value={isFetching ? "—" : totalAgent}
+            description="Total Count For "
+          />
+        </div>
+
+        {/* ===== Main Graph + Wallet ===== */}
+        <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_359px] gap-6 w-full max-w-[1375px] mx-auto">
+          {/* Graph Section */}
+          <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-200">
+            <div className="w-full bg-saleGradient px-4 py-3 rounded-xl mb-3">
+              <div className="flex items-center justify-between w-full max-w-full md:w-[975px] h-[40px] rounded-full border-[0.6px] px-4 py-2 bg-paleGrayGradient border-strokeGreyThree">
+                <h2 className="w-[43px] h-[19px] font-bold text-[14px] leading-[100%] tracking-[0.7px] text-textDarkGrey font-primary">
+                  SALES
+                </h2>
+
+                {/* Filters */}
+                <div className="flex items-center gap-2">
+                  {/* Status */}
+                  <div className="relative flex w-max">
+                    <select
+                      value={status}
+                      onChange={(e) => setStatus(e.target.value)}
+                      className="text-xs font-medium text-textGrey pl-2 pr-6 py-1 bg-[#F9F9F9] border-[0.6px] border-strokeGreyThree rounded-full appearance-none"
+                      title="Filter by status"
+                    >
+                      {STATUS_OPTIONS.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt === "ALL" ? "All Status" : opt}
+                        </option>
+                      ))}
+                    </select>
+                    <img src={dropdown} alt="" className="w-4 h-4 -ml-5 pointer-events-none" />
+                  </div>
+
+                  {/* Month */}
+                  <div className="relative flex w-max">
+                    <select
+                      value={monthFilter}
+                      onChange={(e) => setMonthFilter(e.target.value)}
+                      className="text-xs font-medium text-textGrey pl-2 pr-6 py-1 bg-[#F9F9F9] border-[0.6px] border-strokeGreyThree rounded-full appearance-none"
+                      title="Filter by month"
+                    >
+                      {MONTH_OPTIONS.map((m) => (
+                        <option key={m} value={m}>{m === "ALL" ? "All Months" : m}</option>
+                      ))}
+                    </select>
+                    <img src={dateIcon} alt="" className="w-4 h-4 -ml-5 pointer-events-none" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between px-4 py-2 mb-2 w/full md:w-[920px]">
+                <div className="flex items-center gap-2 pl-2 pr-1 bg-[#F9F9F9] border-[0.6px] border-strokeGreyThree rounded-full">
+                  <h3 className="text-xs font-medium text-textGrey">Sales Count Graph</h3>
+                </div>
+                <div className="flex items-center gap-2 pl-2 pr-1 bg-primaryGradient border-[0.6px] border-strokeGreyThree rounded-full">
+                  <span className="text-xs font-medium text-white">{badgeLabel}</span>
+                </div>
+              </div>
+
+              <div className="w-full h-[300px]">
+                <SalesChart data={filteredSales} />
+              </div>
+
+              {/* Cards + Pie */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4 w-full max-w-[1024px]">
+                <DashboardCard
+                  title="Revenue"
+                  icon={Icon}
+                  bgColor="bg-paleGrayGradient"
+                  value={isFetching ? "—" : totalRevenue.toLocaleString()}
+                  prefix="₦"
+                  description="Value of Total "
+                />
+                <DashboardCard
+                  title="Sales"
+                  icon={Icon1}
+                  bgColor="bg-paleGrayGradient"
+                  value={isFetching ? "—" : totalSales}
+                  description="Count For Sales"
+                />
+                <SalesCategoryPie data={productCategoriesPie} isLoading={isFetching} />
+              </div>
+            </div>
+          </div>
+
           <div>
-            <h1 className="text-3xl font-bold text-textBlack">Dashboard</h1>
-            <p className="text-textDarkGrey">Overview of your warehouse operations</p>
+            <InventaryTable
+              inventoryData={data}
+              isLoading={isFetching}
+              refreshTable={refetch}
+              // errorData={errorFallback}
+              // paginationInfo={paginationFallback}
+              setTableQueryParams={() => { }}
+            />
           </div>
         </div>
 
-        {/* Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <MetricCard
-            title="Total Inventory Items"
-            value={statsLoading ? "..." : totalItems.toLocaleString()}
-            icon={<PackageIcon />}
-            trend={{ value: "+12% from last month", isPositive: true }}
-          />
-          <MetricCard
-            title="Total Warehouses"
-            value={isLoading ? "..." : warehouses.length}
-            icon={<WarehouseIcon />}
-          />
-          <MetricCard
-            title="Pending Transfers"
-            value={pendingRequests}
-            icon={<ArrowLeftRightIcon />}
-            trend={{ value: `${transferRequests.length} total requests`, isPositive: true }}
-          />
-          <MetricCard
-            title="Total Inventory Value"
-            value={statsLoading ? "..." : formatCurrency(totalValue)}
-            icon={<TrendingUpIcon />}
-            trend={{ value: "+8% from last month", isPositive: true }}
-          />
+
+
+        {/* ======= Transactions + New Tasks ======= */}
+        <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_359px] gap-6 w-full max-w-[1375px] mx-auto">
+          <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-200">
+            <div className="flex items-center justify-between w-full max-w-full md:w-[975px] h-[40px] rounded-full border-[0.6px] px-4 py-2 bg-paleGrayGradient border-strokeGreyThree">
+              <h2 className="font-bold text-[14px] tracking-[0.7px] text-textDarkGrey font-primary">TRANSACTIONS</h2>
+
+              {/* SAME FILTERS AS SALES */}
+              <div className="flex items-center gap-2">
+                {/* Status */}
+                <div className="relative flex w-max">
+                  <select
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value)}
+                    className="text-xs font-medium text-textGrey pl-2 pr-6 py-1 bg-[#F9F9F9] border-[0.6px] border-strokeGreyThree rounded-full appearance-none"
+                    title="Filter by status"
+                  >
+                    {STATUS_OPTIONS.map((opt) => (
+                      <option key={opt} value={opt}>
+                        {opt === "ALL" ? "All Status" : opt}
+                      </option>
+                    ))}
+                  </select>
+                  <img src={dropdown} alt="" className="w-4 h-4 -ml-5 pointer-events-none" />
+                </div>
+
+                {/* Month */}
+                <div className="relative flex w-max">
+                  <select
+                    value={monthFilter}
+                    onChange={(e) => setMonthFilter(e.target.value)}
+                    className="text-xs font-medium text-textGrey pl-2 pr-6 py-1 bg-[#F9F9F9] border-[0.6px] border-strokeGreyThree rounded-full appearance-none"
+                    title="Filter transactions by month"
+                  >
+                    {MONTH_OPTIONS.map((m) => (
+                      <option key={m} value={m}>{m === "ALL" ? "All Months" : m}</option>
+                    ))}
+                  </select>
+                  <img src={dateIcon} alt="icon" className="w-4 h-4 -ml-5 pointer-events-none" />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between px-4 py-2 mb-2 w/full md:w-[920px]">
+              <div className="flex items-center gap-2 pl-2 pr-1 bg-[#F9F9F9] border-[0.6px] border-strokeGreyThree rounded-full">
+                <h3 className="text-xs font-medium text-textGrey">Transactions Line Graph</h3>
+              </div>
+              <div className="flex items-center gap-2 pl-2 pr-1 bg-[#3951B6] border-[0.6px] border-strokeGreyThree rounded-full">
+                <span className="text-xs font-medium text-white">TOTAL TRANSACTIONS</span>
+              </div>
+            </div>
+
+            <div className="w-full h-[300px]">
+              <TransactionsInsights
+                status={status === "ALL" ? undefined : (status as ExtendedSalesPoint["status"])}
+                month={monthFilter === "ALL" ? undefined : monthFilter}
+              />
+            </div>
+          </div>
+
+          <div>
+            <AgentLeaderboard
+            />
+          </div>
         </div>
 
-        {/* Warehouses */}
-        <div>
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-semibold text-textBlack">Warehouses</h2>
-            <Link
-              to="/warehouses"
-              className="border border-strokeGreyThree text-textBlack py-2 px-4 rounded-full flex items-center gap-2 hover:bg-gray-50 transition-colors"
-            >
-              <PlusIcon />
-              View All Warehouses
-            </Link>
-          </div>
-          
-          {isLoading ? (
-            <div className="flex items-center justify-center h-32">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {warehouses.slice(0, 3).map((warehouse) => (
-                <WarehouseCard key={warehouse.id} warehouse={warehouse} />
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+
+      </section>
     </PageLayout>
   );
 };
