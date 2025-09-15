@@ -182,7 +182,7 @@ const CommissionsTab: React.FC<Props> = ({ agentID }) => {
                     <td className="px-4 py-3">{r.customer?.name ?? "—"}</td>
                     <td className="px-4 py-3">{r.customer?.phone ?? "—"}</td>
                     <td className="px-4 py-3">{r.paymentMethod ?? "—"}</td>
-                    <td className="px-4 py-3 text-right">{money(r.amount)}</td>
+                    <td className="px-4 py-3 text-right">{money(r.amount?? r?.saleAmount)}</td>
                     <td className="px-4 py-3 text-right">
                       {money(
                         typeof r.commissionAmount === "string"
