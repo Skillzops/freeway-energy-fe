@@ -547,6 +547,7 @@ export default function WarehouseDetail() {
         <NewRequestModal
           open={newRequestOpen}
           onOpenChange={setNewRequestOpen}
+          currentWarehouseId={id}
         />
         <FulfillRequestModal
           open={fulfillRequestOpen}

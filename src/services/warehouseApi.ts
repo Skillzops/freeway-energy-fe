@@ -83,46 +83,82 @@ export const useWarehouseApi = () => {
         formData.append('image', warehouseData.image);
       }
       
-      return apiCall({
+      const result = await apiCall({
         endpoint: WAREHOUSE_ENDPOINTS.WAREHOUSES,
         method: 'post',
         data: formData,
         headers: FORM_DATA_HEADERS,
         successMessage: 'Warehouse created successfully',
       });
+
+      // Trigger revalidation of warehouses data
+      import('swr').then(({ mutate }) => {
+        mutate(key => typeof key === 'string' && key.includes('/v1/warehouses'));
+      });
+
+      return result;
     },
 
     update: async (id: string, warehouseData: Partial<Warehouse> | FormData) => {
       const isFormData = warehouseData instanceof FormData;
       
-      return apiCall({
+      const result = await apiCall({
         endpoint: WAREHOUSE_ENDPOINTS.WAREHOUSE_BY_ID(id),
         method: 'patch',
         data: warehouseData,
         headers: isFormData ? FORM_DATA_HEADERS : JSON_HEADERS,
         successMessage: 'Warehouse updated successfully',
       });
+
+      // Trigger revalidation of warehouses data
+      import('swr').then(({ mutate }) => {
+        mutate(key => typeof key === 'string' && (
+          key.includes('/v1/warehouses') || 
+          key.includes(`/v1/warehouses/${id}`)
+        ));
+      });
+
+      return result;
     },
 
-    delete: async (id: string) => apiCall({
-      endpoint: WAREHOUSE_ENDPOINTS.WAREHOUSE_BY_ID(id),
-      method: 'delete',
-      headers: FORM_DATA_HEADERS,
-      successMessage: 'Warehouse deleted successfully',
-    }),
+    delete: async (id: string) => {
+      const result = await apiCall({
+        endpoint: WAREHOUSE_ENDPOINTS.WAREHOUSE_BY_ID(id),
+        method: 'delete',
+        headers: FORM_DATA_HEADERS,
+        successMessage: 'Warehouse deleted successfully',
+      });
+
+      // Trigger revalidation of warehouses data
+      import('swr').then(({ mutate }) => {
+        mutate(key => typeof key === 'string' && key.includes('/v1/warehouses'));
+      });
+
+      return result;
+    },
 
     toggleStatus: async (id: string, isActive: boolean) => {
       const endpoint = isActive 
         ? WAREHOUSE_ENDPOINTS.WAREHOUSE_ACTIVATE(id)
         : WAREHOUSE_ENDPOINTS.WAREHOUSE_DEACTIVATE(id);
       
-      return apiCall({
+      const result = await apiCall({
         endpoint,
         method: 'patch',
         data: {},
         headers: FORM_DATA_HEADERS,
         successMessage: `Warehouse ${isActive ? 'activated' : 'deactivated'} successfully`,
       });
+
+      // Trigger revalidation of warehouses data
+      import('swr').then(({ mutate }) => {
+        mutate(key => typeof key === 'string' && (
+          key.includes('/v1/warehouses') || 
+          key.includes(`/v1/warehouses/${id}`)
+        ));
+      });
+
+      return result;
     },
   }), [apiCall]);
 
@@ -137,48 +173,94 @@ export const useWarehouseApi = () => {
         notes: transferData.notes,
       };
 
-      return apiCall({
+      const result = await apiCall({
         endpoint: WAREHOUSE_ENDPOINTS.TRANSFER_REQUESTS,
         method: 'post',
         data: apiData,
         headers: JSON_HEADERS,
         successMessage: 'Transfer request created successfully',
       });
+
+      // Trigger revalidation of transfer requests data
+      import('swr').then(({ mutate }) => {
+        mutate(key => typeof key === 'string' && key.includes('/v1/warehouses/transfer-requests'));
+      });
+
+      return result;
     },
 
-    fulfill: async (id: string, quantity?: number, notes?: string) => apiCall({
-      endpoint: WAREHOUSE_ENDPOINTS.TRANSFER_REQUEST_FULFILL(id),
-      method: 'patch',
-      data: { quantity, notes },
-      headers: JSON_HEADERS,
-      successMessage: 'Transfer request fulfilled successfully',
-    }),
+    fulfill: async (id: string, quantity?: number, notes?: string) => {
+      const result = await apiCall({
+        endpoint: WAREHOUSE_ENDPOINTS.TRANSFER_REQUEST_FULFILL(id),
+        method: 'patch',
+        data: { quantity, notes },
+        headers: JSON_HEADERS,
+        successMessage: 'Transfer request fulfilled successfully',
+      });
 
-    reject: async (id: string, reason?: string) => apiCall({
-      endpoint: WAREHOUSE_ENDPOINTS.TRANSFER_REQUEST_REJECT(id),
-      method: 'patch',
-      data: { reason },
-      headers: JSON_HEADERS,
-      successMessage: 'Transfer request rejected successfully',
-    }),
+      // Trigger revalidation of transfer requests and inventory data
+      import('swr').then(({ mutate }) => {
+        mutate(key => typeof key === 'string' && (
+          key.includes('/v1/warehouses/transfer-requests') ||
+          key.includes('/v1/warehouses') && key.includes('/inventory')
+        ));
+      });
+
+      return result;
+    },
+
+    reject: async (id: string, reason?: string) => {
+      const result = await apiCall({
+        endpoint: WAREHOUSE_ENDPOINTS.TRANSFER_REQUEST_REJECT(id),
+        method: 'patch',
+        data: { reason },
+        headers: JSON_HEADERS,
+        successMessage: 'Transfer request rejected successfully',
+      });
+
+      // Trigger revalidation of transfer requests data
+      import('swr').then(({ mutate }) => {
+        mutate(key => typeof key === 'string' && key.includes('/v1/warehouses/transfer-requests'));
+      });
+
+      return result;
+    },
   }), [apiCall]);
 
   // Optimized manager operations
   const managerOperations = useMemo(() => ({
-    assign: async (warehouseId: string, userIds: string[]) => apiCall({
-      endpoint: WAREHOUSE_ENDPOINTS.WAREHOUSE_MANAGERS(warehouseId),
-      method: 'post',
-      data: { userIds },
-      headers: JSON_HEADERS,
-      successMessage: 'Warehouse managers assigned successfully',
-    }),
+    assign: async (warehouseId: string, userIds: string[]) => {
+      const result = await apiCall({
+        endpoint: WAREHOUSE_ENDPOINTS.WAREHOUSE_MANAGERS(warehouseId),
+        method: 'post',
+        data: { userIds },
+        headers: JSON_HEADERS,
+        successMessage: 'Warehouse managers assigned successfully',
+      });
 
-    unassign: async (managerId: string) => apiCall({
-      endpoint: WAREHOUSE_ENDPOINTS.UNASSIGN_MANAGER(managerId),
-      method: 'delete',
-      headers: FORM_DATA_HEADERS,
-      successMessage: 'Warehouse manager unassigned successfully',
-    }),
+      // Trigger revalidation of managers data
+      import('swr').then(({ mutate }) => {
+        mutate(key => typeof key === 'string' && key.includes(`/v1/warehouses/${warehouseId}/managers`));
+      });
+
+      return result;
+    },
+
+    unassign: async (managerId: string) => {
+      const result = await apiCall({
+        endpoint: WAREHOUSE_ENDPOINTS.UNASSIGN_MANAGER(managerId),
+        method: 'delete',
+        headers: FORM_DATA_HEADERS,
+        successMessage: 'Warehouse manager unassigned successfully',
+      });
+
+      // Trigger revalidation of managers data
+      import('swr').then(({ mutate }) => {
+        mutate(key => typeof key === 'string' && key.includes('/managers'));
+      });
+
+      return result;
+    },
   }), [apiCall]);
 
   return {

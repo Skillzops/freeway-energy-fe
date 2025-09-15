@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Modal } from "../ModalComponent/Modal";
 import { useWarehouses, useWarehouseApi } from "../../services/warehouseApi";
 import { useWarehouseInventory } from "../../services/inventoryApi";
@@ -8,10 +8,11 @@ import useBreakpoint from "../../hooks/useBreakpoint";
 interface NewRequestModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  currentWarehouseId?: string; // Add current warehouse context
 }
 
-export function NewRequestModal({ open, onOpenChange }: NewRequestModalProps) {
-  const [fromWarehouse, setFromWarehouse] = useState(""); // Allow selecting any warehouse
+export function NewRequestModal({ open, onOpenChange, currentWarehouseId }: NewRequestModalProps) {
+  const [fromWarehouse, setFromWarehouse] = useState("");
   const [toWarehouse, setToWarehouse] = useState("");
   const [productId, setProductId] = useState("");
   const [quantity, setQuantity] = useState("");
@@ -20,8 +21,38 @@ export function NewRequestModal({ open, onOpenChange }: NewRequestModalProps) {
 
   // Fetch data using API
   const { data: warehouses = [] } = useWarehouses();
-  const { data: inventory = [] } = useWarehouseInventory(fromWarehouse || null); // Fetch inventory for selected warehouse
+  const { data: inventory = [] } = useWarehouseInventory(fromWarehouse || null);
   const { createTransferRequest } = useWarehouseApi();
+
+  // Get current warehouse and main warehouse
+  const currentWarehouse = warehouses.find((w: any) => w.id === currentWarehouseId);
+  const mainWarehouse = warehouses.find((w: any) => w.isMainWarehouse);
+  const isCurrentWarehouseMain = currentWarehouse?.isMainWarehouse;
+
+  // Set default warehouses based on current warehouse type
+  useEffect(() => {
+    if (open && currentWarehouse && mainWarehouse) {
+      if (isCurrentWarehouseMain) {
+        // Main warehouse requesting to branch: from=main, to=selectable branch
+        setFromWarehouse(mainWarehouse.id);
+        setToWarehouse("");
+      } else {
+        // Branch warehouse requesting from main: from=main, to=current branch
+        setFromWarehouse(mainWarehouse.id);
+        setToWarehouse(currentWarehouse.id);
+      }
+      setProductId("");
+      setQuantity("");
+      setNotes("");
+    }
+  }, [open, currentWarehouse, mainWarehouse, isCurrentWarehouseMain]);
+
+  const availableToWarehouses = isCurrentWarehouseMain 
+    ? warehouses.filter((w: any) => !w.isMainWarehouse) // Branch warehouses for main
+    : []; // No selection needed for branch warehouses
+
+  const selectedFromWarehouse = warehouses.find((w: any) => w.id === fromWarehouse);
+  const selectedToWarehouse = warehouses.find((w: any) => w.id === toWarehouse);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,9 +90,6 @@ export function NewRequestModal({ open, onOpenChange }: NewRequestModalProps) {
     }
   };
 
-  const selectedFromWarehouse = warehouses.find((w: any) => w.id === fromWarehouse);
-  const availableToWarehouses = warehouses.filter((w: any) => w.id !== fromWarehouse);
-
   return (
     <Modal
       isOpen={open}
@@ -78,57 +106,63 @@ export function NewRequestModal({ open, onOpenChange }: NewRequestModalProps) {
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
               <span className="text-sm font-medium text-textBlack">From:</span>
               <span className="text-sm text-textDarkGrey">
-                {selectedFromWarehouse?.name || "Select source warehouse below"}
+                {selectedFromWarehouse?.name || "Main Warehouse"} (Main)
               </span>
             </div>
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
               <span className="text-sm font-medium text-textBlack">To:</span>
-              <span className="text-sm text-textDarkGrey">Select destination warehouse below</span>
+              <span className="text-sm text-textDarkGrey">
+                {isCurrentWarehouseMain 
+                  ? (selectedToWarehouse?.name || "Select destination warehouse below")
+                  : `${currentWarehouse?.name || "Current Warehouse"} (Branch)`
+                }
+              </span>
             </div>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+          {/* Source Warehouse - Always Main, Not Editable */}
           <div className="space-y-2">
-            <label htmlFor="from-warehouse" className="block text-sm font-medium text-textBlack">
-              Source Warehouse *
+            <label className="block text-sm font-medium text-textBlack">
+              Source Warehouse
             </label>
-            <select
-              id="from-warehouse"
-              value={fromWarehouse}
-              onChange={(e) => {
-                setFromWarehouse(e.target.value);
-                setProductId(""); // Reset product selection when warehouse changes
-              }}
-              className="w-full px-3 py-2 sm:py-3 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm sm:text-base"
-            >
-              <option value="">Select source warehouse</option>
-              {warehouses.map((warehouse: any) => (
-                <option key={warehouse.id} value={warehouse.id}>
-                  {warehouse.name} {warehouse.isMainWarehouse ? "(Main)" : "(Branch)"}
-                </option>
-              ))}
-            </select>
+            <div className="w-full px-3 py-2 sm:py-3 border border-strokeGreyThree rounded-lg bg-gray-50 text-textDarkGrey text-sm sm:text-base">
+              {mainWarehouse?.name || "Main Warehouse"} (Main)
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <label htmlFor="to-warehouse" className="block text-sm font-medium text-textBlack">
-              Destination Warehouse *
-            </label>
-            <select
-              id="to-warehouse"
-              value={toWarehouse}
-              onChange={(e) => setToWarehouse(e.target.value)}
-              className="w-full px-3 py-2 sm:py-3 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm sm:text-base"
-            >
-              <option value="">Select destination warehouse</option>
-              {availableToWarehouses.map((warehouse: any) => (
-                <option key={warehouse.id} value={warehouse.id}>
-                  {warehouse.name} {warehouse.isMainWarehouse ? "(Main)" : "(Branch)"}
-                </option>
-              ))}
-            </select>
-          </div>
+          {/* Destination Warehouse - Conditional based on current warehouse type */}
+          {isCurrentWarehouseMain ? (
+            <div className="space-y-2">
+              <label htmlFor="to-warehouse" className="block text-sm font-medium text-textBlack">
+                Destination Warehouse *
+              </label>
+              <select
+                id="to-warehouse"
+                value={toWarehouse}
+                onChange={(e) => setToWarehouse(e.target.value)}
+                className="w-full px-3 py-2 sm:py-3 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm sm:text-base"
+                required
+              >
+                <option value="">Select destination warehouse</option>
+                {availableToWarehouses.map((warehouse: any) => (
+                  <option key={warehouse.id} value={warehouse.id}>
+                    {warehouse.name} (Branch)
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-textBlack">
+                Destination Warehouse
+              </label>
+              <div className="w-full px-3 py-2 sm:py-3 border border-strokeGreyThree rounded-lg bg-gray-50 text-textDarkGrey text-sm sm:text-base">
+                {currentWarehouse?.name || "Current Warehouse"} (Branch)
+              </div>
+            </div>
+          )}
 
           <div className="space-y-2">
             <label htmlFor="product" className="block text-sm font-medium text-textBlack">
