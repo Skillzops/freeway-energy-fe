@@ -37,6 +37,7 @@ const Home = () => {
     Settings: 0,
   };
   const homeData = [
+    // { sectionName: "Dashboard", sectionImage: sales, location: "/dashboard" },
     { sectionName: "Sales", sectionImage: sales, location: "/sales" },
     // {
     //   sectionName: "Transactions",

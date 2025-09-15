@@ -1,6 +1,5 @@
 import { Route, Routes } from "react-router-dom";
 import Home from "./Pages/Home";
-import Dashboard from "./Pages/Dashboard";
 import Sales from "./Pages/Sales";
 // import Transactions from "./Pages/Transactions";
 import Customers from "./Pages/Customers";
@@ -23,6 +22,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { ErrorBoundary } from "react-error-boundary";
 import ErrorPage from "./Pages/ErrorPage";
 import { WarehouseProvider } from "./contexts/WarehouseContext";
+import Dashboard from "./Pages/Dashboard";
 
 function App() {
   return (
