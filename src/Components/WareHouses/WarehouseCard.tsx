@@ -28,6 +28,16 @@ export function WarehouseCard({ warehouse }: WarehouseCardProps) {
     }).format(amount);
   };
 
+  // Helper function to get image URL
+  const getImageUrl = (image: string | File | undefined): string => {
+    if (!image) return '';
+    if (typeof image === 'string') return image;
+    if (image instanceof File) return URL.createObjectURL(image);
+    return '';
+  };
+
+  const imageUrl = getImageUrl(warehouse.image);
+
   const handleToggleStatus = async () => {
     try {
       await toggleWarehouseStatus(warehouse.id);
@@ -61,13 +71,19 @@ export function WarehouseCard({ warehouse }: WarehouseCardProps) {
     warehouse.isActive ? 'Deactivate' : 'Activate',
     'Manage Managers',
     'Edit Warehouse',
-    'Settings',
     'Archive',
     'Delete'
-  ];
+  ].filter((item, index) => {
+    // Hide deactivate/activate for main warehouse
+    if (index === 0 && warehouse.isMainWarehouse) return false;
+    return true;
+  });
 
   const handleDropdownClick = (index: number) => {
-    switch (index) {
+    // Adjust index mapping since we might have filtered out the first item
+    const actualIndex = warehouse.isMainWarehouse ? index + 1 : index;
+    
+    switch (actualIndex) {
       case 0:
         handleToggleStatus();
         break;
@@ -103,7 +119,7 @@ export function WarehouseCard({ warehouse }: WarehouseCardProps) {
         {/* Warehouse Image */}
         <div className="w-full h-48 sm:h-56 relative">
           <img
-            src={warehouse.image}
+            src={imageUrl}
             alt={`${warehouse.name} Image`}
             className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
           />
@@ -278,7 +294,8 @@ export function WarehouseCard({ warehouse }: WarehouseCardProps) {
       <WarehouseManagerModal
         open={managerModalOpen}
         onOpenChange={setManagerModalOpen}
-        warehouse={warehouse}
+        warehouseId={warehouse.id}
+        warehouseName={warehouse.name}
       />
       
       <EditWarehouseModal

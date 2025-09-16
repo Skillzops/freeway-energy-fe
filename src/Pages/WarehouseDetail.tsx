@@ -15,6 +15,8 @@ import type { TransferRequest, Product } from "../data/warehouseData";
 import useBreakpoint from "../hooks/useBreakpoint";
 import { toast } from "react-toastify";
 import warehouseBadge from "../assets/inventory/inventorybadge.png";
+import ProceedButton from "../Components/ProceedButtonComponent/ProceedButtonComponent";
+import { formatNumberWithCommas } from "../utils/helpers";
 
 // Icons
 const ArrowLeftIcon = () => (
@@ -249,14 +251,14 @@ export default function WarehouseDetail() {
             </div>
             
             <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-              <button className="border border-strokeGreyThree text-textBlack py-2 px-4 rounded-full flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors text-sm">
+              <button className="bg-chalk border border-strokeGreyThree text-textDarkGrey py-2 px-4 rounded-full flex items-center justify-center gap-2 hover:bg-strokeGreyThree transition-colors text-sm">
                 <RefreshIcon />
                 {!isMobile && "Refresh"}
               </button>
               {!warehouse.isMainWarehouse && (
                 <button
                   onClick={() => setNewRequestOpen(true)}
-                  className="bg-primary text-white py-2 px-4 rounded-full flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors text-sm"
+                  className="bg-primary text-chalk py-2 px-4 rounded-full flex items-center justify-center gap-2 hover:bg-blackBrown transition-colors text-sm"
                 >
                   <SendIcon />
                   {isMobile ? "Request" : "Request from Main"}
@@ -266,14 +268,14 @@ export default function WarehouseDetail() {
                 <>
                   <button
                     onClick={() => setNewInventoryOpen(true)}
-                    className="bg-primary text-white py-2 px-4 rounded-full flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors text-sm"
+                    className="bg-primary text-chalk py-2 px-4 rounded-full flex items-center justify-center gap-2 hover:bg-blackBrown transition-colors text-sm"
                   >
                     <PlusIcon />
                     {isMobile ? "Add Item" : "New Inventory Item"}
                   </button>
                   <button
                     onClick={() => setAddStockOpen(true)}
-                    className="bg-green-600 text-white py-2 px-4 rounded-full flex items-center justify-center gap-2 hover:bg-green-700 transition-colors text-sm"
+                    className="bg-success text-chalk py-2 px-4 rounded-full flex items-center justify-center gap-2 hover:bg-success/90 transition-colors text-sm"
                   >
                     <PlusIcon />
                     {isMobile ? "Add Stock" : "Add Stock to Warehouse"}
@@ -331,7 +333,7 @@ export default function WarehouseDetail() {
             </h2>
             <Link
               to="/transfers"
-              className="border border-strokeGreyThree text-textBlack py-2 px-4 rounded-full hover:bg-gray-50 transition-colors"
+              className="bg-white border border-strokeGreyThree text-textDarkGrey py-2 px-4 rounded-full hover:bg-gray-50 transition-colors"
             >
               View All Requests
             </Link>
@@ -426,10 +428,10 @@ export default function WarehouseDetail() {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <h2 className="text-xl sm:text-2xl font-semibold text-textBlack">Inventory</h2>
             <div className="flex gap-2 w-full sm:w-auto">
-              <button className="flex-1 sm:flex-none border border-strokeGreyThree text-textBlack py-2 px-3 sm:px-4 rounded-full hover:bg-gray-50 transition-colors text-sm">
+              <button className="flex-1 sm:flex-none bg-chalk border border-strokeGreyThree text-textDarkGrey py-2 px-3 sm:px-4 rounded-full hover:bg-strokeGreyThree transition-colors text-sm">
                 {isMobile ? "Reset" : "Reset Filters"}
               </button>
-              <button className="flex-1 sm:flex-none border border-strokeGreyThree text-textBlack py-2 px-3 sm:px-4 rounded-full hover:bg-gray-50 transition-colors text-sm">
+              <button className="flex-1 sm:flex-none bg-chalk border border-strokeGreyThree text-textDarkGrey py-2 px-3 sm:px-4 rounded-full hover:bg-strokeGreyThree transition-colors text-sm">
                 {isMobile ? "Refresh" : "Refresh Table"}
               </button>
             </div>
@@ -498,13 +500,36 @@ export default function WarehouseDetail() {
                             {formatCurrency(inventoryValue)}
                           </td>
                           <td className="py-3 px-4">
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm text-textDarkGrey">
-                                {stockLevel}/{maxCapacity}
+                            <div className="flex items-center gap-0 w-full">
+                              <span className="flex items-center justify-center w-[130px] text-textGrey font-bold px-1 h-[24px] bg-[#F6F8FA] border-[0.6px] border-strokeGreyThree rounded-full">
+                                {formatNumberWithCommas(stockLevel)} /
+                                <span className="font-normal">
+                                  {formatNumberWithCommas(maxCapacity)}
+                                </span>
                               </span>
-                              <span className={`px-2 py-1 rounded-full text-xs bg-success text-white`}>
-                                {stockStatus.label}
-                              </span>
+                              <div className="flex w-[77%] h-[24px] bg-[#FFFFFC] border-[0.6px] border-strokeGreyThree rounded-full">
+                                <span
+                                  className={`${
+                                    (stockLevel / maxCapacity) * 100 > 50
+                                      ? "bg-successThree border-inkBlue"
+                                      : "bg-[#FFEBEC] border-[#FFC7CD]"
+                                  } flex items-center ${
+                                    (stockLevel / maxCapacity) * 100 === 0
+                                      ? "justify-start text-errorTwo px-2"
+                                      : "justify-end text-textBlack pr-1.5"
+                                  } h-full text-[9px] font-bold border-[0.6px] rounded-full`}
+                                  style={{
+                                    width:
+                                      (stockLevel / maxCapacity) * 100 === 0
+                                        ? "100%"
+                                        : (stockLevel / maxCapacity) * 100 <= 35
+                                        ? "35%"
+                                        : `${(stockLevel / maxCapacity) * 100}%`,
+                                  }}
+                                >
+                                  {Math.round((stockLevel / maxCapacity) * 100)}%
+                                </span>
+                              </div>
                             </div>
                           </td>
                           <td className="py-3 px-4">
