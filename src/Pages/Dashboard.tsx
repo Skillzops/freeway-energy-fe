@@ -21,19 +21,21 @@ import dateIcon from "@/assets/table/date.svg";
 // App infra
 import { useApiCall } from "@/utils/useApiCall";
 
-
 // Installer Drawer bits (uses your Modal & shared UI)
 import AgentLeaderboard from "@/Components/DashBoardCard/AgentLeaderboard";
 import useGetAdminOverviewQuery from "@/redux/AdminOverview";
 import InventaryTable from "@/Components/DashBoardCard/InventaryTable";
 
-// Data hook
-type ExtendedSalesPoint = SalesGraphPoint & {
-  category?: string;
-  paymentMode?: string; // legacy fallback
-  status?: "COMPLETED" | "IN_INSTALLMENT" | "UNPAID" | "CANCELLED";
+
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"] as const;
+const monthFromISO = (iso: string) => {
+  const d = new Date(iso);
+  return isNaN(d.getTime()) ? "—" : MONTHS[d.getMonth()];
 };
 
+type ExtendedSalesPoint = SalesGraphPoint & {
+  derivedMonth?: string; 
+};
 
 const STATUS_OPTIONS: Array<"ALL" | "COMPLETED" | "IN_INSTALLMENT" | "UNPAID" | "CANCELLED"> = [
   "ALL",
@@ -47,6 +49,16 @@ const MONTH_OPTIONS = [
   "ALL", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 ] as const;
 
+// Transaction Trends local type for the second chart
+type TxPoint = {
+  month: (typeof MONTHS)[number];
+  sales: number;
+  salesValue: number;
+  payments: number;
+  paymentsValue: number;
+  status: "COMPLETED" | "IN_INSTALLMENT" | "UNPAID" | "CANCELLED";
+};
+
 const Dashboard: React.FC = () => {
   // ======= Sales/Transactions filters =======
   const [status, setStatus] = useState<string>("ALL");
@@ -54,7 +66,7 @@ const Dashboard: React.FC = () => {
 
   const overviewFilters = useMemo(() => {
     return {
-      status: (status === "ALL" ? undefined : (status as ExtendedSalesPoint["status"])) ?? undefined,
+      status: status === "ALL" ? undefined : (status as TxPoint["status"]),
       month: monthFilter === "ALL" ? undefined : monthFilter,
       productType: undefined,
     };
@@ -65,27 +77,34 @@ const Dashboard: React.FC = () => {
   const totalRevenue = data?.overview?.totalRevenue ?? 0;
   const totalSales = data?.overview?.totalSales ?? 0;
   const totalCustomers = data?.overview?.totalCustomers ?? 0;
-  const totalAgent = data?.overview?.totalAgent ?? 0;
+  // payload sometimes uses totalAgents vs totalAgent; prefer totalAgents and fallback to totalAgent
+  const totalAgent = (data as any)?.overview?.totalAgents ?? (data as any)?.overview?.totalAgent ?? 0;
 
+  // ======= SALES GRAPH: use charts.salesChart (daily points) =======
+  const salesDaily: ExtendedSalesPoint[] = useMemo(() => {
+    const items: any[] = (data as any)?.charts?.salesChart ?? [];
+    return items.map((it) => {
+      const iso = String(it?.date ?? "");
+      const d = new Date(iso);
+      const valid = !isNaN(d.getTime());
+      const m = valid ? MONTHS[d.getMonth()] : ("—" as const);
+      const dd = valid ? String(d.getDate()).padStart(2, "0") : "—";
+      const label = valid ? `${m} ${dd}` : (iso || "—");
+      return {
+        month: label,                 
+        sales: Number(it?.count ?? 0),
+        value: Number(it?.value ?? 0),
+        derivedMonth: m,            
+      };
+    });
+  }, [data]);
 
-  // const errorFallback = {} as ApiErrorStatesType;
-  // const paginationFallback = {} as PaginationType;
-
-
-
-  const salesGraph: ExtendedSalesPoint[] = (data as any)?.charts?.salesGraph ?? [];
-
-  const filteredSales = useMemo(() => {
-    let rows = salesGraph;
-    if (monthFilter !== "ALL") rows = rows.filter((r) => r.month === monthFilter);
-    if (status !== "ALL") {
-      rows = rows.filter((r) => {
-        const rowStatus = (r.status ?? r.paymentMode ?? "").toString().toUpperCase();
-        return rowStatus === status;
-      });
-    }
+  // Apply UI filters on the mapped daily points
+  const filteredSales: SalesGraphPoint[] = useMemo(() => {
+    let rows = salesDaily;
+    if (monthFilter !== "ALL") rows = rows.filter((r) => r.derivedMonth === monthFilter);
     return rows;
-  }, [salesGraph, monthFilter, status]);
+  }, [salesDaily, monthFilter]);
 
   const badgeLabel =
     monthFilter === "ALL" ? "YEARLY SALES COUNT" : `${monthFilter.toUpperCase()} SALES COUNT`;
@@ -97,11 +116,32 @@ const Dashboard: React.FC = () => {
     apiRef.current = apiCall;
   }, [apiCall]);
 
-
   // ======= Product Categories Pie =======
   type ProductCategorySlice = { name: string; count: number; value: number; percentage: string };
   const productCategoriesPie: ProductCategorySlice[] =
-    (data as any)?.charts?.productCategoriesPieChart ?? [];
+    (data as any)?.charts?.productCategoriesPieChart ??
+    (data as any)?.charts?.productCategoriesChart ??
+    [];
+
+  // ======= TRANSACTIONS GRAPH: use charts.monthlyTrends (monthly points) =======
+  const monthlyTrends: TxPoint[] = useMemo(() => {
+    const items: any[] = (data as any)?.charts?.monthlyTrends ?? [];
+    return items.map((m) => ({
+      month: String(m.month) as TxPoint["month"],
+      sales: Number(m.sales ?? 0),
+      salesValue: Number(m.salesValue ?? 0),
+      payments: Number(m.payments ?? 0),
+      paymentsValue: Number(m.paymentsValue ?? 0),
+      status: "COMPLETED", 
+    }));
+  }, [data]);
+
+  const filteredTransactions: TxPoint[] = useMemo(() => {
+    let rows = monthlyTrends;
+    if (monthFilter !== "ALL") rows = rows.filter((r) => r.month === monthFilter);
+    if (status !== "ALL") rows = rows.filter((r) => r.status === status);
+    return rows;
+  }, [monthlyTrends, monthFilter, status]);
 
   return (
     <PageLayout pageName="Dashboard" badge={dashboardbadge}>
@@ -194,6 +234,7 @@ const Dashboard: React.FC = () => {
                 </div>
               </div>
 
+              {/* Feed the normalized & filtered daily points to the chart */}
               <div className="w-full h-[300px]">
                 <SalesChart data={filteredSales} />
               </div>
@@ -225,20 +266,16 @@ const Dashboard: React.FC = () => {
               inventoryData={data}
               isLoading={isFetching}
               refreshTable={refetch}
-              // errorData={errorFallback}
-              // paginationInfo={paginationFallback}
               setTableQueryParams={() => { }}
             />
           </div>
         </div>
 
-
-
         {/* ======= Transactions + New Tasks ======= */}
         <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_359px] gap-6 w-full max-w-[1375px] mx-auto">
           <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-200">
-            <div className="flex items-center justify-between w-full max-w-full md:w-[975px] h-[40px] rounded-full border-[0.6px] px-4 py-2 bg-paleGrayGradient border-strokeGreyThree">
-              <h2 className="font-bold text-[14px] tracking-[0.7px] text-textDarkGrey font-primary">TRANSACTIONS</h2>
+            <div className="flex items-center justify-between w/full max-w-full md:w-[975px] h-[40px] rounded-full border-[0.6px] px-4 py-2 bg-paleGrayGradient border-strokeGreyThree">
+              <h2 className="font-bold text-[14px] tracking-[0.7px] text-textDarkGrey font-primary">MONTHLY TRENDS</h2>
 
               {/* SAME FILTERS AS SALES */}
               <div className="flex items-center gap-2">
@@ -278,28 +315,25 @@ const Dashboard: React.FC = () => {
 
             <div className="flex items-center justify-between px-4 py-2 mb-2 w/full md:w-[920px]">
               <div className="flex items-center gap-2 pl-2 pr-1 bg-[#F9F9F9] border-[0.6px] border-strokeGreyThree rounded-full">
-                <h3 className="text-xs font-medium text-textGrey">Transactions Line Graph</h3>
+                <h3 className="text-xs font-medium text-textGrey">Monthly Trends Line Graph</h3>
               </div>
               <div className="flex items-center gap-2 pl-2 pr-1 bg-[#3951B6] border-[0.6px] border-strokeGreyThree rounded-full">
-                <span className="text-xs font-medium text-white">TOTAL TRANSACTIONS</span>
+                <span className="text-xs font-medium text-white">ALL TRENDS</span>
               </div>
             </div>
 
             <div className="w-full h-[300px]">
               <TransactionsInsights
-                status={status === "ALL" ? undefined : (status as ExtendedSalesPoint["status"])}
+                status={status === "ALL" ? undefined : (status as TxPoint["status"])}
                 month={monthFilter === "ALL" ? undefined : monthFilter}
               />
             </div>
           </div>
 
           <div>
-            <AgentLeaderboard
-            />
+            <AgentLeaderboard />
           </div>
         </div>
-
-
       </section>
     </PageLayout>
   );

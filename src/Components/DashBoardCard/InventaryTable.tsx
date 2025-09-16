@@ -16,7 +16,7 @@ const fmtNGN0 = (n?: number) =>
   (Number(n) || 0).toLocaleString("en-NG", { maximumFractionDigits: 0 });
 
 const pctFill = (p: number) =>
-  p <= 0 ? "bg-red-300" : p < 30 ? "bg-red-300" : p < 60 ? "bg-amber-300" : "bg-green-500";
+  p <= 0 ? "bg-red-500" : p < 30 ? "bg-red-600" : p < 60 ? "bg-amber-300" : "bg-green-500";
 
 const pctChip = (p: number) =>
   p <= 0
@@ -24,7 +24,7 @@ const pctChip = (p: number) =>
     : p < 30
     ? "bg-red-100 text-red-700"
     : p < 60
-    ? "bg-amber-100 text-amber-700"
+    ? "bg-[#FBD34D] text-amber-700"
     : "bg-emerald-100 text-emerald-700";
 
 const InventaryTable: React.FC<InventoryTableProps> = ({ inventoryData, isLoading }) => {
@@ -85,12 +85,12 @@ const InventaryTable: React.FC<InventoryTableProps> = ({ inventoryData, isLoadin
       {/* Header */}
       <div className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-2">
         <div className="text-[11px] font-bold tracking-wide text-slate-700 uppercase">
-          Inventory Table
+          Monthly Performance
         </div>
         <div className="flex items-center gap-2">
           {/* score badge */}
-          <div className="flex items-center gap-1 rounded-full bg-indigo-50 px-2 py-1 text-[10px] font-semibold text-indigo-700">
-            <span className="inline-block h-4 w-4 rounded-full bg-indigo-200" />
+          <div className="flex items-center gap-1 rounded-full bg-green-100 px-2 py-1 text-[10px] font-semibold text-green-700">
+            <span className="inline-block h-4 w-4 rounded-full bg-green-500" />
             <span>{scorePct}%</span>
           </div>
           {/* coin badge */}
@@ -104,7 +104,7 @@ const InventaryTable: React.FC<InventoryTableProps> = ({ inventoryData, isLoadin
       {/* Subheader */}
       <div className="px-2 pt-3 pb-1">
         <p className="text-[10px] font-semibold tracking-wide text-slate-400">
-          SHS INVENTORY
+          Monthly sales
         </p>
       </div>
 
@@ -120,7 +120,7 @@ const InventaryTable: React.FC<InventoryTableProps> = ({ inventoryData, isLoadin
                 className="relative rounded-full bg-slate-50 px-2 py-2 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.04)]"
               >
                 {/* track */}
-                <div className="absolute inset-y-0 left-0 right-0 mx-2 my-2 rounded-full bg-white shadow-[inset_0_0_0_1px_rgba(0,0,0,0.05)]" />
+                <div className="absolute inset-y-0 left-0 right-0 mx-2 my-1 rounded-full bg-white shadow-[inset_0_0_0_1px_rgba(0,0,0,0.05)]" />
                 {/* fill */}
                 <div
                   className={`absolute inset-y-0 left-0 my-2 ml-2 rounded-full ${pctFill(
@@ -128,16 +128,16 @@ const InventaryTable: React.FC<InventoryTableProps> = ({ inventoryData, isLoadin
                   )} transition-all`}
                   style={{ width: `calc(${it.percent}% - 0.5rem)` }}
                 />
-                {/* row content */}
+                {/* row  */}
                 <div className="relative z-[1] flex items-center justify-between gap-2 px-3">
                   <div className="flex min-w-0 flex-col">
                     <div className="flex items-center gap-2">
-                      <span className="inline-block h-5 w-5 rounded-full bg-white shadow-sm" />
-                      <span className="truncate text-[12px] font-semibold text-slate-800">
+                      {/* <span style={{border: "3px solid red"}} className="inline-block h-4 w-4 rounded-full bg-white shadow-sm" /> */}
+                      <span className="truncate text-[12px] font-semibold text-black">
                         {it.name}
                       </span>
                     </div>
-                    <div className="pl-7 text-[10px] text-slate-400">
+                    <div className="pl-7 text-[10px] text-black">
                       {it.range}
                     </div>
                   </div>

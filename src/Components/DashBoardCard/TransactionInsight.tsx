@@ -12,26 +12,67 @@ import {
 
 type TxPoint = { month: string; amount: number; count: number };
 
-const TransactionsInsights: React.FC = () => {
-  
-  const { data, isFetching, isError } = useGetAdminOverviewQuery();
+type Props = {
+  status?: "COMPLETED" | "IN_INSTALLMENT" | "UNPAID" | "CANCELLED";
+  month?: string; 
+};
+
+const TransactionsInsights: React.FC<Props> = ({ status, month }) => {
+  const { data, isFetching, isError } = useGetAdminOverviewQuery({
+    status,
+    month,
+  });
+
+  const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const;
 
   const lineData: TxPoint[] = useMemo(() => {
-    const rows = (data as any)?.charts?.transactionGraph ?? [];
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    const byMonth = Object.fromEntries(rows.map((r: TxPoint) => [r.month, r]));
-    return months.map((m) => byMonth[m] ?? { month: m, amount: 0, count: 0 });
+    const rows = (data as any)?.charts?.monthlyTrends ?? [];
+
+    const byMonth: Record<string, { paymentsValue: number; payments: number }> =
+      rows.reduce((acc: Record<string, any>, r: any) => {
+        const m = String(r?.month ?? "");
+        acc[m] = {
+          paymentsValue: Number(r?.paymentsValue ?? 0),
+          payments: Number(r?.payments ?? 0),
+        };
+        return acc;
+      }, {});
+
+
+      return MONTHS.map((m) => {
+      const hit = byMonth[m];
+      return {
+        month: m,
+        // Your chart uses a money axis called "amount" — we map paymentsValue here
+        amount: hit ? hit.paymentsValue : 0,
+        // keeping "count" around if you later want a second series
+        count: hit ? hit.payments : 0,
+      };
+    });
   }, [data]);
 
   if (isFetching) {
-    return <div className="w-full h-full flex items-center justify-center text-sm text-textGrey">Loading transactions…</div>;
+    return (
+      <div className="w-full h-full flex items-center justify-center text-sm text-textGrey">
+        Loading transactions…
+      </div>
+    );
   }
   if (isError) {
-    return <div className="w-full h-full flex items-center justify-center text-sm text-red-500">Failed to load transactions.</div>;
+    return (
+      <div className="w-full h-full flex items-center justify-center text-sm text-red-500">
+        Failed to load transactions.
+      </div>
+    );
   }
+
   const hasData = lineData.some((d) => d.amount > 0 || d.count > 0);
   if (!hasData) {
-    return <div className="w-full h-full flex items-center justify-center text-sm text-textGrey">No transaction data yet.</div>;
+    return (
+      <div className="w-full h-full flex items-center justify-center text-sm text-textGrey">
+        No transaction data yet.
+      </div>
+    );
   }
 
   const maxAmount = Math.max(...lineData.map((d) => d.amount), 0);
@@ -81,4 +122,3 @@ const TransactionsInsights: React.FC = () => {
 };
 
 export default TransactionsInsights;
-
