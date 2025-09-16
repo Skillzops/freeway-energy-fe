@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useWarehouseManagers, useWarehouseManagerOperations } from '../../hooks/useWarehouseHooks';
+import { useUsers } from '../../services/warehouseApi';
 import type { WarehouseManager } from '../../data/warehouseData';
 
 interface WarehouseManagerModalProps {
@@ -37,28 +38,20 @@ export const WarehouseManagerModal: React.FC<WarehouseManagerModalProps> = ({
   warehouseName,
 }) => {
   const [newManagerEmail, setNewManagerEmail] = useState('');
-  const [availableUsers, setAvailableUsers] = useState<any[]>([]);
   
   const { data: managersData = [], mutate: mutateManagers } = useWarehouseManagers(warehouseId);
   const { isLoading, assignManagers, unassignManager } = useWarehouseManagerOperations();
+  const { data: availableUsers = [] } = useUsers();
   
   // Ensure managers is always an array
   const managers = Array.isArray(managersData) ? managersData : [];
-
-  // Mock available users - in real app, this would come from an API
-  useEffect(() => {
-    setAvailableUsers([
-      { id: '1', name: 'John Doe', email: 'john@example.com' },
-      { id: '2', name: 'Jane Smith', email: 'jane@example.com' },
-      { id: '3', name: 'Mike Johnson', email: 'mike@example.com' },
-    ]);
-  }, []);
 
   const handleAssignManager = async (userId: string) => {
     try {
       await assignManagers(warehouseId, [userId]);
       await mutateManagers();
       setNewManagerEmail('');
+      // Keep the modal open after assigning a manager
     } catch (error) {
       console.error('Failed to assign manager:', error);
     }
@@ -84,8 +77,8 @@ export const WarehouseManagerModal: React.FC<WarehouseManagerModalProps> = ({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => onOpenChange(false)}>
+      <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-6">
           <div>
             <h2 className="text-xl font-semibold text-textBlack">Warehouse Managers</h2>
@@ -123,13 +116,13 @@ export const WarehouseManagerModal: React.FC<WarehouseManagerModalProps> = ({
                     </div>
                     <div>
                       <p className="font-medium text-textBlack">
-                        {manager.user?.name || 'Unknown User'}
+                        {manager.user ? `${manager.user.firstname} ${manager.user.lastname}` : 'Unknown User'}
                       </p>
                       <p className="text-sm text-textDarkGrey">
                         {manager.user?.email || 'No email'}
                       </p>
                       <p className="text-xs text-textDarkGrey">
-                        Assigned: {formatDate(manager.assignedAt)}
+                        Assigned: {formatDate(manager.createdAt)}
                       </p>
                     </div>
                   </div>
@@ -150,10 +143,21 @@ export const WarehouseManagerModal: React.FC<WarehouseManagerModalProps> = ({
         {/* Add New Manager */}
         <div>
           <h3 className="text-lg font-medium text-textBlack mb-3">Add New Manager</h3>
+          <input
+            type="text"
+            placeholder="Search for a user..."
+            value={newManagerEmail}
+            onChange={(e) => setNewManagerEmail(e.target.value)}
+            className="w-full px-3 py-2 border border-strokeGreyThree rounded-lg mb-3"
+          />
           <div className="space-y-3">
             {availableUsers
-              .filter(user => !managers.some((m: WarehouseManager) => m.user?.id === user.id))
-              .map((user) => (
+              .filter((user: any) => {
+                const fullName = `${user.firstname} ${user.lastname}`.toLowerCase();
+                return fullName.includes(newManagerEmail.toLowerCase()) &&
+                       !managers.some((m: WarehouseManager) => m.userId === user.id);
+              })
+              .map((user: any) => (
                 <div
                   key={user.id}
                   className="flex items-center justify-between p-3 border border-strokeGreyThree rounded-lg"
@@ -163,7 +167,7 @@ export const WarehouseManagerModal: React.FC<WarehouseManagerModalProps> = ({
                       <UserIcon />
                     </div>
                     <div>
-                      <p className="font-medium text-textBlack">{user.name}</p>
+                      <p className="font-medium text-textBlack">{`${user.firstname} ${user.lastname}`}</p>
                       <p className="text-sm text-textDarkGrey">{user.email}</p>
                     </div>
                   </div>

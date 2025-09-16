@@ -12,6 +12,15 @@
   body {
     font-family: "Red Hat Display", sans-serif;
   }
+  :root {
+    --background: 0 0% 98%;
+    --foreground: 0 0% 8%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 8%;
+    --border: 45 20% 88%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+  }
 }
 
 #root {

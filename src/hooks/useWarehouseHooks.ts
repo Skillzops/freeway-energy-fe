@@ -289,10 +289,10 @@ export const useTransferManagement = () => {
     }
   };
 
-  const fulfillTransferRequest = async (id: string, fulfilledQuantity?: number, notes?: string) => {
+  const fulfillTransferRequest = async (id: string, quantity?: number, notes?: string) => {
     setIsLoading(true);
     try {
-      await warehouseApi.fulfillTransferRequest(id, fulfilledQuantity, notes);
+      await warehouseApi.fulfillTransferRequest(id, quantity, notes);
       await mutateTransfers(); // Refresh data
       toast.success('Transfer request fulfilled successfully');
     } catch (error) {
@@ -541,10 +541,10 @@ export const useWarehouseManagerOperations = () => {
   const [isLoading, setIsLoading] = useState(false);
   const warehouseApi = useWarehouseApi();
 
-  const assignManagers = async (warehouseId: string, managerIds: string[]) => {
+  const assignManagers = async (warehouseId: string, userIds: string[]) => {
     setIsLoading(true);
     try {
-      await warehouseApi.assignWarehouseManagers(warehouseId, managerIds);
+      await warehouseApi.assignWarehouseManagers(warehouseId, userIds);
       toast.success('Warehouse managers assigned successfully');
     } catch (error) {
       toast.error('Failed to assign warehouse managers');
