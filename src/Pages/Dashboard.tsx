@@ -14,7 +14,6 @@ import SalesChart, { SalesGraphPoint } from "@/Components/DashBoardCard/SaleSGra
 import SalesCategoryPie from "@/Components/DashBoardCard/SalesCategoryPie";
 import TransactionsInsights from "@/Components/DashBoardCard/TransactionInsight";
 
-
 // Small UI bits
 import dropdown from "@/assets/table/dropdown.svg";
 import dateIcon from "@/assets/table/date.svg";
@@ -24,13 +23,11 @@ import { useApiCall } from "@/utils/useApiCall";
 
 
 // Installer Drawer bits (uses your Modal & shared UI)
-
 import AgentLeaderboard from "@/Components/DashBoardCard/AgentLeaderboard";
 import useGetAdminOverviewQuery from "@/redux/AdminOverview";
 import InventaryTable from "@/Components/DashBoardCard/InventaryTable";
 
 // Data hook
-
 type ExtendedSalesPoint = SalesGraphPoint & {
   category?: string;
   paymentMode?: string; // legacy fallback
