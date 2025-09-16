@@ -79,12 +79,26 @@ export function ViewInventoryModal({ open, onOpenChange, product }: ViewInventor
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Product Image */}
                 <div>
-                  <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center mb-4">
-                    <div className="text-center">
+                  <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center mb-4 overflow-hidden">
+                    {product.image ? (
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          console.error('Error loading product image:', product.image);
+                          e.currentTarget.style.display = 'none';
+                          e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                        }}
+                      />
+                    ) : null}
+                    <div className={`text-center ${product.image ? 'hidden' : ''}`}>
                       <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-2 flex items-center justify-center text-2xl">
                         📷
                       </div>
-                      <p className="text-sm text-textDarkGrey">Inventory Image</p>
+                      <p className="text-sm text-textDarkGrey">
+                        {product.image ? 'Error loading image' : 'No image available'}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -110,7 +124,14 @@ export function ViewInventoryModal({ open, onOpenChange, product }: ViewInventor
                       <div className="flex justify-between">
                         <span className="text-textDarkGrey">Category</span>
                         <span className="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">
-                          {(product.category?.name || product.categoryName || 'N/A').toUpperCase()}
+                          {(
+                            product.category?.name || 
+                            product.categoryName || 
+                            product.inventoryCategory?.name ||
+                            product.inventoryCategoryName ||
+                            product.category ||
+                            'UNCATEGORIZED'
+                          ).toUpperCase()}
                         </span>
                       </div>
                       <div className="flex justify-between">

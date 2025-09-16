@@ -16,6 +16,7 @@ const WAREHOUSE_ENDPOINTS = {
   TRANSFER_REQUEST_FULFILL: (id: string) => `/v1/warehouses/transfer-requests/${id}/fulfill`,
   TRANSFER_REQUEST_REJECT: (id: string) => `/v1/warehouses/transfer-requests/${id}/reject`,
   WAREHOUSE_INVENTORY: (id: string) => `/v1/warehouses/${id}/inventory`,
+  WAREHOUSE_INVENTORY_ITEM: (warehouseId: string, itemId: string) => `/v1/warehouses/${warehouseId}/inventory/${itemId}`,
   PRODUCTS: '/v1/products',
   PRODUCT_BY_ID: (id: string) => `/v1/products/${id}`,
   USERS: '/v1/users',
@@ -225,6 +226,82 @@ export const useWarehouseApi = () => {
 
       return result;
     },
+
+    update: async (id: string, updates: Partial<TransferRequest>) => {
+      const result = await apiCall({
+        endpoint: WAREHOUSE_ENDPOINTS.TRANSFER_REQUEST_BY_ID(id),
+        method: 'patch',
+        data: updates,
+        headers: JSON_HEADERS,
+        successMessage: 'Transfer request updated successfully',
+      });
+
+      // Trigger revalidation of transfer requests data
+      import('swr').then(({ mutate }) => {
+        mutate(key => typeof key === 'string' && key.includes('/v1/warehouses/transfer-requests'));
+      });
+
+      return result;
+    },
+  }), [apiCall]);
+
+  // Optimized inventory operations
+  const inventoryOperations = useMemo(() => ({
+    add: async (warehouseId: string, inventoryData: any) => {
+      const result = await apiCall({
+        endpoint: WAREHOUSE_ENDPOINTS.WAREHOUSE_INVENTORY(warehouseId),
+        method: 'post',
+        data: inventoryData,
+        headers: JSON_HEADERS,
+        successMessage: 'Inventory item added successfully',
+      });
+
+      // Trigger revalidation of inventory data
+      import('swr').then(({ mutate }) => {
+        mutate(key => typeof key === 'string' && (
+          key.includes('/v1/warehouses') && key.includes('/inventory')
+        ));
+      });
+
+      return result;
+    },
+
+    update: async (warehouseId: string, itemId: string, updates: any) => {
+      const result = await apiCall({
+        endpoint: WAREHOUSE_ENDPOINTS.WAREHOUSE_INVENTORY_ITEM(warehouseId, itemId),
+        method: 'patch',
+        data: updates,
+        headers: JSON_HEADERS,
+        successMessage: 'Inventory item updated successfully',
+      });
+
+      // Trigger revalidation of inventory data
+      import('swr').then(({ mutate }) => {
+        mutate(key => typeof key === 'string' && (
+          key.includes('/v1/warehouses') && key.includes('/inventory')
+        ));
+      });
+
+      return result;
+    },
+
+    delete: async (warehouseId: string, itemId: string) => {
+      const result = await apiCall({
+        endpoint: WAREHOUSE_ENDPOINTS.WAREHOUSE_INVENTORY_ITEM(warehouseId, itemId),
+        method: 'delete',
+        headers: JSON_HEADERS,
+        successMessage: 'Inventory item deleted successfully',
+      });
+
+      // Trigger revalidation of inventory data
+      import('swr').then(({ mutate }) => {
+        mutate(key => typeof key === 'string' && (
+          key.includes('/v1/warehouses') && key.includes('/inventory')
+        ));
+      });
+
+      return result;
+    },
   }), [apiCall]);
 
   // Optimized manager operations
@@ -280,6 +357,12 @@ export const useWarehouseApi = () => {
     createTransferRequest: transferOperations.create,
     fulfillTransferRequest: transferOperations.fulfill,
     rejectTransferRequest: transferOperations.reject,
+    updateTransferRequest: transferOperations.update,
+
+    // Inventory operations
+    addInventoryItem: inventoryOperations.add,
+    updateInventoryItem: inventoryOperations.update,
+    deleteInventoryItem: inventoryOperations.delete,
   };
 };
 
@@ -383,12 +466,23 @@ export const useWarehouseTransferRequests = (filters: {
     : WAREHOUSE_ENDPOINTS.TRANSFER_REQUESTS;
 
   const result = useGetRequest(endpoint, revalidate);
-  
-  const processedData = useMemo(() => 
-    normalizeArrayResponse(result.data, 'transferRequests'), 
-    [result.data]
-  );
-  
+
+  const processedData = useMemo(() => {
+    if (!result.data) return [];
+
+    // For paginated requests, return the full response with pagination metadata
+    if (filters.page || filters.limit) {
+      return result.data; // Return full response including transferRequests, total, page, etc.
+    }
+
+    // For non-paginated requests, return just the array
+    if (result.data.transferRequests) {
+      return result.data.transferRequests;
+    }
+
+    return normalizeArrayResponse(result.data, 'transferRequests');
+  }, [result.data, filters.page, filters.limit]);
+
   return { ...result, data: processedData };
 };
 
@@ -424,7 +518,7 @@ export const useWarehouseManagers = (warehouseId: string | null, revalidate = tr
 
 // Export commonly used hooks
 export const useWarehouseMetrics = useWarehouseStats;
-export const useTransferRequests = () => useWarehouseTransferRequests();
+export const useTransferRequests = () => useWarehouseTransferRequests({});
 
 export const useUsers = (revalidate = true, enabled = true) => {
   const result = useGetRequest(

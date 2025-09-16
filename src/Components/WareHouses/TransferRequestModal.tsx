@@ -33,8 +33,23 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
   );
   const [notes, setNotes] = useState(transferRequest.notes || '');
   const [rejectionReason, setRejectionReason] = useState('');
-  
+
   const { fulfillTransferRequest, rejectTransferRequest, isLoading } = useTransferManagement();
+
+  // Helper function to safely extract string values from objects
+  const getDisplayValue = (value: any): string => {
+    if (!value) return 'N/A';
+    if (typeof value === 'string') return value;
+    if (typeof value === 'object') {
+      // Handle common object structures
+      if (value.name) return value.name;
+      if (value.firstname && value.lastname) return `${value.firstname} ${value.lastname}`;
+      if (value.email) return value.email;
+      if (value.id) return value.id;
+      return JSON.stringify(value);
+    }
+    return String(value);
+  };
 
   const handleFulfill = async () => {
     try {
@@ -56,8 +71,13 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+  const formatDate = (dateString: string | undefined | null) => {
+    if (!dateString) return 'N/A';
+
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Invalid Date';
+
+    return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -89,7 +109,9 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
         <div className="flex justify-between items-center mb-6">
           <div>
             <h2 className="text-xl font-semibold text-textBlack">Transfer Request Details</h2>
-            <p className="text-textDarkGrey text-sm">ID: {transferRequest.id}</p>
+            <p className="text-textDarkGrey text-sm">
+              ID: {(transferRequest as any).requestId || transferRequest.id}
+            </p>
           </div>
           <button
             onClick={() => onOpenChange(false)}
@@ -109,13 +131,13 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
               <label className="block text-sm font-medium text-textBlack mb-1">
                 From Warehouse
               </label>
-              <p className="text-textDarkGrey">{transferRequest.fromWarehouse}</p>
+              <p className="text-textDarkGrey">{getDisplayValue(transferRequest.fromWarehouse)}</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-textBlack mb-1">
                 To Warehouse
               </label>
-              <p className="text-textDarkGrey">{transferRequest.toWarehouse}</p>
+              <p className="text-textDarkGrey">{getDisplayValue(transferRequest.toWarehouse)}</p>
             </div>
           </div>
 
@@ -124,7 +146,13 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
               <label className="block text-sm font-medium text-textBlack mb-1">
                 Product
               </label>
-              <p className="text-textDarkGrey">{transferRequest.productId}</p>
+              <p className="text-textDarkGrey">
+                {getDisplayValue((transferRequest as any).inventory) ||
+                 getDisplayValue((transferRequest as any).productName) ||
+                 transferRequest.productId ||
+                 (transferRequest as any).inventoryId ||
+                 'N/A'}
+              </p>
             </div>
             <div>
               <label className="block text-sm font-medium text-textBlack mb-1">
@@ -155,7 +183,9 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
             <label className="block text-sm font-medium text-textBlack mb-1">
               Request Date
             </label>
-            <p className="text-textDarkGrey">{formatDate(transferRequest.requestDate)}</p>
+            <p className="text-textDarkGrey">
+              {formatDate((transferRequest as any).createdAt || transferRequest.requestDate)}
+            </p>
           </div>
 
           {transferRequest.notes && (
@@ -163,7 +193,7 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
               <label className="block text-sm font-medium text-textBlack mb-1">
                 Notes
               </label>
-              <p className="text-textDarkGrey">{transferRequest.notes}</p>
+              <p className="text-textDarkGrey">{getDisplayValue(transferRequest.notes)}</p>
             </div>
           )}
 
@@ -172,7 +202,7 @@ export const TransferRequestModal: React.FC<TransferRequestModalProps> = ({
               <label className="block text-sm font-medium text-textBlack mb-1">
                 Rejection Reason
               </label>
-              <p className="text-red-600">{transferRequest.rejectionReason}</p>
+              <p className="text-red-600">{getDisplayValue(transferRequest.rejectionReason)}</p>
             </div>
           )}
         </div>
