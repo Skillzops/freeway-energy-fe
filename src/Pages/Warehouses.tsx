@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import PageLayout from "./PageLayout";
 import { MetricCard } from "../Components/WareHouses/MetricCard";
 import { WarehouseCard } from "../Components/WareHouses/WarehouseCard";
 import { PaginationInfo } from "../Components/WareHouses/PaginationInfo";
 import { NewWarehouseModal } from "../Components/WareHouses/NewWarehouseModal";
-import { useWarehouse } from "../contexts/WarehouseContext";
 import { useWarehouseStats } from "../services/warehouseApi";
+import { useWarehouseManagement } from "../hooks/useWarehouseHooks";
 import useBreakpoint from "../hooks/useBreakpoint";
 import warehouseBadge from "../assets/inventory/inventorybadge.png";
 
@@ -63,28 +63,43 @@ const PlusIcon = () => (
 
 export default function Warehouses() {
   const [newWarehouseOpen, setNewWarehouseOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const { warehouses, isLoading, error } = useWarehouse();
+  const [showFilters, setShowFilters] = useState(false);
+
+  // Use the warehouse management hook for filtering and pagination
+  const {
+    warehouses: filteredWarehouses,
+    allWarehouses,
+    isLoading,
+    searchTerm,
+    statusFilter,
+    typeFilter,
+    locationFilter,
+    setStatusFilter,
+    setTypeFilter,
+    setLocationFilter,
+    handleSearch,
+    currentPage,
+    totalPages,
+    pageSize,
+    handlePageChange,
+    setPageSize,
+    refreshData
+  } = useWarehouseManagement();
+
   const { data: stats, isLoading: statsLoading } = useWarehouseStats();
   const isMobile = useBreakpoint("max", 640);
-  
+
   // Ensure warehouses is always an array
-  const warehousesArray = Array.isArray(warehouses) ? warehouses : [];
-  
+  const warehousesArray = Array.isArray(allWarehouses) ? allWarehouses : [];
+
   // Calculate totals from warehouses data
   const totalItems = warehousesArray.reduce((sum, warehouse) => sum + warehouse.totalItems, 0);
   const totalValue = warehousesArray.reduce((sum, warehouse) => sum + warehouse.totalValue, 0);
-  
+
   // Use stats from API if available, otherwise calculate from warehouses
   const warehouseCount = stats?.totalWarehouses || warehousesArray.length;
   const totalInventoryItems = stats?.totalItems || totalItems;
   const totalInventoryValue = stats?.totalValue || totalValue;
-
-  // Filter warehouses based on search
-  const filteredWarehouses = warehousesArray.filter(warehouse =>
-    warehouse.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    warehouse.location.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-NG', {
@@ -108,24 +123,7 @@ export default function Warehouses() {
     );
   }
 
-  // Show error state
-  if (error) {
-    return (
-      <PageLayout pageName="Warehouses" badge={warehouseBadge}>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <p className="text-errorTwo mb-4">Failed to load warehouses</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="bg-primary text-white px-4 py-2 rounded-full hover:bg-primary/90 transition-colors"
-            >
-              Retry
-            </button>
-          </div>
-        </div>
-      </PageLayout>
-    );
-  }
+
 
   return (
     <PageLayout pageName="Warehouses" badge={warehouseBadge} className="w-full px-2 py-8 md:p-8">
@@ -165,43 +163,133 @@ export default function Warehouses() {
         </div>
 
         {/* Search and Filters */}
-        <div className="flex gap-4 items-center">
-          <div className="flex-1 max-w-sm">
-            <div className="relative">
-              
-              <input
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search warehouses..."
-                className="pl-10 pr-4 py-2 border border-strokeGreyThree rounded-full w-full focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-              />
-              <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-textDarkGrey">
-                <SearchIcon />
+        <div className="space-y-4">
+          <div className="flex gap-4 items-center">
+            <div className="flex-1 max-w-sm">
+              <div className="relative">
+                <input
+                  value={searchTerm}
+                  onChange={(e) => handleSearch(e.target.value)}
+                  placeholder="Search warehouses..."
+                  className="pl-10 pr-4 py-2 border border-strokeGreyThree rounded-full w-full focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                />
+                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-textDarkGrey">
+                  <SearchIcon />
+                </div>
               </div>
             </div>
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`border border-strokeGreyThree text-textBlack py-2 px-4 rounded-full flex items-center gap-2 hover:bg-gray-50 transition-colors ${
+                showFilters ? 'bg-primary/10 border-primary' : ''
+              }`}
+            >
+              <FilterIcon />
+              Filters
+            </button>
+            <button
+              onClick={refreshData}
+              className="border border-strokeGreyThree text-textBlack py-2 px-4 rounded-full flex items-center gap-2 hover:bg-gray-50 transition-colors"
+            >
+              <RefreshIcon />
+              Refresh Table
+            </button>
           </div>
-          <button className="border border-strokeGreyThree text-textBlack py-2 px-4 rounded-full flex items-center gap-2 hover:bg-gray-50 transition-colors">
-            <FilterIcon />
-            Filters
-          </button>
-          <button className="border border-strokeGreyThree text-textBlack py-2 px-4 rounded-full flex items-center gap-2 hover:bg-gray-50 transition-colors">
-            <RefreshIcon />
-            Refresh Table
-          </button>
+
+          {/* Filter Controls */}
+          {showFilters && (
+            <div className="bg-gray-50 p-4 rounded-lg border border-strokeGreyThree">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Status Filter */}
+                <div>
+                  <label className="block text-sm font-medium text-textBlack mb-2">Status</label>
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="w-full px-3 py-2 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  >
+                    <option value="">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                </div>
+
+                {/* Type Filter */}
+                <div>
+                  <label className="block text-sm font-medium text-textBlack mb-2">Type</label>
+                  <select
+                    value={typeFilter}
+                    onChange={(e) => setTypeFilter(e.target.value)}
+                    className="w-full px-3 py-2 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  >
+                    <option value="">All Types</option>
+                    <option value="main">Main Warehouse</option>
+                    <option value="regular">Regular Warehouse</option>
+                  </select>
+                </div>
+
+                {/* Location Filter */}
+                <div>
+                  <label className="block text-sm font-medium text-textBlack mb-2">Location</label>
+                  <input
+                    type="text"
+                    value={locationFilter}
+                    onChange={(e) => setLocationFilter(e.target.value)}
+                    placeholder="Filter by location..."
+                    className="w-full px-3 py-2 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  />
+                </div>
+              </div>
+
+              {/* Clear Filters */}
+              <div className="mt-4 flex justify-end">
+                <button
+                  onClick={() => {
+                    setStatusFilter('');
+                    setTypeFilter('');
+                    setLocationFilter('');
+                    handleSearch('');
+                  }}
+                  className="text-primary hover:text-primary/80 text-sm font-medium"
+                >
+                  Clear All Filters
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Warehouses Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredWarehouses.length === 0 ? (
+          {isLoading ? (
             <div className="col-span-full text-center py-12">
-              <p className="text-textDarkGrey mb-4">
-                {searchTerm ? "No warehouses match your search" : "No warehouses found"}
-              </p>
+              <p className="text-textDarkGrey">Loading warehouses...</p>
+            </div>
+          ) : filteredWarehouses.length === 0 && allWarehouses.length === 0 ? (
+            <div className="col-span-full text-center py-12">
+              <p className="text-textDarkGrey mb-4">No warehouses found</p>
               <button
                 onClick={() => setNewWarehouseOpen(true)}
                 className="bg-primaryGradient text-white px-4 py-2 rounded-full hover:opacity-90 transition-all"
               >
                 Create Your First Warehouse
+              </button>
+            </div>
+          ) : filteredWarehouses.length === 0 ? (
+            <div className="col-span-full text-center py-12">
+              <p className="text-textDarkGrey mb-4">
+                No warehouses match your current filters
+              </p>
+              <button
+                onClick={() => {
+                  setStatusFilter('');
+                  setTypeFilter('');
+                  setLocationFilter('');
+                  handleSearch('');
+                }}
+                className="text-primary hover:text-primary/80 font-medium"
+              >
+                Clear All Filters
               </button>
             </div>
           ) : (
@@ -212,12 +300,70 @@ export default function Warehouses() {
         </div>
 
         {filteredWarehouses.length > 0 && (
-          <PaginationInfo
-            currentPage={1}
-            totalPages={Math.ceil(filteredWarehouses.length / 6)}
-            itemsPerPage={6}
-            totalItems={filteredWarehouses.length}
-          />
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+            <PaginationInfo
+              currentPage={currentPage}
+              totalPages={totalPages}
+              itemsPerPage={pageSize}
+              totalItems={filteredWarehouses.length}
+            />
+
+            {/* Page Size Selector */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-textDarkGrey">Show:</span>
+              <select
+                value={pageSize}
+                onChange={(e) => setPageSize(Number(e.target.value))}
+                className="px-2 py-1 border border-strokeGreyThree rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+              >
+                <option value={6}>6</option>
+                <option value={12}>12</option>
+                <option value={24}>24</option>
+                <option value={48}>48</option>
+              </select>
+              <span className="text-sm text-textDarkGrey">per page</span>
+            </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1 border border-strokeGreyThree rounded text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Previous
+                </button>
+
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    const page = i + 1;
+                    return (
+                      <button
+                        key={page}
+                        onClick={() => handlePageChange(page)}
+                        className={`px-3 py-1 rounded text-sm ${
+                          currentPage === page
+                            ? 'bg-primary text-white'
+                            : 'border border-strokeGreyThree hover:bg-gray-50'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1 border border-strokeGreyThree rounded text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </div>
         )}
         <NewWarehouseModal
           open={newWarehouseOpen}

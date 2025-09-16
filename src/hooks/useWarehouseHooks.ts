@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useWarehouseApi, useWarehouses, useProducts, useTransferRequests, useWarehouseStats, useWarehouseManagers } from '../services/warehouseApi';
+import { useWarehouseApi, useWarehouses, useProducts, useTransferRequests, useWarehouseStats, useWarehouseManagers, useWarehouseTransferRequests } from '../services/warehouseApi';
 import { useInventory } from '../services/inventoryApi';
 import { toast } from 'react-toastify';
 import type { Warehouse, Product, TransferRequest } from '../data/warehouseData';
@@ -11,18 +11,38 @@ export { useWarehouseManagers } from '../services/warehouseApi';
 export const useWarehouseManagement = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filters, setFilters] = useState<any>({});
+  const [statusFilter, setStatusFilter] = useState(''); // 'active', 'inactive', or ''
+  const [typeFilter, setTypeFilter] = useState(''); // 'main', 'regular', or ''
+  const [locationFilter, setLocationFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(6);
 
-  const { data: warehouses = [], mutate: mutateWarehouses } = useWarehouses();
+  const { data: warehouses = [], mutate: mutateWarehouses, isLoading: isLoadingWarehouses } = useWarehouses();
   const warehouseApi = useWarehouseApi();
 
-  // Search functionality
-  const filteredWarehouses = warehouses.filter((warehouse: Warehouse) =>
-    warehouse.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    warehouse.location.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Combined search and filtering functionality
+  const filteredWarehouses = warehouses.filter((warehouse: Warehouse) => {
+    // Search filter
+    const matchesSearch = !searchTerm ||
+      warehouse.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      warehouse.location.toLowerCase().includes(searchTerm.toLowerCase());
+
+    // Status filter
+    const matchesStatus = !statusFilter ||
+      (statusFilter === 'active' && warehouse.isActive) ||
+      (statusFilter === 'inactive' && !warehouse.isActive);
+
+    // Type filter
+    const matchesType = !typeFilter ||
+      (typeFilter === 'main' && warehouse.isMainWarehouse) ||
+      (typeFilter === 'regular' && !warehouse.isMainWarehouse);
+
+    // Location filter
+    const matchesLocation = !locationFilter ||
+      warehouse.location.toLowerCase().includes(locationFilter.toLowerCase());
+
+    return matchesSearch && matchesStatus && matchesType && matchesLocation;
+  });
 
   // Pagination
   const totalPages = Math.ceil(filteredWarehouses.length / pageSize);
@@ -30,6 +50,18 @@ export const useWarehouseManagement = () => {
     (currentPage - 1) * pageSize,
     currentPage * pageSize
   );
+
+  // Debug logging
+  console.log('Warehouse Management Hook Debug:', {
+    totalWarehouses: warehouses.length,
+    filteredWarehouses: filteredWarehouses.length,
+    paginatedWarehouses: paginatedWarehouses.length,
+    currentPage,
+    pageSize,
+    totalPages,
+    isLoadingWarehouses,
+    filters: { statusFilter, typeFilter, locationFilter, searchTerm }
+  });
 
   const handleSearch = useCallback((term: string) => {
     setSearchTerm(term);
@@ -127,8 +159,14 @@ export const useWarehouseManagement = () => {
   return {
     warehouses: paginatedWarehouses,
     allWarehouses: warehouses,
-    isLoading,
+    isLoading: isLoading || isLoadingWarehouses,
     searchTerm,
+    statusFilter,
+    typeFilter,
+    locationFilter,
+    setStatusFilter,
+    setTypeFilter,
+    setLocationFilter,
     currentPage,
     totalPages,
     pageSize,
@@ -246,33 +284,75 @@ export const useInventoryManagement = (warehouseId?: string) => {
   };
 };
 
-// Real-time transfer management hook
+// Real-time transfer management hook with pagination
 export const useTransferManagement = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState('');
   const [warehouseFilter, setWarehouseFilter] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
-  const { data: transfers = [], mutate: mutateTransfers } = useTransferRequests();
+  // Use the paginated hook with filters
+  const {
+    data: transfersResponse = {},
+    mutate: mutateTransfers,
+    isLoading: isLoadingTransfers,
+    error: transfersError
+  } = useWarehouseTransferRequests({
+    // Remove status filtering from API - we'll do it on frontend
+    page: currentPage,
+    limit: pageSize
+  });
+
   const { data: warehouses = [] } = useWarehouses();
   const { data: products = [] } = useInventory();
   const warehouseApi = useWarehouseApi();
 
-  // Filter transfers
-  const filteredTransfers = transfers.filter((transfer: TransferRequest) => {
-    const matchesStatus = !statusFilter || transfer.status === statusFilter;
-    const matchesWarehouse = !warehouseFilter || 
-      transfer.fromWarehouse === warehouseFilter || 
-      transfer.toWarehouse === warehouseFilter;
+  // Extract transfers and pagination data from API response
+  const transfers = Array.isArray(transfersResponse)
+    ? transfersResponse
+    : (transfersResponse as any)?.transferRequests || [];
+
+  // Frontend filtering for both status and warehouse filters
+  const filteredTransfers = transfers.filter((transfer: any) => {
+    // Status filter
+    const matchesStatus = !statusFilter || transfer.status.toLowerCase() === statusFilter.toLowerCase();
+
+    // Warehouse filter - check if the selected warehouse is either source or destination
+    const matchesWarehouse = !warehouseFilter ||
+      transfer.fromWarehouseId === warehouseFilter ||
+      transfer.toWarehouseId === warehouseFilter ||
+      // Also check nested warehouse objects in case API returns full objects
+      transfer.fromWarehouse?.id === warehouseFilter ||
+      transfer.toWarehouse?.id === warehouseFilter;
+
     return matchesStatus && matchesWarehouse;
   });
+
+  // Apply frontend pagination to filtered results
+  const hasActiveFilters = statusFilter || warehouseFilter;
+  const totalFilteredItems = filteredTransfers.length;
+  const totalPages = Math.ceil(totalFilteredItems / pageSize);
+
+  // Slice the filtered results for current page
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const paginatedTransfers = hasActiveFilters ? filteredTransfers.slice(startIndex, endIndex) : filteredTransfers;
+
+  const paginationData = {
+    total: totalFilteredItems,
+    page: currentPage,
+    limit: pageSize,
+    totalPages: totalPages
+  };
 
   // Calculate transfer metrics
   const transferMetrics = {
     total: transfers.length,
-    pending: transfers.filter((t: TransferRequest) => t.status === 'pending').length,
-    partial: transfers.filter((t: TransferRequest) => t.status === 'partial').length,
-    fulfilled: transfers.filter((t: TransferRequest) => t.status === 'fulfilled').length,
-    rejected: transfers.filter((t: TransferRequest) => t.status === 'rejected').length,
+    pending: transfers.filter((t: any) => t.status.toLowerCase() === 'pending').length,
+    partial: transfers.filter((t: any) => t.status.toLowerCase() === 'partial').length,
+    fulfilled: transfers.filter((t: any) => t.status.toLowerCase() === 'fulfilled').length,
+    rejected: transfers.filter((t: any) => t.status.toLowerCase() === 'rejected').length,
   };
 
   const createTransferRequest = async (transferData: Omit<TransferRequest, 'id' | 'requestDate' | 'fulfilledQuantity' | 'status'>) => {
@@ -341,12 +421,13 @@ export const useTransferManagement = () => {
   };
 
   return {
-    transfers: filteredTransfers,
+    transfers: paginatedTransfers,
     allTransfers: transfers,
+    filteredTransfers,
     transferMetrics,
     warehouses,
     products,
-    isLoading,
+    isLoading: isLoading || isLoadingTransfers,
     statusFilter,
     warehouseFilter,
     setStatusFilter,
@@ -358,6 +439,15 @@ export const useTransferManagement = () => {
     getWarehouseName,
     getProductName,
     refreshData: mutateTransfers,
+
+    // Pagination data and functions
+    pagination: paginationData,
+    currentPage,
+    pageSize,
+    setCurrentPage,
+    setPageSize,
+    totalPages: paginationData.totalPages,
+    totalItems: paginationData.total,
   };
 };
 

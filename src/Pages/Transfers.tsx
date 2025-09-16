@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import PageLayout from "./PageLayout";
 import { TransferRequestModal } from "../Components/WareHouses/TransferRequestModal";
+import { NewRequestModal } from "../Components/WareHouses/NewRequestModal";
 import { useTransferManagement } from "../hooks/useWarehouseHooks";
 import type { TransferRequest } from "../data/warehouseData";
 import useBreakpoint from "../hooks/useBreakpoint";
@@ -52,12 +53,23 @@ export default function Transfers() {
     getWarehouseName,
     getProductName,
     refreshData,
+    currentPage,
+    pageSize,
+    setCurrentPage,
+    setPageSize,
+    totalPages,
+    totalItems,
   } = useTransferManagement();
   
   const isMobile = useBreakpoint("max", 640);
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+  const formatDate = (dateString: string | undefined | null) => {
+    if (!dateString) return 'N/A';
+
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Invalid Date';
+
+    return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -65,17 +77,17 @@ export default function Transfers() {
   };
 
   const getStatusColor = (status: string) => {
-    switch (status) {
+    switch (status?.toLowerCase()) {
       case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-gold/10 text-gold border-gold/20';
       case 'fulfilled':
-        return 'bg-green-100 text-green-800';
+        return 'bg-success/10 text-success border-success/20';
       case 'partial':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-brightBlue/10 text-brightBlue border-brightBlue/20';
       case 'rejected':
-        return 'bg-red-100 text-red-800';
+        return 'bg-errorTwo/10 text-errorTwo border-errorTwo/20';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-strokeGreyThree text-textDarkGrey border-strokeGreyThree';
     }
   };
 
@@ -112,7 +124,7 @@ export default function Transfers() {
           </div>
           <button
             onClick={() => setNewTransferModalOpen(true)}
-            className="bg-primary text-white px-4 py-2 rounded-full flex items-center gap-2 hover:bg-primary/90 transition-colors text-sm sm:text-base w-full sm:w-auto justify-center"
+            className="bg-primaryGradient text-white px-4 py-2 rounded-full flex items-center gap-2 hover:opacity-90 transition-all text-sm sm:text-base w-full sm:w-auto justify-center"
           >
             <PlusIcon />
             {isMobile ? "New Request" : "New Transfer Request"}
@@ -126,15 +138,15 @@ export default function Transfers() {
             <div className="text-sm text-textDarkGrey">Total Requests</div>
           </div>
           <div className="bg-white p-4 rounded-lg border border-strokeGreyThree">
-            <div className="text-2xl font-bold text-yellow-600">{transferMetrics.pending}</div>
+            <div className="text-2xl font-bold text-gold">{transferMetrics.pending}</div>
             <div className="text-sm text-textDarkGrey">Pending</div>
           </div>
           <div className="bg-white p-4 rounded-lg border border-strokeGreyThree">
-            <div className="text-2xl font-bold text-green-600">{transferMetrics.fulfilled}</div>
+            <div className="text-2xl font-bold text-success">{transferMetrics.fulfilled}</div>
             <div className="text-sm text-textDarkGrey">Fulfilled</div>
           </div>
           <div className="bg-white p-4 rounded-lg border border-strokeGreyThree">
-            <div className="text-2xl font-bold text-red-600">{transferMetrics.rejected}</div>
+            <div className="text-2xl font-bold text-errorTwo">{transferMetrics.rejected}</div>
             <div className="text-sm text-textDarkGrey">Rejected</div>
           </div>
         </div>
@@ -174,7 +186,7 @@ export default function Transfers() {
 
             <button
               onClick={refreshData}
-              className="border border-strokeGreyThree text-textBlack py-2 px-4 rounded-full flex items-center gap-2 hover:bg-gray-50 transition-colors text-sm"
+              className="border border-strokeGreyThree text-textBlack py-2 px-4 rounded-full flex items-center gap-2 hover:bg-strokeGreyThree transition-colors text-sm"
             >
               <RefreshIcon />
               Refresh
@@ -186,18 +198,30 @@ export default function Transfers() {
         <div className="bg-white rounded-lg border border-strokeGreyThree overflow-hidden">
           {transfers.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-textDarkGrey mb-4">No transfer requests found</p>
-              <button
-                onClick={() => setNewTransferModalOpen(true)}
-                className="bg-primary text-white px-4 py-2 rounded-full hover:bg-primary/90 transition-colors"
-              >
-                Create Your First Transfer Request
-              </button>
+              <p className="text-textDarkGrey mb-2">
+                {totalItems === 0
+                  ? "No transfer requests found"
+                  : `No transfers found on page ${currentPage}`
+                }
+              </p>
+              {totalItems > 0 && (
+                <p className="text-sm text-textDarkGrey mb-4">
+                  Try adjusting your filters or go to a different page
+                </p>
+              )}
+              {totalItems === 0 && (
+                <button
+                  onClick={() => setNewTransferModalOpen(true)}
+                  className="bg-primaryGradient text-white px-4 py-2 rounded-full hover:opacity-90 transition-all"
+                >
+                  Create Your First Transfer Request
+                </button>
+              )}
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50">
+                <thead className="bg-strokeGreyThree">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-textDarkGrey uppercase tracking-wider">
                       Request ID
@@ -222,37 +246,37 @@ export default function Transfers() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {transfers.map((transfer: TransferRequest) => (
-                    <tr key={transfer.id} className="hover:bg-gray-50">
+                <tbody className="bg-white divide-y divide-strokeGreyTwo">
+                  {transfers.map((transfer: any) => (
+                    <tr key={transfer.id} className="hover:bg-strokeGreyThree">
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-textBlack">
-                        {transfer.id}
+                        {transfer.requestId || transfer.id}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-textDarkGrey">
                         <div className="flex items-center gap-2">
-                          <span>{getWarehouseName(transfer.fromWarehouse)}</span>
+                          <span>{transfer.fromWarehouse?.name || getWarehouseName(transfer.fromWarehouseId)}</span>
                           <ArrowRightIcon />
-                          <span>{getWarehouseName(transfer.toWarehouse)}</span>
+                          <span>{transfer.toWarehouse?.name || getWarehouseName(transfer.toWarehouseId)}</span>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-textDarkGrey">
-                        {getProductName(transfer.productId)}
+                        {transfer.inventory?.name || getProductName(transfer.inventoryId)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-textDarkGrey">
                         {transfer.fulfilledQuantity || 0} / {transfer.requestedQuantity}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(transfer.status)}`}>
+                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full border ${getStatusColor(transfer.status)}`}>
                           {transfer.status.charAt(0).toUpperCase() + transfer.status.slice(1)}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-textDarkGrey">
-                        {formatDate(transfer.requestDate)}
+                        {formatDate(transfer.createdAt || transfer.requestDate)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <button
                           onClick={() => handleTransferClick(transfer)}
-                          className="text-primary hover:text-primary/80 font-medium"
+                          className="border border-strokeGreyThree text-textBlack py-1 px-3 rounded-full text-sm hover:bg-strokeGreyThree transition-colors"
                         >
                           View Details
                         </button>
@@ -265,6 +289,85 @@ export default function Transfers() {
           )}
         </div>
 
+        {/* Pagination Controls */}
+        {!isLoading && transfers.length > 0 && (
+          <div className="flex flex-col sm:flex-row justify-between items-center mt-6 gap-4">
+            {/* Page Info */}
+            <div className="text-sm text-textDarkGrey">
+              Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalItems)} of {totalItems} transfers
+            </div>
+
+            {/* Pagination Controls */}
+            <div className="flex items-center gap-2">
+              {/* Page Size Selector */}
+              <div className="flex items-center gap-2 mr-4">
+                <span className="text-sm text-textDarkGrey">Show:</span>
+                <select
+                  value={pageSize}
+                  onChange={(e) => {
+                    setPageSize(Number(e.target.value));
+                    setCurrentPage(1); // Reset to first page when changing page size
+                  }}
+                  className="border border-strokeGreyTwo rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primaryBlue"
+                >
+                  <option value={5}>5</option>
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                  <option value={50}>50</option>
+                </select>
+              </div>
+
+              {/* Previous Button */}
+              <button
+                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                disabled={currentPage <= 1}
+                className="px-3 py-1 border border-strokeGreyTwo rounded text-sm hover:bg-strokeGreyOne disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Previous
+              </button>
+
+              {/* Page Numbers */}
+              <div className="flex items-center gap-1">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum;
+                  if (totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (currentPage <= 3) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = currentPage - 2 + i;
+                  }
+
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => setCurrentPage(pageNum)}
+                      className={`px-3 py-1 text-sm rounded ${
+                        currentPage === pageNum
+                          ? 'bg-primaryBlue text-white'
+                          : 'border border-strokeGreyTwo hover:bg-strokeGreyOne'
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Next Button */}
+              <button
+                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                disabled={currentPage >= totalPages}
+                className="px-3 py-1 border border-strokeGreyTwo rounded text-sm hover:bg-strokeGreyOne disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Transfer Request Modal */}
         {selectedTransfer && (
           <TransferRequestModal
@@ -274,6 +377,12 @@ export default function Transfers() {
             onUpdate={handleTransferUpdate}
           />
         )}
+
+        {/* New Transfer Request Modal */}
+        <NewRequestModal
+          open={newTransferModalOpen}
+          onOpenChange={setNewTransferModalOpen}
+        />
       </div>
     </PageLayout>
   );

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import PageLayout from "./PageLayout";
 import { MetricCard } from "../Components/WareHouses/MetricCard";
@@ -7,15 +7,14 @@ import { NewInventoryModal } from "../Components/WareHouses/NewInventoryModal";
 import { NewRequestModal } from "../Components/WareHouses/NewRequestModal";
 import { FulfillRequestModal } from "../Components/WareHouses/FulfillRequestModal";
 import { ViewInventoryModal } from "../Components/WareHouses/ViewInventoryModal";
+import { ViewRequestModal } from "../Components/WareHouses/ViewRequestModal";
 import { useWarehouses, useWarehouseTransferRequests } from "../services/warehouseApi";
 import { useWarehouseInventory } from "../services/inventoryApi";
-import { AddInventoryToWarehouseModal } from "../Components/WareHouses/AddInventoryToWarehouseModal";
 import { AddStockToWarehouseModal } from "../Components/WareHouses/AddStockToWarehouseModal";
 import type { TransferRequest, Product } from "../data/warehouseData";
 import useBreakpoint from "../hooks/useBreakpoint";
 import { toast } from "react-toastify";
 import warehouseBadge from "../assets/inventory/inventorybadge.png";
-import ProceedButton from "../Components/ProceedButtonComponent/ProceedButtonComponent";
 import { formatNumberWithCommas } from "../utils/helpers";
 
 // Icons
@@ -67,6 +66,12 @@ const RefreshIcon = () => (
   </svg>
 );
 
+const LoadingSpinner = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="animate-spin">
+    <path d="M21 12a9 9 0 11-6.219-8.56"/>
+  </svg>
+);
+
 const SendIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <path d="m22 2-7 20-4-9-9-4Z"/>
@@ -96,18 +101,25 @@ export default function WarehouseDetail() {
   const [selectedRequest, setSelectedRequest] = useState<TransferRequest | undefined>();
   const [selectedProduct, setSelectedProduct] = useState<Product | undefined>();
   const [viewInventoryOpen, setViewInventoryOpen] = useState(false);
+  const [viewRequestOpen, setViewRequestOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [requestSearchQuery, setRequestSearchQuery] = useState("");
+
+  // Loading states for refresh operations
+  const [isRefreshingAll, setIsRefreshingAll] = useState(false);
+  const [isRefreshingInventory, setIsRefreshingInventory] = useState(false);
+  const [isRefreshingRequests, setIsRefreshingRequests] = useState(false);
   const isMobile = useBreakpoint("max", 640);
-  const isTablet = useBreakpoint("max", 1024);
   
   // Fetch warehouse data using mock API
-  const { data: warehouses = [], isLoading: warehouseLoading, error: warehouseError } = useWarehouses();
+  const { data: warehouses = [], isLoading: warehouseLoading, error: warehouseError, mutate: mutateWarehouses } = useWarehouses();
   const { data: inventory = [], isLoading: inventoryLoading, mutate: mutateInventory } = useWarehouseInventory(id || null);
-  
+
   const warehouse = warehouses.find((w: any) => w.id === id);
-  
+
   // For main warehouse: show outgoing requests (fromWarehouseId)
   // For branch warehouse: show incoming requests (toWarehouseId)
-  const { data: transferRequests = [], isLoading: transfersLoading } = useWarehouseTransferRequests(
+  const { data: transferRequests = [], isLoading: transfersLoading, mutate: mutateTransferRequests } = useWarehouseTransferRequests(
     warehouse?.isMainWarehouse
       ? { fromWarehouseId: id || undefined }
       : { toWarehouseId: id || undefined }
@@ -154,13 +166,7 @@ export default function WarehouseDetail() {
     }).format(amount);
   };
 
-  const getStockStatus = (current: number, max: number) => {
-    const percentage = (current / max) * 100;
-    if (percentage === 100) return { label: "100%", color: "text-success" };
-    if (percentage >= 75) return { label: `${Math.round(percentage)}%`, color: "text-success" };
-    if (percentage >= 50) return { label: `${Math.round(percentage)}%`, color: "text-warning" };
-    return { label: `${Math.round(percentage)}%`, color: "text-errorTwo" };
-  };
+
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -217,12 +223,87 @@ export default function WarehouseDetail() {
     setViewInventoryOpen(true);
   };
 
+  const handleViewRequest = (request: any) => {
+    setSelectedRequest(request);
+    setViewRequestOpen(true);
+  };
+
   const handleRequestUpdated = () => {
     // This would trigger a data refresh in a real implementation
     // For now, we'll just close the modal
     setFulfillRequestOpen(false);
     setSelectedRequest(undefined);
   };
+
+  const handleRefreshTable = async () => {
+    setIsRefreshingInventory(true);
+    setSearchQuery("");
+    try {
+      // Refresh inventory data
+      await mutateInventory();
+      toast.success("Inventory refreshed successfully");
+    } catch (error) {
+      toast.error("Failed to refresh inventory");
+    } finally {
+      setIsRefreshingInventory(false);
+    }
+  };
+
+  const handleRefreshRequests = async () => {
+    setIsRefreshingRequests(true);
+    setRequestSearchQuery("");
+    try {
+      // Refresh transfer requests data
+      await mutateTransferRequests();
+      toast.success("Transfer requests refreshed successfully");
+    } catch (error) {
+      toast.error("Failed to refresh transfer requests");
+    } finally {
+      setIsRefreshingRequests(false);
+    }
+  };
+
+  const handleRefreshAll = async () => {
+    setIsRefreshingAll(true);
+    // Clear search queries
+    setSearchQuery("");
+    setRequestSearchQuery("");
+
+    // Refresh all data
+    try {
+      await Promise.all([
+        mutateWarehouses(),
+        mutateInventory(),
+        mutateTransferRequests()
+      ]);
+      toast.success("All data refreshed successfully");
+    } catch (error) {
+      toast.error("Failed to refresh data");
+    } finally {
+      setIsRefreshingAll(false);
+    }
+  };
+
+  // Filter inventory based on search query
+  const filteredInventory = searchQuery
+    ? inventoryArray.filter((product: any) =>
+        product.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.status?.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : inventoryArray;
+
+  // Filter requests based on search query
+  const filteredRequests = requestSearchQuery
+    ? requests.filter((request: any) =>
+        request.requestId?.toLowerCase().includes(requestSearchQuery.toLowerCase()) ||
+        request.id?.toLowerCase().includes(requestSearchQuery.toLowerCase()) ||
+        getWarehouseName(warehouse?.isMainWarehouse ? request.toWarehouseId : request.fromWarehouseId)
+          ?.toLowerCase().includes(requestSearchQuery.toLowerCase()) ||
+        getProductName(request.inventoryId, request.inventory)
+          ?.toLowerCase().includes(requestSearchQuery.toLowerCase()) ||
+        request.status?.toLowerCase().includes(requestSearchQuery.toLowerCase())
+      )
+    : requests;
 
   return (
     <PageLayout pageName={warehouse.name} badge={warehouseBadge} className="w-full px-2 py-8 md:p-8">
@@ -251,14 +332,20 @@ export default function WarehouseDetail() {
             </div>
             
             <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-              <button className="bg-chalk border border-strokeGreyThree text-textDarkGrey py-2 px-4 rounded-full flex items-center justify-center gap-2 hover:bg-strokeGreyThree transition-colors text-sm">
-                <RefreshIcon />
-                {!isMobile && "Refresh"}
+              <button
+                onClick={handleRefreshAll}
+                disabled={isRefreshingAll}
+                className={`bg-chalk border border-strokeGreyThree text-textDarkGrey py-2 px-4 rounded-full flex items-center justify-center gap-2 hover:bg-strokeGreyThree transition-colors text-sm ${
+                  isRefreshingAll ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+              >
+                {isRefreshingAll ? <LoadingSpinner /> : <RefreshIcon />}
+                {!isMobile && (isRefreshingAll ? "Refreshing..." : "Refresh")}
               </button>
               {!warehouse.isMainWarehouse && (
                 <button
                   onClick={() => setNewRequestOpen(true)}
-                  className="bg-primary text-chalk py-2 px-4 rounded-full flex items-center justify-center gap-2 hover:bg-blackBrown transition-colors text-sm"
+                  className="bg-primaryGradient text-white py-2 px-4 rounded-full flex items-center justify-center gap-2 hover:opacity-90 transition-all text-sm"
                 >
                   <SendIcon />
                   {isMobile ? "Request" : "Request from Main"}
@@ -268,7 +355,7 @@ export default function WarehouseDetail() {
                 <>
                   <button
                     onClick={() => setNewInventoryOpen(true)}
-                    className="bg-primary text-chalk py-2 px-4 rounded-full flex items-center justify-center gap-2 hover:bg-blackBrown transition-colors text-sm"
+                    className="bg-primaryGradient text-white py-2 px-4 rounded-full flex items-center justify-center gap-2 hover:opacity-90 transition-all text-sm"
                   >
                     <PlusIcon />
                     {isMobile ? "Add Item" : "New Inventory Item"}
@@ -327,19 +414,64 @@ export default function WarehouseDetail() {
 
         {/* Transfer Requests Section */}
         <div className="space-y-4">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <h2 className="text-2xl font-semibold text-textBlack">
               {warehouse?.isMainWarehouse ? "Outgoing Requests" : "Incoming Requests"}
             </h2>
-            <Link
-              to="/transfers"
-              className="bg-white border border-strokeGreyThree text-textDarkGrey py-2 px-4 rounded-full hover:bg-gray-50 transition-colors"
-            >
-              View All Requests
-            </Link>
+            <div className="flex gap-2 w-full sm:w-auto">
+              <button
+                onClick={handleRefreshRequests}
+                disabled={isRefreshingRequests || isRefreshingAll}
+                className={`bg-chalk border border-strokeGreyThree text-textDarkGrey py-2 px-4 rounded-full hover:bg-strokeGreyThree transition-colors text-sm ${
+                  (isRefreshingRequests || isRefreshingAll) ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+              >
+                {(isRefreshingRequests || isRefreshingAll) ? (
+                  <div className="flex items-center gap-2">
+                    <LoadingSpinner />
+                    {!isMobile && "Refreshing..."}
+                  </div>
+                ) : (
+                  isMobile ? "Refresh" : "Refresh Requests"
+                )}
+              </button>
+              <Link
+                to="/transfers"
+                className="bg-chalk border border-strokeGreyThree text-textDarkGrey py-2 px-4 rounded-full hover:bg-strokeGreyThree transition-colors text-sm"
+              >
+                View All Requests
+              </Link>
+              <div className="relative w-full sm:w-auto">
+                <input
+                  type="text"
+                  value={requestSearchQuery}
+                  onChange={(e) => setRequestSearchQuery(e.target.value)}
+                  placeholder="Search requests..."
+                  className="w-full sm:w-64 px-4 py-2 text-sm border border-strokeGreyThree rounded-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+                <svg
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-textGrey"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+            </div>
           </div>
 
-          <div className="bg-white border-[0.6px] border-strokeGreyThree rounded-[20px] overflow-hidden">
+          <div className="bg-white border-[0.6px] border-strokeGreyThree rounded-[20px] overflow-hidden relative">
+            {(isRefreshingAll || isRefreshingRequests || transfersLoading) && (
+              <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
+                <div className="flex items-center gap-2 text-textDarkGrey">
+                  <LoadingSpinner />
+                  <span className="text-sm">
+                    {transfersLoading ? "Loading requests..." : "Refreshing requests..."}
+                  </span>
+                </div>
+              </div>
+            )}
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-strokeGreyTwo">
@@ -357,16 +489,21 @@ export default function WarehouseDetail() {
                   </tr>
                 </thead>
                 <tbody>
-                  {requests.length === 0 ? (
+                  {filteredRequests.length === 0 ? (
                     <tr>
                       <td colSpan={8} className="py-8 text-center">
                         <p className="text-textDarkGrey">
-                          {warehouse?.isMainWarehouse ? "No outgoing transfer requests" : "No incoming transfer requests"}
+                          {requestSearchQuery
+                            ? "No transfer requests match your search"
+                            : warehouse?.isMainWarehouse
+                              ? "No outgoing transfer requests"
+                              : "No incoming transfer requests"
+                          }
                         </p>
                       </td>
                     </tr>
                   ) : (
-                    requests.map((request: any) => (
+                    filteredRequests.map((request: any) => (
                       <tr key={request.id} className="border-b border-strokeGreyTwo">
                         <td className="py-3 px-4 font-medium text-textBlack">{request.requestId || request.id}</td>
                         <td className="py-3 px-4 text-textDarkGrey">
@@ -387,12 +524,8 @@ export default function WarehouseDetail() {
                         <td className="py-3 px-4">
                           <div className="flex gap-2">
                             <button
-                              onClick={() => {
-                                setSelectedRequest(request);
-                                // In a real app, this would open a view modal
-                                toast.info(`Viewing request ${request.requestId || request.id}`);
-                              }}
-                              className="border border-strokeGreyThree text-textBlack py-1 px-3 rounded-full text-sm flex items-center gap-1 hover:bg-gray-50 transition-colors"
+                              onClick={() => handleViewRequest(request)}
+                              className="border border-strokeGreyThree text-textBlack py-1 px-3 rounded-full text-sm flex items-center gap-1 hover:bg-strokeGreyThree transition-colors"
                             >
                               <EyeIcon />
                               View
@@ -400,7 +533,7 @@ export default function WarehouseDetail() {
                             {warehouse?.isMainWarehouse && request.status !== 'FULFILLED' && request.status !== 'REJECTED' && (
                               <button
                                 onClick={() => handleFulfillRequest(request)}
-                                className="bg-primary text-white py-1 px-3 rounded-full text-sm flex items-center gap-1 hover:bg-primary/90 transition-colors"
+                                className="bg-primaryGradient text-white py-1 px-3 rounded-full text-sm flex items-center gap-1 hover:opacity-90 transition-all"
                               >
                                 <CheckCircleIcon />
                                 Fulfill
@@ -416,9 +549,9 @@ export default function WarehouseDetail() {
             </div>
             <PaginationInfo
               currentPage={1}
-              totalPages={Math.ceil(requests.length / 10)}
+              totalPages={Math.ceil(filteredRequests.length / 10)}
               itemsPerPage={10}
-              totalItems={requests.length}
+              totalItems={filteredRequests.length}
             />
           </div>
         </div>
@@ -428,16 +561,64 @@ export default function WarehouseDetail() {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <h2 className="text-xl sm:text-2xl font-semibold text-textBlack">Inventory</h2>
             <div className="flex gap-2 w-full sm:w-auto">
-              <button className="flex-1 sm:flex-none bg-chalk border border-strokeGreyThree text-textDarkGrey py-2 px-3 sm:px-4 rounded-full hover:bg-strokeGreyThree transition-colors text-sm">
-                {isMobile ? "Reset" : "Reset Filters"}
+              <button
+                onClick={handleRefreshTable}
+                disabled={isRefreshingInventory}
+                className={`flex-1 sm:flex-none bg-chalk border border-strokeGreyThree text-textDarkGrey py-2 px-3 sm:px-4 rounded-full hover:bg-strokeGreyThree transition-colors text-sm ${
+                  isRefreshingInventory ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+              >
+                {isRefreshingInventory && isMobile ? (
+                  <LoadingSpinner />
+                ) : (
+                  isMobile ? "Reset" : "Reset Filters"
+                )}
               </button>
-              <button className="flex-1 sm:flex-none bg-chalk border border-strokeGreyThree text-textDarkGrey py-2 px-3 sm:px-4 rounded-full hover:bg-strokeGreyThree transition-colors text-sm">
-                {isMobile ? "Refresh" : "Refresh Table"}
+              <button
+                onClick={handleRefreshTable}
+                disabled={isRefreshingInventory}
+                className={`flex-1 sm:flex-none bg-chalk border border-strokeGreyThree text-textDarkGrey py-2 px-3 sm:px-4 rounded-full hover:bg-strokeGreyThree transition-colors text-sm ${
+                  isRefreshingInventory ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+              >
+                {isRefreshingInventory ? (
+                  <div className="flex items-center gap-2">
+                    <LoadingSpinner />
+                    {!isMobile && "Refreshing..."}
+                  </div>
+                ) : (
+                  isMobile ? "Refresh" : "Refresh Table"
+                )}
               </button>
+              <div className="relative w-full sm:w-auto">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search inventory..."
+                  className="w-full sm:w-64 px-4 py-2 text-sm border border-strokeGreyThree rounded-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+                <svg
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-textGrey"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
             </div>
           </div>
 
-          <div className="bg-white border-[0.4px] border-strokeGreyTwo rounded-[20px] overflow-hidden">
+          <div className="bg-white border-[0.4px] border-strokeGreyTwo rounded-[20px] overflow-hidden relative">
+            {(isRefreshingInventory || isRefreshingAll) && (
+              <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
+                <div className="flex items-center gap-2 text-textDarkGrey">
+                  <LoadingSpinner />
+                  <span className="text-sm">Refreshing inventory...</span>
+                </div>
+              </div>
+            )}
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 border-b border-strokeGreyTwo">
@@ -460,21 +641,22 @@ export default function WarehouseDetail() {
                         <p className="text-textDarkGrey">Loading inventory...</p>
                       </td>
                     </tr>
-                  ) : inventory.length === 0 ? (
+                  ) : filteredInventory.length === 0 ? (
                     <tr>
                       <td colSpan={8} className="py-8 text-center">
-                        <p className="text-textDarkGrey">No inventory items found</p>
+                        <p className="text-textDarkGrey">
+                          {searchQuery ? "No inventory items match your search" : "No inventory items found"}
+                        </p>
                       </td>
                     </tr>
                   ) : (
-                    inventoryArray.map((product: any, index: number) => {
+                    filteredInventory.map((product: any, index: number) => {
                       // Map API response fields to display values
                       const salePrice = product.salePrice?.minimumInventoryBatchPrice || product.salePrice?.maximumInventoryBatchPrice || 0;
                       const stockLevel = product.totalRemainingQuantities || 0;
                       const maxCapacity = product.totalInitialQuantities || stockLevel || 1; // Fallback to prevent division by zero
                       const inventoryValue = product.inventoryValue || 0; // Use API-provided inventory value
-                      
-                      const stockStatus = getStockStatus(stockLevel, maxCapacity);
+
                       return (
                         <tr key={product.id} className="border-b border-strokeGreyTwo">
                           <td className="py-3 px-4 text-textDarkGrey">{index + 1}</td>
@@ -535,7 +717,7 @@ export default function WarehouseDetail() {
                           <td className="py-3 px-4">
                             <button
                               onClick={() => handleViewProduct(product)}
-                              className="border border-strokeGreyThree text-textBlack py-1 px-3 rounded-full text-sm flex items-center gap-1 hover:bg-gray-50 transition-colors"
+                              className="border border-strokeGreyThree text-textBlack py-1 px-3 rounded-full text-sm flex items-center gap-1 hover:bg-strokeGreyThree transition-colors"
                             >
                               <EyeIcon />
                               View
@@ -550,9 +732,9 @@ export default function WarehouseDetail() {
             </div>
             <PaginationInfo
               currentPage={1}
-              totalPages={Math.ceil(inventory.length / 10)}
+              totalPages={Math.ceil(filteredInventory.length / 10)}
               itemsPerPage={10}
-              totalItems={inventory.length}
+              totalItems={filteredInventory.length}
             />
           </div>
         </div>
@@ -584,6 +766,13 @@ export default function WarehouseDetail() {
           open={viewInventoryOpen}
           onOpenChange={setViewInventoryOpen}
           product={selectedProduct}
+        />
+        <ViewRequestModal
+          open={viewRequestOpen}
+          onOpenChange={setViewRequestOpen}
+          request={selectedRequest}
+          warehouseName={warehouse?.name}
+          productName={selectedRequest?.productId ? getProductName(selectedRequest.productId, selectedRequest) : undefined}
         />
       </div>
     </PageLayout>
