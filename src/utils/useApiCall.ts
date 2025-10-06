@@ -8,7 +8,7 @@ import { useState } from "react";
 
 // Create an axios instance
 const baseURL = import.meta.env.VITE_API_URL;
-const apiClient = axios.create({
+export const apiClient = axios.create({
   baseURL: baseURL as string,
 });
 
@@ -21,6 +21,8 @@ interface ApiCallOptions {
   headers?: any;
   successMessage?: string;
   showToast?: boolean;
+  responseType?: AxiosRequestConfig["responseType"];
+
 }
 
 export const useApiCall = () => {
@@ -38,6 +40,7 @@ export const useApiCall = () => {
     headers = {},
     successMessage = "Successful",
     showToast = true,
+    responseType,
   }: ApiCallOptions): Promise<any> => {
     setIsNetworkError(false);
     setIsPermissionError(false);
@@ -58,6 +61,7 @@ export const useApiCall = () => {
         ...headers,
         Authorization: `Bearer ${token}`,
       },
+      responseType,
     };
 
     try {

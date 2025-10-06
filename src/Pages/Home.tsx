@@ -66,6 +66,11 @@ const Home = () => {
       sectionImage: contracts,
       location: "/contracts",
     },
+    {
+      sectionName: "Reports",
+      sectionImage: contracts,
+      location: "/reports",
+    },
     // { sectionName: "Support", sectionImage: support, location: "/support" },
     // {
     //   sectionName: "Communication",

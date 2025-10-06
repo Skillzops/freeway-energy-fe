@@ -23,6 +23,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import ErrorPage from "./Pages/ErrorPage";
 import { WarehouseProvider } from "./contexts/WarehouseContext";
 import Dashboard from "./Pages/Dashboard";
+import Reports from "./Pages/Reports";
 
 function App() {
   return (
@@ -50,6 +51,8 @@ function App() {
             <Route path="/warehouses" element={<Warehouses />} />
             <Route path="/warehouses/:id" element={<WarehouseDetail />} />
             <Route path="/transfers" element={<Transfers />} />
+            <Route path="/reports" element={<Reports />} />
+
             {/* Other protected routes */}
           </Route>
 
