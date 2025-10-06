@@ -81,6 +81,11 @@ export const navData = [
   //   link: "/communication",
   // },
   {
+    title: "Reports",
+    icon: InventoryIcon,
+    link: "/reports",
+  },
+  {
     title: "Settings",
     icon: SettingsIcon,
     link: "/settings",
