@@ -42,8 +42,7 @@ const Inventory = () => {
     mutate: allInventoryRefresh,
     errorStates: allInventoryErrorStates,
   } = useGetRequest(
-    `/v1/inventory?page=${currentPage}&limit=${entriesPerPage}${
-      queryString && `&${queryString}`
+    `/v1/inventory?page=${currentPage}&limit=${entriesPerPage}${queryString && `&${queryString}`
     }`,
     true,
     60000
