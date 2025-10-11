@@ -37,6 +37,7 @@ const Home = () => {
     Settings: 0,
   };
   const homeData = [
+    { sectionName: "Dashboard", sectionImage: sales, location: "/dashboard" },
     { sectionName: "Sales", sectionImage: sales, location: "/sales" },
     // {
     //   sectionName: "Transactions",
@@ -64,6 +65,11 @@ const Home = () => {
       sectionName: "Contracts",
       sectionImage: contracts,
       location: "/contracts",
+    },
+    {
+      sectionName: "Reports",
+      sectionImage: contracts,
+      location: "/reports",
     },
     // { sectionName: "Support", sectionImage: support, location: "/support" },
     // {

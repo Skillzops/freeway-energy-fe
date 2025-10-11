@@ -45,6 +45,7 @@ const validSubjects = [
   "Contracts",
   "Support",
   "Communication",
+  "Warehouse",
 ];
 const validActions = ["manage", "read", "write", "delete"];
 

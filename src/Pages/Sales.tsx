@@ -155,15 +155,15 @@ const Sales = observer(() => {
         
         
         // Check what the response contains
-        if (response.data.status) {
+        // if (response.data.status) {
 
-        }
-        if (response.data.saleId) {
+        // }
+        // if (response.data.saleId) {
           
-        }
-        if (response.data.paymentStatus) {
+        // }
+        // if (response.data.paymentStatus) {
           
-        }
+        // }
         
         // Refresh sales data to show updated status
         if (allSalesRefresh) {

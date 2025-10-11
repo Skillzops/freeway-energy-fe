@@ -445,3 +445,35 @@ export const SettingsIcon = (props: React.SVGProps<SVGSVGElement>) => (
     </defs>
   </svg>
 );
+
+export const WarehouseIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    width={props.width || "16"}
+    height={props.height || "16"}
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <path
+      d="M3 13h10"
+      stroke={props.stroke || "#828DA9"}
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+    <path
+      d="M5 13V5l6-3v11"
+      stroke={props.stroke || "#828DA9"}
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M13 13V7l-4-2"
+      stroke={props.stroke || "#828DA9"}
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);

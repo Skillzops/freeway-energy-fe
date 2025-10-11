@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { KeyedMutator } from "swr";
+import { observer } from "mobx-react-lite";
 import { Tag } from "../Products/ProductDetails";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 import customericon from "../../assets/customers/customericon.svg";
+import rootStore from "../../stores/rootStore";
 
 export interface AgentUserType {
   id: string;
@@ -16,15 +18,18 @@ export interface AgentUserType {
   addressType: string;
   status: string;
   emailVerified: boolean;
+  category?: string;
 }
 
-const AgentDetails = ({
+const AgentDetails = observer(({
   refreshTable,
   displayInput,
+  onClose,
   ...data
 }: AgentUserType & {
   refreshTable: KeyedMutator<any>;
   displayInput: boolean;
+  onClose?: () => void;
 }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [formData, setFormData] = useState({
@@ -39,8 +44,22 @@ const AgentDetails = ({
     addressType: data.addressType,
     status: data.status,
     emailVerified: data.emailVerified,
+    agentsId: data.id
   });
-  // const [unsavedChanges, setUnsavedChanges] = useState(false);
+
+  // Get assigned data from store - access directly to ensure MobX tracking
+  const { agentAssignmentStore } = rootStore;
+  
+  // Access the assignments array directly to ensure MobX tracks changes
+  const assignments = agentAssignmentStore.assignments;
+  const assignedData = assignments.find(a => a.agentId === data.id);
+  
+  // Check if all items are assigned
+  const allAssigned = assignedData ? 
+    (assignedData.customers.length > 0 && assignedData.products.length > 0 && assignedData.installers.length > 0) : 
+    false;
+
+
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -50,14 +69,8 @@ const AgentDetails = ({
       ...prevData,
       [name]: value,
     }));
-
-    // Check for unsaved changes by comparing the form data with the initial userData
-    // if (data[name] !== value) {
-    //   setUnsavedChanges(true);
-    // } else {
-    //   setUnsavedChanges(false);
-    // }
   };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -71,8 +84,35 @@ const AgentDetails = ({
     }
   };
 
+
+
   return (
     <form onSubmit={handleSubmit} className="flex flex-col w-full gap-4">
+
+      <div className="flex flex-col p-2.5 gap-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px]">
+        <p className="flex gap-1 w-max text-textLightGrey text-xs font-medium pb-2">
+          <img src={customericon} alt="Settings Icon" /> AGENT ID
+        </p>
+        <div className="flex items-center justify-between">
+          <Tag name="Agent ID" />
+          <p className="text-xs font-bold text-textDarkGrey">
+            {data.id || "N/A"}
+          </p>
+        </div>
+      </div>
+
+      <div className="flex flex-col p-2.5 gap-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px]">
+        <p className="flex gap-1 w-max text-textLightGrey text-xs font-medium pb-2">
+          <img src={customericon} alt="Settings Icon" /> AGENT CATEGORY
+        </p>
+        <div className="flex items-center justify-between">
+          <Tag name="Category" />
+          <p className="text-xs font-bold text-textDarkGrey">
+            {data.category || "SALES"}
+          </p>
+        </div>
+      </div>
+     
       <div className="flex flex-col p-2.5 gap-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px]">
         <p className="flex gap-1 w-max text-textLightGrey text-xs font-medium pb-2">
           <img src={customericon} alt="Settings Icon" /> PERSONAL DETAILS
@@ -123,17 +163,13 @@ const AgentDetails = ({
               className="text-xs text-textDarkGrey px-2 py-1 w-full max-w-[160px] border-[0.6px] border-strokeGreyThree rounded-full"
             />
           ) : (
-            <p className="text-xs font-bold text-textDarkGrey">{data.email}</p>
+            <p className="text-xs font-bold text-textDarkGrey">
+              {data.email}
+            </p>
           )}
         </div>
         <div className="flex items-center justify-between">
-          <Tag name="Email Verified" />
-          <p className="text-xs font-bold text-textDarkGrey">
-            {data.emailVerified ? "True" : "False"}
-          </p>
-        </div>
-        <div className="flex items-center justify-between">
-          <Tag name="Phone Number" />
+          <Tag name="Phone" />
           {displayInput ? (
             <input
               type="text"
@@ -219,10 +255,119 @@ const AgentDetails = ({
           )}
         </div>
       </div>
+
+      {/* Upcoming Tasks Section - Only show for non-installer agents */}
+      {data.category !== "INSTALLER" && (
+        <div className="flex flex-col p-2.5 gap-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px]">
+          <p className="flex gap-1 w-max text-textLightGrey text-xs font-medium pb-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-textLightGrey">
+              <path d="M9 11L12 14L22 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M21 12V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+           RECENT ACTIVITIES
+          </p>
+
+          {/* Assigned Customers */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className={`w-3 h-3 rounded-full ${assignedData?.customers?.length && assignedData.customers.length > 0 ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+              <span className="text-xs font-medium text-textDarkGrey">Assigned Customers</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-textGrey">{assignedData?.customers?.length || 0} assigned</span>
+              {assignedData?.customers && assignedData.customers.length > 0 && (
+                <div className="flex -space-x-1">
+                  {assignedData.customers.slice(0, 2).map((customer, index) => (
+                    <div key={customer.id} className="w-5 h-5 bg-[#A58730] rounded-full flex items-center justify-center">
+                      <span className="text-xs text-white font-bold">{customer.name.charAt(0)}</span>
+                    </div>
+                  ))}
+                  {assignedData.customers && (assignedData.customers?.length || 0) > 2 && (
+                    <div className="w-5 h-5 bg-gray-300 rounded-full flex items-center justify-center">
+                      <span className="text-xs text-textDarkGrey font-bold">+{(assignedData.customers?.length || 0) - 2}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Assigned Products */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className={`w-3 h-3 rounded-full ${assignedData?.products?.length && assignedData.products.length > 0 ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+              <span className="text-xs font-medium text-textDarkGrey">Assigned Products</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-textGrey">{assignedData?.products?.length || 0} assigned</span>
+              {assignedData?.products && assignedData.products.length > 0 && (
+                <div className="flex -space-x-1">
+                  {assignedData.products.slice(0, 2).map((product, index) => (
+                    <div key={product.id} className="w-5 h-5 bg-[#982214] rounded-full flex items-center justify-center">
+                      <span className="text-xs text-white font-bold">{product.name.charAt(0)}</span>
+                    </div>
+                  ))}
+                  {assignedData.products && (assignedData.products?.length || 0) > 2 && (
+                    <div className="w-5 h-5 bg-gray-300 rounded-full flex items-center justify-center">
+                      <span className="text-xs text-textDarkGrey font-bold">+{(assignedData.products?.length || 0) - 2}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Assigned Installers */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className={`w-3 h-3 rounded-full ${assignedData?.installers?.length && assignedData.installers.length > 0 ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+              <span className="text-xs font-medium text-textDarkGrey">Assigned Installers</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-textGrey">{assignedData?.installers?.length || 0} assigned</span>
+              {assignedData?.installers && assignedData.installers.length > 0 && (
+                <div className="flex -space-x-1">
+                  {assignedData.installers.slice(0, 2).map((installer, index) => (
+                    <div key={installer.id} className="w-5 h-5 bg-[#F8CB48] rounded-full flex items-center justify-center">
+                      <span className="text-xs text-textBlack font-bold">{installer.name.charAt(0)}</span>
+                    </div>
+                  ))}
+                  {assignedData.installers && (assignedData.installers?.length || 0) > 2 && (
+                    <div className="w-5 h-5 bg-gray-300 rounded-full flex items-center justify-center">
+                      <span className="text-xs text-textDarkGrey font-bold">+{(assignedData.installers?.length || 0) - 2}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Assignment Status Indicator */}
+          {allAssigned && (
+            <div className="flex items-center justify-between w-full pt-4">
+              <div className="flex items-center gap-2 bg-green-100 text-green-800 px-4 py-2 rounded-full text-xs font-medium">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span>All Items Assigned</span>
+              </div>
+              {onClose && (
+                <button
+                  onClick={onClose}
+                  type="button"
+                  className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300 transition-colors"
+                >
+                  <span className="text-gray-600 text-sm">×</span>
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
       {displayInput && (
         <div className="flex items-center justify-center w-full pt-5 pb-5">
           <ProceedButton
             type="submit"
+
             loading={loading}
             variant={"gray"}
             disabled={false}
@@ -231,6 +376,6 @@ const AgentDetails = ({
       )}
     </form>
   );
-};
+});
 
 export default AgentDetails;

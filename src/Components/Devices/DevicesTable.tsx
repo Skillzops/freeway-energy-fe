@@ -9,6 +9,7 @@ export interface TokenEntry {
   id: string;
   token: string;
   duration: number;
+  creator: Record<string, any>;
   createdAt: string;
 }
 export type DeviceEntries = {
@@ -23,6 +24,7 @@ export type DeviceEntries = {
   hardwareModel: string;
   firmwareVersion: string;
   isTokenable: boolean;
+  saleItemId?: string | null;
   saleItemIDs?: string[];
   tokens?: TokenEntry[];
   createdAt?: string;
@@ -95,6 +97,9 @@ const DevicesTable = ({
     { title: "Serial Number", key: "serialNumber" },
     { title: "Key", key: "key" },
     { title: "Hardware Model", key: "hardwareModel" },
+    {title: "Installation Status", key: "saleItemId", valueIsAComponent: true, customValue: (value: string | null) => {
+      return <>{value ? "Installed" : "Not Installed"}</>;
+    }},
     { title: "Count", key: "count" },
     {
       title: "Is Tokenable",

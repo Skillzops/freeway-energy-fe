@@ -8,7 +8,7 @@ import { useState } from "react";
 
 // Create an axios instance
 const baseURL = import.meta.env.VITE_API_URL;
-const apiClient = axios.create({
+export const apiClient = axios.create({
   baseURL: baseURL as string,
 });
 
@@ -21,6 +21,8 @@ interface ApiCallOptions {
   headers?: any;
   successMessage?: string;
   showToast?: boolean;
+  responseType?: AxiosRequestConfig["responseType"];
+
 }
 
 export const useApiCall = () => {
@@ -38,6 +40,7 @@ export const useApiCall = () => {
     headers = {},
     successMessage = "Successful",
     showToast = true,
+    responseType,
   }: ApiCallOptions): Promise<any> => {
     setIsNetworkError(false);
     setIsPermissionError(false);
@@ -52,9 +55,13 @@ export const useApiCall = () => {
       params,
       data,
       headers: {
+        'Accept': 'application/json',
+        // Only set Content-Type for non-FormData requests
+        ...(!(data instanceof FormData) && { 'Content-Type': 'application/json' }),
         ...headers,
         Authorization: `Bearer ${token}`,
       },
+      responseType,
     };
 
     try {
@@ -65,17 +72,17 @@ export const useApiCall = () => {
       updateErrorState(endpoint, false, true);
       return response;
     } catch (error: any) {
-      // handleApiError(
-      //   error,
-      //   location,
-      //   setIsNetworkError,
-      //   setIsPermissionError,
-      //   endpoint,
-      //   errorStates,
-      //   updateErrorState,
-      //   setToastShown
-      // // );
-      // throw error;
+      handleApiError(
+        error,
+        location,
+        setIsNetworkError,
+        setIsPermissionError,
+        endpoint,
+        errorStates,
+        updateErrorState,
+        setToastShown
+      );
+      throw error;
     }
   };
 
@@ -105,6 +112,7 @@ export const useGetRequest = (
     try {
       const response = await apiClient.get(url, {
         headers: {
+          'Accept': 'application/json',
           Authorization: `Bearer ${token}`,
         },
       });
@@ -167,6 +175,7 @@ export const useGetAllDevices = (revalidate = true) => {
     try {
       const response = await apiClient.get(url, {
         headers: {
+          'Accept': 'application/json',
           Authorization: `Bearer ${token}`,
         },
       });

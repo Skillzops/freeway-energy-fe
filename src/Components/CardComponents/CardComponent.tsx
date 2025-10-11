@@ -37,15 +37,25 @@ export type CardComponentProps = {
   };
   name?: string;
   status?: string;
+  category?: string;
   onGoingSales?: number;
   inventoryInPossession?: number;
   sales?: number;
   registeredCustomers?: number;
+  // Additional fields for installer agents
+  pendingTasks?: number;
+  totalTasks?: number;
+  totalInstallations?: number;
+  location?: string;
   productTag?: string;
   productType?: string;
   paymentStatus?: "Completed" | "Successful" | "Defaulted";
   daysDue?: number;
   transactionId?: string;
+  transactionRef?: string;
+  ogaranyaOrderRef?: string | null;
+  ogaranyaSmsMessage?: string | null;
+  paymentMethod?: string;
   transactionStatus?: string;
   datetime?: string;
   transactionAmount?: number;
@@ -347,15 +357,24 @@ export const CardComponent = ({
   dropDownList,
   name,
   status,
+  category,
   onGoingSales,
   inventoryInPossession,
   sales,
   registeredCustomers,
+  pendingTasks,
+  totalTasks,
+  totalInstallations,
+  location,
   productTag,
   productType,
   paymentStatus,
   daysDue,
   transactionId,
+  transactionRef,
+  ogaranyaOrderRef,
+  ogaranyaSmsMessage,
+  paymentMethod,
   transactionStatus,
   datetime,
   transactionAmount,
@@ -551,6 +570,13 @@ export const CardComponent = ({
             </div>
             <div className="flex items-center justify-between w-full gap-1">
               <SimpleTag
+                text="REFERENCE"
+                containerClass="text-[#49526A] font-light"
+              />
+              <p className="text-textBlack text-xs">{transactionRef}</p>
+            </div>
+            <div className="flex items-center justify-between w-full gap-1">
+              <SimpleTag
                 text="DATE & TIME"
                 containerClass="text-[#49526A] font-light"
               />
@@ -579,6 +605,31 @@ export const CardComponent = ({
                 </p>
               </div>
             </div>
+            {paymentMethod === "ONLINE" && ogaranyaOrderRef && (
+              <div className="flex items-center justify-between w-full gap-1">
+                <SimpleTag
+                  text="ORDER REF"
+                  containerClass="text-[#49526A] font-light"
+                />
+                <p className="text-textBlack text-xs font-bold">
+                  {ogaranyaOrderRef}
+                </p>
+              </div>
+            )}
+
+            {paymentMethod === "ONLINE" && ogaranyaSmsMessage && (
+              <div className="flex flex-col w-full gap-1">
+                <SimpleTag
+                  text="PAYMENT INSTRUCTIONS"
+                  containerClass="text-[#49526A] font-light"
+                />
+                <div className="bg-blue-50 p-2 rounded-lg border border-blue-200">
+                  <p className="text-textBlack text-xs leading-relaxed">
+                    {ogaranyaSmsMessage}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <NameTag
@@ -616,42 +667,85 @@ export const CardComponent = ({
         <div className="flex flex-col gap-2 p-2">
           {variant === "agent" ? (
             <>
-              <div className="flex items-center justify-between">
-                <p className="flex items-center gap-1 px-2 py-1 text-xs text-textDarkGrey bg-successTwo rounded-full h-[24px]">
-                  <img src={ongoing} />
-                  On-Going Sales
-                </p>
-                <span className="text-xs font-bold text-textDarkGrey">
-                  {onGoingSales}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <p className="flex items-center gap-1 px-2 py-1 text-xs text-textDarkGrey bg-successTwo rounded-full h-[24px]">
-                  <img src={inventory} />
-                  Inventory in Possession
-                </p>
-                <span className="text-xs font-bold text-textDarkGrey">
-                  {inventoryInPossession}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <p className="flex items-center gap-1 px-2 py-1 text-xs text-textDarkGrey bg-[#F6F8FA] rounded-full h-[24px]">
-                  <img src={inventory} />
-                  Total Sales
-                </p>
-                <span className="text-xs font-bold text-textDarkGrey">
-                  {sales}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <p className="flex items-center gap-1 px-2 py-1 text-xs text-textDarkGrey bg-[#F6F8FA] rounded-full h-[24px]">
-                  <img src={customer} />
-                  Registered Customers
-                </p>
-                <span className="text-xs font-bold text-textDarkGrey">
-                  {registeredCustomers}
-                </span>
-              </div>
+              {variant === "agent" && category?.toLowerCase().includes("installer") ? (
+                <>
+                  <div className="flex items-center justify-between">
+                    <p className="flex items-center gap-1 px-2 py-1 text-xs text-textDarkGrey bg-[#E3FAD6] rounded-full h-[24px]">
+                      <img src={ongoing} alt="Pending Tasks" className="w-4 h-4" />
+                      <span className="no-underline">Pending Tasks</span>
+                    </p>
+                    <span className="text-xs font-bold text-textDarkGrey">
+                      {!pendingTasks ? "0" : pendingTasks < 10 ? `0${pendingTasks}` : pendingTasks}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <p className="flex items-center gap-1 px-2 py-1 text-xs text-textDarkGrey bg-[#F6F8FA] rounded-full h-[24px]">
+                      <img src={inventory} alt="Total Tasks" className="w-4 h-4" />
+                      <span className="no-underline">Total Tasks</span>
+                    </p>
+                    <span className="text-xs font-bold text-textDarkGrey">
+                      {totalTasks || 0}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <p className="flex items-center gap-1 px-2 py-1 text-xs text-textDarkGrey bg-[#F6F8FA] rounded-full h-[24px]">
+                      <img src={inventory} alt="Total Installations" className="w-4 h-4" />
+                      <span className="no-underline">Total Installations</span>
+                    </p>
+                    <span className="text-xs font-bold text-textDarkGrey">
+                      {totalInstallations || 0}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <p className="flex items-center gap-1 px-2 py-1 text-xs text-textDarkGrey bg-[#F6F8FA] rounded-full h-[24px]">
+                      <img src={customer} alt="Location" className="w-4 h-4" />
+                      <span className="no-underline">Location</span>
+                    </p>
+                    <span className="text-xs font-bold text-textDarkGrey">
+                      {location || "N/A"}
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center justify-between">
+                    <p className="flex items-center gap-1 px-2 py-1 text-xs text-textDarkGrey bg-successTwo rounded-full h-[24px]">
+                      <img src={ongoing} />
+                      On-Going Sales
+                    </p>
+                    <span className="text-xs font-bold text-textDarkGrey">
+                      {onGoingSales}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <p className="flex items-center gap-1 px-2 py-1 text-xs text-textDarkGrey bg-successTwo rounded-full h-[24px]">
+                      <img src={inventory} />
+                      Inventory in Possession
+                    </p>
+                    <span className="text-xs font-bold text-textDarkGrey">
+                      {inventoryInPossession}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <p className="flex items-center gap-1 px-2 py-1 text-xs text-textDarkGrey bg-[#F6F8FA] rounded-full h-[24px]">
+                      <img src={inventory} />
+                      Total Sales
+                    </p>
+                    <span className="text-xs font-bold text-textDarkGrey">
+                      {sales}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <p className="flex items-center gap-1 px-2 py-1 text-xs text-textDarkGrey bg-[#F6F8FA] rounded-full h-[24px]">
+                      <img src={customer} />
+                      Registered Customers
+                    </p>
+                    <span className="text-xs font-bold text-textDarkGrey">
+                      {registeredCustomers}
+                    </span>
+                  </div>
+                </>
+              )}
             </>
           ) : variant === "customer" ? (
             <div className="flex items-center gap-2">
@@ -731,7 +825,9 @@ export const CardComponent = ({
                   {productTag}
                 </p>
               )}
-              <p className="text-textDarkGrey text-xs capitalize">{productName}</p>
+              <p className="text-textDarkGrey text-xs capitalize">
+                {productName}
+              </p>
               {quantity && (
                 <p className="text-textDarkGrey font-medium text-xs">
                   Quantity: {quantity}
@@ -826,6 +922,13 @@ export const CardComponent = ({
             initialQuantity={_productUnits}
             isSale={isSale}
           />
+        ) : variant === "agent" ? (
+          <div className="flex items-center justify-between w-full">
+                          <span className="flex items-center text-xs justify-center gap-0.5 bg-[#F6F8FA] px-2 py-1 border-[0.4px] border-strokeGreyTwo h-[24px] rounded-full text-textDarkGrey font-bold normal-case">
+                {category}
+              </span>
+            {!showDropdown ? null : <DropDown {...dropDownList} cardData={productInfo} />}
+          </div>
         ) : !showDropdown ? null : (
           <DropDown {...dropDownList} cardData={productInfo} />
         )}

@@ -706,17 +706,25 @@ const SaleTransactions = ({
       {/* Transaction Cards */}
       <div className="flex flex-wrap items-center gap-4">
         {data?.entries?.map((item, index) => {
+           const paymentInfo = data?.paymentInfo?.find(
+             (payment) => payment.transactionRef === item.transactionRef
+           ) as any;
+        
           return (
             <CardComponent
               key={index}
               variant="salesTransactions"
               transactionId={item?.transactionId}
+              transactionRef={item?.transactionRef}
               productId={item?.transactionId}
               transactionStatus={item?.paymentStatus}
               datetime={item?.datetime}
               productType={item?.productCategory}
               productTag={item?.paymentMode}
               transactionAmount={item?.amount}
+              ogaranyaOrderRef={paymentInfo?.ogaranyaOrderRef}
+              ogaranyaSmsMessage={paymentInfo?.ogaranyaSmsMessage}
+              paymentMethod={paymentInfo?.paymentMethod}
               dropDownList={getDropDownList(item?.paymentStatus)}
               showDropdown={item?.paymentStatus !== "COMPLETED"}
             />

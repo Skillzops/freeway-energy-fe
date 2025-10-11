@@ -1,6 +1,6 @@
 import {
   HomeIcon,
-  // DashboardIcon,
+  DashboardIcon,
   SalesIcon,
   // TransactionsIcon,
   CustomersIcon,
@@ -11,6 +11,7 @@ import {
   // SupportIcon,
   // CommunicationIcon,
   SettingsIcon,
+  WarehouseIcon,
 } from "./Icons";
 
 export const navData = [
@@ -19,11 +20,11 @@ export const navData = [
     icon: HomeIcon,
     link: "/home",
   },
-  // {
-  //   title: "Dashboard",
-  //   icon: DashboardIcon,
-  //   link: "/dashboard",
-  // },
+  {
+    title: "Dashboard",
+    icon: DashboardIcon,
+    link: "/dashboard",
+  },
   {
     title: "Sales",
     icon: SalesIcon,
@@ -55,6 +56,11 @@ export const navData = [
     link: "/inventory",
   },
   {
+    title: "Warehouses",
+    icon: WarehouseIcon,
+    link: "/warehouses",
+  },
+  {
     title: "Devices",
     icon: InventoryIcon,
     link: "/devices",
@@ -74,6 +80,11 @@ export const navData = [
   //   icon: CommunicationIcon,
   //   link: "/communication",
   // },
+  {
+    title: "Reports",
+    icon: InventoryIcon,
+    link: "/reports",
+  },
   {
     title: "Settings",
     icon: SettingsIcon,
