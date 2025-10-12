@@ -15,7 +15,6 @@ const WarehouseTable = lazy(
   () => import("@/Components/Agents/WareHouses/WarehouseTable")
 );
 
-type WarehouseClass = "REGULAR" | "RETURNED" | "REFURBISHED";
 
 const WareHouses = () => {
   const location = useLocation();
@@ -59,14 +58,6 @@ const WareHouses = () => {
       setEntriesPerPage,
     };
   };
-
-  function getFilteredClassCount(classList: WarehouseClass) {
-    const filteredClass =
-      fetchWarehouseStats?.data?.warehouseClassCounts?.find(
-        (item: { warehouseClass: string }) => item.warehouseClass === classList
-      )?.count || 0;
-    return filteredClass;
-  }
 
   useEffect(() => {
     setTableQueryParams({});

@@ -2,13 +2,17 @@ import { useApiCall, useGetRequest } from "@/utils/useApiCall";
 import React, { useState } from "react";
 import { KeyedMutator } from "swr";
 import { z } from "zod";
-import { Modal } from "../ModalComponent/Modal";
-import { FileInput, Input, SelectInput } from "../InputComponent/Input";
-import ApiErrorMessage from "../ApiErrorMessage";
-import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
+// import { Modal } from "../ModalComponent/Modal";
+// import { FileInput, Input, SelectInput } from "../InputComponent/Input";
+// import ApiErrorMessage from "../ApiErrorMessage";
+// import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 import { RxFilePlus } from "react-icons/rx";
 import { FiCopy, FiDownload, FiRefreshCw } from "react-icons/fi";
 import jsPDF from "jspdf";
+import { Modal } from "@/Components/ModalComponent/Modal";
+import { FileInput, Input, SelectInput } from "@/Components/InputComponent/Input";
+import ApiErrorMessage from "@/Components/ApiErrorMessage";
+import ProceedButton from "@/Components/ProceedButtonComponent/ProceedButtonComponent";
 
 interface GenerateTokensProps {
     isOpen: boolean;

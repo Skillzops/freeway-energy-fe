@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { KeyedMutator } from "swr";
-import { PaginationType, Table } from "../TableComponent/Table";
 import { ApiErrorStatesType } from "@/utils/useApiCall";
 import { ErrorComponent } from "@/Pages/ErrorPage";
 import { formatDateTime } from "@/utils/helpers";
 import { GoDotFill } from "react-icons/go";
+import Table, { PaginationType } from "@/Components/TableComponent/Table";
 
 export type TokenEntries = {
   id: string;
