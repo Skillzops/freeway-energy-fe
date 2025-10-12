@@ -5,7 +5,7 @@ import InstallerHome from "./Pages/Installer/Home";
 
 
 import Sales from "./Pages/Sales";
-import AgentSale from "./Pages/Agent/Sales";
+import AgentSales from "./Pages/Agent/Sales";
 
 // import Transactions from "./Pages/Transactions";
 import Customers from "./Pages/Customers";
@@ -109,7 +109,7 @@ function App() {
             {/* // AGENT ROUTE */}
             <Route path="/agent/home" element={<AgentHome />} />
             {<Route path="/agent/dashboard" element={<AgentDashboard />} />}
-            <Route path="/agent/sales/*" element={<AgentSale />} />
+            <Route path="/agent/sales/*" element={<AgentSales />} />
             {<Route path="/agent/transactions/*" element={<Transactions />} />}
             <Route path="/agent/customers/*" element={<AgentCustomers />} />
             <Route path="/agent/commissions/*" element={<AgentCommissions />} />

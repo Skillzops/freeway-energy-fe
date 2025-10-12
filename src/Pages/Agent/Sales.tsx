@@ -22,7 +22,7 @@ import { SaleStore } from "@/stores/SaleStore";
 
 const SalesTable = lazy(() => import("@/Components/Sales/SalesTable"));
 
-const Sales = observer(() => {
+const AgentSales = observer(() => {
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const { apiCall } = useApiCall();
@@ -85,7 +85,7 @@ const Sales = observer(() => {
   const navigationList = [
     {
       title: "All Sales",
-      link: "/sales/all",
+      link: "/agent/sales/all",
       count: salesData?.total || 0,
     },
   ];
@@ -165,7 +165,7 @@ const Sales = observer(() => {
               <Routes>
                 <Route
                   path="/"
-                  element={<Navigate to="/sales/all" replace />}
+                  element={<Navigate to="/agent/sales/all" replace />}
                 />
                 {salesPaths.map((path) => (
                   <Route
@@ -198,4 +198,4 @@ const Sales = observer(() => {
   );
 });
 
-export default Sales;
+export default AgentSales;
