@@ -57,7 +57,7 @@ import AgentLoginPage from "./Pages/Agent/LoginPage";
 
 function App() {
   return (
-    <WarehouseProvider>
+    <>
       <ToastContainer autoClose={2000} />
       <ErrorBoundary
         fallbackRender={({ error, resetErrorBoundary }) => (
@@ -65,6 +65,21 @@ function App() {
         )}
       >
         <Routes>
+
+          {/* Public Routes */}
+          <Route path="/" element={<LoginPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/agent/login" element={<AgentLoginPage />} />
+          <Route path="/installer/login" element={<InstallerLoginPage />} />
+          <Route
+            path="/create-password/:id/:token"
+            element={<CreatePassword />}
+          />
+          <Route
+            path="/reset-password/:id/:token"
+            element={<CreatePassword />}
+          />
+
           {/* Protected Routes */}
           <Route element={<ProtectedRouteWrapper />}>
             <Route path="/home" element={<Home />} />
@@ -78,8 +93,8 @@ function App() {
             <Route path="/devices/*" element={<Devices />} />
             <Route path="/contracts/*" element={<Contracts />} />
             <Route path="/settings/*" element={<Settings />} />
-            <Route path="/warehouses" element={<Warehouses />} />
-            <Route path="/warehouses/:id" element={<WarehouseDetail />} />
+            <Route path="/warehouses" element={<WarehouseProvider><Warehouses /></WarehouseProvider>} />
+            <Route path="/warehouses/:id" element={<WarehouseProvider><WarehouseDetail /></WarehouseProvider>} />
             <Route path="/transfers" element={<Transfers />} />
             <Route path="/reports" element={<Reports />} />
 
@@ -114,25 +129,11 @@ function App() {
             {/* Other protected routes */}
           </Route>
 
-          {/* Public Routes */}
-          <Route path="/" element={<LoginPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/agent/login" element={<AgentLoginPage />} />
-          <Route path="/installer/login" element={<InstallerLoginPage />} />
-          <Route
-            path="/create-password/:id/:token"
-            element={<CreatePassword />}
-          />
-          <Route
-            path="/reset-password/:id/:token"
-            element={<CreatePassword />}
-          />
-
           {/* Fallback Route */}
           <Route path="*" element={<PageNotFound />} />
         </Routes>
       </ErrorBoundary>
-    </WarehouseProvider>
+    </>
   );
 }
 
