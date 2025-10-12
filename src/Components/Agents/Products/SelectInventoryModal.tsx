@@ -2,8 +2,8 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import { CardComponent } from "../CardComponents/CardComponent";
 import { observer } from "mobx-react-lite";
-import searchIcon from "../../assets/search.svg";
-import wrong from "../../assets/table/wrong.png";
+import searchIcon from "@/assets/search.svg";
+import wrong from "@/assets/table/wrong.png";
 import { useGetRequest } from "@/utils/useApiCall";
 import { Modal } from "@/Components/ModalComponent/Modal";
 

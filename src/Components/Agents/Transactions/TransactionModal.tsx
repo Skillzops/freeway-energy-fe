@@ -1,17 +1,18 @@
 import React from "react";
 import { KeyedMutator } from "swr";
-import { Modal } from "../ModalComponent/Modal";
-import { DropDown } from "../DropDownComponent/DropDown";
+
 import { GoDotFill } from "react-icons/go";
-import { DataStateWrapper } from "../Loaders/DataStateWrapper";
 import { Tag } from "../Products/ProductDetails";
 import { NairaSymbol, ProductTag } from "../CardComponents/CardComponent";
-import customericon from "../../assets/customers/customericon.svg";
-import creditcardicon from "../../assets/creditcardgrey.svg";
+import customericon from "@/assets/customers/customericon.svg";
+import creditcardicon from "@/assets/creditcardgrey.svg";
 import { formatDateTime, formatNumberWithCommas } from "@/utils/helpers";
-import producticon from "../../assets/product-grey.svg";
+import producticon from "@/assets/product-grey.svg";
 import { useApiCall } from "@/utils/useApiCall";
 import { toast } from "react-toastify";
+import { DropDown } from "@/Components/DropDownComponent/DropDown";
+import { DataStateWrapper } from "@/Components/Loaders/DataStateWrapper";
+import { Modal } from "@/Components/ModalComponent/Modal";
 
 type TransactionDetailType = {
   status: string;

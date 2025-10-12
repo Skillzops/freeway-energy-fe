@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import producticon from "../../assets/product-grey.svg";
-import creditcardicon from "../../assets/creditcardgrey.svg";
-import settingsicon from "../../assets/settings.svg";
+import producticon from "@/assets/product-grey.svg";
+import creditcardicon from "@/assets/creditcardgrey.svg";
+import settingsicon from "@/assets/settings.svg";
 import { NameTag, ProductTag } from "../CardComponents/CardComponent";
 import { LuImagePlus } from "react-icons/lu";
 import { KeyedMutator } from "swr";

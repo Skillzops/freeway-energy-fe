@@ -2,12 +2,12 @@ import { useEffect, useMemo, useState } from "react";
 import { KeyedMutator } from "swr";
 import { ApiErrorStatesType } from "@/utils/useApiCall";
 import { ErrorComponent } from "@/Pages/ErrorPage";
-import { PaginationType, Table } from "../TableComponent/Table";
 import TransactionModal from "./TransactionModal";
 import { DateTimeTag, NairaSymbol, NameTag } from "../CardComponents/CardComponent";
 import { GoDotFill } from "react-icons/go";
 import { formatNumberWithCommas } from "@/utils/helpers";
-import creditcardicon from "../../assets/creditcardgrey.svg";
+import creditcardicon from "@/assets/creditcardgrey.svg";
+import Table, { PaginationType } from "@/Components/TableComponent/Table";
 
 type TransactionEntries = {
   no: number;

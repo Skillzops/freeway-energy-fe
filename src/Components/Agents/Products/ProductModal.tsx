@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-// import editInput from "../../assets/settings/editInput.svg";
+// import editInput from "@/assets/settings/editInput.svg";
 // import { DropDown } from "../DropDownComponent/DropDown";
 import ProductDetails from "./ProductDetails";
 import InventoryDetails from "./InventoryDetails";

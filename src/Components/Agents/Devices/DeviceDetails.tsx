@@ -3,7 +3,7 @@ import { DeviceEntries } from "./DevicesTable";
 import { KeyedMutator } from "swr";
 import { z } from "zod";
 import { useApiCall } from "@/utils/useApiCall";
-import inventoryIcon from "../../assets/inventory/inventoryIcon.svg";
+import inventoryIcon from "@/assets/inventory/inventoryIcon.svg";
 import ApiErrorMessage from "@/Components/ApiErrorMessage";
 import { SmallInput } from "@/Components/InputComponent/Input";
 import ProceedButton from "@/Components/ProceedButtonComponent/ProceedButtonComponent";

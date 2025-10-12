@@ -3,7 +3,7 @@ import React, { useMemo, useState } from "react";
 import { KeyedMutator } from "swr";
 
 import { DeviceEntries } from "./DevicesTable";
-import editInput from "../../assets/settings/editInput.svg";
+import editInput from "@/assets/settings/editInput.svg";
 
 import DeviceDetails from "./DeviceDetails";
 

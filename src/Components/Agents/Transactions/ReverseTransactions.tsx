@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { KeyedMutator } from "swr";
-import { Modal } from "../ModalComponent/Modal";
 import { useApiCall } from "@/utils/useApiCall";
 import { z } from "zod";
-import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
-import { Input } from "../InputComponent/Input";
+import { Input } from "@/Components/InputComponent/Input";
+import { Modal } from "@/Components/ModalComponent/Modal";
+import ProceedButton from "@/Components/ProceedButtonComponent/ProceedButtonComponent";
 
 type ReverseTransactionsType = {
   isOpen: boolean;
