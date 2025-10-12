@@ -11,7 +11,7 @@ import {
 } from "../InputComponent/Input";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 import { SaleStore } from "@/stores/SaleStore";
-// import SelectCustomerProductModal from "./SelectCustomerProductModal";
+import SelectCustomerProductModal from "./SelectCustomerProductModal";
 import roletwo from "../../assets/table/roletwo.svg";
 import { observer } from "mobx-react-lite";
 import ProductSaleDisplay, { ExtraInfoSection } from "./ProductSaleDisplay";
@@ -26,13 +26,14 @@ import {
 import { revalidateStore } from "@/utils/helpers";
 import SalesSummary from "./SalesSummary";
 import ApiErrorMessage from "../ApiErrorMessage";
+import { FlutterwaveConfig } from "flutterwave-react-v3/dist/types";
 import { toJS } from "mobx";
 import axios from "axios";
-import SelectCustomerProductModal from "./SelectCustomerProductModal";
 
 const public_key =
   import.meta.env.VITE_FLW_PUBLIC_KEY ||
   "FLWPUBK_TEST-720d3bd8434091e9b28a01452ebdd2e0-X";
+const base_url = import.meta.env.VITE_API_BASE_URL;
 
 type CreateSalesType = {
   isOpen: boolean;
@@ -49,10 +50,7 @@ export type ExtraInfoType =
   | "recipient"
   // | "identification"
   // | "nextOfKin"
-  | "guarantor"
   | "";
-
-
 
 const CreateNewSale = observer(
   ({ isOpen, setIsOpen, allSalesRefresh }: CreateSalesType) => {
@@ -87,7 +85,7 @@ const CreateNewSale = observer(
       }));
       resetFormErrors(name);
     };
-    
+
     const getPayload = useCallback(() => {
       const payload: SalePayload = {
         category: SaleStore.category,
@@ -99,25 +97,7 @@ const CreateNewSale = observer(
       
       // If any sale item has installment payment mode, include additional required fields
       if (SaleStore.doesSaleItemHaveInstallment()) {
-        // Include BVN from formData
-        payload.bvn = formData.bvn;
         
-        // Only include guarantor details if they have actual data
-        if (SaleStore.guarantorDetails && SaleStore.guarantorDetails.fullName) {
-          // Create a copy of guarantor details without empty identification details
-          const guarantorDetails = { ...SaleStore.guarantorDetails };
-          
-          // Only include identification details if they have actual data
-          if (!guarantorDetails.identificationDetails || 
-              !guarantorDetails.identificationDetails.idType || 
-              !guarantorDetails.identificationDetails.idNumber) {
-            // Create a new object without identification details
-            const { identificationDetails, ...guarantorWithoutId } = guarantorDetails;
-            payload.guarantorDetails = guarantorWithoutId;
-          } else {
-            payload.guarantorDetails = guarantorDetails;
-          }
-        }
         
         // Don't include identification details or next of kin details
         // payload.identificationDetails = SaleStore.identificationDetails;
@@ -149,39 +129,72 @@ const CreateNewSale = observer(
         // Step 1: Validate data
         const validatedData = formSchema.parse(payload);
 
-        // Step 2: Store payment details for SalesSummary
+        // Step 2: Calculate payment amount
+        const calculatePaymentAmount = () => {
+          return SaleStore.products.reduce((total, product) => {
+            const params = SaleStore.getParametersByProductId(product.productId);
+            const miscellaneous = SaleStore.getMiscellaneousByProductId(product.productId);
+            
+            // Calculate base product total
+            let productTotal = Number(product.productPrice) * Number(product.productUnits);
+            
+            // Add miscellaneous costs
+            if (miscellaneous?.costs) {
+              const miscCosts = Array.from(miscellaneous.costs.values()).reduce((sum, cost) => sum + Number(cost), 0);
+              productTotal += miscCosts;
+            }
+            
+            // Apply discount
+            if (params?.discount && params.discount > 0) {
+              const discountAmount = (params.discount / 100) * productTotal;
+              productTotal -= discountAmount;
+            }
+            
+            // If installment payment, calculate initial payment based on installment duration
+            if (params?.paymentMode === "INSTALLMENT" && params.installmentDuration) {
+              // Calculate monthly installment amount
+              const monthlyInstallment = productTotal / params.installmentDuration;
+              // Use the user-defined initial payment or calculated monthly amount
+              const initialPayment = params.installmentStartingPrice || monthlyInstallment;
+              return total + initialPayment;
+            }
+            
+            // For one-off payments, use full amount
+            return total + productTotal;
+          }, 0);
+        };
+
+        const paymentAmount = calculatePaymentAmount();
+        console.log("Calculated payment amount:", paymentAmount);
+
+        // Step 3: Store payment details for SalesSummary
         console.log("Creating payment data object...");
         const newPaymentData = {
-          publicKey: public_key,
-          email: SaleStore?.customer?.email || "",
-          amount: 0, // Will be calculated in SalesSummary
+          public_key: public_key,
+          tx_ref: `sale_${Date.now()}`,
+          amount: paymentAmount,
           currency: "NGN",
-          reference: `sale_${Date.now()}`,
-          metadata: {
+          customer: {
+            email: SaleStore?.customer?.email || "",
+            phone_number: SaleStore?.customer?.phone || "",
+            name: SaleStore.customer?.customerName || "",
+          },
+          customizations: {
+            title: "Sale Payment",
+            description: "Payment for sale",
+            logo: "https://yourdomain.com/logo.png",
+          },
+          meta: {
             saleId: "",
             customerName: SaleStore.customer?.customerName || "",
-            phoneNumber: SaleStore?.customer?.phone || "",
-            tx_ref: `sale_${Date.now()}`,
-            payment_options: "card,banktransfer,ussd",
-            customer: {
-              email: SaleStore?.customer?.email || "",
-              name: SaleStore.customer?.customerName || "",
-              phone_number: SaleStore?.customer?.phone || "",
-            },
-            customizations: {
-              title: "Sale Payment",
-              description: "Payment for sale",
-              logo: "https://yourdomain.com/logo.png",
-            },
           },
-          callback: null,
-          onClose: null,
-          channels: ["card", "bank", "ussd"],
+          redirect_url: `${window.location.origin}/sales/all`,
+          payment_options: "card,banktransfer,ussd",
         };
         
         console.log("Payment data created:", newPaymentData);
         
-        // Step 3: Add payment details to store and go to summary
+        // Step 4: Add payment details to store and go to summary
           try {
             SaleStore.addPaymentDetails(newPaymentData);
             console.log("Payment details added to store successfully");
@@ -205,6 +218,7 @@ const CreateNewSale = observer(
         setLoading(false);
       }
     };
+
     const resetSaleModalState = () => {
       setIsOpen(false);
       SaleStore.purgeStore();
@@ -294,7 +308,7 @@ const CreateNewSale = observer(
               >
                 {!summaryState
                   ? "New Sale"
-                  : !SaleStore.paymentDetails.reference
+                  : !SaleStore.paymentDetails.tx_ref
                   ? "Sale Summary"
                   : "Proceed to Payment"}
               </h2>
@@ -388,109 +402,6 @@ const CreateNewSale = observer(
                         : getFieldError("products")
                     }
                   />
-                  <Input
-                    type="text"
-                    name="bvn"
-                    label="BANK VERIFICATION NUMBER"
-                    value={formData.bvn as string}
-                    onChange={(e) => {
-                      const numericValue = e.target.value.replace(
-                        /\D/g,
-                        ""
-                      ); // Remove non-numeric characters
-                      if (numericValue.length <= 11) {
-                        handleInputChange(e.target.name, numericValue);
-                      }
-                    }}
-                    placeholder="Enter 11 digit BVN (Optional)"
-                    required={false}
-                    errorMessage={getFieldError("bvn")}
-                    maxLength={11}
-                    description="BVN must be exactly 11 digits (numbers only)"
-                  />
-                  {/* <ModalInput
-                    type="button"
-                    name="identificationDetails"
-                    label="IDENTIFICATION DETAILS"
-                    onClick={() => {
-                      setExtraInfoModal("identification");
-                    }}
-                    placeholder="Enter Identification"
-                    required={false}
-                    isItemsSelected={Boolean(
-                      SaleStore.identificationDetails.idNumber
-                    )}
-                    customSelectedText="Update Identification Details"
-                    itemsSelected={
-                      <div className="flex flex-col w-full gap-2 bg-[#F9F9F9] p-3 border-[0.6px] border-strokeGreyThree rounded-md">
-                        {SaleStore.identificationDetails.idNumber && (
-                          <ExtraInfoSection
-                            label="Identification"
-                            onClear={() =>
-                              SaleStore.removeIdentificationDetails()
-                            }
-                          />
-                        )}
-                      </div>
-                    }
-                    errorMessage={getFieldError("identificationDetails")}
-                  /> */}
-                  {/* <ModalInput
-                    type="button"
-                    name="nextOfKinDetails"
-                    label="NEXT OF KIN DETAILS"
-                    onClick={() => {
-                      setExtraInfoModal("nextOfKin");
-                    }}
-                    placeholder="Enter Next of Kin"
-                    required={false}
-                    isItemsSelected={Boolean(
-                      SaleStore.nextOfKinDetails.fullName
-                    )}
-                    customSelectedText="Update Next of Kin"
-                    itemsSelected={
-                      <div className="flex flex-col w-full gap-2 bg-[#F9F9F9] p-3 border-[0.6px] border-strokeGreyThree rounded-md">
-                        {SaleStore.nextOfKinDetails.fullName && (
-                          <ExtraInfoSection
-                            label="Next of Kin"
-                            onClear={() =>
-                              SaleStore.removeNextOfKinDetails()
-                            }
-                          />
-                        )}
-                      </div>
-                    }
-                    errorMessage={getFieldError("nextOfKinDetails")}
-                  /> */}
-                  {SaleStore.doesSaleItemHaveInstallment() && (
-                    <ModalInput
-                      type="button"
-                      name="guarantorDetails"
-                      label="GUARANTOR DETAILS"
-                      onClick={() => {
-                        setExtraInfoModal("guarantor");
-                      }}
-                      placeholder="Enter Guarantor"
-                      required={false}
-                      isItemsSelected={Boolean(
-                        SaleStore.guarantorDetails.fullName
-                      )}
-                      customSelectedText="Update Guarantor"
-                      itemsSelected={
-                        <div className="flex flex-col w-full gap-2 bg-[#F9F9F9] p-3 border-[0.6px] border-strokeGreyThree rounded-md">
-                          {SaleStore.guarantorDetails.fullName && (
-                            <ExtraInfoSection
-                              label="Guarantor"
-                              onClear={() =>
-                                SaleStore.removeGuarantorDetails()
-                              }
-                            />
-                          )}
-                        </div>
-                      }
-                      errorMessage={getFieldError("guarantorDetails")}
-                    />
-                  )}
 
                   <div className="flex items-center justify-between gap-2 w-full">
                     <p className="text-sm text-textBlack font-semibold">
@@ -503,6 +414,7 @@ const CreateNewSale = observer(
                       }}
                     />
                   </div>
+
 
                   <ProceedButton
                     type="button"
@@ -519,8 +431,7 @@ const CreateNewSale = observer(
                   loading={loading}
                   getIsFormFilled={getIsFormFilled}
                   apiErrorMessage={<ApiErrorMessage apiError={apiError} />}
-                  payload={getPayload()}
-                  refreshTable={allSalesRefresh}
+                  payload={payload}
                 />
               )}
             </div>

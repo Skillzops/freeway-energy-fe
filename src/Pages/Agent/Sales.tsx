@@ -15,10 +15,11 @@ import circleAction from "@/assets/settings/addCircle.svg";
 import gradientsales from "@/assets/sales/gradientsales.svg";
 import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
 import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
-import CreateNewSale from "@/Components/Sales/CreateNewSale";
+// import CreateNewSale from "@/Components/Sales/CreateNewSale";
 import { useGetRequest, useApiCall } from "@/utils/useApiCall";
 import { observer } from "mobx-react-lite";
 import { SaleStore } from "@/stores/SaleStore";
+import CreateNewSale from "@/Components/Agents/Sales/CreateNewSale";
 
 const SalesTable = lazy(() => import("@/Components/Sales/SalesTable"));
 
