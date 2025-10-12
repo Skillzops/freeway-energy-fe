@@ -52,6 +52,8 @@ import Transactions from "./Pages/Agent/Transactions";
 import Tasks from "./Pages/Agent/Tasks";
 import Wallets from "./Pages/Agent/Wallet";
 import WareHouses from "./Pages/Agent/WareHouse";
+import InstallerLoginPage from "./Pages/Installer/LoginPage";
+import AgentLoginPage from "./Pages/Agent/LoginPage";
 
 function App() {
   return (
@@ -104,6 +106,7 @@ function App() {
             <Route path="/agent/devices/*" element={<AgentDevices />} />
             <Route path="/agent/settings/*" element={<AgentSettings />} />
             <Route path="/agent/warehouses/*" element={<WareHouses />} />
+            
 
 
 
@@ -114,6 +117,8 @@ function App() {
           {/* Public Routes */}
           <Route path="/" element={<LoginPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/agent/login" element={<AgentLoginPage />} />
+          <Route path="/installer/login" element={<InstallerLoginPage />} />
           <Route
             path="/create-password/:id/:token"
             element={<CreatePassword />}

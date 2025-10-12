@@ -11,7 +11,8 @@ import { useApiCall } from "@/utils/useApiCall";
 import Cookies from "js-cookie";
 import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
 import { useIsLoggedIn } from "@/utils/helpers";
-import InstallerBadge from "@/Components/InstallerComponent/InstallerBadge";
+import InstallerBadge from "@/Components/Installer/InstallerComponent/InstallerBadge";
+// import InstallerBadge from "@/Components/InstallerComponent/InstallerBadge";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -29,7 +30,7 @@ const defaultLoginFormData: LoginFormData = {
   password: "",
 };
 
-const LoginPage = () => {
+const InstallerLoginPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { apiCall } = useApiCall();
@@ -116,7 +117,7 @@ const LoginPage = () => {
           path: "/",
           sameSite: "Lax",
         }); // Token expires in 7 days
-        navigate(redirectPath || "/home");
+        navigate(redirectPath || "/installer/home");
       } catch (error) {
         // Error handling without logging sensitive data
       }
@@ -286,4 +287,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default InstallerLoginPage;

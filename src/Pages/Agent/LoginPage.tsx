@@ -28,7 +28,7 @@ const defaultLoginFormData: LoginFormData = {
   password: "",
 };
 
-const LoginPage = () => {
+const AgentLoginPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { apiCall } = useApiCall();
@@ -76,7 +76,7 @@ const LoginPage = () => {
         path: "/",
         sameSite: "Lax",
       }); // Token expires in 7 days
-      navigate(redirectPath || "/home");
+      navigate(redirectPath || "/agent/home");
     } catch (error: any) {
       if (error instanceof z.ZodError) {
         setFormErrors(error.issues);
@@ -252,4 +252,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default AgentLoginPage;
