@@ -21,7 +21,7 @@ import { observer } from "mobx-react-lite";
 import { SaleStore } from "@/stores/SaleStore";
 import CreateNewSale from "@/Components/Agents/Sales/CreateNewSale";
 
-const SalesTable = lazy(() => import("@/Components/Sales/SalesTable"));
+const SalesTable = lazy(() => import("@/Components/Agents/Sales/SalesTable"));
 
 const AgentSales = observer(() => {
   const location = useLocation();

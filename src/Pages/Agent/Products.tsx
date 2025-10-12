@@ -13,7 +13,7 @@ import CreateNewProduct, {
 import { useGetRequest } from "@/utils/useApiCall";
 
 const ProductsTable = lazy(
-  () => import("@/Components/Products/ProductsTable")
+  () => import("@/Components/Agents/Products/ProductsTable")
 );
 
 const Products = () => {

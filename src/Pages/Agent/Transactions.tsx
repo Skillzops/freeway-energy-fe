@@ -6,11 +6,12 @@ import transactionsbadge from "@/assets/transactions/transactionsbadge.png";
 import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
 import wallet from "@/assets/agents/wallet.svg";
 import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
-import ReverseTransactions from "@/Components/Transactions/ReverseTransactions";
+// import ReverseTransactions from "@/Components/Transactions/ReverseTransactions";
 import { useGetRequest } from "@/utils/useApiCall";
+import ReverseTransactions from "@/Components/Agents/Transactions/ReverseTransactions";
 
 const TransactionTable = lazy(
-  () => import("@/Components/Transactions/TransactionTable")
+  () => import("@/Components/Agents/Transactions/TransactionTable")
 );
 
 const Transactions = () => {

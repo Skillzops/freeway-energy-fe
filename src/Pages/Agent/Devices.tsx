@@ -13,8 +13,8 @@ import CreateNewDevice from "@/Components/Devices/CreateNewDevice";
 import { Modal } from "@/Components/ModalComponent/Modal";
 import GenerateTokens from "@/Components/Agents/Tokens/GenerateTokens";
 
-const DevicesTable = lazy(() => import("@/Components/Devices/DevicesTable"));
-const TokensTable = lazy(() => import("@/Components/Tokens/TokensTable"));
+const DevicesTable = lazy(() => import("@/Components/Agents/Devices/DevicesTable"));
+const TokensTable = lazy(() => import("@/Components/Agents/Tokens/TokensTable"));
 
 const Devices = () => {
   const location = useLocation();
