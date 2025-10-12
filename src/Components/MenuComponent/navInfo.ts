@@ -85,58 +85,58 @@ export const AgentNavData = [
   {
     title: "Home",
     icon: HomeIcon,
-    link: "/home",
+    link: "/agent/home",
   },
   {
     title: "Dashboard",
     icon: DashboardIcon,
-    link: "/dashboard",
+    link: "/agent/dashboard",
   },
   {
     title: "Sales",
     icon: SalesIcon,
-    link: "/sales",
+    link: "/agent/sales",
   },
   {
     title: "Wallet",
     icon: WalletIcon,
-    link: "/wallets",
+    link: "/agent/wallets",
   },
   {
     title: "Customers",
     icon: CustomersIcon,
-    link: "/customers",
+    link: "/agent/customers",
   },
   {
     title: "Tasks",
     icon: ProductsIcon,
-    link: "/tasks",
+    link: "/agent/tasks",
   },
   {
     title: "Commission",
     icon: CustomersIcon,
-    link: "/commissions",
+    link: "/agent/commissions",
   },
   {
     title: "Installers",
     icon: AgentsIcon,
-    link: "/installers",
+    link: "/agent/installers",
   },
   {
     title: "Products",
     icon: ProductsIcon,
-    link: "/products",
+    link: "/agent/products",
   },
 
   {
     title: "Transactions",
     icon: TransactionsIcon,
-    link: "/transactions",
+    link: "/agent/transactions",
   },
   {
     title: "Settings",
     icon: SettingsIcon,
-    link: "/settings",
+    link: "/agent/settings",
   },
 ];
 
@@ -145,26 +145,26 @@ export const InstallerNavData = [
   {
     title: "Home",
     icon: HomeIcon,
-    link: "/home",
+    link: "/installer/home",
   },
   {
     title: "Dashboard",
     icon: DashboardIcon,
-    link: "/dashboard",
+    link: "/installer/dashboard",
   },
   {
     title: "Installer",
     icon: InstallerIcon,
-    link: "/installer",
+    link: "/installer/installer",
   },
   {
     title: "Commission",
     icon: InstallerIcon,
-    link: "/commissions",
+    link: "/installer/commissions",
   },
   {
     title: "Settings",
     icon: SettingsIcon,
-    link: "/settings",
+    link: "/installer/settings",
   },
 ];
