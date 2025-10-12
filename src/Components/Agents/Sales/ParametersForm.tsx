@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { Input, SelectInput } from "../InputComponent/Input";
 import { z } from "zod";
 import { SaleStore } from "@/stores/SaleStore";
-import SecondaryButton from "../SecondaryButton/SecondaryButton";
+import { SelectInput, Input } from "@/Components/InputComponent/Input";
+import SecondaryButton from "@/Components/SecondaryButton/SecondaryButton";
 
 const formSchema = z.object({
   paymentMode: z.enum(["INSTALLMENT", "ONE_OFF"], {

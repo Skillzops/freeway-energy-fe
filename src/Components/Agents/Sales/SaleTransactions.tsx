@@ -1,14 +1,11 @@
 import { CardComponent } from "../CardComponents/CardComponent";
 import { SaleTransactionsType } from "./SalesDetailsModal";
-import { toast } from "react-toastify";
 import { useCallback, useEffect, useState } from "react";
-import { useFlutterwave } from "flutterwave-react-v3";
-import { useApiCall } from "../../utils/useApiCall";
 import PaymentModeSelector from "./PaymentModeSelector";
-import { formatNumberWithCommas } from "../../utils/helpers";
 import { NairaSymbol } from "../CardComponents/CardComponent";
 import PayNextPayment from "./PayNextPayment";
-import settingsicon from "../../assets/settings.svg";
+import { formatNumberWithCommas } from "@/utils/helpers";
+import { useApiCall } from "@/utils/useApiCall";
 
 type PaymentInfo = {
   id: string;

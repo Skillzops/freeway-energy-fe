@@ -1,14 +1,15 @@
 import React, { useState } from "react";
-import { Modal } from "../ModalComponent/Modal";
 import { ProductTag, SimpleTag } from "../CardComponents/CardComponent";
-import TabComponent from "../TabComponent/TabComponent";
-import { TabNamesType } from "../Inventory/InventoryDetailModal";
-import { DataStateWrapper } from "../Loaders/DataStateWrapper";
+
 import SaleDetails from "./SaleDetails";
 import SaleTransactions from "./SaleTransactions";
-import { useGetRequest } from "../../utils/useApiCall";
 import SaleDevices from "./SaleDevices";
 import SaleInventory from "./SaleInventory";
+import { TabNamesType } from "@/Components/Inventory/InventoryDetailModal";
+import { DataStateWrapper } from "@/Components/Loaders/DataStateWrapper";
+import { Modal } from "@/Components/ModalComponent/Modal";
+import TabComponent from "@/Components/TabComponent/TabComponent";
+import { useGetRequest } from "@/utils/useApiCall";
 
 export type SaleDetailsType = {
   daysToNextInstallment: string;

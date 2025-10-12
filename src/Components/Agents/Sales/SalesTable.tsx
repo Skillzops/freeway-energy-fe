@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { ApiErrorStatesType } from "@/utils/useApiCall";
 import { KeyedMutator } from "swr";
-import { PaginationType, Table } from "../TableComponent/Table";
 import { ErrorComponent } from "@/Pages/ErrorPage";
 import SalesDetailsModal from "./SalesDetailsModal";
 import {
@@ -11,6 +10,7 @@ import {
   SimpleTag,
 } from "../CardComponents/CardComponent";
 import { formatNumberWithCommas } from "@/utils/helpers";
+import Table, { PaginationType } from "@/Components/TableComponent/Table";
 
 type SalesEntries = {
   no: string;

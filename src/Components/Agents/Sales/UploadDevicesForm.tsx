@@ -8,9 +8,9 @@ import { TiEdit } from "react-icons/ti";
 import { IoIosSearch } from "react-icons/io";
 import { SaleStore } from "@/stores/SaleStore";
 import { ProductDetailRow } from "./ProductSaleDisplay";
-import SecondaryButton from "../SecondaryButton/SecondaryButton";
 import { revalidateStore, truncateTextByWord } from "@/utils/helpers";
 import { observer } from "mobx-react-lite";
+import SecondaryButton from "@/Components/SecondaryButton/SecondaryButton";
 
 
 interface DeviceResponse {

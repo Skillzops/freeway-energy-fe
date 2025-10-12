@@ -227,7 +227,7 @@ export type SalePayload = {
   identificationDetails?: IdentificationDetails;
   guarantorDetails?: GuarantorDetails;
   applyMargin: boolean;
-  paymentMethod: "ONLINE";
+  paymentMethod: "ONLINE" | "CASH";
 };
 
 export const defaultSaleFormData = {

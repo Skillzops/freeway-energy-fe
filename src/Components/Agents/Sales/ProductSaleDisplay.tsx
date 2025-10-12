@@ -1,5 +1,4 @@
 import React from "react";
-import { Tag } from "../Products/ProductDetails";
 import {
   NairaSymbol,
   ProductTag,
@@ -9,6 +8,7 @@ import { RiDeleteBin5Fill } from "react-icons/ri";
 import { ExtraInfoType } from "./CreateNewSale";
 import { SaleStore } from "@/stores/SaleStore";
 import { observer } from "mobx-react-lite";
+import { Tag } from "@/Components/Products/ProductDetails";
 
 export const ProductDetailRow = ({
   label,

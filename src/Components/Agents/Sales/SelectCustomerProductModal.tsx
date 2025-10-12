@@ -1,20 +1,20 @@
 import type React from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Modal } from "../ModalComponent/Modal";
 import { useGetRequest } from "@/utils/useApiCall";
 import { observer } from "mobx-react-lite";
 import { SaleStore } from "@/stores/SaleStore";
-import type { TabNamesType } from "../Inventory/InventoryDetailModal";
-import type { ListDataType } from "../Products/SelectInventoryModal";
-import { DataStateWrapper } from "../Loaders/DataStateWrapper";
-import { TableSearch } from "../TableSearchComponent/TableSearch";
 import searchIcon from "../../assets/search.svg";
-import ListPagination from "../PaginationComponent/ListPagination";
-import TabComponent from "../TabComponent/TabComponent";
 import wrong from "../../assets/table/wrong.png";
 import { CardComponent } from "../CardComponents/CardComponent";
 import CustomerSalesTable from "./CustomerSalesTable";
 import { formatNumberWithCommas } from "@/utils/helpers";
+import { TabNamesType } from "@/Components/Inventory/InventoryDetailModal";
+import { DataStateWrapper } from "@/Components/Loaders/DataStateWrapper";
+import { Modal } from "@/Components/ModalComponent/Modal";
+import ListPagination from "@/Components/PaginationComponent/ListPagination";
+import { ListDataType } from "@/Components/Products/SelectInventoryModal";
+import TabComponent from "@/Components/TabComponent/TabComponent";
+import { TableSearch } from "@/Components/TableSearchComponent/TableSearch";
 
 interface Customer {
   id: string;

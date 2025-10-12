@@ -1,4 +1,3 @@
-import { Tag } from "../Products/ProductDetails";
 import { SaleDetailsType } from "./SalesDetailsModal";
 import producticon from "../../assets/product-grey.svg";
 import {
@@ -9,6 +8,7 @@ import {
 import { formatDateTime, formatNumberWithCommas } from "@/utils/helpers";
 import customericon from "../../assets/customers/customericon.svg";
 import creditcardicon from "../../assets/creditcardgrey.svg";
+import { Tag } from "@/Components/Products/ProductDetails";
 
 type InstallmentAccountDetails = {
   id: string;

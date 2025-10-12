@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { SelectInput, Input } from "../InputComponent/Input";
 import roletwo from "../../assets/table/roletwo.svg";
+import { SelectInput, Input } from "@/Components/InputComponent/Input";
 
 interface PaymentModeSelectorProps {
   value: "ONLINE" | "CASH";

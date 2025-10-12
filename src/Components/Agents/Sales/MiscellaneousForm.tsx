@@ -1,9 +1,9 @@
+import SecondaryButton from "@/Components/SecondaryButton/SecondaryButton";
 import { SaleStore } from "@/stores/SaleStore";
 import { useState } from "react";
 import { IoMdAdd } from "react-icons/io";
 import { RiDeleteBin5Fill } from "react-icons/ri";
 import { z } from "zod";
-import SecondaryButton from "../SecondaryButton/SecondaryButton";
 
 interface CostItem {
   name: string;

@@ -1,9 +1,7 @@
 import React, { useState } from "react";
-import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 import settingsicon from "../../assets/settings.svg";
 import producticon from "../../assets/product-grey.svg";
 import { SaleStore } from "@/stores/SaleStore";
-import { Tag } from "../Products/ProductDetails";
 import { NameTag } from "../CardComponents/CardComponent";
 import { ProductDetailRow } from "./ProductSaleDisplay";
 import { IoReturnUpBack } from "react-icons/io5";
@@ -14,6 +12,8 @@ import { FlutterwaveConfig } from "flutterwave-react-v3/dist/types";
 import { toast } from "react-toastify";
 import { useApiCall } from "@/utils/useApiCall";
 import PaymentModeSelector from "./PaymentModeSelector";
+import ProceedButton from "@/Components/ProceedButtonComponent/ProceedButtonComponent";
+import { Tag } from "@/Components/Products/ProductDetails";
 
 // Types for sale creation
 interface SaleResponse {

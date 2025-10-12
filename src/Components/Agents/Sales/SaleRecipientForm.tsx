@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Input } from "../InputComponent/Input";
 import { z } from "zod";
 import { saleRecipientSchema } from "./salesSchema";
 import { SaleStore } from "@/stores/SaleStore";
-import SecondaryButton from "../SecondaryButton/SecondaryButton";
+import { Input } from "@/Components/InputComponent/Input";
+import SecondaryButton from "@/Components/SecondaryButton/SecondaryButton";
 
 type FormData = z.infer<typeof saleRecipientSchema>;
 

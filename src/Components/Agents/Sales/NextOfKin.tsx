@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { Input } from "../InputComponent/Input";
 import { z } from "zod";
 import { nextOfKinDetailsSchema } from "./salesSchema";
 import { SaleStore } from "@/stores/SaleStore";
 import { formatDateForInput } from "@/utils/helpers";
-import SecondaryButton from "../SecondaryButton/SecondaryButton";
-import { GooglePlacesInput } from "../InputComponent/GooglePlacesInput";
+import { GooglePlacesInput } from "@/Components/InputComponent/GooglePlacesInput";
+import { Input } from "@/Components/InputComponent/Input";
+import SecondaryButton from "@/Components/SecondaryButton/SecondaryButton";
 
 type FormData = z.infer<typeof nextOfKinDetailsSchema>;
 

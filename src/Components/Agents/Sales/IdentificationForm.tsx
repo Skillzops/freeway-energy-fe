@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { Input, SelectInput } from "../InputComponent/Input";
 import { z } from "zod";
 import { identificationDetailsSchema } from "./salesSchema";
 import { SaleStore } from "@/stores/SaleStore";
 import { formatDateForInput } from "@/utils/helpers";
-import SecondaryButton from "../SecondaryButton/SecondaryButton";
+import { SelectInput, Input } from "@/Components/InputComponent/Input";
+import SecondaryButton from "@/Components/SecondaryButton/SecondaryButton";
 
 type FormData = z.infer<typeof identificationDetailsSchema>;
 

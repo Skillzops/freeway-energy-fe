@@ -1,3 +1,4 @@
+import { Tag } from "@/Components/Products/ProductDetails";
 import producticon from "../../assets/product-grey.svg";
 
 interface Devices {
@@ -16,7 +17,6 @@ interface Devices {
   updatedAt: string;
 }
 
-import { Tag } from "../Products/ProductDetails";
 
 interface DeviceInfoRowProps {
   label: string;

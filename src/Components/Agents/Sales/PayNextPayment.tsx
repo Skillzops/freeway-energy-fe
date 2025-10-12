@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
-import { useApiCall } from "../../utils/useApiCall";
-import { formatNumberWithCommas } from "../../utils/helpers";
 import { NairaSymbol } from "../CardComponents/CardComponent";
-import { Input } from "../InputComponent/Input";
+import { Input } from "@/Components/InputComponent/Input";
+import { formatNumberWithCommas } from "@/utils/helpers";
+import { useApiCall } from "@/utils/useApiCall";
 
 interface PaymentVerificationResponse {
   status?: string;

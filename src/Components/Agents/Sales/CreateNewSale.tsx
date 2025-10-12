@@ -1,15 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { KeyedMutator } from "swr";
-import { Modal } from "../ModalComponent/Modal";
 import { z, ZodIssue } from "zod";
 import { useApiCall } from "@/utils/useApiCall";
-import {
-  Input,
-  ModalInput,
-  SelectInput,
-  ToggleInput,
-} from "../InputComponent/Input";
-import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 import { SaleStore } from "@/stores/SaleStore";
 import SelectCustomerProductModal from "./SelectCustomerProductModal";
 import roletwo from "../../assets/table/roletwo.svg";
@@ -25,10 +17,12 @@ import {
 } from "./salesSchema";
 import { revalidateStore } from "@/utils/helpers";
 import SalesSummary from "./SalesSummary";
-import ApiErrorMessage from "../ApiErrorMessage";
-import { FlutterwaveConfig } from "flutterwave-react-v3/dist/types";
 import { toJS } from "mobx";
 import axios from "axios";
+import ApiErrorMessage from "@/Components/ApiErrorMessage";
+import { SelectInput, ModalInput, ToggleInput } from "@/Components/InputComponent/Input";
+import { Modal } from "@/Components/ModalComponent/Modal";
+import ProceedButton from "@/Components/ProceedButtonComponent/ProceedButtonComponent";
 
 const public_key =
   import.meta.env.VITE_FLW_PUBLIC_KEY ||
