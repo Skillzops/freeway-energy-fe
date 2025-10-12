@@ -75,6 +75,12 @@ const AgentLoginPage = () => {
 
       if(userData?.role?.role !== "AssignedAgent"){
         toast.error("Unauthorized login attempt")
+        return
+      }
+
+      if(userData?.agentDetails?.category !== "SALES"){
+        toast.error("Unauthorized login attempt")
+        return
       }
 
       console.log(userData, 'response___Agent')

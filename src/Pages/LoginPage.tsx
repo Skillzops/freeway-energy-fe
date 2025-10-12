@@ -11,6 +11,7 @@ import { useApiCall } from "@/utils/useApiCall";
 import Cookies from "js-cookie";
 import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
 import { useIsLoggedIn } from "@/utils/helpers";
+import { toast } from "react-toastify";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -107,6 +108,11 @@ const LoginPage = () => {
           permissions: optimizedPermissions, // Only action and subject
         },
       };
+
+      if(userData?.role?.role !== "admin"){
+        toast.error("Unauthorized login attempt")
+        return
+      }
       
       try {
         const cookiebar = JSON.stringify(userData);

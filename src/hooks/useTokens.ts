@@ -28,6 +28,7 @@ const useTokens = () => {
         role: parsedData?.role?.role,
         updated_at: parsedData?.role?.updated_at,
       },
+      agentDetails: parsedData?.agentDetails,
       roleId: parsedData?.roleId,
       staffId: parsedData?.staffId,
       status: parsedData?.status,

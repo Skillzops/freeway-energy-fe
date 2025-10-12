@@ -16,11 +16,12 @@ export const MenuButton = (props: MenuButtonType) => {
   const { buttonStyle, sections } = props;
 
   const role = userData?.role?.role;
+  const cate = userData?.agentDetails?.category
 
   const value =
     role == "AssignedAgent"
       ? AgentNavData
-      : role == "InstallerAgent"
+      : cate == "INSTALLER"
       ? InstallerNavData
       : role == "admin"
       ? navData

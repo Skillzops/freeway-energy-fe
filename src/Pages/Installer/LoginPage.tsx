@@ -109,13 +109,20 @@ const InstallerLoginPage = () => {
           deleted_at: response.data.role?.deleted_at,
           permissions: optimizedPermissions, // Only action and subject
         },
+        agentDetails: response.data?.agentDetails
       };
 
       console.log(userData, 'response___Installer')
 
 
-      if(userData?.role?.role !== "InstallerAgent"){
+      if(userData?.role?.role !== "AssignedAgent"){
         toast.error("Unauthorized login attempt")
+        return
+      }
+
+      if(userData?.agentDetails?.category !== "INSTALLER"){
+        toast.error("Unauthorized login attempt")
+        return
       }
 
       
