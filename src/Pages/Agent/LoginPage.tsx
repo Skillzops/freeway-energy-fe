@@ -65,7 +65,7 @@ const AgentLoginPage = () => {
         endpoint: "/v1/auth/login",
         method: "post",
         data: validatedData,
-        successMessage: "Login Successful!",
+        successMessage: "",
       });
 
       const userData = {
