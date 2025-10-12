@@ -71,7 +71,7 @@ const WareHouses = () => {
   useEffect(() => {
     setTableQueryParams({});
     switch (location.pathname) {
-      case "/warehouses/all":
+      case "/agent/warehouses/all":
         setTableQueryParams((prevParams) => ({
           ...prevParams,
         }));
@@ -133,7 +133,7 @@ const WareHouses = () => {
               <Routes>
                 <Route
                   path="/"
-                  element={<Navigate to="/warehouses/all" replace />}
+                  element={<Navigate to="/agent/warehouses/all" replace />}
                 />
                 {warehousePaths.map((path) => (
                   <Route

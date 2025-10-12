@@ -65,7 +65,7 @@ const Products = () => {
   const navigationList = [
     {
       title: "All Product",
-      link: "/products/all",
+      link: "/agent/products/all",
       count: productData?.total || 0,
     },
   ];
@@ -75,7 +75,7 @@ const Products = () => {
   useEffect(() => {
     setTableQueryParams({});
     switch (location.pathname) {
-      case "/products/all":
+      case "/agent/products/all":
         setTableQueryParams((prevParams) => ({
           ...prevParams,
         }));
@@ -168,7 +168,7 @@ const Products = () => {
               <Routes>
                 <Route
                   path="/"
-                  element={<Navigate to="/products/all" replace />}
+                  element={<Navigate to="/agent/products/all" replace />}
                 />
                 {productPaths.map((path) => (
                   <Route

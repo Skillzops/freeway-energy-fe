@@ -56,12 +56,12 @@ const Customers = () => {
   useEffect(() => {
     setTableQueryParams({});
     switch (location.pathname) {
-      case "/customers/your":
+      case "/agent/customers/your":
         setTableQueryParams((prevParams) => ({
           ...prevParams,
         }));
         break;
-      case "/customers/defaulting":
+      case "/agent/customers/defaulting":
         setTableQueryParams((prevParams) => ({
           ...prevParams,
           status: "active",
@@ -77,7 +77,7 @@ const Customers = () => {
   const navigationList = [
     {
       title: "Your Customers",
-      link: "/customers/your",
+      link: "/agent/customers/your",
       count: customerData?.total || 0,
     },
   ];
@@ -114,7 +114,7 @@ const Customers = () => {
               <Routes>
                 <Route
                   path="/"
-                  element={<Navigate to="/customers/all" replace />}
+                  element={<Navigate to="/agent/customers/all" replace />}
                 />
                 {customerPaths.map((path) => (
                   <Route

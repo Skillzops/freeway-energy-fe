@@ -71,7 +71,7 @@ const Wallets = () => {
   const navigationList = [
     {
       title: "Wallets",
-      link: "/wallets/all",
+      link: "/agent/wallets/all",
       count: stats.transactionCount, // show transaction count from stats
     },
   ];

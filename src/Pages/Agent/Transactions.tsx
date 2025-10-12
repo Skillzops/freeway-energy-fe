@@ -58,7 +58,7 @@ const Transactions = () => {
 
   useEffect(() => {
     switch (location.pathname) {
-      case "/transactions/all":
+      case "/agent/transactions/all":
         setTransactionsFilter("");
         break;
       default:
@@ -69,7 +69,7 @@ const Transactions = () => {
   const navigationList = [
     {
       title: "All Transactions",
-      link: "/transactions/all",
+      link: "/agent/transactions/all",
       count: transactionsData?.total ?? 0,
     },
   ];
@@ -126,7 +126,7 @@ const Transactions = () => {
               <Routes>
                 <Route
                   path="/"
-                  element={<Navigate to="/transactions/all" replace />}
+                  element={<Navigate to="/agent/transactions/all" replace />}
                 />
                 {transactionPaths.map((path) => (
                   <Route

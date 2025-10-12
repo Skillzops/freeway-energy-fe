@@ -91,10 +91,10 @@ const Tasks = () => {
   const rejectedCount = getTotal(rejectedCountReq.data);
 
   const navigationList = [
-    { title: "All", link: "/tasks/all", count: allCount },
-    { title: "Pending", link: "/tasks/pending", count: pendingCount },
-    { title: "Completed", link: "/tasks/completed", count: completedCount },
-    { title: "Rejected", link: "/tasks/rejected", count: rejectedCount },
+    { title: "All", link: "/agent/tasks/all", count: allCount },
+    { title: "Pending", link: "/agent/tasks/pending", count: pendingCount },
+    { title: "Completed", link: "/agent/tasks/completed", count: completedCount },
+    { title: "Rejected", link: "/agent/tasks/rejected", count: rejectedCount },
   ];
 
   const taskPaths = ["all", "pending", "completed", "rejected"];
@@ -127,7 +127,7 @@ const Tasks = () => {
         <section className="relative items-start justify-center flex min-h-[415px] w-full overflow-hidden">
           <Suspense fallback={<LoadingSpinner parentClass="absolute top-[50%] w-full" />}>
             <Routes>
-              <Route path="/" element={<Navigate to="/tasks/all" replace />} />
+              <Route path="/" element={<Navigate to="/agent/tasks/all" replace />} />
               {taskPaths.map((path) => (
                 <Route
                   key={path}

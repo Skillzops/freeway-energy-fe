@@ -9,8 +9,9 @@ import { DropDown } from "@/Components/DropDownComponent/DropDown";
 import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
 import { useGetRequest } from "@/utils/useApiCall";
 import CreateNewDevice from "@/Components/Devices/CreateNewDevice";
-import GenerateTokens from "@/Components/Tokens/GenerateTokens";
+// import GenerateTokens from "@/Components/Tokens/GenerateTokens";
 import { Modal } from "@/Components/ModalComponent/Modal";
+import GenerateTokens from "@/Components/Agents/Tokens/GenerateTokens";
 
 const DevicesTable = lazy(() => import("@/Components/Devices/DevicesTable"));
 const TokensTable = lazy(() => import("@/Components/Tokens/TokensTable"));
@@ -102,17 +103,17 @@ const Devices = () => {
   const navigationList = [
     {
       title: "All Devices",
-      link: "/devices/all",
+      link: "/agent/devices/all",
       count: deviceData?.total || 0,
     },
     {
       title: "To be Installed",
-      link: "/devices/to-be-installed",
+      link: "/agent/devices/to-be-installed",
       count: deviceData?.total || 0,
     },
     {
       title: "Installed Devices",
-      link: "/devices/installed",
+      link: "/agent/devices/installed",
       count: deviceData?.total || 0,
     },
   ];
@@ -121,10 +122,10 @@ const Devices = () => {
   useEffect(() => {
     setTableQueryParams({});
     switch (location.pathname) {
-      case "/devices/installed":
+      case "/agent/devices/installed":
         setTableQueryParams(() => ({ installationStatus: "installed" }));
         break;
-      case "/devices/to-be-installed":
+      case "/agent/devices/to-be-installed":
         // choose the status your BE expects for "to be installed":
         setTableQueryParams(() => ({
           installationStatus: "ready_for_installation",
@@ -187,7 +188,7 @@ const Devices = () => {
               <Routes>
                 <Route
                   path="/"
-                  element={<Navigate to="/devices/all" replace />}
+                  element={<Navigate to="/agent/devices/all" replace />}
                 />
                 {devicesPaths.map((path) => (
                   <Route

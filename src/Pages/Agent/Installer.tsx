@@ -73,7 +73,7 @@ const AgentInstaller = () => {
   useEffect(() => {
     setTableQueryParams({});
     switch (location.pathname) {
-      case "/installers/all":
+      case "/agent/installers/all":
       default:
         setTableQueryParams((prevParams) => ({ ...(prevParams || {}) }));
     }
@@ -82,7 +82,7 @@ const AgentInstaller = () => {
   const navigationList = [
     {
       title: "All Installers",
-      link: "/installers/all",
+      link: "/agent/installers/all",
       count: installerData?.total  || 0,
     },
   ];
@@ -124,7 +124,7 @@ const AgentInstaller = () => {
               <Routes>
                 <Route
                   path="/"
-                  element={<Navigate to="/installers/all" replace />}
+                  element={<Navigate to="/agent/installers/all" replace />}
                 />
                 {installersPaths.map((path) => (
                   <Route
