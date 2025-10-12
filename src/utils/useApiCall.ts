@@ -67,7 +67,9 @@ export const useApiCall = () => {
     try {
       const response = await apiClient(requestConfig);
       if (response.status >= 200 && response.status < 300 && showToast) {
-        toast.success(successMessage);
+        if(successMessage && successMessage !== ""){
+          toast.success(successMessage);
+        }
       }
       updateErrorState(endpoint, false, true);
       return response;
