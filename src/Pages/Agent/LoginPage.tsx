@@ -71,6 +71,8 @@ const AgentLoginPage = () => {
         token: response.headers.access_token,
         ...response.data,
       };
+
+      console.log(userData, 'response___Agent')
       Cookies.set("userData", JSON.stringify(userData), {
         expires: 7,
         path: "/",

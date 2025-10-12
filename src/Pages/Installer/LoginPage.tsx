@@ -109,6 +109,9 @@ const InstallerLoginPage = () => {
           permissions: optimizedPermissions, // Only action and subject
         },
       };
+
+      console.log(userData, 'response___Installer')
+
       
       try {
         const cookiebar = JSON.stringify(userData);
