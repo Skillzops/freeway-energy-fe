@@ -133,7 +133,7 @@ const InstallerLoginPage = () => {
           path: "/",
           sameSite: "Lax",
         }); // Token expires in 7 days
-        navigate(redirectPath || "/installer/home");
+        navigate(redirectPath || "/installer/dashboard");
       } catch (error) {
         // Error handling without logging sensitive data
       }

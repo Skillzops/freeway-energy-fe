@@ -19,11 +19,11 @@ import {
 } from "./Icons";
 
 export const navData = [
-  {
-    title: "Home",
-    icon: HomeIcon,
-    link: "/home",
-  },
+  // {
+  //   title: "Home",
+  //   icon: HomeIcon,
+  //   link: "/home",
+  // },
   {
     title: "Dashboard",
     icon: DashboardIcon,
@@ -82,11 +82,11 @@ export const navData = [
 ];
 
 export const AgentNavData = [
-  {
-    title: "Home",
-    icon: HomeIcon,
-    link: "/agent/home",
-  },
+  // {
+  //   title: "Home",
+  //   icon: HomeIcon,
+  //   link: "/agent/home",
+  // },
   {
     title: "Dashboard",
     icon: DashboardIcon,
@@ -142,11 +142,11 @@ export const AgentNavData = [
 
 
 export const InstallerNavData = [
-  {
-    title: "Home",
-    icon: HomeIcon,
-    link: "/installer/home",
-  },
+  // {
+  //   title: "Home",
+  //   icon: HomeIcon,
+  //   link: "/installer/home",
+  // },
   {
     title: "Dashboard",
     icon: DashboardIcon,

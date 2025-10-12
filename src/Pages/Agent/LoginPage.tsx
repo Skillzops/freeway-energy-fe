@@ -89,7 +89,7 @@ const AgentLoginPage = () => {
         path: "/",
         sameSite: "Lax",
       }); // Token expires in 7 days
-      navigate(redirectPath || "/agent/home");
+      navigate(redirectPath || "/agent/dashboard");
     } catch (error: any) {
       if (error instanceof z.ZodError) {
         setFormErrors(error.issues);

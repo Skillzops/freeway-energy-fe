@@ -121,7 +121,7 @@ const LoginPage = () => {
           path: "/",
           sameSite: "Lax",
         }); // Token expires in 7 days
-        navigate(redirectPath || "/home");
+        navigate(redirectPath || "/dashboard");
       } catch (error) {
         // Error handling without logging sensitive data
       }
