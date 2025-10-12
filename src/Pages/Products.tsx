@@ -1,23 +1,23 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import PageLayout from "./PageLayout";
-import productsbadge from "../assets/products/productsbadge.png";
-import { TitlePill } from "../Components/TitlePillComponent/TitlePill";
-import ActionButton from "../Components/ActionButtonComponent/ActionButton";
-import { DropDown } from "../Components/DropDownComponent/DropDown";
-import circleAction from "../assets/settings/addCircle.svg";
-import productgradient from "../assets/products/productgradient.svg";
-// import productgreen from "../assets/products/productgreen.svg";
-import cancelled from "../assets/cancelled.svg";
-import LoadingSpinner from "../Components/Loaders/LoadingSpinner";
-import { SideMenu } from "../Components/SideMenuComponent/SideMenu";
+import productsbadge from "@/assets/products/productsbadge.png";
+import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
+import ActionButton from "@/Components/ActionButtonComponent/ActionButton";
+import { DropDown } from "@/Components/DropDownComponent/DropDown";
+import circleAction from "@/assets/settings/addCircle.svg";
+import productgradient from "@/assets/products/productgradient.svg";
+// import productgreen from "@/assets/products/productgreen.svg";
+import cancelled from "@/assets/cancelled.svg";
+import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
+import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import CreateNewProduct, {
   ProductFormType,
-} from "../Components/Products/CreateNewProduct";
-import { useGetRequest } from "../utils/useApiCall";
+} from "@/Components/Products/CreateNewProduct";
+import { useGetRequest } from "@/utils/useApiCall";
 
 const ProductsTable = lazy(
-  () => import("../Components/Products/ProductsTable")
+  () => import("@/Components/Products/ProductsTable")
 );
 
 const Products = () => {

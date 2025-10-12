@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import loginbg from "../assets/loginbg.jpg";
-import logo from "../assets/logo.svg";
-import eyeclosed from "../assets/eyeclosed.svg";
-import eyeopen from "../assets/eyeopen.svg";
-import { Input } from "../Components/InputComponent/Input";
-import ProceedButton from "../Components/ProceedButtonComponent/ProceedButtonComponent";
-import { useApiCall } from "../utils/useApiCall";
+import loginbg from "@/assets/loginbg.jpg";
+import logo from "@/assets/logo.svg";
+import eyeclosed from "@/assets/eyeclosed.svg";
+import eyeopen from "@/assets/eyeopen.svg";
+import { Input } from "@/Components/InputComponent/Input";
+import ProceedButton from "@/Components/ProceedButtonComponent/ProceedButtonComponent";
+import { useApiCall } from "@/utils/useApiCall";
 
 const LoginPage = () => {
   const location = useLocation();

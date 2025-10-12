@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import { PaginationType, Table } from "../TableComponent/Table";
 import { CardComponent } from "../CardComponents/CardComponent";
 import AgentsModal from "./AgentsModal";
-import { ApiErrorStatesType } from "../../utils/useApiCall";
+import { ApiErrorStatesType } from "@/utils/useApiCall";
 import { KeyedMutator } from "swr";
 import { ErrorComponent } from "@/Pages/ErrorPage";
 

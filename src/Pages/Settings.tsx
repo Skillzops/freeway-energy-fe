@@ -1,26 +1,26 @@
 import { Routes, Route, useLocation } from "react-router-dom";
-import { SideMenu } from "../Components/SideMenuComponent/SideMenu";
-import Profile from "../Components/Settings/Profile";
-import LoadingSpinner from "../Components/Loaders/LoadingSpinner";
+import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
+import Profile from "@/Components/Settings/Profile";
+import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
 import { Suspense, lazy, useState } from "react";
-import { TitlePill } from "../Components/TitlePillComponent/TitlePill";
-import settings from "../assets/settings/settings.svg";
-import ActionButton from "../Components/ActionButtonComponent/ActionButton";
-import circleAction from "../assets/settings/addCircle.svg";
-import { DropDown } from "../Components/DropDownComponent/DropDown";
-import settingsbadge from "../assets/settings/settingsbadge.png";
-import { useGetRequest } from "../utils/useApiCall";
+import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
+import settings from "@/assets/settings/settings.svg";
+import ActionButton from "@/Components/ActionButtonComponent/ActionButton";
+import circleAction from "@/assets/settings/addCircle.svg";
+import { DropDown } from "@/Components/DropDownComponent/DropDown";
+import settingsbadge from "@/assets/settings/settingsbadge.png";
+import { useGetRequest } from "@/utils/useApiCall";
 import PageLayout from "./PageLayout";
 import CreateNewUserModal from "@/Components/Settings/CreateNewUserModal";
 import AddNewAgentModal from "@/Components/Settings/AddNewAgentModal";
 
 const RoleAndPermissions = lazy(
-  () => import("../Components/Settings/RoleAndPermissions")
+  () => import("@/Components/Settings/RoleAndPermissions")
 );
 const ChangePassword = lazy(
-  () => import("../Components/Settings/ChangePassword")
+  () => import("@/Components/Settings/ChangePassword")
 );
-const Users = lazy(() => import("../Components/Settings/Users"));
+const Users = lazy(() => import("@/Components/Settings/Users"));
 
 const Settings = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);

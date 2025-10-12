@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Modal } from "../ModalComponent/Modal";
 import TabComponent from "../TabComponent/TabComponent";
 import { DropDown } from "../DropDownComponent/DropDown";
-import { useGetRequest } from "../../utils/useApiCall";
+import { useGetRequest } from "@/utils/useApiCall";
 import { DataStateWrapper } from "../Loaders/DataStateWrapper";
 import ListPagination from "../PaginationComponent/ListPagination";
 import AgentDetails, { AgentUserType } from "./AgentDetails";
@@ -10,11 +10,11 @@ import AssignCustomersModal from "./AssignCustomersModal";
 import AssignProductsModal from "./AssignProductsModal";
 import AssignInstallersModal from "./AssignInstallersModal";
 import TopUpWalletForm from "../TopUp/TopWalletForm";
-import walletIcon from "../../assets/agents/wallet.svg";
+import walletIcon from "@/assets/agents/wallet.svg";
 import InstallationHistoryModal from "./InstallationHistoryModal";
 import TaskHistoryModal from "./TaskHistoryModal";
 import { KeyedMutator } from "swr";
-import rootStore from "../../stores/rootStore";
+import rootStore from "@/stores/rootStore";
 import CommissionsTab from "./CommissionsTab";
 
 // Extend the AgentUserType to include category

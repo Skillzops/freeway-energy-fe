@@ -1,16 +1,16 @@
 import { Suspense, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { z } from "zod";
-import loginbg from "../assets/loginbg.jpg";
-import logo from "../assets/logo.svg";
-import eyeclosed from "../assets/eyeclosed.svg";
-import eyeopen from "../assets/eyeopen.svg";
-import { Input } from "../Components/InputComponent/Input";
-import ProceedButton from "../Components/ProceedButtonComponent/ProceedButtonComponent";
-import { useApiCall } from "../utils/useApiCall";
+import loginbg from "@/assets/loginbg.jpg";
+import logo from "@/assets/logo.svg";
+import eyeclosed from "@/assets/eyeclosed.svg";
+import eyeopen from "@/assets/eyeopen.svg";
+import { Input } from "@/Components/InputComponent/Input";
+import ProceedButton from "@/Components/ProceedButtonComponent/ProceedButtonComponent";
+import { useApiCall } from "@/utils/useApiCall";
 import Cookies from "js-cookie";
-import LoadingSpinner from "../Components/Loaders/LoadingSpinner";
-import { useIsLoggedIn } from "../utils/helpers";
+import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
+import { useIsLoggedIn } from "@/utils/helpers";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),

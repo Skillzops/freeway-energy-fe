@@ -1,13 +1,13 @@
 import { useState } from "react";
 import PageLayout from "./PageLayout";
-import { MetricCard } from "../Components/WareHouses/MetricCard";
-import { WarehouseCard } from "../Components/WareHouses/WarehouseCard";
-import { PaginationInfo } from "../Components/WareHouses/PaginationInfo";
-import { NewWarehouseModal } from "../Components/WareHouses/NewWarehouseModal";
+import { MetricCard } from "@/Components/WareHouses/MetricCard";
+import { WarehouseCard } from "@/Components/WareHouses/WarehouseCard";
+import { PaginationInfo } from "@/Components/WareHouses/PaginationInfo";
+import { NewWarehouseModal } from "@/Components/WareHouses/NewWarehouseModal";
 import { useWarehouseStats } from "../services/warehouseApi";
 import { useWarehouseManagement } from "../hooks/useWarehouseHooks";
 import useBreakpoint from "../hooks/useBreakpoint";
-import warehouseBadge from "../assets/inventory/inventorybadge.png";
+import warehouseBadge from "@/assets/inventory/inventorybadge.png";
 
 // Icons (you may need to adjust these based on your icon system)
 const PackageIcon = () => (

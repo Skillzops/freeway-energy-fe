@@ -1,11 +1,11 @@
 import { useState } from "react";
 import PageLayout from "./PageLayout";
-import { TransferRequestModal } from "../Components/WareHouses/TransferRequestModal";
-import { NewRequestModal } from "../Components/WareHouses/NewRequestModal";
+import { TransferRequestModal } from "@/Components/WareHouses/TransferRequestModal";
+import { NewRequestModal } from "@/Components/WareHouses/NewRequestModal";
 import { useTransferManagement } from "../hooks/useWarehouseHooks";
 import type { TransferRequest } from "../data/warehouseData";
 import useBreakpoint from "../hooks/useBreakpoint";
-import transferBadge from "../assets/inventory/inventorybadge.png";
+import transferBadge from "@/assets/inventory/inventorybadge.png";
 
 // Icons
 const ArrowRightIcon = () => (

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import avatar from "../assets/avatar.svg";
+import avatar from "@/assets/avatar.svg";
 
 const UserPill = ({ role }: { role: string }) => {
   return (

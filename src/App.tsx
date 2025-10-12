@@ -1,14 +1,29 @@
 import { Route, Routes } from "react-router-dom";
 import Home from "./Pages/Home";
+import AgentHome from "./Pages/Agent/Home";
+import InstallerHome from "./Pages/Installer/Home";
+
+
 import Sales from "./Pages/Sales";
+import AgentSale from "./Pages/Agent/Sales";
+
 // import Transactions from "./Pages/Transactions";
 import Customers from "./Pages/Customers";
+import AgentCustomers from "./Pages/Agent/Customers";
+
 import Agent from "./Pages/Agent";
 import Products from "./Pages/Products";
+import AgentProducts from "./Pages/Agent/Products";
+
 import Inventory from "./Pages/Inventory";
 import Devices from "./Pages/Devices";
+import AgentDevices from "./Pages/Agent/Devices";
+
 import Contracts from "./Pages/Contracts";
 import Settings from "./Pages/Settings";
+import AgentSettings from "./Pages/Agent/Settings";
+
+
 import Warehouses from "./Pages/Warehouses";
 import WarehouseDetail from "./Pages/WarehouseDetail";
 import Transfers from "./Pages/Transfers";
@@ -24,6 +39,19 @@ import ErrorPage from "./Pages/ErrorPage";
 import { WarehouseProvider } from "./contexts/WarehouseContext";
 import Dashboard from "./Pages/Dashboard";
 import Reports from "./Pages/Reports";
+import Installer from "./Pages/Installer/Installer";
+import AgentInstaller from "./Pages/Agent/Installer";
+
+import InstallerCommissions from "./Pages/Installer/AgentCommissions";
+import AgentCommissions from "./Pages/Agent/AgentCommissions";
+
+import InstallerSettings from "./Pages/Installer/Settings";
+import InstallerDashboard from "./Pages/Installer/Dashboard";
+import AgentDashboard from "./Pages/Agent/Dashboard";
+import Transactions from "./Pages/Agent/Transactions";
+import Tasks from "./Pages/Agent/Tasks";
+import Wallets from "./Pages/Agent/Wallet";
+import WareHouses from "./Pages/Agent/WareHouse";
 
 function App() {
   return (
@@ -52,6 +80,33 @@ function App() {
             <Route path="/warehouses/:id" element={<WarehouseDetail />} />
             <Route path="/transfers" element={<Transfers />} />
             <Route path="/reports" element={<Reports />} />
+
+
+            {/* //INSTALLER ROUTE */}
+            <Route path="/installer/home" element={<InstallerHome />} />
+            <Route path="/installer/dashboard" element={<InstallerDashboard />} />
+            <Route path="/installer/installer/*" element={<Installer />} />
+            <Route path="/installer/commissions/*" element={<InstallerCommissions />} />
+            <Route path="/installer/settings/*" element={<InstallerSettings />} />
+
+            {/* // AGENT ROUTE */}
+            <Route path="/agent/home" element={<AgentHome />} />
+            {<Route path="/agent/dashboard" element={<AgentDashboard />} />}
+            <Route path="/agent/sales/*" element={<AgentSale />} />
+            {<Route path="/agent/transactions/*" element={<Transactions />} />}
+            <Route path="/agent/customers/*" element={<AgentCustomers />} />
+            <Route path="/agent/commissions/*" element={<AgentCommissions />} />
+            <Route path="/agent/tasks/*" element={<Tasks />} />
+
+            <Route path="/agent/installers/*" element={<AgentInstaller />} />
+            <Route path="/agent/products/*" element={<AgentProducts />} />
+            <Route path="/agent/wallets/*" element={<Wallets />} />
+            <Route path="/agent/devices/*" element={<AgentDevices />} />
+            <Route path="/agent/settings/*" element={<AgentSettings />} />
+            <Route path="/agent/warehouses/*" element={<WareHouses />} />
+
+
+
 
             {/* Other protected routes */}
           </Route>

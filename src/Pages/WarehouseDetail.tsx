@@ -1,21 +1,21 @@
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import PageLayout from "./PageLayout";
-import { MetricCard } from "../Components/WareHouses/MetricCard";
-import { PaginationInfo } from "../Components/WareHouses/PaginationInfo";
-import { NewInventoryModal } from "../Components/WareHouses/NewInventoryModal";
-import { NewRequestModal } from "../Components/WareHouses/NewRequestModal";
-import { FulfillRequestModal } from "../Components/WareHouses/FulfillRequestModal";
-import { ViewInventoryModal } from "../Components/WareHouses/ViewInventoryModal";
-import { ViewRequestModal } from "../Components/WareHouses/ViewRequestModal";
+import { MetricCard } from "@/Components/WareHouses/MetricCard";
+import { PaginationInfo } from "@/Components/WareHouses/PaginationInfo";
+import { NewInventoryModal } from "@/Components/WareHouses/NewInventoryModal";
+import { NewRequestModal } from "@/Components/WareHouses/NewRequestModal";
+import { FulfillRequestModal } from "@/Components/WareHouses/FulfillRequestModal";
+import { ViewInventoryModal } from "@/Components/WareHouses/ViewInventoryModal";
+import { ViewRequestModal } from "@/Components/WareHouses/ViewRequestModal";
 import { useWarehouses, useWarehouseTransferRequests } from "../services/warehouseApi";
 import { useWarehouseInventory } from "../services/inventoryApi";
-import { AddStockToWarehouseModal } from "../Components/WareHouses/AddStockToWarehouseModal";
+import { AddStockToWarehouseModal } from "@/Components/WareHouses/AddStockToWarehouseModal";
 import type { TransferRequest, Product } from "../data/warehouseData";
 import useBreakpoint from "../hooks/useBreakpoint";
 import { toast } from "react-toastify";
-import warehouseBadge from "../assets/inventory/inventorybadge.png";
-import { formatNumberWithCommas } from "../utils/helpers";
+import warehouseBadge from "@/assets/inventory/inventorybadge.png";
+import { formatNumberWithCommas } from "@/utils/helpers";
 
 // Icons
 const ArrowLeftIcon = () => (

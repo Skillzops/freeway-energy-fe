@@ -3,8 +3,8 @@ import { KeyedMutator } from "swr";
 import { observer } from "mobx-react-lite";
 import { Tag } from "../Products/ProductDetails";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
-import customericon from "../../assets/customers/customericon.svg";
-import rootStore from "../../stores/rootStore";
+import customericon from "@/assets/customers/customericon.svg";
+import rootStore from "@/stores/rootStore";
 
 export interface AgentUserType {
   id: string;

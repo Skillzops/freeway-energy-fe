@@ -3,7 +3,7 @@
 // import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
 // import { useGetRequest, useApiCall } from "@/utils/useApiCall";
 // import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
-// import inventorybadge from "../assets/inventory/inventorybadge.png";
+// import inventorybadge from "@/assets/inventory/inventorybadge.png";
 // import FiltersModal, { Filters } from "@/Components/ReportsTable/FiltersModal";
 // import { Table, PaginationType } from "@/Components/TableComponent/Table";
 // import ActionButton from "@/Components/ActionButtonComponent/ActionButton";
@@ -322,7 +322,7 @@ import PageLayout from "./PageLayout";
 import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
 import { useGetRequest, useApiCall } from "@/utils/useApiCall";
 import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
-import inventorybadge from "../assets/inventory/inventorybadge.png";
+import inventorybadge from "@/assets/inventory/inventorybadge.png";
 import FiltersModal, { Filters } from "@/Components/ReportsTable/FiltersModal";
 import { Table, PaginationType } from "@/Components/TableComponent/Table";
 import ActionButton from "@/Components/ActionButtonComponent/ActionButton";
