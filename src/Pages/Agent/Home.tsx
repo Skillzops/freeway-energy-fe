@@ -37,27 +37,27 @@ const Home = () => {
     {
       sectionName: "Dashboard",
       sectionImage: dashboard,
-      location: "/dashboard",
+      location: "/agent/dashboard",
     },
-    { sectionName: "Sales", sectionImage: sales, location: "/sales" },
+    { sectionName: "Sales", sectionImage: sales, location: "/agent/sales" },
     // {
     //   sectionName: "Transactions",
     //   sectionImage: transactions,
     //   location: "/transactions",
     // },
-    { sectionName: "Wallet", sectionImage: wallet, location: "/wallets" },
+    { sectionName: "Wallet", sectionImage: wallet, location: "/agent/wallets" },
 
-    { sectionName: "Installer", sectionImage: agents, location: "/installers" },
+    { sectionName: "Installer", sectionImage: agents, location: "/agent/installers" },
 
     {
       sectionName: "Customers",
       sectionImage: customers,
-      location: "/customers",
+      location: "/agent/customers",
     },
     {
       sectionName: "Tasks",
       sectionImage: inventory,
-      location: "/tasks",
+      location: "/agent/tasks",
     },
     // {
     //   sectionName: "Commission",
@@ -65,11 +65,11 @@ const Home = () => {
     //   location: "/commissions",
     // },
 
-    { sectionName: "Products", sectionImage: products, location: "/products" },
+    { sectionName: "Products", sectionImage: products, location: "/agent/products" },
     {
       sectionName: "Devices",
       sectionImage: inventory,
-      location: "/devices",
+      location: "/agent/devices",
     },
 
     // { sectionName: "Support", sectionImage: support, location: "/support" },
@@ -78,7 +78,7 @@ const Home = () => {
     //   sectionImage: communication,
     //   location: "/communication",
     // },
-    { sectionName: "Settings", sectionImage: settings, location: "/settings" },
+    { sectionName: "Settings", sectionImage: settings, location: "/agent/settings" },
   ];
 
   const newHomeData: SectionData[] = homeData.map((data: SectionData) => ({

@@ -171,6 +171,45 @@ export const TransactionsIcon = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
+
+export const WalletIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    width={props.width || "16"}
+    height={props.height || "16"}
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <g clipPath="url(#clip0_wallet)">
+      <path
+        d="M2.66663 5.33398H13.3333C14.0697 5.33398 14.6666 5.93086 14.6666 6.66732V11.334C14.6666 12.0705 14.0697 12.6673 13.3333 12.6673H2.66663C1.93017 12.6673 1.33329 12.0705 1.33329 11.334V6.66732C1.33329 5.93086 1.93017 5.33398 2.66663 5.33398Z"
+        stroke={props.stroke || "#828DA9"}
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M11.3333 7.99935H12.6666C13.0348 7.99935 13.3333 8.29788 13.3333 8.66602C13.3333 9.03417 13.0348 9.33268 12.6666 9.33268H11.3333C11.1492 9.33268 11 9.18346 11 8.99935V8.66602C11 8.48191 11.1492 8.33268 11.3333 8.33268V7.99935Z"
+        stroke={props.stroke || "#828DA9"}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M1.33329 6.66732V4.66732C1.33329 3.93086 1.93017 3.33398 2.66663 3.33398H10.6666"
+        stroke={props.stroke || "#828DA9"}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </g>
+    <defs>
+      <clipPath id="clip0_wallet">
+        <rect width="16" height="16" fill="white" />
+      </clipPath>
+    </defs>
+  </svg>
+);
+
 export const CustomersIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     width={props.width || "16"}
@@ -440,6 +479,55 @@ export const SettingsIcon = (props: React.SVGProps<SVGSVGElement>) => (
     </g>
     <defs>
       <clipPath id="clip0_1069_42481">
+        <rect width="16" height="16" fill="white" />
+      </clipPath>
+    </defs>
+  </svg>
+);
+
+export const InstallerIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    width={props.width || "16"}
+    height={props.height || "16"}
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <g clipPath="url(#clip0_installer)">
+      <path
+        d="M8 1.33398C4.31818 1.33398 1.33341 4.31875 1.33341 8.00065C1.33341 11.6826 4.31818 14.6673 8.00008 14.6673C11.682 14.6673 14.6667 11.6826 14.6667 8.00065C14.6667 4.31875 11.682 1.33398 8.00008 1.33398"
+        stroke={props.stroke || "#828DA9"}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+      <path
+        d="M6.66667 6.66602H9.33333"
+        stroke={props.stroke || "#828DA9"}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+      <path
+        d="M6.66667 9.33398H9.33333"
+        stroke={props.stroke || "#828DA9"}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+      <path
+        d="M5.33333 4.66602H10.6667"
+        stroke={props.stroke || "#828DA9"}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+      <path
+        d="M5.33333 11.3333H10.6667"
+        stroke={props.stroke || "#828DA9"}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </g>
+    <defs>
+      <clipPath id="clip0_installer">
         <rect width="16" height="16" fill="white" />
       </clipPath>
     </defs>

@@ -22,18 +22,18 @@ const AgentHome = () => {
     Settings: 0,
   };
   const homeData = [
-    { sectionName: "Dashboard", sectionImage: dashboard, location: "/dashboard" },
+    { sectionName: "Dashboard", sectionImage: dashboard, location: "/installer/dashboard" },
     {
       sectionName: "Installer",
       sectionImage: installer,
-      location: "/Installer",
+      location: "/installer/Installer",
     },
     {
       sectionName: "Commissions",
       sectionImage: installer,
-      location: "/commissions",
+      location: "/installer/commissions",
     },
-    { sectionName: "Settings", sectionImage: settings, location: "/settings" },
+    { sectionName: "Settings", sectionImage: settings, location: "/installer/settings" },
   ];
 
   const newHomeData: SectionData[] = homeData.map((data: SectionData) => ({

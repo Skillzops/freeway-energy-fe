@@ -12,6 +12,7 @@ import Cookies from "js-cookie";
 import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
 import { useIsLoggedIn } from "@/utils/helpers";
 import InstallerBadge from "@/Components/Installer/InstallerComponent/InstallerBadge";
+import { toast } from "react-toastify";
 // import InstallerBadge from "@/Components/InstallerComponent/InstallerBadge";
 
 const loginSchema = z.object({
@@ -111,6 +112,11 @@ const InstallerLoginPage = () => {
       };
 
       console.log(userData, 'response___Installer')
+
+
+      if(userData?.role?.role !== "InstallerAgent"){
+        toast.error("Unauthorized login attempt")
+      }
 
       
       try {

@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation, Link } from "react-router-dom";
 import buttonIcon from "../../assets/menu/menu.svg";
-import { navData } from "./navInfo";
+import { navData, AgentNavData, InstallerNavData } from "./navInfo";
+import useTokens from "@/hooks/useTokens";
 
 export type MenuButtonType = {
   buttonStyle?: string;
@@ -9,8 +10,27 @@ export type MenuButtonType = {
 };
 
 export const MenuButton = (props: MenuButtonType) => {
+  const userData = useTokens();
+
   const location = useLocation();
   const { buttonStyle, sections = navData } = props;
+
+  const role = userData?.role?.role;
+
+  const value =
+    role == "AssignedAgent"
+      ? AgentNavData
+      : role == "InstallerAgent"
+      ? InstallerNavData
+      : role == "admin"
+      ? navData
+      : [];
+  const [sideMenuArray, setSideMenuArray] = useState(value);
+
+  useEffect(() => {
+    setSideMenuArray(value);
+  }, [value]);
+
   const [dialog, setDialog] = useState<boolean>(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
@@ -55,7 +75,7 @@ export const MenuButton = (props: MenuButtonType) => {
           ref={modalRef}
           className="absolute overflow-visible top-[60px] md:top-[70px] md:left-[90px] z-50 flex flex-col w-full bg-white p-4 gap-[10px] max-w-[200px] rounded-[20px] shadow-menuCustom"
         >
-          {sections.map((section, index) => (
+          {sideMenuArray.map((section, index) => (
             <div key={index} className="bg-white">
               <div
                 className={`flex items-center w-full h-[28px] px-2 py-2 gap-1 border-[0.6px] border-strokeGreyThree rounded-full transition-all hover:cursor-pointer
