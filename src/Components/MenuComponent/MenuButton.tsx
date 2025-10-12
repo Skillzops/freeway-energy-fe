@@ -13,7 +13,7 @@ export const MenuButton = (props: MenuButtonType) => {
   const userData = useTokens();
 
   const location = useLocation();
-  const { buttonStyle, sections = navData } = props;
+  const { buttonStyle, sections } = props;
 
   const role = userData?.role?.role;
 
@@ -25,11 +25,18 @@ export const MenuButton = (props: MenuButtonType) => {
       : role == "admin"
       ? navData
       : [];
+
   const [sideMenuArray, setSideMenuArray] = useState(value);
+
+  console.log(sideMenuArray, 'skksksksk', value, 'ssssss', sections)
+
 
   useEffect(() => {
     setSideMenuArray(value);
   }, [value]);
+
+
+  console.log(value, 'value___')
 
   const [dialog, setDialog] = useState<boolean>(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
@@ -105,7 +112,7 @@ export const MenuButton = (props: MenuButtonType) => {
                 </Link>
               </div>
 
-              {(index + 1) % 3 === 0 && index !== sections.length - 1 && (
+              {(index + 1) % 3 === 0 && index !== sideMenuArray.length - 1 && (
                 <div
                   className="w-full h-[1px] mt-[0.6em] border-t border-dashed"
                   style={{ borderColor: "#E0E0E0" }}
