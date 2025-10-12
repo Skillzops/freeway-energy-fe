@@ -1,7 +1,7 @@
 import { Suspense, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { z } from "zod";
-import loginbg from "@/assets/loginbg.png";
+import loginbg from "@/assets/loginbg.jpg";
 import logo from "@/assets/logo.svg";
 import eyeclosed from "@/assets/eyeclosed.svg";
 import eyeopen from "@/assets/eyeopen.svg";
