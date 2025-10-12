@@ -16,28 +16,26 @@ export const MenuButton = (props: MenuButtonType) => {
   const { buttonStyle, sections } = props;
 
   const role = userData?.role?.role;
-  const cate = userData?.agentDetails?.category
+  const cate = userData?.agentDetails?.category;
 
   const value =
-    role == "AssignedAgent"
-      ? AgentNavData
-      : cate == "INSTALLER"
+    cate == "INSTALLER"
       ? InstallerNavData
+      : role == "AssignedAgent"
+      ? AgentNavData
       : role == "admin"
       ? navData
       : [];
 
   const [sideMenuArray, setSideMenuArray] = useState(value);
 
-  console.log(sideMenuArray, 'skksksksk', value, 'ssssss', sections)
-
+  console.log(sideMenuArray, "skksksksk", value, "ssssss", userData);
 
   useEffect(() => {
     setSideMenuArray(value);
   }, [value]);
 
-
-  console.log(value, 'value___')
+  console.log(value, "value___");
 
   const [dialog, setDialog] = useState<boolean>(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
