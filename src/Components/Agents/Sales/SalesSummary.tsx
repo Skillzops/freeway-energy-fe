@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import settingsicon from "../../assets/settings.svg";
-import producticon from "../../assets/product-grey.svg";
+import settingsicon from "@/assets/settings.svg";
+import producticon from "@/assets/product-grey.svg";
 import { SaleStore } from "@/stores/SaleStore";
 import { NameTag } from "../CardComponents/CardComponent";
 import { ProductDetailRow } from "./ProductSaleDisplay";
 import { IoReturnUpBack } from "react-icons/io5";
 import { formatNumberWithCommas } from "@/utils/helpers";
-import creditcardicon from "../../assets/creditcardgrey.svg";
+import creditcardicon from "@/assets/creditcardgrey.svg";
 import { useFlutterwave, closePaymentModal } from "flutterwave-react-v3";
 import { FlutterwaveConfig } from "flutterwave-react-v3/dist/types";
 import { toast } from "react-toastify";

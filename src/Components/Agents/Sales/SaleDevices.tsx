@@ -1,5 +1,5 @@
 import { Tag } from "@/Components/Products/ProductDetails";
-import producticon from "../../assets/product-grey.svg";
+import producticon from "@/assets/product-grey.svg";
 
 interface Devices {
   id: string;

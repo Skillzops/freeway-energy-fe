@@ -4,7 +4,7 @@ import { z, ZodIssue } from "zod";
 import { useApiCall } from "@/utils/useApiCall";
 import { SaleStore } from "@/stores/SaleStore";
 import SelectCustomerProductModal from "./SelectCustomerProductModal";
-import roletwo from "../../assets/table/roletwo.svg";
+import roletwo from "@/assets/table/roletwo.svg";
 import { observer } from "mobx-react-lite";
 import ProductSaleDisplay, { ExtraInfoSection } from "./ProductSaleDisplay";
 import SetExtraInfoModal from "./SetExtraInfoModal";

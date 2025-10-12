@@ -1,13 +1,13 @@
 import { SaleDetailsType } from "./SalesDetailsModal";
-import producticon from "../../assets/product-grey.svg";
+import producticon from "@/assets/product-grey.svg";
 import {
   NairaSymbol,
   NameTag,
   ProductTag,
 } from "../CardComponents/CardComponent";
 import { formatDateTime, formatNumberWithCommas } from "@/utils/helpers";
-import customericon from "../../assets/customers/customericon.svg";
-import creditcardicon from "../../assets/creditcardgrey.svg";
+import customericon from "@/assets/customers/customericon.svg";
+import creditcardicon from "@/assets/creditcardgrey.svg";
 import { Tag } from "@/Components/Products/ProductDetails";
 
 type InstallmentAccountDetails = {
