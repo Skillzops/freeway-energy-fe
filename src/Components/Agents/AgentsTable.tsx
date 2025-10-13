@@ -199,11 +199,11 @@ const AgentsTable = ({
   return (
     <>
       {!error ? (
-        <div className="w-full">
+        <div className="w-full border">
           <Table
             tableType="card"
             tableTitle={getTableTitle()}
-            tableClassname="flex flex-wrap items-center gap-4"
+            tableClassname="w-full flex flex-wrap items-center gap-4"
             tableData={getTableData()}
             loading={isLoading}
             filterList={filterList}
