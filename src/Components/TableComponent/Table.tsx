@@ -226,10 +226,11 @@ export const Table = (props: TableType) => {
       ) : null}
 
       <section
-        className={`${tableClassname ?? ""} w-full border-[0.6px] border-strokeGreyThree rounded-[20px] overflow-hidden`}
+        // className={`${tableClassname ?? ""} w-full border-[0.6px] border-strokeGreyThree rounded-[20px] overflow-hidden`}
       >
         <div
           ref={scrollRef}
+          // className="flex"
           className="overflow-x-auto overflow-y-hidden cursor-grab active:cursor-grabbing select-none"
           style={{ touchAction: "pan-y" }}
           onPointerDown={onPointerDown}
@@ -238,8 +239,9 @@ export const Table = (props: TableType) => {
           onPointerCancel={endDrag}
           onWheel={onWheel}
         >
-          <div className="p-[16px_16px_0px_16px] min-w-[975px]">
-            {tableType === "default" ? (
+          <div className="w-full">
+           <div className="flex">
+           {tableType === "default" ? (
               <table className="w-full table-auto whitespace-nowrap">
                 <thead className="sticky top-0 z-10 bg-white">
                   <tr className="h-[36px]">
@@ -299,6 +301,7 @@ export const Table = (props: TableType) => {
             ) : (
               cardComponent && cardComponent(paginatedData)
             )}
+           </div>
 
             <div className="w-full hidden sm:block pb-3">
               <Pagination
@@ -312,7 +315,7 @@ export const Table = (props: TableType) => {
                 }}
               />
             </div>
-          </div>
+          </div>  
         </div>
       </section>
 
