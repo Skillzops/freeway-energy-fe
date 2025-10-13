@@ -240,7 +240,7 @@ export const Table = (props: TableType) => {
           onWheel={onWheel}
         >
           <div className="w-full">
-           <div className="flex">
+           <div className="flex flex-wrap gap-2">
            {tableType === "default" ? (
               <table className="w-full table-auto whitespace-nowrap">
                 <thead className="sticky top-0 z-10 bg-white">
