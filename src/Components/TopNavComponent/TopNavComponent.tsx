@@ -79,7 +79,7 @@ const TopNavComponent = () => {
             <img
               src={logoplain}
               alt="Logo"
-              width="20px"
+              width="120px"
               className="w-[120px] sm:w-[120px] cursor-pointer"
               onClick={() => navigate("/home")}
             />
