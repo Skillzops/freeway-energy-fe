@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useApiCall } from "@/utils/useApiCall";
 import ListPagination from "@/Components/PaginationComponent/ListPagination";
 import { DataStateWrapper } from "@/Components/Loaders/DataStateWrapper";
-import customerbadge from "@/assets/customers/customerbadge.png";
+import customerbadge from "@/assets/RedIcons/affiliate-marketing.png";
 
 import dropdown from "@/assets/table/dropdown.svg";
 import PageLayout from "./PageLayout";

@@ -1,3 +1,5 @@
+
+
 import React, { ReactNode } from "react";
 
 interface ActionButtonProps {
@@ -14,17 +16,43 @@ const ActionButton: React.FC<ActionButtonProps> = ({
   icon,
   onClick,
   disabled = false,
-  buttonClass,
-  labelClass,
+  buttonClass = "",
+  labelClass = "",
 }) => {
+  const COLOR = "#5A081C";
+  const RING = "";
+  const SHADOW = "#882F45";
+
+  const base =
+    "flex items-center h-[32px] gap-1 px-3 py-1 rounded-full border transition-all select-none focus:outline-none";
+  const stateClass = disabled
+    ? "cursor-not-allowed"
+    : "hover:brightness-110 active:brightness-95";
+
   return (
     <button
-      className={`${buttonClass} flex items-center bg-[#FDEEC2] px-2 py-1 h-[32px] gap-1 border-[0.2px] border-strokeGreyTwo rounded-[32px] shadow-innerCustom transition-all hover:bg-[#F8CB48]`}
+      aria-disabled={disabled}
       disabled={disabled}
       onClick={onClick}
+      className={`${base} ${stateClass} ${buttonClass}`}
+      style={{
+        backgroundColor: disabled ? `${COLOR}66` : COLOR,
+        borderColor: disabled ? `${COLOR}66` : COLOR,
+        color: "#fff",
+        boxShadow: disabled ? "none" : SHADOW,
+        outline: "none",
+      }}
+      onFocus={(e) => {
+        (e.currentTarget.style as any).boxShadow = disabled
+          ? "none"
+          : `${SHADOW}, 0 0 0 2px ${RING}`;
+      }}
+      onBlur={(e) => {
+        (e.currentTarget.style as any).boxShadow = disabled ? "none" : SHADOW;
+      }}
     >
-      {icon ? icon : null}
-      <span className={`${labelClass}text-textBlack text-[10px] font-medium`}>
+      {icon ?? null}
+      <span className={`${labelClass} text-[11px] font-medium leading-none`}>
         {label}
       </span>
     </button>
@@ -32,3 +60,4 @@ const ActionButton: React.FC<ActionButtonProps> = ({
 };
 
 export default ActionButton;
+

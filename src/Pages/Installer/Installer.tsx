@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 // import PageLayout from "../Pages/PageLayout";
-import productbadge from "@/assets/products/productsbadge.png";
+import productbadge from "@/assets/RedIcons/product.png";
 // import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
 import productgradient from "@/assets/products/productgradient.svg";
 import cancelIcon from "@/assets/cancel.svg";
@@ -45,11 +45,11 @@ const Installer = () => {
     mutate: refreshTasks
   } = useGetRequest(
     isTaskHistory ?
-    `/v1/agents/tasks?page=${currentPage}&limit=${entriesPerPage}${queryString && `&${queryString}`}` :
-    null,
+      `/v1/agents/tasks?page=${currentPage}&limit=${entriesPerPage}${queryString && `&${queryString}`}` :
+      null,
     isTaskHistory,
     60000
-    
+
   );
 
   // Fetch installation history data for Installation History tab( Revisit This endpoint later)
@@ -61,8 +61,8 @@ const Installer = () => {
     mutate: refreshInstallations
   } = useGetRequest(
     !isTaskHistory ?
-    `/v1/agents/tasks?page=${currentPage}&limit=${entriesPerPage}${queryString && `&${queryString}`}` :
-    null,
+      `/v1/agents/tasks?page=${currentPage}&limit=${entriesPerPage}${queryString && `&${queryString}`}` :
+      null,
     !isTaskHistory,
     60000
   );
@@ -109,21 +109,22 @@ const Installer = () => {
           <div className="flex flex-wrap w-full items-center gap-2 gap-y-3">
             <TitlePill
               icon={productgradient}
-              iconBgColor="bg-[#FDEEC2]"
+              // iconBgColor="bg-[#FDEEC2]"
               topText="Total"
               bottomText={isTaskHistory ? "TASK" : "INSTALLATIONS"}
               value={isTaskHistory ? taskStats.total : installationStats.total}
+              
             />
             <TitlePill
               icon={cancelIcon}
-              iconBgColor="bg-[#FFDBDE]"
+              // iconBgColor="bg-[#FFDBDE]"
               topText="Pending"
               bottomText={isTaskHistory ? "TASK" : "INSTALLATIONS"}
               value={isTaskHistory ? taskStats.pending : installationStats.pending}
             />
             <TitlePill
               icon={cancelIcon}
-              iconBgColor="bg-[#FFDBDE]"
+              // iconBgColor="bg-[#FFDBDE]"
               topText="Cancelled"
               bottomText={isTaskHistory ? "TASK" : "INSTALLATIONS"}
               value={isTaskHistory ? taskStats.cancelled : installationStats.cancelled}
@@ -131,11 +132,13 @@ const Installer = () => {
           </div>
           {!isTaskHistory && (
             <div className="flex w-full items-center justify-between gap-2 min-w-max sm:w-max sm:justify-end">
+          
               <ActionButton
                 label="Request Token"
-                icon={<img src={circleAction} alt="Add" />}
+                icon={<img src={circleAction} className="w-4 h-4 filter brightness-0 invert" />}
                 onClick={() => setIsOpen(true)}
               />
+
             </div>
           )}
         </section>
@@ -148,7 +151,7 @@ const Installer = () => {
               activeTabName={isTaskHistory ? "Task History" : "Installation History"}
             />
           </div>
-          
+
           <div className="flex-1">
             {isTaskHistory ? (
               <TaskHistoryTable
@@ -179,7 +182,7 @@ const Installer = () => {
           </div>
         </div>
       </PageLayout>
-      <RequestToken isOpen={isOpen} setIsOpen={setIsOpen} refreshTable={async () => {}} />
+      <RequestToken isOpen={isOpen} setIsOpen={setIsOpen} refreshTable={async () => { }} />
     </>
   );
 };

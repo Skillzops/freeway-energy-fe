@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useApiCall } from "@/utils/useApiCall";
 import ListPagination from "@/Components/PaginationComponent/ListPagination";
 import { DataStateWrapper } from "@/Components/Loaders/DataStateWrapper";
-import customerbadge from "@/assets/customers/customerbadge.png";
+import customerbadge from "@/assets/RedIcons/affiliate-marketing.png";
 
 import dropdown from "@/assets/table/dropdown.svg";
 import PageLayout from "./PageLayout";
@@ -134,15 +134,15 @@ const AgentCommissions: React.FC = () => {
 
   return (
     <>
-      <PageLayout pageName="COMMISSION" badge={customerbadge}>
+      <PageLayout pageName="Commission" badge={customerbadge}>
         <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-200">
           {/* Top capsule (kept for parity with app headers) */}
           <section className="flex flex-col-reverse sm:flex-row items-center justify-between w-full bg-paleGrayGradient px-2 md:px-8 py-4 gap-2 min-h-[64px]">
             <div className="flex flex-wrap w-full items-center gap-2 gap-y-3">
               <TitlePill
                 icon={customerbadge}
-                iconBgColor="bg-[#E3FAD6]"
-                topText="YOUR"
+                // iconBgColor="bg-[#E3FAD6]"
+                topText="Your"
                 bottomText="COMMISSION"
                 value={summary?.totalCommission || 0}
               />
