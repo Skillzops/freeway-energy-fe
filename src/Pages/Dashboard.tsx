@@ -8,7 +8,7 @@ import Icon1 from "@/assets/agents/Icon1.png";
 import Icon2 from "@/assets/agents/Icon2.png";
 import Icon3 from "@/assets/agents/Icon3.png";
 
-import dashboardbadge from "@/assets/dashboard/dashboardbadge.png";
+import dashboardbadge from "@/assets/RedIcons/Dashboard.png";
 import DashboardCard from "@/Components/DashBoardCard/DashBoard";
 import SalesChart, { SalesGraphPoint } from "@/Components/DashBoardCard/SaleSGraph";
 import SalesCategoryPie from "@/Components/DashBoardCard/SalesCategoryPie";
@@ -151,7 +151,7 @@ const Dashboard: React.FC = () => {
           <DashboardCard
             title="Revenue"
             icon={Icon}
-            bgColor="bg-[#F6F7FE]"
+            bgColor="bg-[#FFFFFF]"
             value={isFetching ? "—" : totalRevenue.toLocaleString()}
             prefix="₦"
             description="Value of Total "
@@ -159,7 +159,7 @@ const Dashboard: React.FC = () => {
           <DashboardCard
             title="Sales"
             icon={Icon1}
-            bgColor="bg-[#F4FEF9]"
+            bgColor="bg-[#FFFFFF]"
             value={isFetching ? "—" : totalSales}
             description="Total Count For "
           />
@@ -168,7 +168,7 @@ const Dashboard: React.FC = () => {
             icon={Icon2}
             description="Total Assigned "
             value={isFetching ? "—" : totalCustomers}
-            bgColor="bg-[#FFFDF7]"
+            bgColor="bg-[#FFFFFF]"
           />
           <DashboardCard
             title="Agents"

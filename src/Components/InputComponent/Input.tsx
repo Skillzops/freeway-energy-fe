@@ -988,7 +988,7 @@ export const ToggleInput = ({
       ></div>
       <div
         className={`absolute top-2.5 left-2.5 w-5 h-5 rounded-full shadow-md transition-transform duration-300 ${
-          isChecked ? "transform translate-x-6 bg-[#A58730]" : "bg-[#CCD0DC]"
+          isChecked ? "transform translate-x-6 bg-[#800020]" : "bg-[#CCD0DC]"
         }`}
       ></div>
     </div>

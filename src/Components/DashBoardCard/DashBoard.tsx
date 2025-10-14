@@ -20,7 +20,7 @@ const DashboardCard: React.FC<DashboardCardProps> = ({
   return (
     <div
       className={clsx(
-        "flex flex-col justify-between p-6 rounded-2xl shadow-md w-full h-full",
+        "flex flex-col justify-between p-6 rounded-2xl shadow-2xl w-full h-full",
         bgColor
       )}
     >

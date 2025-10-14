@@ -8,7 +8,7 @@ import {
   useNavigate,
 } from "react-router-dom";
 import PageLayout from "./PageLayout";
-import transactionsbadge from "@/assets/transactions/transactionsbadge.png";
+import transactionsbadge from "@/assets/RedIcons/Sales.png";
 import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
 import ActionButton from "@/Components/ActionButtonComponent/ActionButton";
 // import { DropDown } from "@/Components/DropDownComponent/DropDown";
@@ -217,7 +217,8 @@ const Sales = observer(() => {
           <div className="flex w-full items-center justify-between gap-2 min-w-max sm:w-max sm:justify-end">
             <ActionButton
               label="New Sale"
-              icon={<img src={circleAction} />}
+              icon={<img src={circleAction}
+              className="w-4 h-4 filter brightness-0 invert" />}
               onClick={() => {
                 setIsOpen(true);
               }}

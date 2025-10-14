@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import PageLayout from "./PageLayout";
-import productsbadge from "@/assets/products/productsbadge.png";
+import productsbadge from "@/assets/RedIcons/product.png";
 import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
 import ActionButton from "@/Components/ActionButtonComponent/ActionButton";
 import { DropDown } from "@/Components/DropDownComponent/DropDown";

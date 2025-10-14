@@ -11,49 +11,77 @@ export type SideMenuType = {
   parentClass?: string;
 };
 
-export const SideMenu = (props: SideMenuType) => {
+export const SideMenu = ({ navigationList, parentClass }: SideMenuType) => {
   const location = useLocation();
-  const { navigationList, parentClass } = props;
   useDefaultNavigation(navigationList);
+
+  const isActive = (path: string) => location.pathname === path;
 
   return (
     <div
-      className={`${parentClass} flex flex-wrap flex-row w-full h-max sm:max-w-[208px] items-center justify-between bg-white p-2 sm:p-4 gap-2 border border-strokeGreyThree rounded-[20px] sm:flex-col`}
+      className={`${parentClass ?? ""} w-full sm:max-w-[220px] rounded-2xl bg-white/90 backdrop-blur
+      border border-black/5 shadow-[0_4px_20px_rgba(0,0,0,0.06)]
+      p-2 sm:p-3 flex sm:flex-col flex-wrap gap-2`}
     >
-      {navigationList.map((item, index) => (
-        <Link
-          to={item.link}
-          key={index}
-          className={`flex group items-center justify-center sm:justify-between w-max sm:w-full h-[24px] px-3 py-1.5 sm:pl-2 sm:pr-1 sm:py-1 gap-2 sm:gap-0 rounded-full cursor-pointer transition-all
-            ${
-              location.pathname === item.link
-                ? "bg-primaryGradient"
-                : "bg-white hover:bg-[#F6F8FA]"
-            }`}
-        >
-          <p
-            className={`text-xs font-medium transition-all ${
-              location.pathname === item.link
-                ? "text-white"
-                : "text-textGrey group-hover:font-normal"
-            }`}
+      {navigationList.map((item, i) => {
+        const active = isActive(item.link);
+        return (
+          <Link
+            to={item.link}
+            key={i}
+            aria-current={active ? "page" : undefined}
+            data-active={active ? "true" : "false"}
+            className={`
+              group relative w-max sm:w-full rounded-full
+              px-3 sm:px-2 py-1.5 sm:py-1
+              flex items-center sm:justify-between gap-2
+              outline-none ring-0
+              transition-[background,transform,box-shadow] duration-200
+              ${active
+                ? "bg-gradient-to-r from-[#800020] to-black text-white shadow-[0_6px_18px_rgba(0,0,0,0.18)]"
+                : "bg-white text-black hover:bg-black/5"
+              }
+              focus-visible:ring-2 focus-visible:ring-[#800020]/60
+              hover:-translate-y-[1px] active:translate-y-0
+            `}
           >
-            {item.title}
-          </p>
-          {item?.count !== null ? (
             <span
-              className={`flex items-center justify-center max-w-max px-1 border-[0.2px] text-xs rounded-full transition-all
-              ${
-                location.pathname === item.link
-                  ? "bg-[#FEF5DA] text-textDarkBrown border-textDarkBrown"
-                  : "bg-[#EAEEF2] text-textDarkGrey border-strokeGrey group-hover:bg-[#FEF5DA] group-hover:text-textDarkBrown group-hover:border-textDarkBrown"
-              }`}
+              className={`
+                text-xs font-medium truncate
+                ${active ? "text-white" : "text-black/80 group-hover:text-black"}
+              `}
             >
-              {formatNumberWithSuffix(item?.count)}
+              {item.title}
             </span>
-          ) : null}
-        </Link>
-      ))}
+
+            {item.count !== null && (
+              <span
+                className={`
+                  ml-auto inline-flex items-center justify-center
+                  min-w-[22px] h-[18px] px-1.5 rounded-full text-[10px] font-medium
+                  transition-colors
+                  ${active
+                    ? "bg-white/90 text-black"
+                    : "bg-black/5 text-black/70 group-hover:bg-[#800020]/10 group-hover:text-[#800020]"
+                  }
+                  border border-black/10
+                `}
+              >
+                {formatNumberWithSuffix(item.count)}
+              </span>
+            )}
+
+            {!active && (
+              <span
+                className="pointer-events-none absolute inset-0 rounded-full opacity-0
+                group-hover:opacity-100 transition-opacity
+                ring-1 ring-[#800020]/20"
+              />
+            )}
+          </Link>
+        );
+      })}
     </div>
   );
 };
+
