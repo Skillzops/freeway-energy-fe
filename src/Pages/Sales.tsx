@@ -96,20 +96,6 @@ const Sales = observer(() => {
     },
   ];
 
-  // const dropDownList = {
-  //   items: ["Export List"],
-  //   onClickLink: (index: number) => {
-  //     switch (index) {
-  //       case 0:
-  //         console.log("Exporting list...");
-  //         break;
-  //       default:
-  //         break;
-  //     }
-  //   },
-  //   showCustomButton: true,
-  // };
-
   const dropDownList = {
     items: ["Batch Upload Sales"], // Changed to be sales-specific
     onClickLink: (index: number) => {
