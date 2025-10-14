@@ -171,7 +171,7 @@ import sales from "@/assets/RedIcons/Sales.png";
 import customers from "@/assets/RedIcons/Customers.png";
 import agents from "@/assets/RedIcons/affiliate-marketing.png";
 import products from "@/assets/RedIcons/product.png";
-import inventory from "@/assets/RedIcons/inventory.png";
+import inventory from "@/assets/RedIcons/Inventory.png";
 import contracts from "@/assets/RedIcons/Contract.png";
 // import support from "@/assets/home/support.svg";
 // import communication from "@/assets/home/communication.svg";
