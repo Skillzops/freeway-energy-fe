@@ -11,11 +11,11 @@ const HeaderBadge = (props: HeaderBadgeProps) => {
       <h1 className="text-[32px] text-textLightGrey font-semibold font-secondary">
         {pageName}
       </h1>
-      <div className="flex items-center justify-end h-[100px] md:h-[128px] overflow-hidden">
+      <div className="flex items-center justify-end overflow-hidden">
         <img
           src={image}
           alt={`${pageName} Badge`}
-          className="w-full opacity-20"
+          className="w-72 opacity-20 h-24 "
         />
       </div>
     </div>

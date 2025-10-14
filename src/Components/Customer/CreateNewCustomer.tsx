@@ -204,7 +204,7 @@ const CreateNewCustomer = ({
           }`}
         >
           <h2
-            style={{ textShadow: "1px 1px grey" }}
+            style={{ textShadow: "1px 1px grey"}}
             className="text-xl text-textBlack font-semibold font-secondary"
           >
             New Customer
