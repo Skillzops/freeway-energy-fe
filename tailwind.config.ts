@@ -104,14 +104,10 @@ export default {
   darkMode: ["class", '[data-mode="dark"]'],
   theme: {
     extend: {
-      // Fonts: Plus Jakarta Sans (UI) + Fraunces (display headings)
       fontFamily: {
-        primary: ['"Plus Jakarta Sans"', "ui-sans-serif", "system-ui", "sans-serif"],
-        secondary: ['"Fraunces"', "ui-serif", "Georgia", "serif"],
-        sans: ['"Plus Jakarta Sans"', "ui-sans-serif", "system-ui", "sans-serif"],
-        serif: ['"Fraunces"', "ui-serif", "Georgia", "serif"],
+        primary: ['"Red Hat Display"', "sans-serif"],
+        secondary: ['"Lora"', "serif"],
       },
-
       // A lovely, calm palette (not your previous brand colors)
       colors: {
         background: "hsl(var(--background))",
