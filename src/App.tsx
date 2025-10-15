@@ -45,7 +45,6 @@ import AgentInstaller from "./Pages/Agent/Installer";
 import InstallerCommissions from "./Pages/Installer/AgentCommissions";
 import AgentCommissions from "./Pages/Agent/AgentCommissions";
 
-import InstallerSettings from "./Pages/Installer/Settings";
 import InstallerDashboard from "./Pages/Installer/Dashboard";
 import AgentDashboard from "./Pages/Agent/Dashboard";
 import Transactions from "./Pages/Agent/Transactions";
@@ -54,6 +53,7 @@ import Wallets from "./Pages/Agent/Wallet";
 import WareHouses from "./Pages/Agent/WareHouse";
 import InstallerLoginPage from "./Pages/Installer/LoginPage";
 import AgentLoginPage from "./Pages/Agent/LoginPage";
+import InstallerSettings from "./Pages/Installer/Settings";
 
 function App() {
   return (

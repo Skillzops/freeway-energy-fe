@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { SideMenu } from "@/Components/Installer/SideMenuComponent/SideMenu";
 import Profile from "@/Components/Settings/Profile";
 import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
@@ -10,17 +10,16 @@ const ChangePassword = lazy(
   () => import("@/Components/Settings/ChangePassword")
 );
 
-const AgentSettings = () => {
-  const userlocation = useLocation();
+const InstallerSettings = () => {
   const navigationList = [
     {
       title: "Profile",
-      link: "/agent/settings/profile",
+      link: "/installer/settings/profile",
       count: null,
     },
     {
       title: "Change Password",
-      link: "/agent/settings/change-password",
+      link: "/installer/settings/change-password",
       count: null,
     },
   ];
@@ -50,4 +49,4 @@ const AgentSettings = () => {
   );
 };
 
-export default AgentSettings;
+export default InstallerSettings;
