@@ -147,7 +147,7 @@ const AgentSales = observer(() => {
           <div className="flex w-full items-center justify-between gap-2 min-w-max sm:w-max sm:justify-end">
             <ActionButton
               label="New Sale"
-              icon={<img src={circleAction} />}
+              icon={<img src={circleAction} className="w-4 h-4 filter brightness-0 invert" />}
               onClick={() => {
                 setIsOpen(true);
               }}

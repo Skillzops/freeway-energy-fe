@@ -1,5 +1,7 @@
 import React, { useMemo } from "react";
-import taskIcon from "@/assets/agents/taskIcon.png";
+// import taskIcon from "@/assets/agents/taskIcon.png";
+import { FiClipboard, FiCpu } from "react-icons/fi";
+
 
 export type RawTask = {
   id: string;
@@ -82,7 +84,7 @@ const NewTasks: React.FC<Props> = ({
     return tasks.map((t) => {
       const customerName = t.customer
         ? `${t.customer.firstname ?? ""} ${t.customer.lastname ?? ""}`.trim() ||
-          "—"
+        "—"
         : "—";
       const phone = t.customer?.phone ?? "—";
       const altPhone = t.customer?.alternatePhone ?? null;
@@ -90,8 +92,8 @@ const NewTasks: React.FC<Props> = ({
       const saleIdShort = t.sale?.id
         ? `${t.sale.id.slice(0, 6)}…${t.sale.id.slice(-4)}`
         : t.saleId
-        ? `${t.saleId.slice(0, 6)}…${t.saleId.slice(-4)}`
-        : "—";
+          ? `${t.saleId.slice(0, 6)}…${t.saleId.slice(-4)}`
+          : "—";
       const requester = t.requestingAgent
         ? `#${t.requestingAgent.agentId} • ${t.requestingAgent.category}`
         : `Agent ${t.requestingAgentId.slice(0, 6)}…`;
@@ -124,7 +126,19 @@ const NewTasks: React.FC<Props> = ({
     <div className="bg-[#FFFFFF] rounded-2xl shadow-sm p-6 border border-[#E3F0FF] w-[359px] h-[640px] flex flex-col items-center gap-4">
       <div className="bg-skyblue relative flex items-center justify-between w-[327px] h-[48px] rounded-full px-4">
         <div className="relative flex items-center gap-2">
-          <img src={taskIcon} alt="Tasks" />
+          {/* <img src={taskIcon} alt="Tasks" /> */}
+
+          <div
+            className="relative w-10 h-10 grid place-items-center rounded-xl shadow-lg ring-1 ring-white/20"
+            style={{ backgroundImage: 'linear-gradient(135deg,#800020 0%,#CFB8BE 55%,#FFFFFF 100%)' }}
+          >
+            <FiClipboard className="w-5 h-5 text-white drop-shadow-sm" />
+            <span
+              className="pointer-events-none absolute inset-0 blur-md opacity-50 -z-10"
+              style={{ backgroundImage: 'linear-gradient(135deg,#800020 0%,#CFB8BE 55%,#FFFFFF 100%)' }}
+            />
+          </div>
+
           <span className="text-[16px] leading-[100%] text-[#050505] font-primary font-medium">
             New Tasks
           </span>
@@ -140,10 +154,9 @@ const NewTasks: React.FC<Props> = ({
               <div
                 key={ui.id}
                 className={`relative w-full bg-white border rounded-lg px-4 py-4 text-sm text-gray-700 cursor-pointer
-                  ${
-                    isSelected
-                      ? "border-[#93C5FD] ring-2 ring-[#BFDBFE]"
-                      : "border-gray-200"
+                  ${isSelected
+                    ? "border-[#93C5FD] ring-2 ring-[#BFDBFE]"
+                    : "border-gray-200"
                   }`}
                 onClick={() => onToggleSelect(ui.id)}
                 title="Click to select/unselect this task"
@@ -210,17 +223,16 @@ const NewTasks: React.FC<Props> = ({
                   <div className="flex justify-between">
                     <p className="text-[11px] text-gray-500">Status</p>
                     <span
-                      className={`text-[11px] font-semibold px-2 py-1 rounded-full border ${
-                        ui.status === "PENDING"
+                      className={`text-[11px] font-semibold px-2 py-1 rounded-full border ${ui.status === "PENDING"
                           ? "bg-[#FFF4E5] text-[#B54708] border-[#FEDF89]"
                           : ui.status === "ASSIGNED"
-                          ? "bg-[#E8F5FF] text-[#1E66F5] border-[#B3DAFE]"
-                          : ui.status === "COMPLETED"
-                          ? "bg-[#D1E7DD] text-[#0F5132] border-[#BADBCC]"
-                          : ui.status === "REJECTED"
-                          ? "bg-[#F8D7DA] text-[#842029] border-[#F5C2C7]"
-                          : "bg-[#F0F1F3] text-[#3F3F46] border-[#E4E4E7]"
-                      }`}
+                            ? "bg-[#E8F5FF] text-[#1E66F5] border-[#B3DAFE]"
+                            : ui.status === "COMPLETED"
+                              ? "bg-[#D1E7DD] text-[#0F5132] border-[#BADBCC]"
+                              : ui.status === "REJECTED"
+                                ? "bg-[#F8D7DA] text-[#842029] border-[#F5C2C7]"
+                                : "bg-[#F0F1F3] text-[#3F3F46] border-[#E4E4E7]"
+                        }`}
                     >
                       {ui.status}
                     </span>
