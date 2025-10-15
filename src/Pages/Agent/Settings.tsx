@@ -58,12 +58,12 @@ const Settings = () => {
   const navigationList = [
     {
       title: "Profile",
-      link: "/settings/profile",
+      link: "/agent/settings/profile",
       count: null,
     },
     {
       title: "Change Password",
-      link: "/settings/change-password",
+      link: "/agent/settings/change-password",
       count: null,
     },
   ];
