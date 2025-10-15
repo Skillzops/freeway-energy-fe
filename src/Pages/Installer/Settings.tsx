@@ -14,12 +14,12 @@ const InstallerSettings = () => {
   const navigationList = [
     {
       title: "Profile",
-      link: "/settings/profile",
+      link: "/installer/settings/profile",
       count: null,
     },
     {
       title: "Change Password",
-      link: "/settings/change-password",
+      link: "/installer/settings/change-password",
       count: null,
     },
   ];

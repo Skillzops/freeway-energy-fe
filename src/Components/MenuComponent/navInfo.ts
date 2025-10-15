@@ -163,7 +163,7 @@ export const InstallerNavData = [
     link: "/installer/commissions",
   },
   {
-    title: "SEttings",
+    title: "Settings",
     icon: SettingsIcon,
     link: "/installer/settings",
   },
