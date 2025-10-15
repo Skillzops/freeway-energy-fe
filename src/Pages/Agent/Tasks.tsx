@@ -5,7 +5,7 @@ import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
 import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
 import { useGetRequest } from "@/utils/useApiCall";
 import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
-import greencustomer from "@/assets/customers/greencustomer.svg";
+import greencustomer from "@/assets/RedIcons/Reports.png";
 import TasksTable from "@/Components/Agents/Tasks/TasksTable";
 // import TasksTable from "@/Components/Tasks/TasksTable";
 
@@ -113,7 +113,7 @@ const Tasks = () => {
         <div className="flex flex-wrap w-full items-center gap-2 gap-y-3">
           <TitlePill
             icon={greencustomer}
-            iconBgColor="bg-[#E3FAD6]"
+            // iconBgColor="bg-[#E3FAD6]"
             topText="ALL"
             bottomText="TASKS"
             value={allCount || 0}

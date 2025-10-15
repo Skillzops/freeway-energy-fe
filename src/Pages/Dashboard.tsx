@@ -27,14 +27,14 @@ import useGetAdminOverviewQuery from "@/redux/AdminOverview";
 import InventaryTable from "@/Components/DashBoardCard/InventaryTable";
 
 
-const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"] as const;
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const;
 const monthFromISO = (iso: string) => {
   const d = new Date(iso);
   return isNaN(d.getTime()) ? "—" : MONTHS[d.getMonth()];
 };
 
 type ExtendedSalesPoint = SalesGraphPoint & {
-  derivedMonth?: string; 
+  derivedMonth?: string;
 };
 
 const STATUS_OPTIONS: Array<"ALL" | "COMPLETED" | "IN_INSTALLMENT" | "UNPAID" | "CANCELLED"> = [
@@ -91,10 +91,10 @@ const Dashboard: React.FC = () => {
       const dd = valid ? String(d.getDate()).padStart(2, "0") : "—";
       const label = valid ? `${m} ${dd}` : (iso || "—");
       return {
-        month: label,                 
+        month: label,
         sales: Number(it?.count ?? 0),
         value: Number(it?.value ?? 0),
-        derivedMonth: m,            
+        derivedMonth: m,
       };
     });
   }, [data]);
@@ -132,7 +132,7 @@ const Dashboard: React.FC = () => {
       salesValue: Number(m.salesValue ?? 0),
       payments: Number(m.payments ?? 0),
       paymentsValue: Number(m.paymentsValue ?? 0),
-      status: "COMPLETED", 
+      status: "COMPLETED",
     }));
   }, [data]);
 
@@ -142,6 +142,8 @@ const Dashboard: React.FC = () => {
     if (status !== "ALL") rows = rows.filter((r) => r.status === status);
     return rows;
   }, [monthlyTrends, monthFilter, status]);
+
+  
 
   return (
     <PageLayout pageName="Dashboard" badge={dashboardbadge}>

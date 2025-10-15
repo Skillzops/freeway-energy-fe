@@ -5,7 +5,7 @@ import PageLayout from "./PageLayout";
 import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
 import ActionButton from "@/Components/ActionButtonComponent/ActionButton";
 import wallet from "@/assets/agents/wallet.svg";
-import walletLogo from "@/assets/wallet/walletLogo.png";
+import walletLogo from "@/assets/RedIcons/Inventory.png";
 import greencustomer from "@/assets/customers/greencustomer.svg";
 import redcustomerbag from "@/assets/customers/redcustomerbag.svg";
 import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
@@ -89,21 +89,21 @@ const Wallets = () => {
           <div className="flex flex-wrap w-full items-center gap-2 gap-y-3">
             <TitlePill
               icon={wallet}
-              iconBgColor="bg-[#D6EEFA]"
+              // iconBgColor="bg-[#D6EEFA]"
               topText="Wallet"
               bottomText="BALANCE"
               value={stats.walletBalance}
             />
             <TitlePill
               icon={greencustomer}
-              iconBgColor="bg-[#E3FAD6]"
+              // iconBgColor="bg-[#E3FAD6]"
               topText="Total"
               bottomText="CREDITS"
               value={stats.totalCredit}
             />
             <TitlePill
               icon={redcustomerbag}
-              iconBgColor="bg-[#FFDBDE]"
+              // iconBgColor="bg-[#FFDBDE]"
               topText="Total"
               bottomText="DEBITS"
               value={stats.totalDebit}

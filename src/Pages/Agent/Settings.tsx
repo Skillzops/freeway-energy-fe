@@ -8,7 +8,7 @@ import settings from "@/assets/settings/settings.svg";
 import ActionButton from "@/Components/ActionButtonComponent/ActionButton";
 import circleAction from "@/assets/settings/addCircle.svg";
 import { DropDown } from "@/Components/DropDownComponent/DropDown";
-import settingsbadge from "@/assets/settings/settingsbadge.png";
+import settingsbadge from "@/assets/RedIcons/settings.png";
 import { useGetRequest } from "@/utils/useApiCall";
 import PageLayout from "./PageLayout";
 import CreateNewUserModal from "@/Components/Settings/CreateNewUserModal";

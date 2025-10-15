@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import PageLayout from "./PageLayout";
 import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
-import transactionsbadge from "@/assets/transactions/transactionsbadge.png";
+import transactionsbadge from "@/assets/RedIcons/Inventory.png";
 import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
 import wallet from "@/assets/agents/wallet.svg";
 import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
@@ -84,14 +84,14 @@ const Transactions = () => {
           <div className="flex flex-wrap w-full items-center gap-2 gap-y-3">
             <TitlePill
               icon={wallet}
-              iconBgColor="bg-[#E3FAD6]"
+              // iconBgColor="bg-[#E3FAD6]"
               topText="All"
               bottomText="TRANSACTIONS"
               value={transactionsData?.total ?? 0}
             />
             <TitlePill
               icon={wallet}
-              iconBgColor="bg-[#FFF3CD]"
+              // iconBgColor="bg-[#FFF3CD]"
               topText="Pending"
               bottomText="TRANSACTIONS"
               value={

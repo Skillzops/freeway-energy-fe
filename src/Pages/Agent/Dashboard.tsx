@@ -6,7 +6,7 @@ import PageLayout from "./PageLayout";
 import Revenue from "@/assets/agents/Revenue.png";
 import gradientsales from "@/assets/sales/gradientsales.svg";
 import greencustomer from "@/assets/customers/greencustomer.svg";
-import dashboardbadge from "@/assets/dashboard/dashboardbadge.png";
+import dashboardbadge from "@/assets/RedIcons/Dashboard.png";
 import DashboardCard from "@/Components/DashBoardCard/DashBoard";
 import SalesChart, { SalesGraphPoint } from "@/Components/DashBoardCard/SaleSGraph";
 import SalesCategoryPie from "@/Components/DashBoardCard/SalesCategoryPie";
