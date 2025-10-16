@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import PageLayout from "./PageLayout";
-import productsbadge from "@/assets/products/productsbadge.png";
+import productsbadge from "@/assets/RedIcons/product.png";
 import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
 import productgradient from "@/assets/products/productgradient.svg";
 // import productgreen from "@/assets/products/productgreen.svg";
@@ -111,7 +111,7 @@ const Products = () => {
           <div className="flex flex-wrap w-full items-center gap-2 gap-y-3">
             <TitlePill
               icon={productgradient}
-              iconBgColor="bg-[#FDEEC2]"
+              // iconBgColor="bg-[#FDEEC2]"
               topText="All"
               bottomText="PRODUCTS"
               value={productData?.total || 0}

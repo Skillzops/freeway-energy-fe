@@ -7,7 +7,7 @@ import {
   useSearchParams,
 } from "react-router-dom";
 import PageLayout from "./PageLayout";
-import transactionsbadge from "@/assets/transactions/transactionsbadge.png";
+import transactionsbadge from "@/assets/RedIcons/Sales.png";
 import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
 import ActionButton from "@/Components/ActionButtonComponent/ActionButton";
 // import { DropDown } from "@/Components/DropDownComponent/DropDown";
@@ -138,7 +138,7 @@ const AgentSales = observer(() => {
           <div className="flex flex-wrap w-full items-center gap-2 gap-y-3">
             <TitlePill
               icon={gradientsales}
-              iconBgColor="bg-[#FDEEC2]"
+              // iconBgColor="bg-[#FDEEC2]"
               topText="All"
               bottomText="SALES"
               value={salesData?.total}

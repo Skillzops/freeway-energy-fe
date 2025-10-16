@@ -4,7 +4,7 @@ import PageLayout from "./PageLayout";
 import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
 // import ActionButton from "@/Components/ActionButtonComponent/ActionButton";
 // import circleAction from "@/assets/settings/addCircle.svg";
-import customerbadge from "@/assets/customers/customerbadge.png";
+import customerbadge from "@/assets/RedIcons/Customers.png";
 import greencustomer from "@/assets/customers/greencustomer.svg";
 import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
 import { useGetRequest } from "@/utils/useApiCall";
@@ -94,8 +94,8 @@ const Customers = () => {
           <div className="flex flex-wrap w-full items-center gap-2 gap-y-3">
             <TitlePill
               icon={greencustomer}
-              iconBgColor="bg-[#E3FAD6]"
-              topText="YOUR"
+              // iconBgColor="bg-[#E3FAD6]"
+              topText="Your"
               bottomText="CUSTOMERS"
               value={customerData?.total || 0}
             />

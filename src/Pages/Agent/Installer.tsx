@@ -2,7 +2,7 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import PageLayout from "./PageLayout";
 import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
-import inventorybadge from "@/assets/inventory/inventorybadge.png";
+import inventorybadge from "@/assets/RedIcons/Inventory.png";
 import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
 import avatar from "@/assets/agents/avatar.svg";
 // import circleAction from "@/assets/settings/addCircle.svg";
@@ -96,7 +96,7 @@ const AgentInstaller = () => {
           <div className="flex flex-wrap w-full items-center gap-2 gap-y-3">
             <TitlePill
               icon={avatar}
-              iconBgColor="bg-[#FDEEC2]"
+              // iconBgColor="bg-[#FDEEC2]"
               topText="Total"
               bottomText="Installers"
               value={
