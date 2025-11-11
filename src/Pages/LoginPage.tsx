@@ -189,7 +189,7 @@ const LoginPage = () => {
         <section className="flex w-full flex-col items-center justify-center gap-2 z-10 max-w-[500px]">
           <div className="flex flex-col items-center justify-center">
             <h1 className="text-[32px] text-primary font-medium font-secondary">
-              {isForgotPassword ? "See who forgot something" : "Welcome Back"}
+              {isForgotPassword ? "See who forgot something" : "Welcome Back8"}
             </h1>
             <em className="text-xs text-textDarkGrey text-center max-w-[220px]">
               {isForgotPassword

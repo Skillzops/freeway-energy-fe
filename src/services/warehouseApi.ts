@@ -75,7 +75,8 @@ export const useWarehouseApi = () => {
         location: warehouseData.location,
         totalItems: warehouseData.totalItems.toString(),
         totalValue: warehouseData.totalValue.toString(),
-        isMainWarehouse: warehouseData.isMainWarehouse.toString(),
+        isMain: warehouseData.isMainWarehouse.toString(),
+        state: "LAGOS",
         ...(warehouseData.isActive !== undefined && { isActive: warehouseData.isActive.toString() })
       }).forEach(([key, value]) => formData.append(key, value));
       

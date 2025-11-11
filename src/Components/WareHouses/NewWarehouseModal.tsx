@@ -75,6 +75,7 @@ export function NewWarehouseModal({ open, onOpenChange }: NewWarehouseModalProps
         isMainWarehouse: isMainWarehouse, // Correct parameter for backend
         isActive: true,
         image: selectedImage, // Pass the actual File object instead of base64 string
+        state: ""
       });
 
       toast.success(`${name} has been added successfully`);

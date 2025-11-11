@@ -49,11 +49,11 @@ export const navData = [
     icon: ProductsIcon,
     link: "/products",
   },
-  // {
-  //   title: "Inventory",
-  //   icon: InventoryIcon,
-  //   link: "/inventory",
-  // },
+  {
+    title: "Inventory",
+    icon: InventoryIcon,
+    link: "/inventory",
+  },
   {
     title: "Warehouses",
     icon: WarehouseIcon,
