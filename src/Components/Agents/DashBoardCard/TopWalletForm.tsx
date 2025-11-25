@@ -37,9 +37,6 @@ const TopUpWalletForm = ({
     if (!validate()) return;
 
     const parsedAmount = parseFloat(amount);
-    console.log("Raw amount:", amount);
-    console.log("Parsed amount:", parsedAmount);
-    console.log("Is NaN:", isNaN(parsedAmount));
 
     setLoading(true);
     try {
@@ -50,14 +47,20 @@ const TopUpWalletForm = ({
           amount: Number(parsedAmount),
           gateway: PaymentGateway.FLUTTERWAVE,
         },
-        // successMessage: "Wallet topped up successfully",
       });
 
-      console.log(res, 'res___')
+      console.log(res, "res___");
 
+      if (!res?.status) return;
 
-      if(!res?.status) return
-      toast.success(res?.data?.message, {autoClose: 80000000})
+      toast.success(res?.data?.message, { autoClose: 80000000 });
+
+      // 👇 Get the payment link from the response
+      const paymentLink = res?.data?.paymentLink; // <-- update this path to match your API
+
+      if (paymentLink && typeof window !== "undefined") {
+        window.open(paymentLink, "_blank", "noopener,noreferrer");
+      }
 
       refreshTable();
       handleClose(); // Close the modal
