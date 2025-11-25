@@ -82,18 +82,6 @@
 //   ],
 // };
 
-
-
-
-
-
-
-
-
-
-
-
-
 /** @type {import('tailwindcss').Config} */
 import scrollbarPlugin from "tailwind-scrollbar";
 import plugin from "tailwindcss/plugin";
@@ -132,22 +120,28 @@ export default {
       backgroundImage: {
         softHero:
           "radial-gradient(900px circle at 10% -10%, hsla(var(--accent)/0.12) 0%, transparent 45%), radial-gradient(800px circle at 110% 0%, hsla(var(--primary)/0.10) 0%, transparent 50%), linear-gradient(180deg, hsla(var(--primary)/0.06) 0%, hsla(var(--accent)/0.08) 100%)",
-        pill:
-          "linear-gradient(180deg, hsla(var(--primary)/0.92) 0%, hsla(var(--accent)/0.92) 100%)",
+        pill: "linear-gradient(180deg, hsla(var(--primary)/0.92) 0%, hsla(var(--accent)/0.92) 100%)",
+
+        primaryGradient: "linear-gradient(to right, #800621, #9B4157)",
+        errorGradient: "linear-gradient(to right, #800621, #473b15)",
+        inversedErrorGradient: "linear-gradient(to left, #800621, #473b15)",
+        paleGrayGradient: "linear-gradient(to right, #F6F8FA, #FFFFFF)",
+        paleGrayGradientLeft: "linear-gradient(to left, #F6F8FA, #FFFFFF)",
+        paleCreamGradientLeft: "linear-gradient(to left, #FEF5DA, #FFFFFF)",
       },
 
       // Comfortable, legible type scale
       fontSize: {
         xs: ["0.78rem", { lineHeight: "1.2" }],
         sm: ["0.875rem", { lineHeight: "1.35" }],
-        base: ["1rem", { lineHeight: "1.5" }],          // 16px
-        lg: ["1.125rem", { lineHeight: "1.5" }],       // 18px
-        xl: ["1.25rem", { lineHeight: "1.4" }],        // 20px
-        "2xl": ["1.5rem", { lineHeight: "1.35" }],     // 24px
-        "3xl": ["1.875rem", { lineHeight: "1.25" }],   // 30px
-        "4xl": ["2.25rem", { lineHeight: "1.2" }],     // 36px
-        "5xl": ["3rem", { lineHeight: "1.1" }],        // 48px
-        "6xl": ["3.75rem", { lineHeight: "1.05" }],    // 60px
+        base: ["1rem", { lineHeight: "1.5" }], // 16px
+        lg: ["1.125rem", { lineHeight: "1.5" }], // 18px
+        xl: ["1.25rem", { lineHeight: "1.4" }], // 20px
+        "2xl": ["1.5rem", { lineHeight: "1.35" }], // 24px
+        "3xl": ["1.875rem", { lineHeight: "1.25" }], // 30px
+        "4xl": ["2.25rem", { lineHeight: "1.2" }], // 36px
+        "5xl": ["3rem", { lineHeight: "1.1" }], // 48px
+        "6xl": ["3.75rem", { lineHeight: "1.05" }], // 60px
       },
 
       boxShadow: {
@@ -164,10 +158,13 @@ export default {
     plugin(function ({ addUtilities }) {
       addUtilities({
         ".scrollbar-thin": { "scrollbar-width": "thin" },
-        ".scrollbar-thumb-muted": { "scrollbar-color": "hsl(var(--muted-foreground)) transparent" },
-        ".scrollbar-track-muted": { "scrollbar-color": "transparent hsl(var(--muted))" },
+        ".scrollbar-thumb-muted": {
+          "scrollbar-color": "hsl(var(--muted-foreground)) transparent",
+        },
+        ".scrollbar-track-muted": {
+          "scrollbar-color": "transparent hsl(var(--muted))",
+        },
       });
     }),
   ],
 };
-

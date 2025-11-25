@@ -48,7 +48,7 @@ const TopUpWalletForm = ({
         method: "post",
         data: {
           amount: Number(parsedAmount),
-          gateway: PaymentGateway.OGARANYA,
+          gateway: PaymentGateway.FLUTTERWAVE,
         },
         // successMessage: "Wallet topped up successfully",
       });

@@ -107,7 +107,7 @@ export default function MiscellaneousForm({
   return (
     <div className="flex flex-col justify-between h-full min-h-[330px] gap-2">
       <div className="space-y-4 overflow-y-auto max-h-[270px]">
-        {items.map((item, index) => (
+        {items?.map((item, index) => (
           <div
             key={index}
             className="grid grid-cols-[1fr,1fr,auto] gap-4 items-start"

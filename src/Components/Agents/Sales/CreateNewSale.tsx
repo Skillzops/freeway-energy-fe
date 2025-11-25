@@ -20,7 +20,12 @@ import SalesSummary from "./SalesSummary";
 import { toJS } from "mobx";
 import axios from "axios";
 import ApiErrorMessage from "@/Components/ApiErrorMessage";
-import { SelectInput, ModalInput, ToggleInput } from "@/Components/InputComponent/Input";
+import {
+  SelectInput,
+  ModalInput,
+  ToggleInput,
+  Input,
+} from "@/Components/InputComponent/Input";
 import { Modal } from "@/Components/ModalComponent/Modal";
 import ProceedButton from "@/Components/ProceedButtonComponent/ProceedButtonComponent";
 
@@ -46,8 +51,7 @@ export type ExtraInfoType =
   | "";
 
 const CreateNewSale = observer(
-  ({ isOpen, setIsOpen }: CreateSalesType) => {
-    const { apiCall } = useApiCall();
+  ({ isOpen, setIsOpen, allSalesRefresh }: CreateSalesType) => {
     const [formData, setFormData] = useState<FormData>(defaultSaleFormData);
     const [loading, setLoading] = useState(false);
     const [isCustomerProductModalOpen, setIsCustomerProductModalOpen] =
@@ -86,17 +90,39 @@ const CreateNewSale = observer(
         saleItems: SaleStore.getTransformedSaleItems() as SaleItem[],
         applyMargin: formData.applyMargin,
         paymentMethod: SaleStore.paymentMethod,
+        monthlypayment: SaleStore.monthlypayment,
       };
-      
+
       // If any sale item has installment payment mode, include additional required fields
       if (SaleStore.doesSaleItemHaveInstallment()) {
-        
-        
+        // Include BVN from formData
+        payload.bvn = formData.bvn;
+
+        // Only include guarantor details if they have actual data
+        if (SaleStore.guarantorDetails && SaleStore.guarantorDetails.fullName) {
+          // Create a copy of guarantor details without empty identification details
+          const guarantorDetails = { ...SaleStore.guarantorDetails };
+
+          // Only include identification details if they have actual data
+          if (
+            !guarantorDetails.identificationDetails ||
+            !guarantorDetails.identificationDetails.idType ||
+            !guarantorDetails.identificationDetails.idNumber
+          ) {
+            // Create a new object without identification details
+            const { identificationDetails, ...guarantorWithoutId } =
+              guarantorDetails;
+            payload.guarantorDetails = guarantorWithoutId;
+          } else {
+            payload.guarantorDetails = guarantorDetails;
+          }
+        }
+
         // Don't include identification details or next of kin details
         // payload.identificationDetails = SaleStore.identificationDetails;
         // payload.nextOfKinDetails = SaleStore.nextOfKinDetails;
       }
-      
+
       console.log("Generated payload:", JSON.stringify(payload, null, 2));
       return payload;
     }, [formData]);
@@ -120,88 +146,58 @@ const CreateNewSale = observer(
 
       try {
         // Step 1: Validate data
-
-        // Step 2: Calculate payment amount
-        const calculatePaymentAmount = () => {
-          return SaleStore.products.reduce((total, product) => {
-            const params = SaleStore.getParametersByProductId(product.productId);
-            const miscellaneous = SaleStore.getMiscellaneousByProductId(product.productId);
-            
-            // Calculate base product total
-            let productTotal = Number(product.productPrice) * Number(product.productUnits);
-            
-            // Add miscellaneous costs
-            if (miscellaneous?.costs) {
-              const miscCosts = Array.from(miscellaneous.costs.values()).reduce((sum, cost) => sum + Number(cost), 0);
-              productTotal += miscCosts;
-            }
-            
-            // Apply discount
-            if (params?.discount && params.discount > 0) {
-              const discountAmount = (params.discount / 100) * productTotal;
-              productTotal -= discountAmount;
-            }
-            
-            // If installment payment, calculate initial payment based on installment duration
-            if (params?.paymentMode === "INSTALLMENT" && params.installmentDuration) {
-              // Calculate monthly installment amount
-              const monthlyInstallment = productTotal / params.installmentDuration;
-              // Use the user-defined initial payment or calculated monthly amount
-              const initialPayment = params.installmentStartingPrice || monthlyInstallment;
-              return total + initialPayment;
-            }
-            
-            // For one-off payments, use full amount
-            return total + productTotal;
-          }, 0);
-        };
-
-        const paymentAmount = calculatePaymentAmount();
-        console.log("Calculated payment amount:", paymentAmount);
-
-        // Step 3: Store payment details for SalesSummary
+        // Step 2: Store payment details for SalesSummary
         console.log("Creating payment data object...");
         const newPaymentData = {
-          public_key: public_key,
-          tx_ref: `sale_${Date.now()}`,
-          amount: paymentAmount,
+          publicKey: public_key,
+          email: SaleStore?.customer?.email || "",
+          amount: 0, // Will be calculated in SalesSummary
           currency: "NGN",
-          customer: {
-            email: SaleStore?.customer?.email || "",
-            phone_number: SaleStore?.customer?.phone || "",
-            name: SaleStore.customer?.customerName || "",
-          },
-          customizations: {
-            title: "Sale Payment",
-            description: "Payment for sale",
-            logo: "https://yourdomain.com/logo.png",
-          },
-          meta: {
+          reference: `sale_${Date.now()}`,
+          metadata: {
             saleId: "",
             customerName: SaleStore.customer?.customerName || "",
+            phoneNumber: SaleStore?.customer?.phone || "",
+            tx_ref: `sale_${Date.now()}`,
+            payment_options: "card,banktransfer,ussd",
+            customer: {
+              email: SaleStore?.customer?.email || "",
+              name: SaleStore.customer?.customerName || "",
+              phone_number: SaleStore?.customer?.phone || "",
+            },
+            customizations: {
+              title: "Sale Payment",
+              description: "Payment for sale",
+              logo: "https://yourdomain.com/logo.png",
+            },
           },
-          redirect_url: `${window.location.origin}/sales/all`,
-          payment_options: "card,banktransfer,ussd",
+          callback: null,
+          onClose: null,
+          channels: ["card", "bank", "ussd"],
         };
-        
+
         console.log("Payment data created:", newPaymentData);
-        
-        // Step 4: Add payment details to store and go to summary
-          try {
-            SaleStore.addPaymentDetails(newPaymentData);
-            console.log("Payment details added to store successfully");
-            setSummaryState(true);
-            console.log("Summary state set to true successfully");
-          } catch (storeError) {
-            console.error("Error in store operations:", storeError);
-            setApiError("Error processing payment information. Please try again.");
-            return;
+
+        // Step 3: Add payment details to store and go to summary
+        try {
+          SaleStore.addPaymentDetails(newPaymentData);
+          console.log("Payment details added to store successfully");
+          setSummaryState(true);
+          console.log("Summary state set to true successfully");
+        } catch (storeError) {
+          console.error("Error in store operations:", storeError);
+          setApiError(
+            "Error processing payment information. Please try again."
+          );
+          return;
         }
       } catch (error) {
         if (error instanceof z.ZodError) {
           setFormErrors(error.issues);
         } else if (axios.isAxiosError(error)) {
-          const message = error.response?.data?.message || "Form validation failed. Please check your inputs.";
+          const message =
+            error.response?.data?.message ||
+            "Form validation failed. Please check your inputs.";
           setApiError(message);
         } else {
           setApiError("Form validation failed. Please check your inputs.");
@@ -210,7 +206,6 @@ const CreateNewSale = observer(
         setLoading(false);
       }
     };
-
     const resetSaleModalState = () => {
       setIsOpen(false);
       SaleStore.purgeStore();
@@ -224,22 +219,25 @@ const CreateNewSale = observer(
     const getIsFormFilled = () => {
       const validationResult = formSchema.safeParse(payload);
       const isPayloadValid = validationResult.success;
-      
+
       if (!isPayloadValid) {
-        console.log("Payload validation failed:", validationResult.error.issues);
+        console.log(
+          "Payload validation failed:",
+          validationResult.error.issues
+        );
       }
-      
+
       const doesParamsExist =
         SaleStore.parameters.length > 0 &&
         SaleStore.parameters.every((param) => param.currentProductId !== "");
-      
+
       console.log("Form validation:", {
         isPayloadValid,
         doesParamsExist,
         payload: payload,
-        parameters: SaleStore.parameters
+        parameters: SaleStore.parameters,
       });
-      
+
       return isPayloadValid && doesParamsExist;
     };
 
@@ -300,7 +298,7 @@ const CreateNewSale = observer(
               >
                 {!summaryState
                   ? "New Sale"
-                  : !SaleStore.paymentDetails.tx_ref
+                  : !SaleStore.paymentDetails.reference
                   ? "Sale Summary"
                   : "Proceed to Payment"}
               </h2>
@@ -394,7 +392,23 @@ const CreateNewSale = observer(
                         : getFieldError("products")
                     }
                   />
-
+                  <Input
+                    type="text"
+                    name="bvn"
+                    label="BANK VERIFICATION NUMBER"
+                    value={formData.bvn as string}
+                    onChange={(e) => {
+                      const numericValue = e.target.value.replace(/\D/g, ""); // Remove non-numeric characters
+                      if (numericValue.length <= 11) {
+                        handleInputChange(e.target.name, numericValue);
+                      }
+                    }}
+                    placeholder="Enter 11 digit BVN (Optional)"
+                    required={false}
+                    errorMessage={getFieldError("bvn")}
+                    maxLength={11}
+                    description="BVN must be exactly 11 digits (numbers only)"
+                  />
                   <div className="flex items-center justify-between gap-2 w-full">
                     <p className="text-sm text-textBlack font-semibold">
                       Apply Margin
@@ -406,7 +420,6 @@ const CreateNewSale = observer(
                       }}
                     />
                   </div>
-
 
                   <ProceedButton
                     type="button"
@@ -423,7 +436,8 @@ const CreateNewSale = observer(
                   loading={loading}
                   getIsFormFilled={getIsFormFilled}
                   apiErrorMessage={<ApiErrorMessage apiError={apiError} />}
-                  payload={payload}
+                  payload={getPayload()}
+                  refreshTable={allSalesRefresh}
                 />
               )}
             </div>

@@ -9,9 +9,13 @@ import greencustomer from "@/assets/customers/greencustomer.svg";
 import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
 import { useGetRequest } from "@/utils/useApiCall";
 import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
-import CreateNewCustomer from "@/Components/Customer/CreateNewCustomer";
+import CreateNewCustomer from "@/Components/Agents/Customer/CreateNewCustomer";
+import ActionButton from "@/Components/ActionButtonComponent/ActionButton";
+import circleAction from "@/assets/settings/addCircle.svg";
+import CustomerTable from "@/Components/Agents/Customer/CustomerTable";
 
-const CustomerTable = lazy(() => import("@/Components/Customer/CustomerTable"));
+
+// const CustomerTable = lazy(() => import("@/Components/Customer/CustomerTable"));
 
 const Customers = () => {
   const location = useLocation();
@@ -40,7 +44,7 @@ const Customers = () => {
     true,
     60000
   );
-  const fetchCustomerStats = useGetRequest("/v1/agents/customer/stats", true);
+  // const fetchCustomerStats = useGetRequest("/v1/agents/customer/stats", true);
 
   const paginationInfo = () => {
     const total = customerData?.total;
@@ -85,8 +89,6 @@ const Customers = () => {
 
   const customerPaths = ["your", "defaulting"];
 
-  console.log(customerData, 'fecustomerDatatchCustomerStats__')
-
   return (
     <>
       <PageLayout pageName="Customers" badge={customerbadge}>
@@ -94,14 +96,23 @@ const Customers = () => {
           <div className="flex flex-wrap w-full items-center gap-2 gap-y-3">
             <TitlePill
               icon={greencustomer}
-              // iconBgColor="bg-[#E3FAD6]"
-              topText="Your"
+              iconBgColor="bg-[#E3FAD6]"
+              topText="YOUR"
               bottomText="CUSTOMERS"
               value={customerData?.total || 0}
             />
           </div>
           <div className="flex w-full items-center justify-between gap-2 min-w-max sm:w-max sm:justify-end">
+            <ActionButton
+              label="New Customer"
+              icon={<img src={circleAction} />}
+              onClick={() => {
+                setIsOpen(true);
+              }}
+            />
+            {/* <DropDown {...dropDownList} /> */}
           </div>
+        
         </section>
         <div className="flex flex-col w-full px-2 py-8 gap-4 lg:flex-row md:p-8">
           <SideMenu navigationList={navigationList} />

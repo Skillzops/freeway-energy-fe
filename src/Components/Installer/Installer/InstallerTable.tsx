@@ -42,24 +42,35 @@ interface InstallationEntries {
 const generateInstallationEntries = (data: any): InstallationEntries[] => {
   // Handle both old format (data.installations) and new format (data.data)
   const installations = data?.data || data?.installations || [];
-  
+
   if (installations.length === 0) {
     return [];
   }
-  
-  const entries: InstallationEntries[] = installations.map((installation: any) => {
-    return {
-      id: installation?.id,
-      datetime: installation?.createdAt,
-      customerName: `${installation?.customer?.firstname} ${installation?.customer?.lastname}`,
-      productType: installation?.sale?.saleItems?.[0]?.product?.name || installation?.productType || 'N/A',
-      googleAddress: installation?.customer?.installationAddress || installation?.googleAddress || 'N/A',
-      tokenStatus: installation?.sale?.saleItems?.[0]?.devices?.[0]?.isTokenable ? 'Active' : 'Inactive',
-      status: installation?.status,
-      email: installation?.customer?.email,
-      phone: installation?.customer?.phone,
-    };
-  });
+
+  const entries: InstallationEntries[] = installations.map(
+    (installation: any) => {
+      return {
+        id: installation?.id,
+        datetime: installation?.createdAt,
+        customerName: `${installation?.customer?.firstname} ${installation?.customer?.lastname}`,
+        productType:
+          installation?.sale?.saleItems?.[0]?.product?.name ||
+          installation?.productType ||
+          "N/A",
+        googleAddress:
+          installation?.customer?.installationAddress ||
+          installation?.googleAddress ||
+          "N/A",
+        tokenStatus: installation?.sale?.saleItems?.[0]?.devices?.[0]
+          ?.isTokenable
+          ? "Active"
+          : "Inactive",
+        status: installation?.status,
+        email: installation?.customer?.email,
+        phone: installation?.customer?.phone,
+      };
+    }
+  );
   return entries;
 };
 
@@ -82,7 +93,8 @@ const InstallerTable = ({
     React.SetStateAction<Record<string, any> | null>
   >;
 }) => {
-  const [isInstallationDetailModalOpen, setIsInstallationDetailModalOpen] = useState<boolean>(false);
+  const [isInstallationDetailModalOpen, setIsInstallationDetailModalOpen] =
+    useState<boolean>(false);
   const [selectedInstallation, setSelectedInstallation] = useState<any>(null);
   const [queryValue, setQueryValue] = useState<string>("");
   const [isSearchQuery, setIsSearchQuery] = useState<boolean>(false);
@@ -136,6 +148,15 @@ const InstallerTable = ({
 
   return (
     <>
+      {/* <InstallationDetailModal
+        isOpen={isInstallationDetailModalOpen}
+        onClose={() => {
+          setIsInstallationDetailModalOpen(false);
+          setSelectedInstallation(null);
+        }}
+        installationData={selectedInstallation}
+      /> */}
+
       <InstallationDetailModal
         isOpen={isInstallationDetailModalOpen}
         onClose={() => {
@@ -143,6 +164,7 @@ const InstallerTable = ({
           setSelectedInstallation(null);
         }}
         installationData={selectedInstallation}
+        refreshTable={refreshTable}
       />
       {!error ? (
         <div className="w-full">
@@ -158,8 +180,12 @@ const InstallerTable = ({
                 title: "S/N",
                 key: "id",
                 customValue: (value, rowData) => {
-                  const index = getTableData().findIndex(item => item.id === rowData.id);
-                  return <span className="text-sm text-gray-700">{index + 1}</span>;
+                  const index = getTableData().findIndex(
+                    (item) => item.id === rowData.id
+                  );
+                  return (
+                    <span className="text-sm text-gray-700">{index + 1}</span>
+                  );
                 },
               },
               {
@@ -168,14 +194,22 @@ const InstallerTable = ({
                 customValue: (value) => {
                   const date = new Date(value);
                   const day = date.getDate();
-                  const month = date.toLocaleDateString('en-GB', { month: 'long' });
+                  const month = date.toLocaleDateString("en-GB", {
+                    month: "long",
+                  });
                   const year = date.getFullYear();
-                  const suffix = day === 1 || day === 21 || day === 31 ? 'st' : 
-                                day === 2 || day === 22 ? 'nd' : 
-                                day === 3 || day === 23 ? 'rd' : 'th';
+                  const suffix =
+                    day === 1 || day === 21 || day === 31
+                      ? "st"
+                      : day === 2 || day === 22
+                      ? "nd"
+                      : day === 3 || day === 23
+                      ? "rd"
+                      : "th";
                   return (
                     <span className="text-sm text-gray-700">
-                      {day}{suffix} {month} {year}
+                      {day}
+                      {suffix} {month} {year}
                     </span>
                   );
                 },
@@ -194,11 +228,11 @@ const InstallerTable = ({
                 title: "PRODUCT TYPE",
                 key: "productType",
                 customValue: (value: string) => {
-                  const parts = value.split(' ');
+                  const parts = value.split(" ");
                   return (
                     <div className="flex gap-1">
                       {parts.map((part: string, index: number) => (
-                        <span 
+                        <span
                           key={index}
                           className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium"
                         >
@@ -214,12 +248,16 @@ const InstallerTable = ({
                 key: "googleAddress",
                 valueIsAComponent: true,
                 customValue: (value) => {
-                  const hasAddress = value && value.trim() !== '';
+                  const hasAddress = value && value.trim() !== "";
                   return (
                     <div className="flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full ${hasAddress ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                      <div
+                        className={`w-2 h-2 rounded-full ${
+                          hasAddress ? "bg-green-500" : "bg-red-500"
+                        }`}
+                      ></div>
                       <span className="text-[10px] text-gray-700 font-medium">
-                        {hasAddress ? 'YES' : 'NO'}
+                        {hasAddress ? "YES" : "NO"}
                       </span>
                     </div>
                   );
@@ -233,28 +271,30 @@ const InstallerTable = ({
                   const status = value?.toLowerCase();
                   let dotColor = "bg-gray-500";
                   let textColor = "text-gray-700";
-                  
+
                   switch (status) {
-                    case 'active':
+                    case "active":
                       dotColor = "bg-green-500";
                       textColor = "text-green-700";
                       break;
-                    case 'inactive':
+                    case "inactive":
                       dotColor = "bg-red-500";
                       textColor = "text-red-700";
                       break;
-                    case 'pending':
+                    case "pending":
                       dotColor = "bg-yellow-500";
                       textColor = "text-yellow-700";
                       break;
                     default:
                       break;
                   }
-                  
+
                   return (
                     <div className="flex items-center gap-2">
                       <div className={`w-2 h-2 ${dotColor} rounded-full`}></div>
-                      <span className={`text-[12px] ${textColor} font-medium`}>{value}</span>
+                      <span className={`text-[12px] ${textColor} font-medium`}>
+                        {value}
+                      </span>
                     </div>
                   );
                 },
@@ -269,42 +309,88 @@ const InstallerTable = ({
                       className="px-2 py-1 text-[10px] text-textBlack font-medium bg-[#F6F8FA] border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom cursor-pointer transition-all hover:bg-gold"
                       onClick={() => {
                         // Handle both old format (installations) and new format (data)
-                        const installations = agentData?.data || agentData?.installations || [];
-                        
+                        const installations =
+                          agentData?.data || agentData?.installations || [];
+
                         const originalInstallation = installations.find(
                           (inst: any) => inst.id === rowData.id
                         );
-                        
+
                         // Re-shape the data to match what the modal expects
-                        const modalData = originalInstallation ? {
-                          id: originalInstallation.installationId || originalInstallation.id,
-                          status: originalInstallation.status,
-                          customer: {
-                            name: `${originalInstallation.customer?.firstname} ${originalInstallation.customer?.lastname}`,
-                            email: originalInstallation.customer?.email,
-                            phone: originalInstallation.customer?.phone,
-                          },
-                          installation: {
-                            address: originalInstallation.customer?.installationAddress || originalInstallation.googleAddress || 'N/A',
-                            longitude: originalInstallation.customer?.longitude || "Not Available",
-                            latitude: originalInstallation.customer?.latitude || "Not Available",
-                          },
-                          product: {
-                            category: originalInstallation.sale?.saleItems?.[0]?.product?.category || originalInstallation.product?.category || "EAAS",
-                            type: originalInstallation.sale?.saleItems?.[0]?.product?.name?.split(" ") || originalInstallation.product?.type?.split(" ") || ["EAAS", "RECHARGE"],
-                            name: originalInstallation.sale?.saleItems?.[0]?.product?.name?.split(" ") || originalInstallation.product?.name?.split(" ") || ["EAAS", "124242"],
-                            id: originalInstallation.sale?.saleItems?.[0]?.product?.id || originalInstallation.product?.id || "234242324",
-                          },
-                          device: {
-                            id: originalInstallation.sale?.saleItems?.[0]?.devices?.[0]?.id || originalInstallation.device?.id || "234242324",
-                            tokenStatus: originalInstallation.sale?.saleItems?.[0]?.devices?.[0]?.isTokenable ? 'Active' : 'Inactive',
-                            deviceStatus: originalInstallation.sale?.saleItems?.[0]?.devices?.[0]?.installationStatus || originalInstallation.device?.status || "Active",
-                          },
-                          general: {
-                            date: new Date(originalInstallation.createdAt).toLocaleDateString(),
-                            time: new Date(originalInstallation.createdAt).toLocaleTimeString(),
-                          },
-                        } : null;
+                        const modalData = originalInstallation
+                          ? {
+                              id:
+                                originalInstallation.installationId ||
+                                originalInstallation.id,
+                              status: originalInstallation.status,
+                              customer: {
+                                name: `${originalInstallation.customer?.firstname} ${originalInstallation.customer?.lastname}`,
+                                email: originalInstallation.customer?.email,
+                                phone: originalInstallation.customer?.phone,
+                              },
+                              installation: {
+                                address:
+                                  originalInstallation.customer
+                                    ?.installationAddress ||
+                                  originalInstallation.googleAddress ||
+                                  "N/A",
+                                longitude:
+                                  originalInstallation.customer?.longitude ||
+                                  "Not Available",
+                                latitude:
+                                  originalInstallation.customer?.latitude ||
+                                  "Not Available",
+                              },
+                              product: {
+                                category:
+                                  originalInstallation.sale?.saleItems?.[0]
+                                    ?.product?.category ||
+                                  originalInstallation.product?.category ||
+                                  "EAAS",
+                                type: originalInstallation.sale?.saleItems?.[0]?.product?.name?.split(
+                                  " "
+                                ) ||
+                                  originalInstallation.product?.type?.split(
+                                    " "
+                                  ) || ["EAAS", "RECHARGE"],
+                                name: originalInstallation.sale?.saleItems?.[0]?.product?.name?.split(
+                                  " "
+                                ) ||
+                                  originalInstallation.product?.name?.split(
+                                    " "
+                                  ) || ["EAAS", "124242"],
+                                id:
+                                  originalInstallation.sale?.saleItems?.[0]
+                                    ?.product?.id ||
+                                  originalInstallation.product?.id ||
+                                  "234242324",
+                              },
+                              device: {
+                                id:
+                                  originalInstallation.sale?.saleItems?.[0]
+                                    ?.devices?.[0]?.id ||
+                                  originalInstallation.device?.id ||
+                                  "234242324",
+                                tokenStatus: originalInstallation.sale
+                                  ?.saleItems?.[0]?.devices?.[0]?.isTokenable
+                                  ? "Active"
+                                  : "Inactive",
+                                deviceStatus:
+                                  originalInstallation.sale?.saleItems?.[0]
+                                    ?.devices?.[0]?.installationStatus ||
+                                  originalInstallation.device?.status ||
+                                  "Active",
+                              },
+                              general: {
+                                date: new Date(
+                                  originalInstallation.createdAt
+                                ).toLocaleDateString(),
+                                time: new Date(
+                                  originalInstallation.createdAt
+                                ).toLocaleTimeString(),
+                              },
+                            }
+                          : null;
 
                         setSelectedInstallation(modalData);
                         setIsInstallationDetailModalOpen(true);

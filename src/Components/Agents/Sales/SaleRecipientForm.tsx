@@ -5,6 +5,7 @@ import { SaleStore } from "@/stores/SaleStore";
 import { Input } from "@/Components/InputComponent/Input";
 import SecondaryButton from "@/Components/SecondaryButton/SecondaryButton";
 
+
 type FormData = z.infer<typeof saleRecipientSchema>;
 
 const defaultFormData: FormData = {
@@ -14,6 +15,14 @@ const defaultFormData: FormData = {
   phone: "",
   email: "",
 };
+
+// Make email optional: allow empty string or a valid email
+const recipientSchema = saleRecipientSchema.extend({
+  email: z.preprocess(
+    (v) => (typeof v === "string" && v.trim() === "" ? undefined : v),
+    z.string().email().optional()
+  ),
+});
 
 const SaleRecipientForm = ({
   handleClose,
@@ -39,17 +48,17 @@ const SaleRecipientForm = ({
     setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
   };
 
-  const isFormFilled = saleRecipientSchema.safeParse(formData).success;
+  const isFormFilled = recipientSchema.safeParse(formData).success;
 
   const getFieldError = (fieldName: string) => {
     return formErrors.find((error) => error.path[0] === fieldName)?.message;
   };
 
   const validateItems = () => {
-    const result = saleRecipientSchema.safeParse(formData);
+    const result = recipientSchema.safeParse(formData);
     if (!result.success) {
       setFormErrors(result.error.issues);
-      return true;
+      return false;
     }
     setFormErrors([]);
     return true;
@@ -66,25 +75,22 @@ const SaleRecipientForm = ({
     const customer = SaleStore.customer;
     if (customer && customer.firstname) {
       setFormData({
-        firstname: customer.firstname,
-        lastname: customer.lastname,
-        address: customer.location,
-        phone: customer.phone,
-        email: customer.email,
+        firstname: customer.firstname || "",
+        lastname: customer.lastname || "",
+        address: customer.location || "",
+        phone: customer.phone || "",
+        email: customer.email || "",
       });
     }
   };
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAutoFillChecked(e.target.checked);
-    if (e.target.checked) {
-      handleAutoFillCustomer();
-    }
+    if (e.target.checked) handleAutoFillCustomer();
   };
 
   return (
     <div className="flex flex-col justify-between h-full max-h-[360px] py-4 pr-1 sm:pr-3 overflow-y-auto gap-4">
-      {/* Conditionally render the checkbox for auto-filling */}
       {SaleStore?.customer?.firstname && (
         <div className="flex items-center gap-2 mb-2">
           <input
@@ -99,6 +105,7 @@ const SaleRecipientForm = ({
           </label>
         </div>
       )}
+
       <Input
         type="text"
         name="firstname"
@@ -145,21 +152,18 @@ const SaleRecipientForm = ({
         label="Email"
         value={formData.email}
         onChange={handleInputChange}
-        placeholder="Enter Email"
-        required={true}
+        placeholder="Enter Email (optional)"
+        required={false}
         errorMessage={getFieldError("email")}
       />
+
       <div className="flex items-center justify-between gap-1 mt-4">
-        <SecondaryButton
-          variant="secondary"
-          children="Cancel"
-          onClick={handleClose}
-        />
-        <SecondaryButton
-          disabled={!isFormFilled}
-          children="Save"
-          onClick={saveForm}
-        />
+        <SecondaryButton variant="secondary" onClick={handleClose}>
+          Cancel
+        </SecondaryButton>
+        <SecondaryButton disabled={!isFormFilled} onClick={saveForm}>
+          Save
+        </SecondaryButton>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { z } from "zod";
 import closeIcon from '@/assets/close.svg';
 import curvedlines from "@/assets/sales/curvedlines.png";
@@ -6,97 +6,144 @@ import redcustomerbag from "@/assets/customers/redcustomerbag.svg";
 import LocationSuccessCard from "./LocationSuccessCard";
 import SecondaryButton from '@/Components/SecondaryButton/SecondaryButton';
 
-// Zod Schema for location validation
+
+/* --------------------------- Validation (Zod) --------------------------- */
 const locationSchema = z.object({
   address: z.string().min(1, "Address is required"),
   latitude: z.string().min(1, "Latitude is required"),
   longitude: z.string().min(1, "Longitude is required"),
 });
-
 type LocationFormData = z.infer<typeof locationSchema>;
+
+/* ------------------------------ Types ---------------------------------- */
+export interface ILocation {
+  location: string;
+  longitude: string; // required
+  latitude: string;  // required
+}
 
 interface LocationUpdateCardProps {
   isOpen: boolean;
   onClose: () => void;
-  onUpdateLocation: (address: string, coordinates?: { lat: string; lng: string }) => void;
+  onUpdateLocation: (data: ILocation) => Promise<void> | void;
+  loading?: boolean
 }
 
+/* ------------------- Google Maps loader (idempotent) ------------------- */
+let mapsPromise: Promise<void> | null = null;
+function loadGoogleMaps(apiKey: string): Promise<void> {
+  if (mapsPromise) return mapsPromise;
+
+  mapsPromise = new Promise<void>((resolve, reject) => {
+    if ((window as any).google?.maps?.places) {
+      resolve();
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_API_KEY || "AIzaSyDqKiQNSG3P4Wsx3Qjy_BSQO2fTgfZIZoE"}&libraries=places&loading=async`;
+    script.async = true;
+    script.defer = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("Failed to load Google Maps JS API"));
+    document.head.appendChild(script);
+  });
+
+  return mapsPromise;
+}
+
+/* --------------------------- Component --------------------------------- */
 const LocationUpdateCard: React.FC<LocationUpdateCardProps> = ({
   isOpen,
   onClose,
-  onUpdateLocation
+  onUpdateLocation,
+  loading,
 }) => {
   const [formData, setFormData] = useState<LocationFormData>({
-    address: '',
-    latitude: '',
-    longitude: ''
+    address: "",
+    latitude: "",
+    longitude: "",
   });
   const [errors, setErrors] = useState<Partial<LocationFormData>>({});
   const [showSuccess, setShowSuccess] = useState(false);
 
-  // Google Places Autocomplete
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const acCleanupRef = useRef<(() => void) | null>(null);
+
+  const apiKey = useMemo(() => (import.meta.env.VITE_GOOGLE_API_KEY as string) ?? "", []);
+  const shouldInitMaps = isOpen && !!apiKey;
+
+  // Initialize classic Places Autocomplete on the input
   useEffect(() => {
-    if (!isOpen) return; // Only initialize when modal is open
+    if (!shouldInitMaps) return;
 
-    const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_API_KEY || "AIzaSyDqKiQNSG3P4Wsx3Qjy_BSQO2fTgfZIZoE"}&libraries=places`;
-    script.async = true;
-    script.defer = true;
-    
-    script.onload = () => {
-      // Wait a bit for the DOM to be ready
-      setTimeout(() => {
-        const input = document.getElementById('google-address-input') as HTMLInputElement;
-        if (input && window.google) {
-          const autocomplete = new window.google.maps.places.Autocomplete(input, {
-            types: ['geocode'],
-            componentRestrictions: { country: 'ng' },
-            fields: ['geometry', 'formatted_address', 'name']
-          });
+    let destroyed = false;
 
-          autocomplete.addListener('place_changed', () => {
-            const place = autocomplete.getPlace();
-            if (place.geometry) {
-              const fullAddress = place.formatted_address || place.name || '';
-              const coordinates = {
-                lat: place.geometry.location.lat().toString(),
-                lng: place.geometry.location.lng().toString(),
-              };
+    (async () => {
+      try {
+        await loadGoogleMaps(apiKey);
+        if (destroyed || !inputRef.current || !(window as any).google?.maps?.places) return;
 
-              setFormData(prev => ({
-                ...prev,
-                address: fullAddress,
-                latitude: coordinates.lat,
-                longitude: coordinates.lng
-              }));
-            }
-          });
-        }
-      }, 100);
-    };
+        const googleObj: any = (window as any).google;
 
-    document.head.appendChild(script);
+        const ac = new googleObj.maps.places.Autocomplete(inputRef.current, {
+          types: ["geocode"],
+          componentRestrictions: { country: ["ng"] },
+          fields: ["geometry", "formatted_address", "name"],
+        });
+
+        const onPlaceChanged = () => {
+          const place = ac.getPlace?.();
+          if (place?.geometry) {
+            const fullAddress = place.formatted_address || place.name || inputRef.current!.value || "";
+            const lat = place.geometry.location?.lat?.().toString?.() ?? "";
+            const lng = place.geometry.location?.lng?.().toString?.() ?? "";
+            setFormData((prev) => ({
+              ...prev,
+              address: fullAddress,
+              latitude: lat,
+              longitude: lng,
+            }));
+          }
+        };
+
+        ac.addListener("place_changed", onPlaceChanged);
+
+        acCleanupRef.current = () => {
+          try {
+            googleObj.maps.event.clearInstanceListeners(ac);
+          } catch {}
+        };
+      } catch (e) {
+        // fallback: user can type manually
+        console.error("Maps init error:", e);
+      }
+    })();
 
     return () => {
-      if (document.head.contains(script)) {
-        document.head.removeChild(script);
-      }
+      destroyed = true;
+      acCleanupRef.current?.();
+      acCleanupRef.current = null;
     };
-  }, [isOpen]); // Re-run when modal opens/closes
+  }, [shouldInitMaps, apiKey]);
 
-  const handleDone = () => {
+  const handleDone = async () => {
     try {
-      const validatedData = locationSchema.parse(formData);
-      onUpdateLocation(validatedData.address, { lat: validatedData.latitude, lng: validatedData.longitude });
+      const validated = locationSchema.parse(formData);
+
+      const payload: ILocation = {
+        location: validated.address,
+        longitude: validated.longitude, // correct mapping
+        latitude: validated.latitude,   // correct mapping
+      };
+
+      await Promise.resolve(onUpdateLocation(payload));
       setShowSuccess(true);
       setErrors({});
     } catch (error) {
       if (error instanceof z.ZodError) {
         const fieldErrors: Partial<LocationFormData> = {};
         error.errors.forEach((err) => {
-          if (err.path[0]) {
-            fieldErrors[err.path[0] as keyof LocationFormData] = err.message;
-          }
+          if (err.path[0]) fieldErrors[err.path[0] as keyof LocationFormData] = err.message;
         });
         setErrors(fieldErrors);
       }
@@ -111,21 +158,20 @@ const LocationUpdateCard: React.FC<LocationUpdateCardProps> = ({
   const handleRequestToken = () => {
     setShowSuccess(false);
     onClose();
-    // TODO: Navigate to request token page or open token modal
-    console.log('Request token clicked');
+    console.log("Request token clicked");
   };
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div 
+      <div
         className="bg-white rounded-[20px] w-[90vw] max-w-[450px] p-6"
         style={{
           backgroundImage: `url(${curvedlines})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
-          backgroundRepeat: "no-repeat"
+          backgroundRepeat: "no-repeat",
         }}
       >
         <div className="flex flex-col justify-between h-full min-h-[600px] gap-2">
@@ -139,7 +185,6 @@ const LocationUpdateCard: React.FC<LocationUpdateCardProps> = ({
               </button>
             </div>
 
-            {/* Shopping Bag Icon */}
             <div className="flex justify-start pl-4 mb-6">
               <img src={redcustomerbag} alt="Shopping Bag" className="w-20 h-20" />
             </div>
@@ -147,80 +192,101 @@ const LocationUpdateCard: React.FC<LocationUpdateCardProps> = ({
             <div className="space-y-4">
               <div className="bg-yellow-100 rounded-lg p-4 mb-6">
                 <p className="text-textBlack text-sm italic">
-                  Try inputting the address of the installation site, or click the location icon to automatically generate the live google address.
+                  Try inputting the installation address, or use the Google suggestion box to select an address.
                 </p>
               </div>
 
-              {/* Google Address Input */}
               <div className="space-y-4">
+                {/* Address + Autocomplete */}
                 <div className="w-full">
                   <div className="relative autofill-parent flex items-center w-full px-[1.1em] py-[1.25em] gap-1 rounded-3xl h-[48px] border-[0.6px] border-strokeGrey transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white">
-                    <span className="absolute flex -top-2 items-center justify-center text-sm text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] transition-opacity duration-500 ease-in-out opacity-100">
+                    <span className="absolute flex -top-2 items-center justify-center text-sm text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px]">
                       GOOGLE ADDRESS
                     </span>
                     <input
+                      ref={inputRef}
                       id="google-address-input"
                       type="text"
                       placeholder="Enter installation address"
                       value={formData.address}
-                      onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, address: e.target.value }))
+                      }
                       className="w-full text-sm font-semibold text-textBlack placeholder:text-textGrey placeholder:font-normal placeholder:italic"
                     />
                   </div>
+                  {errors.address && (
+                    <p className="text-xs text-red-600 mt-1">{errors.address}</p>
+                  )}
                 </div>
 
-                {/* Longitude Input */}
+                {/* Longitude */}
                 <div className="w-full">
                   <div className="relative autofill-parent flex items-center w-full px-[1.1em] py-[1.25em] gap-1 rounded-3xl h-[48px] border-[0.6px] border-strokeGrey transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white">
-                    <span className="absolute flex -top-2 items-center justify-center text-sm text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] transition-opacity duration-500 ease-in-out opacity-100">
+                    <span className="absolute flex -top-2 items-center justify-center text-sm text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px]">
                       LONGITUDE
                     </span>
                     <input
                       type="text"
-                      placeholder="44556677"
+                      inputMode="decimal"
+                      placeholder="7.4951"
                       value={formData.longitude}
-                      onChange={(e) => setFormData(prev => ({ ...prev, longitude: e.target.value }))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, longitude: e.target.value }))
+                      }
                       className="w-full text-sm font-semibold text-textBlack placeholder:text-textGrey placeholder:font-normal placeholder:italic"
                     />
                   </div>
+                  {errors.longitude && (
+                    <p className="text-xs text-red-600 mt-1">{errors.longitude}</p>
+                  )}
                 </div>
 
-                {/* Latitude Input */}
+                {/* Latitude */}
                 <div className="w-full">
                   <div className="relative autofill-parent flex items-center w-full px-[1.1em] py-[1.25em] gap-1 rounded-3xl h-[48px] border-[0.6px] border-strokeGrey transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white">
-                    <span className="absolute flex -top-2 items-center justify-center text-sm text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px] transition-opacity duration-500 ease-in-out opacity-100">
+                    <span className="absolute flex -top-2 items-center justify-center text-sm text-textGrey font-semibold px-2 py-0.5 max-w-max h-4 bg-white border-[0.6px] border-strokeCream rounded-[200px]">
                       LATITUDE
                     </span>
                     <input
                       type="text"
-                      placeholder="112233445"
+                      inputMode="decimal"
+                      placeholder="6.5244"
                       value={formData.latitude}
-                      onChange={(e) => setFormData(prev => ({ ...prev, latitude: e.target.value }))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, latitude: e.target.value }))
+                      }
                       className="w-full text-sm font-semibold text-textBlack placeholder:text-textGrey placeholder:font-normal placeholder:italic"
                     />
                   </div>
+                  {errors.latitude && (
+                    <p className="text-xs text-red-600 mt-1">{errors.latitude}</p>
+                  )}
                 </div>
               </div>
             </div>
           </div>
 
           <div className="flex items-center justify-between gap-1">
+            <SecondaryButton variant="secondary" onClick={onClose}>
+              Cancel
+            </SecondaryButton>
             <SecondaryButton
-              variant="secondary"
-              children="Cancel"
-              onClick={onClose}
-            />
-            <SecondaryButton
-              disabled={!formData.address.trim() || !formData.latitude.trim() || !formData.longitude.trim()}
-              children="Done"
+              disabled={
+                !formData.address.trim() ||
+                !formData.latitude.trim() ||
+                !formData.longitude.trim()
+              }
               onClick={handleDone}
               className="bg-gradient-to-r from-orange-400 to-orange-600 text-white"
-            />
+            >
+            {loading? "Updating...": "Done"}
+            </SecondaryButton>
           </div>
         </div>
       </div>
-      
-      {/* Success Card - Show independently */}
+
+      {/* Success Card */}
       <LocationSuccessCard
         isOpen={showSuccess}
         onClose={() => setShowSuccess(false)}
@@ -231,4 +297,4 @@ const LocationUpdateCard: React.FC<LocationUpdateCardProps> = ({
   );
 };
 
-export default LocationUpdateCard; 
+export default LocationUpdateCard;

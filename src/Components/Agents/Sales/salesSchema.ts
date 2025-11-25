@@ -5,18 +5,28 @@ export const saleRecipientSchema = z.object({
   lastname: z.string().trim().min(2, "Lastname is required"),
   address: z.string().trim().min(1, "Address is required"),
   phone: z.string().trim().min(10, "Phone number is required"),
-  email: z.string().trim().email("Invalid email"),
+  email: z.preprocess(
+    v => (typeof v === "string" ? v.trim() : v),
+    z.string().email("Invalid email").or(z.literal(""))
+  ),
 });
 
 export const identificationDetailsSchema = z
   .object({
-    idType: z.string().trim().min(2, "ID Type is required"),
+    idType: z.string().trim().min(2, "ID Type is required_"),
     idNumber: z.string().trim().min(5, "ID Number is required"),
     issuingCountry: z.string().trim().min(2, "Issuing Country is required"),
     issueDate: z
       .string()
       .trim()
       .nonempty({ message: "Issue date is required" })
+      .transform((date) => {
+        // Handle ISO date strings by extracting just the date part
+        if (date.includes('T')) {
+          return date.split('T')[0];
+        }
+        return date;
+      })
       .refine((date) => !isNaN(Date.parse(date)), {
         message: "Invalid issue date",
       })
@@ -28,6 +38,13 @@ export const identificationDetailsSchema = z
       .string()
       .trim()
       .nonempty({ message: "Expiration date is required" })
+      .transform((date) => {
+        // Handle ISO date strings by extracting just the date part
+        if (date.includes('T')) {
+          return date.split('T')[0];
+        }
+        return date;
+      })
       .refine((date) => !isNaN(Date.parse(date)), {
         message: "Invalid expiration date",
       })
@@ -56,12 +73,19 @@ export const nextOfKinDetailsSchema = z.object({
   fullName: z.string().trim().min(3, "Full name is required"),
   relationship: z.string().trim().min(2, "Relationship is required"),
   phoneNumber: z.string().trim().min(10, "Phone number is required"),
-  email: z.string().email("Invalid email").or(z.literal("")),
+  email: z.string().email("Invalid email").or(z.literal("")).optional(),
   homeAddress: z.string().trim(),
   dateOfBirth: z
     .string()
     .trim()
-    .nonempty({ message: "Issue date is required" })
+    .nonempty({ message: "Date of birth is required" })
+    .transform((date) => {
+      // Handle ISO date strings by extracting just the date part
+      if (date.includes('T')) {
+        return date.split('T')[0];
+      }
+      return date;
+    })
     .refine((date) => !isNaN(Date.parse(date)), {
       message: "Invalid date of birth",
     })
@@ -74,12 +98,19 @@ export const nextOfKinDetailsSchema = z.object({
 export const guarantorDetailsSchema = z.object({
   fullName: z.string().trim().min(3, "Full name is required"),
   phoneNumber: z.string().trim().min(10, "Phone number is required"),
-  email: z.string().trim().email("Invalid email").or(z.literal("")),
+  email: z.string().trim().email("Invalid email").or(z.literal("")).optional(),
   homeAddress: z.string().trim().min(1, "Home address is required"),
   dateOfBirth: z
     .string()
     .trim()
-    .nonempty({ message: "Issue date is required" })
+    .nonempty({ message: "Date of birth is required" })
+    .transform((date) => {
+      // Handle ISO date strings by extracting just the date part
+      if (date.includes('T')) {
+        return date.split('T')[0];
+      }
+      return date;
+    })
     .refine((date) => !isNaN(Date.parse(date)), {
       message: "Invalid date of birth",
     })
@@ -123,48 +154,6 @@ export const saleItemSchema = z
             "Installment starting price is required for installment payments",
           path: ["installmentStartingPrice"],
         });
-      }
-    }
-  });
-
-export const formSchema = z
-  .object({
-    category: z.enum(["PRODUCT"], {
-      message: "Category is required",
-    }),
-    customerId: z.string().min(1, "Please select at least one customer"),
-    saleItems: z
-      .array(saleItemSchema)
-      .min(1, "At least one sale item is required"),
-    identificationDetails: identificationDetailsSchema.optional(),
-    nextOfKinDetails: nextOfKinDetailsSchema.optional(),
-    guarantorDetails: guarantorDetailsSchema.optional(),
-    applyMargin: z.boolean().default(false),
-    paymentMethod: z.enum(["ONLINE"], {
-      message: "Payment method is required",
-    }),
-  })
-  .superRefine((data, ctx) => {
-    // Check if any sale item has paymentMode as "INSTALLMENT"
-    const hasInstallment = data.saleItems.some(
-      (item) => item.paymentMode === "INSTALLMENT"
-    );
-
-    // If any sale item has paymentMode as "INSTALLMENT", validate guarantorDetails if provided
-    if (hasInstallment) {
-      // Validate guarantorDetails if provided
-      if (data.guarantorDetails) {
-        const guarantorValidation = guarantorDetailsSchema.safeParse(
-          data.guarantorDetails
-        );
-        if (!guarantorValidation.success) {
-          guarantorValidation.error.issues.forEach((issue) => {
-            ctx.addIssue({
-              ...issue,
-              path: ["guarantorDetails", ...issue.path],
-            });
-          });
-        }
       }
     }
   });
@@ -222,18 +211,81 @@ type GuarantorDetails = {
 export type SalePayload = {
   category: "PRODUCT";
   customerId: string;
+  bvn?: string;
   saleItems: SaleItem[];
   nextOfKinDetails?: NextOfKinDetails;
   identificationDetails?: IdentificationDetails;
   guarantorDetails?: GuarantorDetails;
   applyMargin: boolean;
   paymentMethod: "ONLINE" | "CASH";
+  monthlypayment: number,
 };
 
-export const defaultSaleFormData = {
-  category: "PRODUCT" as const,
+export const defaultSaleFormData: SalePayload = {
+  category: "PRODUCT",
   customerId: "",
   applyMargin: false,
+  bvn: undefined,
   saleItems: [],
-  paymentMethod: "ONLINE" as const,
+  paymentMethod: "ONLINE",
+  monthlypayment: 0,
 };
+
+export const formSchema = z
+  .object({
+    category: z.enum(["PRODUCT"], {
+      message: "Category is required",
+    }),
+    customerId: z.string().min(1, "Please select at least one customer"),
+    saleItems: z
+      .array(saleItemSchema)
+      .min(1, "At least one sale item is required"),
+    bvn: z
+      .string()
+      .optional()
+      .refine((val) => {
+        // If no value provided, it's valid (optional field)
+        if (!val || val.length === 0) return true;
+        
+        // Must be exactly 11 digits
+        if (val.length !== 11) return false;
+        
+        // Must contain only digits
+        if (!/^\d+$/.test(val)) return false;
+        
+        return true;
+      }, {
+        message: "BVN must be exactly 11 digits when provided"
+      }),
+    identificationDetails: identificationDetailsSchema.optional(),
+    nextOfKinDetails: nextOfKinDetailsSchema.optional(),
+    guarantorDetails: guarantorDetailsSchema.optional(),
+    applyMargin: z.boolean().default(false),
+    paymentMethod: z.enum(["ONLINE", "CASH"], {
+      message: "Payment method is required",
+    }),
+  })
+  .superRefine((data, ctx) => {
+    // Check if any sale item has paymentMode as "INSTALLMENT"
+    const hasInstallment = data.saleItems.some(
+      (item) => item.paymentMode === "INSTALLMENT"
+    );
+
+    // If any sale item has paymentMode as "INSTALLMENT", validate guarantorDetails if provided
+    if (hasInstallment) {
+      // Validate guarantorDetails if provided
+      if (data.guarantorDetails) {
+        const guarantorValidation = guarantorDetailsSchema.safeParse(
+          data.guarantorDetails
+        );
+        if (!guarantorValidation.success) {
+          guarantorValidation.error.issues.forEach((issue) => {
+            ctx.addIssue({
+              ...issue,
+              path: ["guarantorDetails", ...issue.path],
+            });
+          });
+        }
+      }
+    }
+  });

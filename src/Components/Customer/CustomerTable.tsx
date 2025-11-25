@@ -4,8 +4,10 @@ import { PaginationType, Table } from "../TableComponent/Table";
 import { GoDotFill } from "react-icons/go";
 import clock from "../../assets/table/clock.svg";
 import CustomerModal from "./CustomerModal";
-import { ApiErrorStatesType } from "@/utils/useApiCall";
+import { ApiErrorStatesType, useApiCall } from "@/utils/useApiCall";
 import { ErrorComponent } from "@/Pages/ErrorPage";
+
+
 
 interface CustomerEntries {
   id: string;
@@ -13,8 +15,8 @@ interface CustomerEntries {
   name: string;
   email: string;
   location: string;
-  // product: string;
   status: string;
+  approvalStatus: string;
 }
 
 type Permission = {
@@ -52,16 +54,16 @@ export type CustomerType = {
   firstname: string;
   lastname: string;
   username: string | null;
-  email: string;
+  email: string | null;
   phone: string;
   alternatePhone?: string;
   gender?: string;
   location: string;
-  addressType: string | null;
   installationAddress?: string;
+  addressType: string | null;
   lga?: string;
   state?: string;
-  staffId: string | null;
+  staffId?: string | null;
   longitude: string;
   latitude: string;
   idType?: string;
@@ -70,6 +72,8 @@ export type CustomerType = {
   emailVerified: boolean;
   isBlocked: boolean;
   status: string;
+  approvalStatus?: "APPROVED" | "REJECTED" | "PENDING" | string;
+  isApproved?: boolean;
   roleId: string;
   createdAt: string;
   updatedAt: string;
@@ -77,27 +81,114 @@ export type CustomerType = {
   lastLogin: string | null;
   customerDetails: CustomerDetails;
   role: Role;
-  passportPhotoUrl?: string;
-  idImageUrl?: string;
-  contractFormImageUrl?: string;
+  passportPhotoUrl?: string | null;
+  idImageUrl?: string | null;
+  contractFormImageUrl?: string | null;
 };
 
-// Helper function to map the API data to the desired format
 const generateCustomerEntries = (data: any): CustomerEntries[] => {
-  const entries: CustomerEntries[] = data?.customers.map(
-    (item: CustomerType, index: number) => {
+  const entries: CustomerEntries[] =
+    data?.customers?.map((item: CustomerType, index: number) => {
+      const approval = (item?.approvalStatus || "PENDING").toUpperCase();
+      const normalizedStatus =
+        approval === "APPROVED" ? "active" : (item?.status || "").toLowerCase();
+
       return {
         id: item?.id,
         no: index + 1,
         name: `${item?.firstname} ${item?.lastname}`,
-        email: item?.email,
+        email: item?.email ?? "—",
         location: item?.location,
-        // product: "N/A",
-        status: item?.status,
+        status: normalizedStatus,
+        approvalStatus: approval,
       };
-    }
-  );
+    }) ?? [];
   return entries;
+};
+
+type ConfirmModalProps = {
+  open: boolean;
+  title: string;
+  description?: string;
+  confirmText?: string;
+  cancelText?: string;
+  loading?: boolean;
+  onConfirm: () => void;
+  onClose: () => void;
+  showReason?: boolean;
+  reason?: string;
+  onReasonChange?: (v: string) => void;
+  reasonLabel?: string;
+  reasonPlaceholder?: string;
+};
+
+const ConfirmModal = ({
+  open,
+  title,
+  description,
+  confirmText = "Confirm",
+  cancelText = "Cancel",
+  loading = false,
+  onConfirm,
+  onClose,
+  showReason = false,
+  reason = "",
+  onReasonChange,
+  reasonLabel = "Reason for rejection",
+  reasonPlaceholder = "Enter reason…",
+}: ConfirmModalProps) => {
+  if (!open) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-[1000] flex items-center justify-center"
+      aria-modal="true"
+      role="dialog"
+    >
+      <div
+        className="absolute inset-0 bg-black/40"
+        onClick={loading ? undefined : onClose}
+      />
+      <div className="relative w-[min(92vw,520px)] rounded-2xl bg-white shadow-2xl border border-strokeGreyTwo p-5">
+        <h3 className="text-lg font-semibold text-textBlack">{title}</h3>
+        {description ? (
+          <p className="mt-2 text-sm text-textGrey">{description}</p>
+        ) : null}
+
+        {showReason && (
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-textBlack mb-1">
+              {reasonLabel}
+            </label>
+            <textarea
+              className="w-full min-h-[88px] rounded-lg border border-strokeGreyTwo px-3 py-2 text-sm outline-none focus:border-light-green"
+              placeholder={reasonPlaceholder}
+              value={reason}
+              onChange={(e) => onReasonChange?.(e.target.value)}
+              disabled={loading}
+            />
+          </div>
+        )}
+
+        <div className="mt-5 flex items-center justify-end gap-2">
+          <button
+            className="px-3 py-2 text-sm rounded-full border border-strokeGreyTwo bg-[#F6F8FA] hover:bg-gray-100 disabled:opacity-60"
+            onClick={onClose}
+            disabled={loading}
+          >
+            {cancelText}
+          </button>
+          <button
+            className="px-3 py-2 text-sm rounded-full border border-errorTwo text-white bg-errorTwo hover:opacity-90 disabled:opacity-60"
+            onClick={onConfirm}
+            disabled={loading}
+          >
+            {loading ? "Processing..." : confirmText}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 const CustomerTable = ({
@@ -119,10 +210,75 @@ const CustomerTable = ({
     React.SetStateAction<Record<string, any> | null>
   >;
 }) => {
+  const { apiCall } = useApiCall();
+
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [customerID, setCustomerID] = useState<string>("");
   const [queryValue, setQueryValue] = useState<string>("");
   const [isSearchQuery, setIsSearchQuery] = useState<boolean>(false);
+
+  const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+  const [actionType, setActionType] = useState<"approve" | "reject" | null>(
+    null
+  );
+
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<{
+    id: string;
+    approve: boolean;
+    label?: string;
+  } | null>(null);
+
+  const [rejectionReason, setRejectionReason] = useState<string>("");
+
+  const API_BASE = (import.meta.env?.VITE_API_BASE ?? "").replace(/\/$/, "");
+
+  const handleApproveReject = async (
+    id: string,
+    approve: boolean,
+    reason?: string
+  ) => {
+    try {
+      setActionLoadingId(id);
+      setActionType(approve ? "approve" : "reject");
+
+      await apiCall({
+        endpoint: `${API_BASE}/v1/customers/${id}/approve`,
+        method: "post",
+        data: approve
+          ? { approve: true }
+          : { approve: false, ...(reason ? { rejectionReason: reason } : {}) },
+        successMessage: approve ? "Customer approved" : "Customer rejected",
+      });
+
+      await refreshTable();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setActionLoadingId(null);
+      setActionType(null);
+    }
+  };
+
+  const applyApprovalStatus = (
+    which: "APPROVED" | "REJECTED" | "PENDING"
+  ) => {
+    setQueryValue(which.toLowerCase());
+    setIsSearchQuery(true);
+
+    setTableQueryParams((prev) => {
+      const next = { ...(prev || {}) };
+      delete (next as any).sRejected;
+      delete (next as any).isApproved;
+      delete (next as any).isPending;
+
+      if (which === "APPROVED") (next as any).isApproved = true;
+      if (which === "REJECTED") (next as any).sRejected = true;
+      if (which === "PENDING") (next as any).isPending = true;
+
+      return next;
+    });
+  };
 
   const filterList = [
     {
@@ -131,19 +287,12 @@ const CustomerTable = ({
         setQueryValue(query);
         setIsSearchQuery(true);
         setTableQueryParams((prevParams) => ({
-          ...prevParams,
+          ...(prevParams || {}),
           location: query,
         }));
       },
       isSearch: true,
     },
-    // {
-    //   name: "Product",
-    //   items: ["Product One", "Product Two"],
-    //   onClickLink: (index: number) => {
-    //     console.log("INDEX:", index);
-    //   },
-    // },
     {
       name: "Status",
       items: ["Active", "Inactive", "Barred"],
@@ -155,7 +304,7 @@ const CustomerTable = ({
         setQueryValue(query);
         setIsSearchQuery(true);
         setTableQueryParams((prevParams) => ({
-          ...prevParams,
+          ...(prevParams || {}),
           status: query,
         }));
       },
@@ -166,18 +315,28 @@ const CustomerTable = ({
         setQueryValue(query);
         setIsSearchQuery(true);
         setTableQueryParams((prevParams) => ({
-          ...prevParams,
+          ...(prevParams || {}),
           search: query,
         }));
       },
       isSearch: true,
     },
     {
+      name: "Approval Status",
+      items: ["Approved", "Rejected", "Pending"],
+      onClickLink: async (index: number) => {
+        const picked = ["APPROVED", "REJECTED", "PENDING"][
+          index
+        ] as "APPROVED" | "REJECTED" | "PENDING";
+        applyApprovalStatus(picked);
+      },
+    },
+    {
       onDateClick: (date: string) => {
         setQueryValue(date);
         setIsSearchQuery(false);
         setTableQueryParams((prevParams) => ({
-          ...prevParams,
+          ...(prevParams || {}),
           createdAt: date.split("T")[0],
         }));
       },
@@ -190,40 +349,35 @@ const CustomerTable = ({
     { title: "NAME", key: "name" },
     { title: "EMAIL", key: "email" },
     { title: "LOCATION", key: "location" },
-    // {
-    //   title: "PRODUCT",
-    //   key: "product",
-    //   rightIcon: (
-    //     <svg
-    //       width="16"
-    //       height="16"
-    //       viewBox="0 0 16 16"
-    //       fill="none"
-    //       xmlns="http://www.w3.org/2000/svg"
-    //     >
-    //       <path
-    //         fillRule="evenodd"
-    //         clipRule="evenodd"
-    //         d="M8.00024 1.8335C7.17181 1.8335 6.50024 2.50507 6.50024 3.3335V3.50675C6.87162 3.50015 7.27913 3.50016 7.72633 3.50016H8.27415C8.72136 3.50016 9.12886 3.50015 9.50024 3.50675V3.3335C9.50024 2.50507 8.82867 1.8335 8.00024 1.8335ZM10.5002 3.55211V3.3335C10.5002 1.95278 9.38095 0.833496 8.00024 0.833496C6.61953 0.833496 5.50024 1.95278 5.50024 3.3335V3.55211C5.40509 3.56031 5.31314 3.56979 5.22429 3.58077C4.55098 3.66396 3.99589 3.83872 3.52436 4.23005C3.05284 4.62138 2.77877 5.13475 2.57292 5.7812C2.37343 6.40768 2.22243 7.2131 2.0326 8.22555L2.01881 8.29908C1.75095 9.72762 1.53985 10.8534 1.50111 11.741C1.46141 12.6507 1.59675 13.4042 2.10993 14.0225C2.62312 14.6409 3.33873 14.9127 4.24019 15.0414C5.11967 15.1669 6.26508 15.1668 7.71849 15.1668H8.28195C9.73538 15.1668 10.8808 15.1669 11.7603 15.0414C12.6618 14.9127 13.3774 14.6409 13.8905 14.0225C14.4037 13.4042 14.5391 12.6507 14.4994 11.741C14.4606 10.8534 14.2495 9.72763 13.9817 8.2991L13.9679 8.22558C13.7781 7.21311 13.627 6.40769 13.4276 5.7812C13.2217 5.13475 12.9476 4.62138 12.4761 4.23005C12.0046 3.83872 11.4495 3.66396 10.7762 3.58077C10.6873 3.56979 10.5954 3.56031 10.5002 3.55211ZM5.34691 4.57322C4.77655 4.64369 4.43207 4.77625 4.163 4.99956C3.89393 5.22287 3.70016 5.53702 3.52578 6.08462C3.34721 6.64542 3.20671 7.38992 3.0093 8.44277C2.73215 9.92089 2.53543 10.9766 2.50016 11.7846C2.4655 12.5787 2.59288 13.0386 2.87944 13.3839C3.16601 13.7292 3.5945 13.9391 4.38145 14.0514C5.18205 14.1656 6.25597 14.1668 7.75985 14.1668H8.24063C9.74451 14.1668 10.8184 14.1656 11.619 14.0514C12.406 13.9391 12.8345 13.7292 13.121 13.3839C13.4076 13.0386 13.535 12.5787 13.5003 11.7846C13.4651 10.9766 13.2683 9.92089 12.9912 8.44277C12.7938 7.38992 12.6533 6.64542 12.4747 6.08462C12.3003 5.53702 12.1066 5.22287 11.8375 4.99956C11.5684 4.77625 11.2239 4.64369 10.6536 4.57322C10.0695 4.50105 9.31183 4.50016 8.24063 4.50016H7.75985C6.68865 4.50016 5.93101 4.50105 5.34691 4.57322ZM6.82816 8.19326C6.67529 8.24685 6.50024 8.41395 6.50024 8.79798C6.50024 8.94103 6.59439 9.16172 6.83988 9.44558C7.0723 9.71432 7.37929 9.96964 7.65794 10.1741C7.80876 10.2847 7.88036 10.3358 7.93765 10.366C7.97391 10.3852 7.98395 10.3852 8.00024 10.3852C8.01654 10.3852 8.02658 10.3852 8.06284 10.366C8.12012 10.3358 8.19173 10.2848 8.34255 10.1741C8.62119 9.96964 8.92818 9.71433 9.1606 9.44558C9.40609 9.16173 9.50024 8.94104 9.50024 8.79798C9.50024 8.41395 9.3252 8.24684 9.17232 8.19325C9.00545 8.13476 8.6964 8.1534 8.34603 8.48887C8.15268 8.67401 7.84781 8.67401 7.65445 8.48887C7.30408 8.1534 6.99503 8.13476 6.82816 8.19326ZM8.00024 7.4897C7.52272 7.17533 6.98356 7.07911 6.49735 7.24956C5.87521 7.46765 5.50024 8.06653 5.50024 8.79798C5.50024 9.31121 5.79438 9.7654 6.08351 10.0997C6.3857 10.4491 6.75967 10.7553 7.06636 10.9803C7.0819 10.9917 7.09755 11.0033 7.11336 11.015C7.34754 11.1881 7.61405 11.3852 8.00024 11.3852C8.38644 11.3852 8.65294 11.1882 8.88712 11.015C8.90293 11.0033 8.91858 10.9917 8.93412 10.9803C9.24082 10.7553 9.61478 10.4491 9.91698 10.0997C10.2061 9.7654 10.5002 9.31121 10.5002 8.79798C10.5002 8.06652 10.1253 7.46765 9.50313 7.24956C9.01692 7.07911 8.47776 7.17533 8.00024 7.4897Z"
-    //         fill="#828DA9"
-    //       />
-    //     </svg>
-    //   ),
-    // },
+    {
+      title: "APPROVAL STATUS",
+      key: "approvalStatus",
+      valueIsAComponent: true,
+      customValue: (value: string) => {
+        const val = (value || "PENDING").toUpperCase();
+        let style = "text-[#49526A] border-strokeGreyTwo";
+        if (val === "APPROVED") style = "text-success border-success";
+        else if (val === "REJECTED") style = "text-errorTwo border-errorTwo";
+
+        return (
+          <span
+            className={`${style} flex items-center gap-1 w-max px-2 py-1 bg-[#F6F8FA] border-[0.4px] rounded-full uppercase text-[11px]`}
+          >
+            <GoDotFill />
+            {val}
+          </span>
+        );
+      },
+    },
     {
       title: "STATUS",
       key: "status",
       valueIsAComponent: true,
-      customValue: (value: any) => {
-        let style: string = "";
-
-        if (value === "active") {
-          style = "text-success";
-        } else if (value === "inactive") {
-          style = "text-strokeCream";
-        } else {
-          style = "text-errorTwo";
-        }
+      customValue: (value: string) => {
+        let style = "";
+        if (value === "active") style = "text-success";
+        else if (value === "inactive") style = "text-strokeCream";
+        else style = "text-errorTwo";
 
         return (
           <span
@@ -240,25 +394,148 @@ const CustomerTable = ({
       title: "ACTIONS",
       key: "actions",
       valueIsAComponent: true,
-      customValue: (_value: any, rowData: { id: string }) => {
+      customValue: (
+        _value: any,
+        row: { id: string; status?: string; approvalStatus?: string }
+      ) => {
+        const isRowLoading = actionLoadingId === row.id;
+        const approval = (row.approvalStatus || "").toUpperCase();
+        const isApproved = approval === "APPROVED";
+        const isRejected = approval === "REJECTED";
+        const isInactive = (row.status || "").toLowerCase() === "inactive";
+
+        // Rejected: hide Accept/Reject, show only View
+        if (isRejected) {
+          return (
+            <div className="flex items-center gap-2">
+              <span
+                className="px-2 py-1 text-[10px] text-textBlack font-medium bg-[#F6F8FA] border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom cursor-pointer transition-all hover:bg-gold"
+                onClick={() => {
+                  setCustomerID(row.id);
+                  setIsOpen(true);
+                }}
+              >
+                View
+              </span>
+            </div>
+          );
+        }
+
+        // Approved: show only View
+        if (isApproved) {
+          return (
+            <div className="flex items-center gap-2">
+              <span
+                className="px-2 py-1 text-[10px] text-textBlack font-medium bg-[#F6F8FA] border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom cursor-pointer transition-all hover:bg-gold"
+                onClick={() => {
+                  setCustomerID(row.id);
+                  setIsOpen(true);
+                }}
+              >
+                View
+              </span>
+            </div>
+          );
+        }
+
+        // Pending + inactive: show Accept + Reject + View
+        if (isInactive) {
+          return (
+            <div className="flex items-center gap-2">
+              <button
+                className={`px-2 py-1 text-[10px] rounded-full border-[0.2px] border-success text-success bg-[#F6F8FA] transition-all ${
+                  isRowLoading && actionType === "approve"
+                    ? "opacity-60 cursor-not-allowed"
+                    : "hover:bg-green-50"
+                }`}
+                disabled={isRowLoading}
+                onClick={() => {
+                  setPendingAction({ id: row.id, approve: true, label: "Accept" });
+                  setRejectionReason("");
+                  setConfirmOpen(true);
+                }}
+              >
+                {isRowLoading && actionType === "approve"
+                  ? "Approving..."
+                  : "Accept"}
+              </button>
+
+              <button
+                className={`px-2 py-1 text-[10px] rounded-full border-[0.2px] border-errorTwo text-errorTwo bg-[#F6F8FA] transition-all ${
+                  isRowLoading && actionType === "reject"
+                    ? "opacity-60 cursor-not-allowed"
+                    : "hover:bg-red-50"
+                }`}
+                disabled={isRowLoading}
+                onClick={() => {
+                  setPendingAction({ id: row.id, approve: false, label: "Reject" });
+                  setRejectionReason("");
+                  setConfirmOpen(true);
+                }}
+              >
+                {isRowLoading && actionType === "reject"
+                  ? "Rejecting..."
+                  : "Reject"}
+              </button>
+
+              <span
+                className="px-2 py-1 text-[10px] text-textBlack font-medium bg-[#F6F8FA] border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom cursor-pointer transition-all hover:bg-gold"
+                onClick={() => {
+                  setCustomerID(row.id);
+                  setIsOpen(true);
+                }}
+              >
+                View
+              </span>
+            </div>
+          );
+        }
+
+        // Other cases: View + Deactivate/Reject button
         return (
-          <span
-            className="px-2 py-1 text-[10px] text-textBlack font-medium bg-[#F6F8FA] border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom cursor-pointer transition-all hover:bg-gold"
-            onClick={() => {
-              setCustomerID(rowData.id);
-              setIsOpen(true);
-            }}
-          >
-            View
-          </span>
+          <div className="flex items-center gap-2">
+            <span
+              className="px-2 py-1 text-[10px] text-textBlack font-medium bg-[#F6F8FA] border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom cursor-pointer transition-all hover:bg-gold"
+              onClick={() => {
+                setCustomerID(row.id);
+                setIsOpen(true);
+              }}
+            >
+              View
+            </span>
+            <button
+              className={`px-2 py-1 text-[10px] rounded-full border-[0.2px] border-errorTwo text-errorTwo bg-[#F6F8FA] transition-all ${
+                isRowLoading && actionType === "reject"
+                  ? "opacity-60 cursor-not-allowed"
+                  : "hover:bg-red-50"
+              }`}
+              disabled={isRowLoading}
+              onClick={() => {
+                setPendingAction({
+                  id: row.id,
+                  approve: false,
+                  label: isInactive ? "Reject" : "Deactivate",
+                });
+                setRejectionReason("");
+                setConfirmOpen(true);
+              }}
+            >
+              {isRowLoading && actionType === "reject"
+                ? "Rejecting..."
+                : `${isInactive ? "Reject" : "Deactivate"}`}
+            </button>
+          </div>
         );
       },
     },
   ];
 
-  const getTableData = () => {
-    return generateCustomerEntries(customerData);
-  };
+  const getTableData = () => generateCustomerEntries(customerData);
+
+  const showReasonField =
+    !!pendingAction &&
+    pendingAction.approve === false &&
+    pendingAction.label !== "Deactivate";
 
   return (
     <>
@@ -275,8 +552,13 @@ const CustomerTable = ({
             }}
             queryValue={isSearchQuery ? queryValue : ""}
             paginationInfo={paginationInfo}
-            clearFilters={() => setTableQueryParams({})}
+            clearFilters={() => {
+              setTableQueryParams({});
+              setQueryValue("");
+              setIsSearchQuery(false);
+            }}
           />
+
           {customerID && (
             <CustomerModal
               isOpen={isOpen}
@@ -285,6 +567,53 @@ const CustomerTable = ({
               refreshTable={refreshTable}
             />
           )}
+
+          <ConfirmModal
+            open={confirmOpen}
+            onClose={() => {
+              if (!actionLoadingId) {
+                setConfirmOpen(false);
+                setRejectionReason("");
+              }
+            }}
+            loading={Boolean(actionLoadingId)}
+            title={
+              pendingAction?.approve
+                ? "Approve customer?"
+                : pendingAction?.label === "Deactivate"
+                ? "Deactivate customer?"
+                : "Reject customer?"
+            }
+            description={
+              pendingAction?.approve
+                ? "This will activate this customer's account."
+                : pendingAction?.label === "Deactivate"
+                ? "This will deactivate this customer's account. They won't be able to access services until reactivated."
+                : "Provide a reason if you want the agent to know what to fix."
+            }
+            confirmText={
+              pendingAction?.approve
+                ? "Approve"
+                : pendingAction?.label === "Deactivate"
+                ? "Deactivate"
+                : "Reject"
+            }
+            cancelText="Cancel"
+            showReason={showReasonField}
+            reason={rejectionReason}
+            onReasonChange={setRejectionReason}
+            onConfirm={async () => {
+              if (!pendingAction) return;
+              await handleApproveReject(
+                pendingAction.id,
+                pendingAction.approve,
+                showReasonField ? rejectionReason : undefined
+              );
+              setConfirmOpen(false);
+              setPendingAction(null);
+              setRejectionReason("");
+            }}
+          />
         </div>
       ) : (
         <ErrorComponent

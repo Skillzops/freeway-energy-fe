@@ -113,7 +113,7 @@ const Tasks = () => {
         <div className="flex flex-wrap w-full items-center gap-2 gap-y-3">
           <TitlePill
             icon={greencustomer}
-            // iconBgColor="bg-[#E3FAD6]"
+            iconBgColor="bg-[#E3FAD6]"
             topText="ALL"
             bottomText="TASKS"
             value={allCount || 0}
@@ -127,7 +127,7 @@ const Tasks = () => {
         <section className="relative items-start justify-center flex min-h-[415px] w-full overflow-hidden">
           <Suspense fallback={<LoadingSpinner parentClass="absolute top-[50%] w-full" />}>
             <Routes>
-              <Route path="/" element={<Navigate to="/agent/tasks/all" replace />} />
+              <Route path="/" element={<Navigate to="/tasks/all" replace />} />
               {taskPaths.map((path) => (
                 <Route
                   key={path}

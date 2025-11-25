@@ -39,7 +39,7 @@ const GroupItemComponent: React.FC<
 const GroupDisplay: React.FC<GroupDisplayProps> = ({ items }) => {
   return (
     <div className="w-full mx-auto rounded-[20px] overflow-hidden">
-      {items.map((item, index) => (
+      {items?.map((item, index) => (
         <GroupItemComponent
           key={index}
           title={item.title}

@@ -234,14 +234,14 @@ const AgentCommissions: React.FC = () => {
             </div>
 
             {/* Sub header badge (total commission) */}
-            <div className="flex items-center justify-between px-4 py-2 mb-2 w-full md:w-[920px]">
+            {/* <div className="flex items-center justify-between px-4 py-2 mb-2 w-full md:w-[920px]">
               <div />
               <div className="flex items-center gap-2 pl-2 pr-1 bg-primaryGradient border-[0.6px] border-strokeGreyThree rounded-full">
                 <span className="text-xs font-medium text-white">
                   TOTAL COMMISSION: {money(summary?.totalCommission ?? 0)}
                 </span>
               </div>
-            </div>
+            </div> */}
           </div>
 
           {/* Quick stats row (chips) */}

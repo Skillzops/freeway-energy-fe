@@ -16,6 +16,7 @@ import { ListDataType } from "@/Components/Products/SelectInventoryModal";
 import TabComponent from "@/Components/TabComponent/TabComponent";
 import { TableSearch } from "@/Components/TableSearchComponent/TableSearch";
 
+
 interface Customer {
   id: string;
   firstname: string;
@@ -65,7 +66,7 @@ const generateCustomerListDataEntries = (data: any): any[] => {
     firstname: item?.firstname,
     lastname: item?.lastname,
     location: item?.location || "",
-    email: item?.email,
+    email: item?.email || "",
     phone: item?.phone,
   }));
 };
@@ -204,6 +205,7 @@ const SelectCustomerProductModal = observer(
           ? 1
           : 0
         : SaleStore.products.length;
+        
 
     const handleTabSelect = useCallback(
       (key: string) => {

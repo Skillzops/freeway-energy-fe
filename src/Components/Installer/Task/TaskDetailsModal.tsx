@@ -14,6 +14,9 @@ import inventoryIcon from '@/assets/creditcardgrey.svg';
 import settingsIcon from '@/assets/settings.svg';
 import wrongIcon from '@/assets/table/wrong.png';
 import { Modal } from "@/Components/ModalComponent/Modal";
+import { toast } from "react-toastify";
+
+
 
 interface TaskEntries {
   id: string;
@@ -56,16 +59,20 @@ const TaskDetailsModal = ({
   isLoading = false,
   refreshTable = async () => {},
   error = null,
-  errorData = { errorStates: [], isNetworkError: false, isPermissionError: false },
+  errorData = {
+    errorStates: [],
+    isNetworkError: false,
+    isPermissionError: false,
+  },
   useMockData = false,
   paginationInfo = () => ({
     total: 0,
     currentPage: 1,
     entriesPerPage: 20,
     setCurrentPage: () => {},
-    setEntriesPerPage: () => {}
+    setEntriesPerPage: () => {},
   }),
-  setTableQueryParams = () => {}
+  setTableQueryParams = () => {},
 }: TaskDetailsModalProps) => {
   const [selectedTask, setSelectedTask] = useState<TaskEntries | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -74,7 +81,6 @@ const TaskDetailsModal = ({
   const { apiCall } = useApiCall();
 
   const data = tasksData?.data || [];
-  
 
   const handlePrevious = () => {
     if (currentTaskIndex > 0) {
@@ -95,19 +101,19 @@ const TaskDetailsModal = ({
         method: "post",
         successMessage: "Task accepted successfully!",
       });
-      
+
       // Update the task status to 'accepted' so the Update location button appears
       if (selectedTask) {
         setSelectedTask({
           ...selectedTask,
-          status: 'accepted'
+          status: "accepted",
         });
       }
-      
+
       // Refresh the task list
       await refreshTable();
     } catch (error) {
-      console.error('Error accepting task:', error);
+      console.error("Error accepting task:", error);
     }
   };
 
@@ -118,12 +124,12 @@ const TaskDetailsModal = ({
         method: "post",
         successMessage: "Task rejected successfully!",
       });
-      
+
       // Refresh the task list
       await refreshTable();
       setIsViewModalOpen(false);
     } catch (error) {
-      console.error('Error rejecting task:', error);
+      console.error("Error rejecting task:", error);
     }
   };
 
@@ -134,32 +140,51 @@ const TaskDetailsModal = ({
         method: "post",
         successMessage: "Task completed successfully!",
       });
-      
+
       // Refresh the task list
       await refreshTable();
     } catch (error) {
-      console.error('Error completing task:', error);
+      console.error("Error completing task:", error);
     }
   };
 
-  const handleUpdateLocation = async (address: string) => {
+  const [isUpdating, setiIsUpdating] = useState(false);
+
+  const handleUpdateLocation = async (data: {
+    location: string;
+    longitude: string;
+    latitude: string;
+  }) => {
     try {
+      setiIsUpdating(true);
+
       await apiCall({
-        endpoint: `/v1/agents/tasks/${selectedTask?.id}/update-location`,
+        endpoint: `/v1/installer/tasks/${selectedTask?.id}/location`,
         method: "post",
-        data: { address },
+        data,
         successMessage: "Location updated successfully!",
       });
-      
+
       // Refresh the task list
       await refreshTable();
+      setIsViewModalOpen(false)
       setIsLocationUpdateOpen(false);
     } catch (error) {
-      console.error('Error updating location:', error);
+      console.error("Error updating location:", error);
+      toast.error("Error updating location:");
+
+    } finally {
+      setiIsUpdating(false);
     }
   };
 
-  const Field = ({ label, value }: { label: string; value: string | React.ReactNode }) => (
+  const Field = ({
+    label,
+    value,
+  }: {
+    label: string;
+    value: string | React.ReactNode;
+  }) => (
     <div className="flex justify-between items-center w-full">
       <div className="bg-[#F8F9FB] px-2.5 py-1 rounded-full">
         <span className="text-textDarkBrown text-xs font-medium">{label}</span>
@@ -170,15 +195,23 @@ const TaskDetailsModal = ({
     </div>
   );
 
-  const Section = ({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) => (
+  const Section = ({
+    title,
+    icon,
+    children,
+  }: {
+    title: string;
+    icon: React.ReactNode;
+    children: React.ReactNode;
+  }) => (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         {icon}
-        <h3 className="text-textDarkBrown text-xs font-medium uppercase">{title}</h3>
+        <h3 className="text-textDarkBrown text-xs font-medium uppercase">
+          {title}
+        </h3>
       </div>
-      <div className="space-y-2">
-        {children}
-      </div>
+      <div className="space-y-2">{children}</div>
     </div>
   );
 
@@ -187,7 +220,7 @@ const TaskDetailsModal = ({
       {/* Task Header Card - Always visible */}
       <div className="mb-4">
         <div className="bg-white rounded-full border border-strokeGreyTwo overflow-hidden">
-          <TaskHeader 
+          <TaskHeader
             count={data.length}
             onPrevious={handlePrevious}
             onNext={handleNext}
@@ -203,20 +236,27 @@ const TaskDetailsModal = ({
             </div>
           ) : data.length === 0 ? (
             <div className="flex flex-col items-center justify-center px-4 py-16 w-full border-[0.6px] border-strokeGreyThree rounded-[20px]">
-              <img src={wrongIcon} alt="No tasks available" className="w-[100px]" />
-              <p className="text-textBlack font-medium">  Chill up! No tasks assigned yet</p>
+              <img
+                src={wrongIcon}
+                alt="No tasks available"
+                className="w-[100px]"
+              />
+              <p className="text-textBlack font-medium">
+                {" "}
+                Chill up! No tasks assigned yet
+              </p>
               <button
                 className="bg-[#F6F8FA] px-4 py-1 text-textDarkGrey font-medium border border-strokeGreyTwo mt-4 rounded-full hover:text-textBlack transition-all"
                 onClick={async () => {
                   try {
-                    if (refreshTable && typeof refreshTable === 'function') {
+                    if (refreshTable && typeof refreshTable === "function") {
                       await refreshTable();
                     } else {
                       // If no refreshTable function is provided, just reload the page
                       window.location.reload();
                     }
                   } catch (error) {
-                    console.error('Error refreshing tasks:', error);
+                    console.error("Error refreshing tasks:", error);
                     // Fallback to page reload
                     window.location.reload();
                   }
@@ -227,10 +267,12 @@ const TaskDetailsModal = ({
             </div>
           ) : (
             <TaskCard
-              dateAssigned={new Date(data[currentTaskIndex].dateAssigned).toLocaleDateString('en-GB', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
+              dateAssigned={new Date(
+                data[currentTaskIndex].dateAssigned
+              ).toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
               })}
               taskValidity={data[currentTaskIndex].taskValidity}
               requestingAgent={data[currentTaskIndex].requestingAgent}
@@ -267,7 +309,7 @@ const TaskDetailsModal = ({
           {/* Header */}
           <header className="flex items-center justify-between bg-paleGrayGradientLeft p-4 min-h-[64px] border-b-[0.6px] border-b-strokeGreyThree">
             <p className="flex items-center justify-center bg-paleLightBlue w-max p-2 h-[24px] text-textBlack text-xs font-semibold rounded-full">
-              Task #{selectedTask?.id || 'N/A'}
+              Task #{selectedTask?.id || "N/A"}
             </p>
             <div className="flex items-center justify-end gap-2">
               <button className="w-8 h-8 bg-pink-500 rounded-full flex items-center justify-center">
@@ -285,106 +327,186 @@ const TaskDetailsModal = ({
               <>
                 {/* Task ID Card */}
                 <div className="bg-white border-[0.6px] border-strokeGreyThree rounded-[20px] p-2">
-                  <Field label="Task ID" value={selectedTask?.id || 'N/A'} />
+                  <Field label="Task ID" value={selectedTask?.id || "N/A"} />
                 </div>
 
-                                {/* Requesting Agent Card */}
+                {/* Requesting Agent Card */}
                 <div className="bg-white border-[0.6px] border-strokeGreyThree rounded-[20px] p-2">
-                  <Field 
-                    label="Requesting Agent" 
+                  <Field
+                    label="Requesting Agent"
                     value={
                       <div className="flex items-center gap-2">
-                        <img src={customerIcon} alt="User" className="w-4 h-4 filter grayscale opacity-60" />
-                        <span>{selectedTask?.requestingAgent || 'N/A'}</span>
+                        <img
+                          src={customerIcon}
+                          alt="User"
+                          className="w-4 h-4 filter grayscale opacity-60"
+                        />
+                        <span>{selectedTask?.requestingAgent || "N/A"}</span>
                       </div>
-                    } 
+                    }
                   />
                 </div>
 
                 {/* Pickup Address Card */}
                 <div className="bg-white border-[0.6px] border-strokeGreyThree rounded-[20px] p-2">
-                  <Field label="Pickup Address" value={selectedTask?.pickupLocation || 'N/A'} />
+                  <Field
+                    label="Pickup Address"
+                    value={selectedTask?.pickupLocation || "N/A"}
+                  />
                 </div>
 
-                                {/* Customer Details Card */}
+                {/* Customer Details Card */}
                 <div className="bg-white border-[0.6px] border-strokeGreyThree rounded-[20px] p-2 space-y-1">
                   <div className="flex items-center gap-2">
-                    <img src={customerIcon} alt="Customer" className="w-4 h-4 filter grayscale opacity-60" />
-                    <h3 className="text-textLightGrey text-xs font-medium uppercase">Customer Details</h3>
+                    <img
+                      src={customerIcon}
+                      alt="Customer"
+                      className="w-4 h-4 filter grayscale opacity-60"
+                    />
+                    <h3 className="text-textLightGrey text-xs font-medium uppercase">
+                      Customer Details
+                    </h3>
                   </div>
-                  <Field label="Name" value={selectedTask?.customerName || 'N/A'} />
-                  <Field label="Email" value={selectedTask?.customerEmail || 'N/A'} />
-                  <Field label="Phone Number" value={selectedTask?.customerPhone || 'N/A'} />
+                  <Field
+                    label="Name"
+                    value={selectedTask?.customerName || "N/A"}
+                  />
+                  <Field
+                    label="Email"
+                    value={selectedTask?.customerEmail || "N/A"}
+                  />
+                  <Field
+                    label="Phone Number"
+                    value={selectedTask?.customerPhone || "N/A"}
+                  />
                 </div>
 
                 {/* Product Details Card */}
                 <div className="bg-white border-[0.6px] border-strokeGreyThree rounded-[20px] p-2 space-y-1">
                   <div className="flex items-center gap-2">
-                    <img src={productIcon} alt="Product" className="w-4 h-4 filter grayscale opacity-60" />
-                    <h3 className="text-textLightGrey text-xs font-medium uppercase">Product Details</h3>
+                    <img
+                      src={productIcon}
+                      alt="Product"
+                      className="w-4 h-4 filter grayscale opacity-60"
+                    />
+                    <h3 className="text-textLightGrey text-xs font-medium uppercase">
+                      Product Details
+                    </h3>
                   </div>
                   <div className="flex justify-between items-center">
                     <div className="bg-[#F8F9FB] px-2.5 py-1 rounded-full">
-                      <span className="text-textDarkBrown text-xs font-medium">Product Type</span>
+                      <span className="text-textDarkBrown text-xs font-medium">
+                        Product Type
+                      </span>
                     </div>
                     <div className="flex gap-1">
-                      {selectedTask?.productType?.map((type: string, index: number) => (
-                        <span key={index} className="bg-purpleBlue px-1.5 py-0.5 rounded-full text-xs font-medium text-textBlack">
-                          {type}
+                      {selectedTask?.productType?.map(
+                        (type: string, index: number) => (
+                          <span
+                            key={index}
+                            className="bg-purpleBlue px-1.5 py-0.5 rounded-full text-xs font-medium text-textBlack"
+                          >
+                            {type}
+                          </span>
+                        )
+                      ) || (
+                        <span className="text-textBlack text-xs font-medium">
+                          N/A
                         </span>
-                      )) || <span className="text-textBlack text-xs font-medium">N/A</span>}
+                      )}
                     </div>
                   </div>
                   <div className="flex justify-between items-center">
                     <div className="bg-[#F8F9FB] px-2.5 py-1 rounded-full">
-                      <span className="text-textDarkBrown text-xs font-medium">Product Name</span>
+                      <span className="text-textDarkBrown text-xs font-medium">
+                        Product Name
+                      </span>
                     </div>
                     <div className="flex gap-1">
                       <span className="bg-purpleBlue px-1.5 py-0.5 rounded-full text-xs font-medium text-textBlack">
-                        {selectedTask?.productName || 'N/A'}
+                        {selectedTask?.productName || "N/A"}
                       </span>
                     </div>
                   </div>
-                  <Field label="Product ID" value={selectedTask?.productId || 'N/A'} />
+                  <Field
+                    label="Product ID"
+                    value={selectedTask?.productId || "N/A"}
+                  />
                 </div>
 
                 {/* Device Details Card */}
                 <div className="bg-white border-[0.6px] border-strokeGreyThree rounded-[20px] p-2 space-y-1">
                   <div className="flex items-center gap-2">
-                    <img src={inventoryIcon} alt="Device" className="w-4 h-4 filter grayscale opacity-60" />
-                    <h3 className="text-textLightGrey text-xs font-medium uppercase">Device Details</h3>
+                    <img
+                      src={inventoryIcon}
+                      alt="Device"
+                      className="w-4 h-4 filter grayscale opacity-60"
+                    />
+                    <h3 className="text-textLightGrey text-xs font-medium uppercase">
+                      Device Details
+                    </h3>
                   </div>
-                  <Field label="Device ID" value={selectedTask?.deviceId || 'N/A'} />
-                  <Field label="Token Status" value={selectedTask?.tokenStatus || 'N/A'} />
+                  <Field
+                    label="Device ID"
+                    value={selectedTask?.deviceId || "N/A"}
+                  />
+                  <Field
+                    label="Token Status"
+                    value={selectedTask?.tokenStatus || "N/A"}
+                  />
                 </div>
 
                 {/* General Details Card */}
                 <div className="bg-white border-[0.6px] border-strokeGreyThree rounded-[20px] p-2 space-y-1">
                   <div className="flex items-center gap-2">
-                    <img src={settingsIcon} alt="General" className="w-4 h-4 filter grayscale opacity-60" />
-                    <h3 className="text-textLightGrey text-xs font-medium uppercase">General Details</h3>
+                    <img
+                      src={settingsIcon}
+                      alt="General"
+                      className="w-4 h-4 filter grayscale opacity-60"
+                    />
+                    <h3 className="text-textLightGrey text-xs font-medium uppercase">
+                      Generaldd Details
+                    </h3>
                   </div>
-                  <Field label="Date Assigned" value={selectedTask?.dateAssigned ? new Date(selectedTask.dateAssigned).toLocaleDateString('en-GB', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric'
-                  }) : 'N/A'} />
-                  <Field label="Task Validity" value={selectedTask?.taskValidity ? new Date(selectedTask.taskValidity).toLocaleDateString('en-GB', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric'
-                  }) : 'N/A'} />
-                  
+                  <Field
+                    label="Date Assigned"
+                    value={
+                      selectedTask?.dateAssigned
+                        ? new Date(
+                            selectedTask.dateAssigned
+                          ).toLocaleDateString("en-GB", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                          })
+                        : "N/A"
+                    }
+                  />
+                  <Field
+                    label="Task Validity"
+                    value={
+                      selectedTask?.taskValidity
+                        ? new Date(
+                            selectedTask.taskValidity
+                          ).toLocaleDateString("en-GB", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                          })
+                        : "N/A"
+                    }
+                  />
+
                   {/* Action Buttons */}
-                  {selectedTask.status === 'pending' && (
+                  {selectedTask.status === "pending" && (
                     <div className="flex justify-center gap-3 pt-2">
-                      <RejectTaskButton 
+                      <RejectTaskButton
                         onClick={() => {
                           handleRejectTask(selectedTask.id);
                           setIsViewModalOpen(false);
                         }}
                       />
-                      <AcceptTaskButton 
+                      <AcceptTaskButton
                         onClick={() => {
                           handleAcceptTask(selectedTask.id);
                         }}
@@ -392,9 +514,9 @@ const TaskDetailsModal = ({
                     </div>
                   )}
 
-                  {selectedTask.status === 'accepted' && (
+                  {selectedTask.status === "accepted" && (
                     <div className="flex justify-center pt-2">
-                      <AcceptTaskButton 
+                      <AcceptTaskButton
                         text="Update location"
                         onClick={() => {
                           setIsLocationUpdateOpen(true);
@@ -408,15 +530,16 @@ const TaskDetailsModal = ({
           </div>
         </div>
       </Modal>
-      
+
       {/* Location Update Card */}
       <LocationUpdateCard
         isOpen={isLocationUpdateOpen}
         onClose={() => setIsLocationUpdateOpen(false)}
         onUpdateLocation={handleUpdateLocation}
+        loading={isUpdating}
       />
     </>
   );
 };
 
-export default TaskDetailsModal; 
+export default TaskDetailsModal;

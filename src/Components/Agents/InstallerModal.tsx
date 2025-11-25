@@ -25,6 +25,7 @@ const InstallerModal = ({
     `/v1/agents/installers/${installerID}`,
     false
   );
+  
 
   const generateInstallerEntries = (data: any): InstallerUserType => {
     return {

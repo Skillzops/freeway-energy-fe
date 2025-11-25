@@ -12,6 +12,7 @@ import GuarantorForm from "./GuarantorForm";
 import { observer } from "mobx-react-lite";
 import SaleRecipientForm from "./SaleRecipientForm";
 
+
 const SetExtraInfoModal = observer(
   ({
     extraInfoModal,
@@ -26,7 +27,8 @@ const SetExtraInfoModal = observer(
       extraInfoModal === "parameters"
         ? "Please select parameters for this product."
         : extraInfoModal === "miscellaneous"
-        ? "Type the title of the Miscellaneous on the left and the Amount on the right. You can add another cost by clicking the add button bellow."
+        ? "Fixed miscellaneous cost for installation."
+        // ? "Type the title of the Miscellaneous on the left and the Amount on the right. You can add another cost by clicking the add button bellow."
         : extraInfoModal === "devices"
         ? "Link Device(s)"
         : extraInfoModal === "recipient"

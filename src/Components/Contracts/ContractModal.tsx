@@ -324,7 +324,7 @@ const ProductSelector = ({ saleItems }: { saleItems: SaleItem[] }) => {
         </tr>
       </thead>
       <tbody>
-        {saleItems.map((item, index) => (
+        {saleItems?.map((item, index) => (
           <tr key={index}>
             <td className="p-2 border border-black capitalize">
               {item?.product.name}

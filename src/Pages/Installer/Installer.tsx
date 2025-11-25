@@ -20,12 +20,14 @@ import TaskHistoryTable from "@/Components/Installer/Task/TaskHistoryTable";
 import InstallerTable from "@/Components/Installer/Installer/InstallerTable";
 import RequestToken from "@/Components/Installer/Installer/RequestToken";
 
-
 const Installer = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [entriesPerPage, setEntriesPerPage] = useState<number>(10);
-  const [tableQueryParams, setTableQueryParams] = useState<Record<string, any> | null>({});
+  const [tableQueryParams, setTableQueryParams] = useState<Record<
+    string,
+    any
+  > | null>({});
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -42,14 +44,15 @@ const Installer = () => {
     isLoading: tasksLoading,
     error: tasksError,
     errorStates: tasksErrorStates,
-    mutate: refreshTasks
+    mutate: refreshTasks,
   } = useGetRequest(
-    isTaskHistory ?
-      `/v1/agents/tasks?page=${currentPage}&limit=${entriesPerPage}${queryString && `&${queryString}`}` :
-      null,
+    isTaskHistory
+      ? `/v1/agents/tasks?page=${currentPage}&limit=${entriesPerPage}${
+          queryString && `&${queryString}`
+        }`
+      : null,
     isTaskHistory,
     60000
-
   );
 
   // Fetch installation history data for Installation History tab( Revisit This endpoint later)
@@ -58,11 +61,13 @@ const Installer = () => {
     isLoading: installationLoading,
     error: installationError,
     errorStates: installationErrorStates,
-    mutate: refreshInstallations
+    mutate: refreshInstallations,
   } = useGetRequest(
-    !isTaskHistory ?
-      `/v1/agents/tasks?page=${currentPage}&limit=${entriesPerPage}${queryString && `&${queryString}`}` :
-      null,
+    !isTaskHistory
+      ? `/v1/agents/tasks?sortField=createdAt&page=${currentPage}&limit=${entriesPerPage}${
+          queryString && `&${queryString}`
+        }`
+      : null,
     !isTaskHistory,
     60000
   );
@@ -72,13 +77,13 @@ const Installer = () => {
     {
       name: "Installation History",
       key: "/installer/history",
-      count: installationData?.total || 0
+      count: installationData?.total || 0,
     },
     {
       name: "Task History",
       key: "/installer/tasks",
-      count: tasksData?.total || 0
-    }
+      count: tasksData?.total || 0,
+    },
   ];
 
   useEffect(() => {
@@ -89,14 +94,14 @@ const Installer = () => {
   const taskStats = {
     total: tasksData?.total || 0,
     pending: tasksData?.pending || 0,
-    cancelled: tasksData?.cancelled || 0
+    cancelled: tasksData?.cancelled || 0,
   };
 
   // Stats for Installation History
   const installationStats = {
     total: installationData?.total || 0,
     pending: installationData?.pending || 0,
-    cancelled: installationData?.cancelled || 0
+    cancelled: installationData?.cancelled || 0,
   };
 
   return (
@@ -113,32 +118,40 @@ const Installer = () => {
               topText="Total"
               bottomText={isTaskHistory ? "TASK" : "INSTALLATIONS"}
               value={isTaskHistory ? taskStats.total : installationStats.total}
-              
             />
             <TitlePill
               icon={cancelIcon}
               // iconBgColor="bg-[#FFDBDE]"
               topText="Pending"
               bottomText={isTaskHistory ? "TASK" : "INSTALLATIONS"}
-              value={isTaskHistory ? taskStats.pending : installationStats.pending}
+              value={
+                isTaskHistory ? taskStats.pending : installationStats.pending
+              }
             />
             <TitlePill
               icon={cancelIcon}
               // iconBgColor="bg-[#FFDBDE]"
               topText="Cancelled"
               bottomText={isTaskHistory ? "TASK" : "INSTALLATIONS"}
-              value={isTaskHistory ? taskStats.cancelled : installationStats.cancelled}
+              value={
+                isTaskHistory
+                  ? taskStats.cancelled
+                  : installationStats.cancelled
+              }
             />
           </div>
           {!isTaskHistory && (
             <div className="flex w-full items-center justify-between gap-2 min-w-max sm:w-max sm:justify-end">
-          
               <ActionButton
                 label="Request Token"
-                icon={<img src={circleAction} className="w-4 h-4 filter brightness-0 invert" />}
+                icon={
+                  <img
+                    src={circleAction}
+                    className="w-4 h-4 filter brightness-0 invert"
+                  />
+                }
                 onClick={() => setIsOpen(true)}
               />
-
             </div>
           )}
         </section>
@@ -148,7 +161,9 @@ const Installer = () => {
             <TabComponent
               tabs={tabs}
               onTabSelect={(key) => navigate(key)}
-              activeTabName={isTaskHistory ? "Task History" : "Installation History"}
+              activeTabName={
+                isTaskHistory ? "Task History" : "Installation History"
+              }
             />
           </div>
 
@@ -174,7 +189,7 @@ const Installer = () => {
                   currentPage,
                   entriesPerPage,
                   setCurrentPage,
-                  setEntriesPerPage
+                  setEntriesPerPage,
                 })}
                 setTableQueryParams={setTableQueryParams}
               />
@@ -182,9 +197,13 @@ const Installer = () => {
           </div>
         </div>
       </PageLayout>
-      <RequestToken isOpen={isOpen} setIsOpen={setIsOpen} refreshTable={async () => { }} />
+      <RequestToken
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        refreshTable={async () => {}}
+      />
     </>
   );
 };
 
-export default Installer; 
+export default Installer;

@@ -64,6 +64,7 @@ const defaultValues: SnapshotIn<typeof saleStore> = {
     channels: ["card", "bank", "ussd", "qr", "mobile_money"],
   },
   paymentMethod: "ONLINE",
+  monthlyPayment: 0,
 };
 
 const IdentificationDetailsModel = types.model({
@@ -131,6 +132,7 @@ const ParamModel = types.model({
   installmentDuration: types.number,
   installmentStartingPrice: types.number,
   discount: types.number,
+  monthlyPayment: types.number,
 });
 
 const ParametersModel = types.model({
@@ -186,12 +188,7 @@ const SaleItemsModel = types.model({
   devices: types.array(types.string),
   miscellaneousPrices: types.maybe(SaleMiscellaneousPricesModel),
   saleRecipient: types.maybe(SaleRecipientModel),
-});
-
-const CustomizationsModel = types.model({
-  title: types.string,
-  description: types.string,
-  logo: types.string,
+  monthlyPayment: types.number,
 });
 
 const PaymentDataModel = types.model({
@@ -224,6 +221,7 @@ const saleStore = types
     guarantorDetails: GuarantorDetailsModel,
     paymentDetails: PaymentDataModel,
     paymentMethod: types.enumeration(["ONLINE", "CASH"]),
+    monthlyPayment: types.number,
   })
   .actions((self) => ({
     addSaleItem(productId: string) {
@@ -285,6 +283,7 @@ const saleStore = types
       if (existingSaleItem) {
         // Update existing sale item instead of adding a new one
         existingSaleItem.quantity = product?.productUnits || 0;
+        existingSaleItem.monthlyPayment = self.monthlyPayment || 0;
         existingSaleItem.paymentMode = params?.params?.paymentMode || "ONE_OFF";
         existingSaleItem.discount = params?.params?.discount || 0;
         existingSaleItem.installmentDuration =
@@ -309,6 +308,7 @@ const saleStore = types
           devices: cast(devices),
           miscellaneousPrices: { costs: cast(miscellaneousCosts) },
           saleRecipient: { ...saleRecipient },
+          monthlyPayment: self.monthlyPayment,
         });
       }
     },
@@ -421,6 +421,7 @@ const saleStore = types
         installmentDuration: number;
         installmentStartingPrice: number;
         discount: number;
+        monthlyPayment: number;
       }
     ) {
       const existingIndex = self.parameters.findIndex(
@@ -437,6 +438,8 @@ const saleStore = types
           })
         );
       }
+
+      self.monthlyPayment = Number(params.monthlyPayment) || 0;
     },
     getParametersByProductId(productId: string) {
       const parameters = self.parameters.find(
@@ -640,7 +643,6 @@ const saleStore = types
         );
         return inventory ? [...inventory.devices] : [];
       }
-
 
       // Default to all devices for product
       return [...productEntry.devices];
@@ -877,8 +879,8 @@ const saleStore = types
       const formatDate = (dateString: string) => {
         if (!dateString) return "";
         // If it's an ISO string, extract just the date part
-        if (dateString.includes('T')) {
-          return dateString.split('T')[0];
+        if (dateString.includes("T")) {
+          return dateString.split("T")[0];
         }
         return dateString;
       };
@@ -889,13 +891,14 @@ const saleStore = types
         saleItems: this.getTransformedSaleItems(),
         paymentMethod: self.paymentMethod,
         applyMargin: false, // Default to false as per schema
+        monthlyPayment: self.monthlyPayment,
       };
 
       // If any sale item has installment payment mode, include additional required fields
       if (this.doesSaleItemHaveInstallment()) {
         // BVN will be provided by the CreateNewSale component
         // We don't set it here as it's not stored in the store
-        
+
         // Format identification details with proper date formatting
         const identificationDetails = toJS(self.identificationDetails);
         payload.identificationDetails = {
@@ -903,14 +906,14 @@ const saleStore = types
           issueDate: formatDate(identificationDetails.issueDate),
           expirationDate: formatDate(identificationDetails.expirationDate),
         };
-        
+
         // Format next of kin details with proper date formatting
         const nextOfKinDetails = toJS(self.nextOfKinDetails);
         payload.nextOfKinDetails = {
           ...nextOfKinDetails,
           dateOfBirth: formatDate(nextOfKinDetails.dateOfBirth),
         };
-        
+
         // Format guarantor details with proper date formatting
         const guarantorDetails = toJS(self.guarantorDetails);
         payload.guarantorDetails = {
@@ -918,8 +921,12 @@ const saleStore = types
           dateOfBirth: formatDate(guarantorDetails.dateOfBirth),
           identificationDetails: {
             ...guarantorDetails.identificationDetails,
-            issueDate: formatDate(guarantorDetails.identificationDetails.issueDate),
-            expirationDate: formatDate(guarantorDetails.identificationDetails.expirationDate),
+            issueDate: formatDate(
+              guarantorDetails.identificationDetails.issueDate
+            ),
+            expirationDate: formatDate(
+              guarantorDetails.identificationDetails.expirationDate
+            ),
           },
         };
       }
@@ -929,22 +936,34 @@ const saleStore = types
     getTotal() {
       return self.products.reduce((total, product) => {
         // Ensure we have valid numeric values
-        const price = Number(product.productPrice) || 0;
+        const rawAmount = product?.productPrice?.split("₦")?.[1] ?? "";
+
+        const samount = rawAmount.replace(/,/g, "").trim();
+
+        const price = Number(samount) || 0;
         const units = Number(product.productUnits) || 1;
         const baseAmount = price * units;
-        
+
         // Get parameters for discount calculation
-        const params = self.parameters.find(p => p.currentProductId === product.productId);
+        const params = self.parameters.find(
+          (p) => p.currentProductId === product.productId
+        );
         const discount = Number(params?.params?.discount) || 0;
         const discountAmount = (baseAmount * discount) / 100;
-        
+
         // Get miscellaneous costs
-        const miscPrices = self.miscellaneousPrices.find(m => m.currentProductId === product.productId);
-        const miscellaneousCosts = miscPrices ? 
-          Array.from(miscPrices.costs.entries()).reduce((sum, [, cost]) => sum + (Number(cost) || 0), 0) : 0;
-        
+        const miscPrices = self.miscellaneousPrices.find(
+          (m) => m.currentProductId === product.productId
+        );
+        const miscellaneousCosts = miscPrices
+          ? Array.from(miscPrices.costs.entries()).reduce(
+              (sum, [, cost]) => sum + (Number(cost) || 0),
+              0
+            )
+          : 0;
+
         const productTotal = baseAmount - discountAmount + miscellaneousCosts;
-        
+
         return total + productTotal;
       }, 0);
     },
@@ -961,6 +980,7 @@ export const SaleStore = saleStore.create({
   devices: [],
   saleItems: [],
   saleRecipient: [],
+  monthlyPayment: 0,
   identificationDetails: {
     idType: "",
     idNumber: "",

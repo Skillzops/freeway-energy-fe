@@ -42,6 +42,8 @@ import { useGetAgentOverviewQuery } from "@/redux/AgentOverview";
 import WalletCard from "@/Components/Agents/DashBoardCard/DashboardTable";
 import NewTasks from "@/Components/Agents/DashBoardCard/NewTasks";
 
+
+
 type ExtendedSalesPoint = SalesGraphPoint & {
   category?: string;
   paymentMode?: string; // legacy fallback
@@ -72,7 +74,7 @@ const MONTH_OPTIONS = [
   "ALL","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"
 ] as const;
 
-const AgentDashboard: React.FC = () => {
+const Dashboard: React.FC = () => {
   // ======= Sales/Transactions filters =======
   const [status, setStatus] = useState<string>("ALL");
   const [monthFilter, setMonthFilter] = useState<string>("ALL");
@@ -590,23 +592,23 @@ const AgentDashboard: React.FC = () => {
                 <div className="border border-gray-200 rounded-xl max-h-[420px] overflow-y-auto">
                   <ul className="divide-y divide-gray-100">
                     {installers.installers?.map((inst: any) => {
-                      const selected = selectedInstallerId === inst.id;
+                      const selected = selectedInstallerId === inst?.id;
                       return (
                         <li
                           key={inst.id}
                           className={`flex items-center justify-between p-3 cursor-pointer ${
                             selected ? "bg-[#F6F8FA]" : ""
                           }`}
-                          onClick={() => setSelectedInstallerId(selected ? null : inst.id)}
+                          onClick={() => setSelectedInstallerId(selected ? null : inst?.id)}
                           title={`Click to ${selected ? "unselect" : "select"} ${inst.name || "installer"}`}
                         >
                           <div className="min-w-0">
                             <p className="text-sm font-medium text-gray-900 truncate">
-                              {inst?.firstname} {inst?.lastname}
+                              {inst?.user?.firstname ?? inst?.firstname} {inst?.user?.lastname ?? inst?.lastname}
                             </p>
                             <p className="text-xs text-gray-500">
-                              {inst.location ? ` 📍 ${inst.location}` : ""} <br />
-                              {inst.email ? ` ✉️ ${inst.email}` : ""}
+                              {inst.user?.location ? ` 📍 ${inst?.user?.location}` : ""} <br />
+                              {inst.user?.email ? ` ✉️ ${inst?.user?.email}` : ""}
                             </p>
                           </div>
                           <span
@@ -632,4 +634,4 @@ const AgentDashboard: React.FC = () => {
   );
 };
 
-export default AgentDashboard;
+export default Dashboard;
