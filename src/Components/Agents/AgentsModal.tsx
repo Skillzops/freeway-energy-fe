@@ -17,6 +17,8 @@ import { KeyedMutator } from "swr";
 import rootStore from "@/stores/rootStore";
 import CommissionsTab from "./CommissionsTab";
 
+
+
 // Extend the AgentUserType to include category
 interface ExtendedAgentUserType extends AgentUserType {
   category?: string;
