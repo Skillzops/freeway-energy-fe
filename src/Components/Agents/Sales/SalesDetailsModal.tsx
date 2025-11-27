@@ -11,6 +11,7 @@ import { Modal } from "@/Components/ModalComponent/Modal";
 import TabComponent from "@/Components/TabComponent/TabComponent";
 import { useGetRequest } from "@/utils/useApiCall";
 
+
 export type SaleDetailsType = {
   daysToNextInstallment: string;
   status: string;
@@ -147,6 +148,7 @@ const SalesDetailsModal = ({
     
     return {
       totalPrice: correctTotalPrice,
+      totalMonthlyPayment: sale.totalMonthlyPayment,
       totalPaid: Math.max(0, sale.totalPaid - (sale.totalMiscellaneousPrice || 0)),
       paymentMode: saleData.paymentMode || "",
       totalInstallments:

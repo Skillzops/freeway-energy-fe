@@ -167,7 +167,7 @@ const PaymentSummary: React.FC<PaymentSummaryProps> = ({
               className="mt-2 px-3 py-1 text-xs bg-primaryGradient text-white rounded-md hover:bg-primary-dark transition-colors font-medium"
             >
               {/* === CHANGED: show totalMonthlyPayment on the button === */}
-              Pay Next - ₦{formatNumberWithCommas(payNextAmountDisplay.toString())}
+              Pay Next - ₦{formatNumberWithCommas(payNextAmountDisplay?.toString())}
             </button>
           )}
         </div>
