@@ -55,8 +55,8 @@ const TopUpWalletForm = ({
 
       toast.success(res?.data?.message, { autoClose: 80000000 });
 
-      // 👇 Get the payment link from the response
-      const paymentLink = res?.data?.paymentLink; // <-- update this path to match your API
+      // Get the payment link from the response
+      const paymentLink = res?.data?.paymentLink;
 
       if (paymentLink && typeof window !== "undefined") {
         window.open(paymentLink, "_blank", "noopener,noreferrer");
