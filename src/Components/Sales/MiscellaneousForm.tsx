@@ -118,10 +118,9 @@ export default function MiscellaneousForm({
                 onChange={(e) => handleChange(index, "name", e.target.value)}
                 placeholder="Cost Title Here"
                 className={`w-full px-3 py-2 border rounded-md outline-none transition-colors
-                  ${
-                    errors[index]?.name
-                      ? "border-errorTwo focus:border-errorTwo"
-                      : "border-gray-300 focus:border-blue-500"
+                  ${errors[index]?.name
+                    ? "border-errorTwo focus:border-errorTwo"
+                    : "border-gray-300 focus:border-blue-500"
                   }`}
               />
               {errors[index]?.name && (
@@ -144,10 +143,9 @@ export default function MiscellaneousForm({
                   step="0.01"
                   placeholder="0.00"
                   className={`w-full pl-7 pr-4 py-2 border rounded-md outline-none transition-colors no-spinner
-                    ${
-                      errors[index]?.cost
-                        ? "border-errorTwo focus:border-errorTwo"
-                        : "border-gray-300 focus:border-blue-500"
+                    ${errors[index]?.cost
+                      ? "border-errorTwo focus:border-errorTwo"
+                      : "border-gray-300 focus:border-blue-500"
                     }`}
                 />
               </div>
@@ -157,7 +155,7 @@ export default function MiscellaneousForm({
                 </p>
               )}
             </div>
-            <div className="flex items-center justify-center h-full">
+            <div className="flex items-center justify-center h-full" >
               <span
                 className="flex items-center justify-center w-7 h-7 bg-white cursor-pointer border-[0.6px] border-strokeGreyTwo rounded-full transition-all hover:opacity-50"
                 title="Remove Customer"
@@ -169,11 +167,11 @@ export default function MiscellaneousForm({
           </div>
         ))}
 
-        <div className="flex justify-center mt-8">
+        <div className="flex justify-center mt-8" >
           <button
             type="button"
             onClick={addItem}
-            className="w-8 h-8 rounded-full bg-success hover:bg-green-500 transition-colors duration-200 flex items-center justify-center text-white shadow-lg hover:shadow-xl"
+            className="w-8 h-8 rounded-full bg-slate-300 hover:bg-green-500 transition-colors duration-200 flex items-center justify-center text-white shadow-lg hover:shadow-xl"
             title="Add New Miscellaneous Cost"
           >
             <IoMdAdd className="w-5 h-5" />
