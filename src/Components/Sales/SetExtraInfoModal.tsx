@@ -92,7 +92,7 @@ const SetExtraInfoModal = observer(
           aria-hidden="true"
         ></div>
 
-        <div className="fixed inset-0 flex justify-center items-center z-50">
+        <div className="fixed inset-0 flex justify-center items-center z-50" >
           <div
             className="space-y-3 bg-white px-5 py-4 rounded-[20px] shadow-menuCustom w-96 min-h-[500px] relative"
             style={{

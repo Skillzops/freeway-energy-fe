@@ -237,7 +237,7 @@ const Dashboard: React.FC = () => {
               </div>
 
               {/* Feed the normalized & filtered daily points to the chart */}
-              <div className="w-full h-[300px]">
+              <div className="w-full h-[300px]" >
                 <SalesChart data={filteredSales} />
               </div>
 
@@ -280,7 +280,7 @@ const Dashboard: React.FC = () => {
               <h2 className="font-bold text-[14px] tracking-[0.7px] text-textDarkGrey font-primary">MONTHLY TRENDS</h2>
 
               {/* SAME FILTERS AS SALES */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2" >
                 {/* Status */}
                 <div className="relative flex w-max">
                   <select

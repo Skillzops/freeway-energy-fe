@@ -270,7 +270,7 @@ const InventoryTable = ({
 
         const getStatusLevel =
           statusLevel > 50
-            ? "bg-successThree border-inkBlue"
+            ? "bg-[#56b32b] border-inkBlue text-white"
             : "bg-[#FFEBEC] border-[#FFC7CD]";
 
         return (

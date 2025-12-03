@@ -188,10 +188,10 @@ const LoginPage = () => {
         <img src={logo} alt="Logo" className="w-[120px] z-10" />
         <section className="flex w-full flex-col items-center justify-center gap-2 z-10 max-w-[500px]">
           <div className="flex flex-col items-center justify-center">
-            <h1 className="text-[32px] text-primary font-medium font-secondary">
-              {isForgotPassword ? "See who forgot something" : "Welcome Back8"}
+            <h1 className="text-[32px] text-white font-medium font-secondary">
+              {isForgotPassword ? "See who forgot something" : "Welcome Back"}
             </h1>
-            <em className="text-xs text-textDarkGrey text-center max-w-[220px]">
+            <em className="text-xs text-white text-center max-w-[220px]">
               {isForgotPassword
                 ? "Input your email below, we will send you a link to help reset your password."
                 : "Sign In to Access your Workplace"}

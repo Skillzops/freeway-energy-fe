@@ -15,7 +15,7 @@ const HeaderBadge = (props: HeaderBadgeProps) => {
         <img
           src={image}
           alt={`${pageName} Badge`}
-          className="w-72 opacity-20 h-24 "
+          className="w-36 opacity-20 h-24 "
         />
       </div>
     </div>

@@ -128,9 +128,8 @@ const NewTasks: React.FC<Props> = ({
         <div className="relative flex items-center gap-2">
           {/* <img src={taskIcon} alt="Tasks" /> */}
 
-          <div
-            className="relative w-10 h-10 grid place-items-center rounded-xl shadow-lg ring-1 ring-white/20"
-            style={{ backgroundImage: 'linear-gradient(135deg,#800020 0%,#CFB8BE 55%,#FFFFFF 100%)' }}
+          <div 
+            className="relative w-10 h-10 grid place-items-center rounded-xl shadow-lg ring-1 ring-white/20 bg-[#932819]"
           >
             <FiClipboard className="w-5 h-5 text-white drop-shadow-sm" />
             <span
@@ -278,7 +277,7 @@ const NewTasks: React.FC<Props> = ({
                   {/* Assign button per card */}
                   <div className="pt-2">
                     <button
-                      className="w-full py-2 rounded-full bg-gradient-to-r from-[#D4442E] to-[#FECB45] text-white font-semibold text-sm disabled:opacity-60"
+                      className="w-full py-2 rounded-full bg-[#932819] text-white font-semibold text-sm disabled:opacity-60"
                       onClick={(e) => {
                         e.stopPropagation(); // don't toggle selection when clicking button
                         onAssign(ui.id);
