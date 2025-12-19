@@ -76,12 +76,12 @@ const Installer = () => {
   const tabs = [
     {
       name: "Installation History",
-      key: "/installer/history",
+      key: "/installer/installer/history",
       count: installationData?.total || 0,
     },
     {
       name: "Task History",
-      key: "/installer/tasks",
+      key: "/installer/installer/tasks",
       count: tasksData?.total || 0,
     },
   ];

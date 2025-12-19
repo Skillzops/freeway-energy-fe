@@ -38,7 +38,7 @@ const Tasks = () => {
         break;
     }
     setCurrentPage(1);
-  }, [location.pathname]);
+  }, [location?.pathname]);
 
 
   const queryString = useMemo(
@@ -128,7 +128,7 @@ const Tasks = () => {
           <Suspense fallback={<LoadingSpinner parentClass="absolute top-[50%] w-full" />}>
             <Routes>
               <Route path="/" element={<Navigate to="/agent/tasks/all" replace />} />
-              {taskPaths.map((path) => (
+              {taskPaths?.map((path) => (
                 <Route
                   key={path}
                   path={path}
