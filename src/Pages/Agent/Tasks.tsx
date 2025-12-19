@@ -24,13 +24,13 @@ const Tasks = () => {
   useEffect(() => {
     setTableQueryParams({});
     switch (location.pathname) {
-      case "/tasks/pending":
+      case "/agent/tasks/pending":
         setTableQueryParams((p) => ({ ...(p || {}), status: "PENDING" }));
         break;
-      case "/tasks/completed":
+      case "/agent/tasks/completed":
         setTableQueryParams((p) => ({ ...(p || {}), status: "COMPLETED" }));
         break;
-      case "/tasks/rejected":
+      case "/agent/tasks/rejected":
         setTableQueryParams((p) => ({ ...(p || {}), status: "REJECTED" }));
         break;
       default:
@@ -127,7 +127,7 @@ const Tasks = () => {
         <section className="relative items-start justify-center flex min-h-[415px] w-full overflow-hidden">
           <Suspense fallback={<LoadingSpinner parentClass="absolute top-[50%] w-full" />}>
             <Routes>
-              <Route path="/" element={<Navigate to="/tasks/all" replace />} />
+              <Route path="/" element={<Navigate to="/agent/tasks/all" replace />} />
               {taskPaths.map((path) => (
                 <Route
                   key={path}
