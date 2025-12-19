@@ -254,7 +254,7 @@ const ParametersForm = ({
             placeholder="Initial Payment Amount"
             required={true}
             errorMessage={getFieldError("installmentStartingPrice")}
-            description="Standard initial payment is ₦6,000. You can modify this amount."
+            description={`Standard initial payment is ₦${formData.installmentStartingPrice}. You can modify this amount.`}
           />
         ) : null}
         

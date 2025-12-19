@@ -465,7 +465,7 @@ const TaskDetailsModal = ({
                       className="w-4 h-4 filter grayscale opacity-60"
                     />
                     <h3 className="text-textLightGrey text-xs font-medium uppercase">
-                      Generaldd Details
+                      General Details
                     </h3>
                   </div>
                   <Field
