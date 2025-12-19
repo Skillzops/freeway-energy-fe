@@ -235,9 +235,12 @@ const SaleTransactions = ({
     // );
 
     // Calculate payments made - if fully paid, show total installments, otherwise show actual completed payments
-    let paymentsMade = completedPayments.length;
+    // let paymentsMade = completedPayments.length;
     const totalInstallments = saleData?.totalInstallments || 0;
     const remainingInstallments = saleData?.remainingInstallments || 0;
+
+    let paymentsMade = totalInstallments - remainingInstallments ;
+
 
     
     // For installment payments, the progress should be based on the full amount
