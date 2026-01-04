@@ -13,6 +13,7 @@ export type MenuButtonType = {
 export const MenuButton = ({ buttonStyle, sections }: MenuButtonType) => {
   const userData = useTokens();
   const location = useLocation();
+  const brandPrimaryHex = "var(--brand-primary-hex)";
 
   const role = userData?.role?.role;
   const cate = userData?.agentDetails?.category;
@@ -71,7 +72,7 @@ export const MenuButton = ({ buttonStyle, sections }: MenuButtonType) => {
         onClick={() => setDialog((s) => !s)}
         className={`${buttonStyle ?? ""} group inline-flex items-center justify-center w-9 h-9 rounded-full
           shadow-innerCustom border border-transparent
-          bg-[#800020] text-white transition-all duration-200
+          bg-primary-hex text-white transition-all duration-200
           hover:brightness-110 active:brightness-95 focus:outline-none focus:ring-2 focus:ring-[#CFB8BE]`}
         title="Open menu"
       >
@@ -93,7 +94,7 @@ export const MenuButton = ({ buttonStyle, sections }: MenuButtonType) => {
         >
           <div 
             className="rounded-2xl shadow-[0_16px_40px_rgba(0,0,0,0.22)] p-3
-                       bg-[linear-gradient(180deg,#800020_0%,#6E001C_60%,#5A0018_100%)]
+                       bg-gradient-to-b from-primary-hex via-primary-shade-1 to-primary-shade-2
                        text-white border border-white/10
                        transition-transform duration-200 origin-top-left"
           >
@@ -101,10 +102,10 @@ export const MenuButton = ({ buttonStyle, sections }: MenuButtonType) => {
               const isActive = location.pathname.startsWith(section.link);
               const isHover = hoveredIndex === index;
               const pillClasses = isActive || isHover
-                ? "bg-white text-[#800020] border-white"
+                ? "bg-white text-primary-hex border-white"
                 : "bg-white/10 text-white border-white/20";
 
-              const iconColor = isActive || isHover ? "#800020" : "#FFFFFF";
+              const iconColor = isActive || isHover ? brandPrimaryHex : "#FFFFFF";
 
               return (
                 <div key={section.title} className="w-full"> 
@@ -136,7 +137,7 @@ export const MenuButton = ({ buttonStyle, sections }: MenuButtonType) => {
           <div className="relative">
             <div
               className="absolute -top-2 left-6 w-3 h-3 rotate-45 
-                         bg-[#800020] border-l border-t border-white/20"
+                         bg-primary-hex border-l border-t border-white/20"
             />
           </div>
         </div>
@@ -144,4 +145,3 @@ export const MenuButton = ({ buttonStyle, sections }: MenuButtonType) => {
     </>
   );
 };
-

@@ -1,8 +1,9 @@
-import { useGetRequest } from "@/utils/useApiCall";
 import React, { useCallback, useEffect } from "react";
+import { useGetRequest } from "@/utils/useApiCall";
 import { DataStateWrapper } from "../Loaders/DataStateWrapper";
 import type { Contract, SaleItem } from "./contractType";
 import { formatDateTime } from "@/utils/helpers";
+import { BRAND_CONFIG } from "@/config/brandConfig";
 
 const ContractModal = ({
   setIsOpen,
@@ -17,6 +18,10 @@ const ContractModal = ({
   );
 
   const contractData: Contract = fetchSingleContract?.data;
+  const companyLegalName =
+    BRAND_CONFIG.companyLegalName || BRAND_CONFIG.companyName;
+  const brandShortName = BRAND_CONFIG.brandShortName ;
+  const officeAddress = BRAND_CONFIG.headquartersAddress;
 
   const handleClose = useCallback(() => {
     setIsOpen(false);
@@ -63,11 +68,12 @@ const ContractModal = ({
               </h1>
               <p>
                 This <strong>AGREEMENT</strong> (the “Agreement”) is made
-                between <strong>Inreli POWER SOLUTIONS LIMITED</strong>, (Inreli)
+                between <strong>{companyLegalName}</strong>, ({brandShortName})
                 and the <strong>CUSTOMER</strong> as set out in the execution
                 section (the “Customer”) on the date appearing in the execution
                 section below and sets out the terms and conditions upon which
-                Inreli will sell its product(s) (the “Product”) to the Customer.
+                {brandShortName} will sell its product(s) (the “Product”) to the
+                Customer.
               </p>
               <section className="flex flex-col gap-2">
                 <p>
@@ -76,8 +82,9 @@ const ContractModal = ({
                 <div>
                   <SectionHeader title="1. Product" />
                   <p className="pb-2">
-                    Inreli will sell to the Customer and the Customer agrees to
-                    buy from Inreli the following product(s):
+                    {brandShortName} will sell to the Customer and the Customer
+                    agrees to buy from {brandShortName} the following
+                    product(s):
                   </p>
                   {contractData?.sale[0]?.saleItems?.length > 0 ? (
                     <ProductSelector
@@ -92,8 +99,9 @@ const ContractModal = ({
                 <SectionHeader title="2. Purchase Price & Payment Plans" />
                 <p>
                   The Customer shall pay the purchase price for the Product,
-                  based on pricing and payment plans made available by Inreli at
-                  the time of signing the Agreement (the “Purchase Price”).
+                  based on pricing and payment plans made available by{" "}
+                  {brandShortName} at the time of signing the Agreement (the
+                  “Purchase Price”).
                 </p>
                 <br />
                 <p className="leading-relaxed">
@@ -107,19 +115,19 @@ const ContractModal = ({
                 <br />
                 <p>
                   All payment regarding the Contract/Agreement in reference
-                  shall be made to Inreli Account. Take <strong>NOTICE</strong>{" "}
-                  that no payment is to be made either via cash or bank transfer
-                  into sales Agent account. Inreli shall not be liable for such
-                  payments.
+                  shall be made to {brandShortName} Account. Take{" "}
+                  <strong>NOTICE</strong> that no payment is to be made either
+                  via cash or bank transfer into sales Agent account.{" "}
+                  {brandShortName} shall not be liable for such payments.
                 </p>
               </section>
               <section>
                 <SectionHeader title="3. Title" />
                 <p>
-                  Inreli shall retain ownership, title and all interest to the
-                  Product sold until full payment of the Purchase Price is
-                  received from Customer in accordance with the terms of this
-                  Agreement.{" "}
+                  {brandShortName} shall retain ownership, title and all
+                  interest to the Product sold until full payment of the
+                  Purchase Price is received from Customer in accordance with
+                  the terms of this Agreement.{" "}
                 </p>
               </section>
               <section>
@@ -129,8 +137,8 @@ const ContractModal = ({
                   encumbrances at the location appearing in the execution
                   section (the “Installation Location”). Customer shall not
                   remove the Product from the Installation Location before the
-                  completion of payment of the Purchase Price without Inreli's
-                  prior written consent.{" "}
+                  completion of payment of the Purchase Price without{" "}
+                  {`${brandShortName}'s`} prior written consent.{" "}
                 </p>
               </section>
               <section>
@@ -138,9 +146,9 @@ const ContractModal = ({
                 <p>
                   Customer may self-install the Product or engage the services
                   of an Installer to install the Product at the Installation
-                  Location. Inreli assumes no responsibility for the installation
-                  of the System by the Customer or an Installer. Customer is
-                  solely liable.
+                  Location. {brandShortName} assumes no responsibility for the
+                  installation of the System by the Customer or an Installer.
+                  Customer is solely liable.
                 </p>
               </section>
               <section>
@@ -161,8 +169,8 @@ const ContractModal = ({
                   </li>
                   <li>
                     Customer shall promptly report a case of technical
-                    malfunction to Inreli by calling the customer experience
-                    helpline; and
+                    malfunction to {brandShortName} by calling the customer
+                    experience helpline; and
                   </li>
                   <li>
                     Customer shall not open, repair or tamper with the Product
@@ -182,17 +190,18 @@ const ContractModal = ({
                 <br />
                 <p>
                   Subject to Customer submitting the faulty Product at the
-                  location advised by Inreli in order to access the product
-                  warranty, Inreli may repair the Product if the warranty is valid
-                  or may replace the Product if a repair is impracticable.{" "}
+                  location advised by {brandShortName} in order to access the
+                  product warranty, {brandShortName} may repair the Product if
+                  the warranty is valid or may replace the Product if a repair
+                  is impracticable.{" "}
                 </p>
               </section>
               <section>
                 <SectionHeader title="7. Default & Conditional Refund" />
                 <p>
                   Upon any default by the Customer of the terms of this
-                  Agreement, Inreli reserves the right to terminate this Agreement
-                  and forthwith:
+                  Agreement, {brandShortName} reserves the right to terminate
+                  this Agreement and forthwith:
                 </p>
                 <div className="pl-4 pt-2 list-[lower-roman]">
                   <li>
@@ -201,16 +210,17 @@ const ContractModal = ({
                   </li>
                   <li>
                     Demand the return of the Product at Customer's expense to a
-                    location as directed by Inreli; or
+                    location as directed by {brandShortName}; or
                   </li>
                   <li>
-                    This agreement may be terminated by Inreli with or without
-                    prior notice to the customer if the customer fails,
-                    neglects, or is unable to make payment for more than fifteen
-                    (15) consecutive days from any due date in which case, Inreli
-                    shall deactivate, recover or take back the Inreli item and the
-                    customer shall forfeit any payment made hitherto and shall
-                    compensate Inreli according to the market price for any
+                    This agreement may be terminated by {brandShortName} with
+                    or without prior notice to the customer if the customer
+                    fails, neglects, or is unable to make payment for more than
+                    fifteen (15) consecutive days from any due date in which
+                    case, {brandShortName} shall deactivate, recover or take
+                    back the {brandShortName} item and the customer shall
+                    forfeit any payment made hitherto and shall compensate
+                    {brandShortName} according to the market price for any
                     damaged or missing parts, accessories and/or components.
                   </li>
                 </div>
@@ -218,30 +228,30 @@ const ContractModal = ({
               <section>
                 <SectionHeader title="8. Data Protection" />
                 <p>
-                  By providing Inreli with personal data as requested and signing
-                  the Agreement and subject to the relevant data protection laws
-                  of Nigeria, Customer hereby agrees and accepts Inreli's Privacy
-                  Policy as published on its website and as may be amended from
-                  time to time.
+                  By providing {brandShortName} with personal data as requested
+                  and signing the Agreement and subject to the relevant data
+                  protection laws of Nigeria, Customer hereby agrees and accepts
+                  {brandShortName}'s Privacy Policy as published on its website
+                  and as may be amended from time to time.
                 </p>
                 <p>
                   Customer consents to receive any text messages, calls
-                  (including automated messages and calls) and emails from Inreli
-                  and shall promptly notify Inreli by calling the customer
-                  experience helpline in the event that Customer wishes to
-                  withdraw this consent.
+                  (including automated messages and calls) and emails from
+                  {brandShortName} and shall promptly notify {brandShortName} by
+                  calling the customer experience helpline in the event that
+                  Customer wishes to withdraw this consent.
                 </p>
                 <p>
                   The Customer authorizes the release from time to time to
-                  Inreli's affiliates, subsidiaries, 3rd parties, agents,
-                  investors, grantor and financing institutions, his personal
-                  data for the administration of this Agreement, for marketing
-                  purposes. Customer shall have access to the personal data and
-                  reserves the right to withdraw this consent.
+                  {brandShortName}'s affiliates, subsidiaries, 3rd parties,
+                  agents, investors, grantor and financing institutions, his
+                  personal data for the administration of this Agreement, for
+                  marketing purposes. Customer shall have access to the personal
+                  data and reserves the right to withdraw this consent.
                 </p>
                 <p>
-                  Inreli may retain the Customer's personal data in accordance
-                  with the applicable laws of Nigeria.
+                  {brandShortName} may retain the Customer's personal data in
+                  accordance with the applicable laws of Nigeria.
                 </p>
               </section>{" "}
               <section>
@@ -250,29 +260,31 @@ const ContractModal = ({
                   The Product is entirely at the risk of the Customer from the
                   moment the Customer takes possession of the Product even when
                   title has not passed to the Customer. The Customer shall be
-                  solely accountable and liable to Inreli for the outstanding
-                  value of the Product in the event of loss and/or damage not
-                  covered by warranty.
+                  solely accountable and liable to {brandShortName} for the
+                  outstanding value of the Product in the event of loss and/or
+                  damage not covered by warranty.
                 </p>
               </section>
               <section>
                 <SectionHeader title="10. Notices" />
                 <p>
-                  Inreli and Customer choose as their respective addresses for the
-                  purpose of notices under this Agreement, and the serving of
-                  any process, the addresses set out below and in the execution
-                  section. A Party may change its address upon 7 (seven) days’
-                  written notice to the other Party. Notice is deemed received
-                  if sent by post, within seven (7) days of postage thereof, if
-                  hand delivered, on the date of delivery at the address of the
-                  receiving Party.
+                  {brandShortName} and Customer choose as their respective
+                  addresses for the purpose of notices under this Agreement, and
+                  the serving of any process, the addresses set out below and in
+                  the execution section. A Party may change its address upon 7
+                  (seven) days’ written notice to the other Party. Notice is
+                  deemed received if sent by post, within seven (7) days of
+                  postage thereof, if hand delivered, on the date of delivery at
+                  the address of the receiving Party.
                 </p>
-                <p>
-                  <strong>Inreli</strong> <br />
-                  27 Olumoroti Jayeisimi Street <br />
-                  Gbagada Phase II <br />
-                  Lagos
-                </p>
+                <div>
+                  <strong>{brandShortName}</strong> <br />
+                  {officeAddress?.map((line, idx) => (
+                    <span key={line + idx} className="block">
+                      {line}
+                    </span>
+                  ))}
+                </div>
               </section>
               <section>
                 <SectionHeader title="11. Severability" />

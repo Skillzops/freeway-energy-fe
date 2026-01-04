@@ -38,10 +38,10 @@ export const SideMenu = ({ navigationList, parentClass }: SideMenuType) => {
               outline-none ring-0
               transition-[background,transform,box-shadow] duration-200
               ${active
-                ? "bg-gradient-to-r from-[#800020] to-black text-white shadow-[0_6px_18px_rgba(0,0,0,0.18)]"
+                ? "bg-gradient-to-r from-[var(--brand-primary-hex)] to-accent text-white shadow-[0_6px_18px_rgba(0,0,0,0.18)]"
                 : "bg-white text-black hover:bg-black/5"
               }
-              focus-visible:ring-2 focus-visible:ring-[#800020]/60
+              focus-visible:ring-2 focus-visible:ring-primary-hex focus-visible:ring-opacity-60
               hover:-translate-y-[1px] active:translate-y-0
             `}
           >
@@ -62,7 +62,7 @@ export const SideMenu = ({ navigationList, parentClass }: SideMenuType) => {
                   transition-colors
                   ${active
                     ? "bg-white/90 text-black"
-                    : "bg-black/5 text-black/70 group-hover:bg-[#800020]/10 group-hover:text-[#800020]"
+                    : "bg-black/5 text-black/70 group-hover:bg-primary-hex/10 group-hover:text-primary-hex"
                   }
                   border border-black/10
                 `}
@@ -75,7 +75,7 @@ export const SideMenu = ({ navigationList, parentClass }: SideMenuType) => {
               <span
                 className="pointer-events-none absolute inset-0 rounded-full opacity-0
                 group-hover:opacity-100 transition-opacity
-                ring-1 ring-[#800020]/20"
+                ring-1 ring-primary-hex/20"
               />
             )}
           </Link>
@@ -84,4 +84,3 @@ export const SideMenu = ({ navigationList, parentClass }: SideMenuType) => {
     </div>
   );
 };
-

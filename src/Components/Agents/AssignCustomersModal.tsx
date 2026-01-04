@@ -117,7 +117,7 @@ const AssignCustomersModal: React.FC<AssignCustomersModalProps> = ({
                     key={customer.id}
                     className={`flex items-center justify-between p-3 border-b border-strokeGreyTwo cursor-pointer transition-colors ${
                       selectedCustomers.includes(customer.id) 
-                        ? 'bg-gradient-to-r from-[#FEF5DA] to-[#F8CB48]/20 border-l-4 border-l-[#A58730]' 
+                        ? 'bg-gradient-to-r from-accent-10 to-accent-20 border-l-4 border-l-accent' 
                         : 'hover:bg-gray-50'
                     }`}
                     onClick={() => handleCustomerSelect(customer.id)}
@@ -162,9 +162,9 @@ const AssignCustomersModal: React.FC<AssignCustomersModalProps> = ({
                   disabled={!isFormValid}
                   className={`flex-1 py-3 px-4 text-sm font-medium rounded-2xl transition-colors ${
                     isFormValid 
-                      ? 'bg-gradient-to-r from-[#982214] to-[#F8CB48] text-white hover:opacity-90 shadow-lg' 
-                      : 'bg-gray-100 text-textDarkGrey cursor-not-allowed'
-                  }`}
+                      ? 'bg-gradient-to-r from-primary to-accent text-white hover:opacity-90 shadow-lg' 
+                        : 'bg-gray-100 text-textDarkGrey cursor-not-allowed'
+                    }`}
                 >
                   Assign {selectedCustomers.length} Customer{selectedCustomers.length !== 1 ? 's' : ''}
                 </button>

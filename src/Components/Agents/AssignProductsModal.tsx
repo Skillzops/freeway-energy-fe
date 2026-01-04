@@ -117,7 +117,7 @@ const AssignProductsModal: React.FC<AssignProductsModalProps> = ({
                     key={product.id}
                     className={`flex items-center justify-between p-4 border-b border-strokeGreyTwo cursor-pointer transition-all duration-200 ${
                       selectedProducts.includes(product.id) 
-                        ? 'bg-gradient-to-r from-[#FEF5DA] to-[#F8CB48]/20 border-l-4 border-l-[#A58730] shadow-sm' 
+                        ? 'bg-gradient-to-r from-accent-10 to-accent-20 border-l-4 border-l-accent shadow-sm' 
                         : 'hover:bg-gray-50 hover:shadow-sm'
                     }`}
                     onClick={() => handleProductSelect(product.id)}
@@ -177,9 +177,9 @@ const AssignProductsModal: React.FC<AssignProductsModalProps> = ({
                   disabled={!isFormValid}
                   className={`flex-1 py-3.5 px-4 text-sm font-semibold rounded-2xl transition-all duration-200 ${
                     isFormValid 
-                      ? 'bg-gradient-to-r from-[#982214] to-[#F8CB48] text-white hover:opacity-90 shadow-lg hover:shadow-xl' 
-                      : 'bg-gray-100 text-textDarkGrey cursor-not-allowed shadow-sm'
-                  }`}
+                      ? 'bg-gradient-to-r from-primary to-accent text-white hover:opacity-90 shadow-lg hover:shadow-xl' 
+                        : 'bg-gray-100 text-textDarkGrey cursor-not-allowed shadow-sm'
+                    }`}
                 >
                   Assign {selectedProducts.length} Product{selectedProducts.length !== 1 ? 's' : ''}
                 </button>

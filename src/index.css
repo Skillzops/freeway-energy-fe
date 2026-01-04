@@ -166,7 +166,7 @@ table {
   position: absolute;
   inset: -10px;
   border-radius: 50%;
-  border: 10px solid #982214;
+  border: 10px solid var(--brand-primary);
   animation: l18 1s infinite linear;
 }
 @keyframes l18 {

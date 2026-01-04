@@ -20,29 +20,28 @@ const TaskHeader: React.FC<TaskHeaderProps> = ({ count, onPrevious, onNext }) =>
           </div> */}
 
           <div
-            className="relative w-10 h-10 grid place-items-center rounded-xl shadow-lg ring-1 ring-white/20"
-            style={{ backgroundImage: 'linear-gradient(135deg,#800020 0%,#CFB8BE 55%,#FFFFFF 100%)' }}
+            className="relative w-10 h-10 grid place-items-center rounded-xl shadow-lg ring-1 ring-white/20 bg-primaryGradient"
           >
             <FiClipboard className="w-5 h-5 text-white drop-shadow-sm" />
             <span
               className="pointer-events-none absolute inset-0 blur-md opacity-50 -z-10"
-              style={{ backgroundImage: 'linear-gradient(135deg,#800020 0%,#CFB8BE 55%,#FFFFFF 100%)' }}
+              style={{ backgroundImage: "var(--brand-gradient-primary)" }}
             />
           </div>
 
           {/* Count Badge */}
-          <div className="absolute -top-1 -right-1 w-6 h-6 bg-[#F8CB48] rounded-full flex items-center justify-center">
+          <div className="absolute -top-1 -right-1 w-6 h-6 bg-accent rounded-full flex items-center justify-center">
             <span className="text-sm font-bold text-white">{count}</span>
           </div>
         </div>
-        <span className="text-sm font-bold text-[#32290E]">New Tasks</span>
+        <span className="text-sm font-bold text-primary">New Tasks</span>
       </div>
 
       {/* Right side: Navigation Buttons */}
       <div className="flex gap-2">
         <button
           onClick={onPrevious}
-          className="w-10 h-10 rounded-full border border-[#E0E0E0] flex items-center justify-center hover:bg-[#FEF5DA] transition-colors"
+          className="w-10 h-10 rounded-full border border-[#E0E0E0] flex items-center justify-center hover:bg-accent-20 transition-colors"
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
             <path d="M15 18L9 12L15 6" stroke="#828DA9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />

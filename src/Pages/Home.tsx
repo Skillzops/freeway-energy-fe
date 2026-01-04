@@ -83,8 +83,8 @@ const Home = () => {
               border border-strokeGreyTwo bg-white
               transition-all duration-300 ease-out
               hover:-translate-y-[2px] hover:shadow-[0_14px_30px_rgba(0,0,0,0.12)]
-              hover:bg-[#800020] hover:border-[#800020]
-              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#800020]/50
+              hover:bg-primary-hex hover:border-primary-hex
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-hex focus-visible:ring-opacity-50
             "
             onClick={() => {
               if (!isMobile) navigate(section.location);
@@ -126,4 +126,3 @@ const Home = () => {
 };
 
 export default Home;
-

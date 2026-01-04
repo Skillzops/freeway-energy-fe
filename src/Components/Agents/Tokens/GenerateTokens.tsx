@@ -434,14 +434,14 @@ const GenerateTokens = ({ isOpen, setIsOpen, allDevicesRefresh, formType }: Gene
                                     <button
                                         type="button"
                                         onClick={handleGenerateAnother}
-                                        className="bg-gradient-to-r from-[#982214] to-[#F8CB48] text-white px-4 py-2 rounded-md hover:opacity-90 transition-opacity font-medium text-sm"
+                                        className="bg-gradient-to-r from-primary to-accent text-white px-4 py-2 rounded-md hover:opacity-90 transition-opacity font-medium text-sm"
                                     >
                                         Generate Another
                                     </button>
                                     <button
                                         type="button"
                                         onClick={handleExportToPDF}
-                                        className="bg-gradient-to-r from-[#982214] to-[#F8CB48] text-white px-4 py-2 rounded-md hover:opacity-90 transition-opacity font-medium text-sm flex items-center gap-2"
+                                        className="bg-gradient-to-r from-primary to-accent text-white px-4 py-2 rounded-md hover:opacity-90 transition-opacity font-medium text-sm flex items-center gap-2"
                                     >
                                         <FiDownload className="w-4 h-4" />
                                         Export to PDF

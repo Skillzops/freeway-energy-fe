@@ -30,7 +30,7 @@ const SalesChart: React.FC<Props> = ({ data }) => (
       <defs>
         <linearGradient id="primaryGradient" x1="0" y1="0" x2="1" y2="0">
           <stop offset="0%" stopColor="#7A0C0C" />
-          <stop offset="100%" stopColor="#982214" />
+          <stop offset="100%" stopColor="var(--brand-accent)" />
         </linearGradient>
       </defs>
 

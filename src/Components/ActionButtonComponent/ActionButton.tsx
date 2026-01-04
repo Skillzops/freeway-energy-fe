@@ -1,3 +1,4 @@
+import { BRAND_CONFIG } from "@/config/brandConfig";
 import React, { ReactNode } from "react";
 
 interface ActionButtonProps {
@@ -17,9 +18,9 @@ const ActionButton: React.FC<ActionButtonProps> = ({
   buttonClass = "",
   labelClass = "",
 }) => {
-  const COLOR = "#5A081C";
+  const COLOR = BRAND_CONFIG.colors.legacy.brandPrimary
   const RING = "";
-  const SHADOW = "#882F45";
+  const SHADOW = BRAND_CONFIG.colors.legacy.accent;
 
   const base =
     "flex items-center h-[32px] gap-1 px-3 py-1 rounded-full border transition-all select-none focus:outline-none";

@@ -303,7 +303,7 @@ const AgentDetails = observer(({
               {assignedData?.products && assignedData.products.length > 0 && (
                 <div className="flex -space-x-1">
                   {assignedData.products.slice(0, 2).map((product, index) => (
-                    <div key={product.id} className="w-5 h-5 bg-[#982214] rounded-full flex items-center justify-center">
+                    <div key={product.id} className="w-5 h-5 bg-primary rounded-full flex items-center justify-center">
                       <span className="text-xs text-white font-bold">{product.name.charAt(0)}</span>
                     </div>
                   ))}
@@ -328,7 +328,7 @@ const AgentDetails = observer(({
               {assignedData?.installers && assignedData.installers.length > 0 && (
                 <div className="flex -space-x-1">
                   {assignedData.installers.slice(0, 2).map((installer, index) => (
-                    <div key={installer.id} className="w-5 h-5 bg-[#F8CB48] rounded-full flex items-center justify-center">
+                    <div key={installer.id} className="w-5 h-5 bg-accent rounded-full flex items-center justify-center">
                       <span className="text-xs text-textBlack font-bold">{installer.name.charAt(0)}</span>
                     </div>
                   ))}

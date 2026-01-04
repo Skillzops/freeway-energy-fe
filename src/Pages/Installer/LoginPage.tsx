@@ -1,10 +1,6 @@
 import { Suspense, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { z } from "zod";
-import loginbg from "@/assets/loginbg.jpg";
-import logo from "@/assets/logo.svg";
-import eyeclosed from "@/assets/eyeclosed.svg";
-import eyeopen from "@/assets/eyeopen.svg";
 import { Input } from "@/Components/InputComponent/Input";
 import ProceedButton from "@/Components/ProceedButtonComponent/ProceedButtonComponent";
 import { useApiCall } from "@/utils/useApiCall";
@@ -13,7 +9,9 @@ import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
 import { useIsLoggedIn } from "@/utils/helpers";
 import InstallerBadge from "@/Components/Installer/InstallerComponent/InstallerBadge";
 import { toast } from "react-toastify";
-// import InstallerBadge from "@/Components/InstallerComponent/InstallerBadge";
+import eyeclosed from "@/assets/eyeclosed.svg";
+import eyeopen from "@/assets/eyeopen.svg";
+import { brandAssets } from "@/config/brandConfig";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -32,6 +30,8 @@ const defaultLoginFormData: LoginFormData = {
 };
 
 const InstallerLoginPage = () => {
+  const brandLogo = brandAssets.logoFull;
+  const brandBg = brandAssets.authBackgrounds.installer;
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { apiCall } = useApiCall();
@@ -190,13 +190,13 @@ const InstallerLoginPage = () => {
     >
       <main className="relative flex flex-col items-center justify-center gap-[60px] px-4 py-16 w-full min-h-screen">
         <img
-          src={loginbg}
+          src={brandBg}
           alt="background"
           className={`absolute w-full h-full object-cover object-center ${
             formData.email || formData.password ? "opacity-60" : "opacity-40"
           }`}
         />
-        <img src={logo} alt="Logo" className="w-[120px] z-10" />
+        <img src={brandLogo} alt="Logo" className="w-[120px] z-10" />
         <div>
           <InstallerBadge />
         </div>

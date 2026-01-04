@@ -129,12 +129,12 @@ const NewTasks: React.FC<Props> = ({
           {/* <img src={taskIcon} alt="Tasks" /> */}
 
           <div 
-            className="relative w-10 h-10 grid place-items-center rounded-xl shadow-lg ring-1 ring-white/20 bg-[#932819]"
+            className="relative w-10 h-10 grid place-items-center rounded-xl shadow-lg ring-1 ring-white/20 bg-gradient-to-br from-primary-hex via-primary-shade-1 to-primary-shade-2"
           >
             <FiClipboard className="w-5 h-5 text-white drop-shadow-sm" />
             <span
               className="pointer-events-none absolute inset-0 blur-md opacity-50 -z-10"
-              style={{ backgroundImage: 'linear-gradient(135deg,#800020 0%,#CFB8BE 55%,#FFFFFF 100%)' }}
+              style={{ backgroundImage: 'linear-gradient(135deg,var(--brand-primary-hex) 0%,var(--brand-primary-shade-1) 55%,#FFFFFF 100%)' }}
             />
           </div>
 

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { TbAlertTriangleFilled } from "react-icons/tb";
 import { KeyedMutator } from "swr";
 import { ApiErrorStatesType } from "@/utils/useApiCall";
+import { BRAND_CONFIG } from "@/config/brandConfig";
 
 export default function ErrorPage({
   error,
@@ -22,6 +23,8 @@ export default function ErrorPage({
   const message = networkError
     ? "No Internet Connection, Try checking your network configuration."
     : "Sorry, something went wrong on our end. We're working to fix it.";
+  const supportEmail = BRAND_CONFIG.supportEmail;
+  const supportEmailHref = `mailto:${supportEmail}`;
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -41,7 +44,10 @@ export default function ErrorPage({
                   >
                     <stop
                       offset="0%"
-                      style={{ stopColor: "#982214", stopOpacity: 1 }}
+                      style={{
+                        stopColor: "var(--brand-primary)",
+                        stopOpacity: 1,
+                      }}
                     />
                     <stop
                       offset="100%"
@@ -90,10 +96,10 @@ export default function ErrorPage({
                 If this problem persists, please contact our support team by
                 sending an email to{" "}
                 <a
-                  href="mailto:support@INRELItpowersolutions.com"
+                  href={supportEmailHref}
                   className="text-primary hover:underline"
                 >
-                  support@INRELIpowersolutions.com
+                  {supportEmail}
                 </a>
                 .
               </p>

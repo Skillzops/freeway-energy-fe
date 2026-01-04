@@ -1,12 +1,8 @@
 import { useEffect, useState } from "react";
-import logoplain from "../../assets/logo.svg";
 import { useNavigate } from "react-router-dom";
 import { MenuButton } from "../MenuComponent/MenuButton";
 import UserProfile from "../UserPill";
 import { useFormattedCurrentDate } from "../../hooks/useFormattedCurrentDate";
-// import notification from "../../assets/notification.svg";
-// import search from "../../assets/search.svg";
-// import close from "../../assets/close.svg";
 import support from "../../assets/support.svg";
 import { DropDown } from "../DropDownComponent/DropDown";
 import Cookies from "js-cookie";
@@ -18,8 +14,6 @@ const TopNavComponent = () => {
   const { role } = useTokens();
   const navigate = useNavigate();
   const currentDate = useFormattedCurrentDate();
-  // const [showSearchInput, setSearchInput] = useState<boolean>(false);
-  // const [query, setQuery] = useState<string>("");
 
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -41,11 +35,6 @@ const TopNavComponent = () => {
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
-
-  // const handleSearch = () => {
-  //   console.log(query);
-  //   setSearchInput(false);
-  // };
 
   const dropDownList = {
     items: ["My Profile", "Logout"],
@@ -76,7 +65,7 @@ const TopNavComponent = () => {
         <div className="flex items-start sm:items-center justify-between gap-1 w-full max-w-screen-2xl" >
           <div className="flex flex-wrap sm:flex-nowrap items-center w-max gap-1 sm:gap-2">
             <img
-              src={logoplain}
+              src={'/logo.svg'}
               alt="Logo"
               // width="100px"
               className="w-[80px] sm:w-[80px] cursor-pointer"
@@ -89,69 +78,6 @@ const TopNavComponent = () => {
             <span className="hidden sm:flex items-center justify-center bg-[#F6F8FA] h-[32px] px-2 py-1 text-xs text-textDarkGrey border-[0.6px] border-strokeGreyThree rounded-full">
               {currentDate}
             </span>
-            {/* {showSearchInput ? null : (
-            <>
-            <span className="hidden sm:flex items-center justify-center bg-[#F6F8FA] h-[32px] px-2 py-1 text-xs text-textDarkGrey border-[0.6px] border-strokeGreyThree rounded-full">
-                {currentDate}
-                </span>
-              <div
-              className="relative flex items-center justify-center w-[32px] h-[32px] bg-white border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom transition-all hover:bg-[#E2E4EB]"
-                onClick={() => setIsOpen(true)}
-              >
-              <img
-              src={notification}
-              alt="Notification"
-              className="w-[16px] cursor-pointer"
-                />
-                <span className="animate-ping -top-1.5 -right-1 absolute flex items-center justify-center bg-[#FEF5DA] text-transparent text-[8px] text-center font-medium min-w-4 min-h-4 p-[1px] border border-[#A58730] rounded-full shadow-innerCustom">
-                  7
-                </span>
-                <span className="-top-1.5 -right-1 absolute flex items-center justify-center bg-[#FEF5DA] text-[8px] text-center font-medium min-w-4 min-h-4 p-[1px] border border-[#A58730] rounded-full shadow-innerCustom">
-                  7
-                </span>
-              </div>
-            </>
-          )} */}
-            {/* {showSearchInput ? (
-            <div className="flex w-full items-center gap-2">
-              <input
-              type="search"
-              className="text-xs font-medium text-textDarkGrey w-full h-[32px] pl-2 pr-1 py-1 border-[0.6px] border-strokeGreyThree rounded-full"
-              value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSearch();
-                }}
-                autoFocus
-                placeholder="Enter your query"
-                />
-                </div>
-                ) : (
-                  <div
-                  className="relative flex items-center justify-center w-[32px] h-[32px] bg-white border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom transition-all hover:bg-[#E2E4EB]"
-              onClick={() => setSearchInput(true)}
-            >
-              <img
-                src={search}
-                alt="Search"
-                className="w-[16px] cursor-pointer"
-              />
-            </div>
-          )} */}
-            {/* {showSearchInput ? (
-            <div
-            className="flex items-center justify-center w-[40px] h-[32px] bg-white border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom  transition-all hover:bg-[#E2E4EB]"
-            onClick={() => setSearchInput(false)}
-            >
-              <img
-              src={close}
-              alt="Close"
-                className="w-[20px] h-[20px] cursor-pointer"
-                />
-                </div>
-                ) : (
-                  <DropDown {...dropDownList} />
-                  )} */}
             <DropDown {...dropDownList} />
           </div>
         </div>

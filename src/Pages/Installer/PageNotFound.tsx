@@ -23,7 +23,10 @@ const PageNotFound = () => {
                   >
                     <stop
                       offset="0%"
-                      style={{ stopColor: "#982214", stopOpacity: 1 }}
+                      style={{
+                        stopColor: "var(--brand-primary)",
+                        stopOpacity: 1,
+                      }}
                     />
                     <stop
                       offset="100%"

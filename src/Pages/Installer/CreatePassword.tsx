@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import loginbg from "@/assets/loginbg.png";
-import logo from "@/assets/logo.svg";
-import eyeclosed from "@/assets/eyeclosed.svg";
-import eyeopen from "@/assets/eyeopen.svg";
 import { Input } from "@/Components/InputComponent/Input";
 import ProceedButton from "@/Components/ProceedButtonComponent/ProceedButtonComponent";
 import { useApiCall } from "@/utils/useApiCall";
+import eyeclosed from "@/assets/eyeclosed.svg";
+import eyeopen from "@/assets/eyeopen.svg";
+import { brandAssets } from "@/config/brandConfig";
 
 const LoginPage = () => {
+  const brandLogo = brandAssets.logoFull;
+  const brandBg = brandAssets.authBackgrounds.installer;
   const location = useLocation();
   const navigate = useNavigate();
   const { apiCall } = useApiCall();
@@ -64,13 +65,13 @@ const LoginPage = () => {
   return (
     <main className="relative flex flex-col items-center justify-center gap-[60px] px-4 py-16 min-h-screen">
       <img
-        src={loginbg}
+        src={brandBg}
         alt="background"
         className={`absolute w-full h-full object-cover object-center ${
           newPassword || confirmPassword ? "opacity-60" : "opacity-40"
         }`}
       />
-      <img src={logo} alt="Logo" className="w-[120px] z-10" />
+      <img src={brandLogo} alt="Logo" className="w-[120px] z-10" />
       <section className="flex w-full flex-col items-center justify-center gap-2 z-10 max-w-[500px]">
         <div className="flex flex-col items-center justify-center">
           <h1 className="text-[32px] text-primary font-medium font-secondary">

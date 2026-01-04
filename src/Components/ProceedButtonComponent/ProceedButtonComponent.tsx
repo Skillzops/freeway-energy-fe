@@ -95,8 +95,8 @@ const ProceedButton: React.FC<ButtonProps> = ({
               y2="12"
               gradientUnits="userSpaceOnUse"
             >
-              <stop stopColor="#982214" />
-              <stop offset="1" stopColor="#F8CB48" />
+              <stop stopColor="var(--brand-primary)" />
+              <stop offset="1" stopColor="var(--brand-accent)" />
             </linearGradient>
             <clipPath id="clip0_51_2955">
               <rect
