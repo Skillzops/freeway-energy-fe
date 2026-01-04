@@ -84,6 +84,7 @@ type BrandColors = {
     warning: string;
     danger: string;
   };
+  palette: Record<string, string>;
   theme?: {
     light: ThemePalette;
     dark: ThemePalette;
@@ -134,11 +135,38 @@ export const BRAND_CONFIG: BrandConfig = {
   },
   colors: {
     legacy: {
-      brandPrimary: "#FFA800",
+      brandPrimary: "#800621",
       accent: "#000000",
       success: "#00AF50",
       warning: "#FFB86B",
       danger: "#FC4C5D",
+    },
+    palette: {
+      textBlack: "#050505",
+      textGrey: "#828DA9",
+      textLightGrey: "#9BA4BA",
+      textDarkGrey: "#49526A",
+      textDarkBrown: "#32290E",
+      strokeGrey: "#9DA3AA",
+      strokeGreyTwo: "#E0E0E0",
+      strokeGreyThree: "#EAEEF2",
+      strokeCream: "#D3C6A1",
+      error: "#EA91B4",
+      errorTwo: "#FC4C5D",
+      paleLightBlue: "#EFF2FF",
+      brightBlue: "#007AFF",
+      successTwo: "#E3FAD6",
+      successThree: "#AEF1A7",
+      disabled: "#E2E4EB",
+      blackBrown: "#1E0604",
+      gold: "#F8CB48",
+      purpleBlue: "#DADFF8",
+      pink: "#F7D3E1",
+      inkBlue: "#8396E7",
+      inkBlueTwo: "#3951B6",
+      paleYellow: "#FFF3D5",
+      chalk: "#FFFFFC",
+      grape: "#EAD2D0",
     },
     gradients: {
       primary: "linear-gradient(to right, var(--brand-primary), var(--brand-accent))",
@@ -173,7 +201,7 @@ export const BRAND_CONFIG: BrandConfig = {
 
 const createBrandCssVariables = (config: BrandConfig) => {
   const {
-    colors: { gradients, legacy },
+    colors: { gradients, legacy, palette },
   } = config;
 
   const derivedLight: ThemePalette = {
@@ -212,6 +240,9 @@ const createBrandCssVariables = (config: BrandConfig) => {
 
   const primaryShade1 = adjustColor(legacy.brandPrimary, -20);
   const primaryShade2 = adjustColor(legacy.brandPrimary, -35);
+  const paletteVars = Object.entries(palette || {}).map(
+    ([key, value]) => `  --${key}: ${value};`
+  );
 
   return `
 :root {
@@ -242,6 +273,7 @@ const createBrandCssVariables = (config: BrandConfig) => {
   --brand-gradient-primary: ${gradients.primary};
   --brand-gradient-error: ${gradients.error};
   --brand-gradient-pill: ${gradients.pill};
+${paletteVars.join("\n")}
 }
 
 :root.dark,
@@ -273,6 +305,7 @@ const createBrandCssVariables = (config: BrandConfig) => {
   --brand-gradient-primary: ${gradients.primary};
   --brand-gradient-error: ${gradients.error};
   --brand-gradient-pill: ${gradients.pill};
+${paletteVars.join("\n")}
 }
 `;
 };
