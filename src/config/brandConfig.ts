@@ -143,7 +143,7 @@ export const BRAND_CONFIG: BrandConfig = {
   },
   colors: {
     legacy: {
-      brandPrimary: "#800621",
+      brandPrimary: "#3c24b5",
       accent: "#000000",
       success: "#00AF50",
       warning: "#FFB86B",

@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import PageLayout from "./PageLayout";
 import { brandAssets } from "@/config/brandConfig";
@@ -32,22 +31,62 @@ const Home = () => {
   };
 
   const homeData = [
-    { sectionName: "Dashboard", sectionImage: brandAssets.homeIcons.dashboard, location: "/dashboard" },
-    { sectionName: "Sales", sectionImage: brandAssets.homeIcons.sales, location: "/sales" },
+    {
+      sectionName: "Dashboard",
+      sectionImage: brandAssets.homeIcons.dashboard,
+      location: "/dashboard",
+    },
+    {
+      sectionName: "Sales",
+      sectionImage: brandAssets.homeIcons.sales,
+      location: "/sales",
+    },
     // { sectionName: "Transactions", sectionImage: transactions, location: "/transactions" },
-    { sectionName: "Customers", sectionImage: brandAssets.homeIcons.customers, location: "/customers" },
-    { sectionName: "Agents", sectionImage: brandAssets.homeIcons.agents, location: "/agents" },
-    { sectionName: "Products", sectionImage: brandAssets.homeIcons.products, location: "/products" },
-    { sectionName: "Inventory", sectionImage: brandAssets.homeIcons.inventory, location: "/inventory" },
-    { sectionName: "Devices", sectionImage: brandAssets.homeIcons.devices, location: "/devices" },
-    { sectionName: "Contracts", sectionImage: brandAssets.homeIcons.contracts, location: "/contracts" },
-    { sectionName: "Reports", sectionImage: brandAssets.homeIcons.reports, location: "/reports" },
+    {
+      sectionName: "Customers",
+      sectionImage: brandAssets.homeIcons.customers,
+      location: "/customers",
+    },
+    {
+      sectionName: "Agents",
+      sectionImage: brandAssets.homeIcons.agents,
+      location: "/agents",
+    },
+    {
+      sectionName: "Products",
+      sectionImage: brandAssets.homeIcons.products,
+      location: "/products",
+    },
+    {
+      sectionName: "Inventory",
+      sectionImage: brandAssets.homeIcons.inventory,
+      location: "/inventory",
+    },
+    {
+      sectionName: "Devices",
+      sectionImage: brandAssets.homeIcons.devices,
+      location: "/devices",
+    },
+    {
+      sectionName: "Contracts",
+      sectionImage: brandAssets.homeIcons.contracts,
+      location: "/contracts",
+    },
+    {
+      sectionName: "Reports",
+      sectionImage: brandAssets.homeIcons.reports,
+      location: "/reports",
+    },
     // { sectionName: "Support", sectionImage: support, location: "/support" },
     // { sectionName: "Communication", sectionImage: communication, location: "/communication" },
-    { sectionName: "Settings", sectionImage: settings, location: "/settings" },
+    {
+      sectionName: "Settings",
+      sectionImage: brandAssets.homeIcons.settings,
+      location: "/settings",
+    },
   ];
 
-const newHomeData: SectionData[] = homeData.map((data: SectionData) => ({
+  const newHomeData: SectionData[] = homeData.map((data: SectionData) => ({
     ...data,
     notificationCount:
       notificationCounts[data.sectionName as keyof typeof notificationCounts],
@@ -80,7 +119,7 @@ const newHomeData: SectionData[] = homeData.map((data: SectionData) => ({
               if (!isMobile) navigate(section.location);
             }}
           >
-            <div/>
+            <div />
             <div className="flex flex-col items-center justify-center pb-4 sm:p-0 text-textDarkGrey group-hover:text-white transition-colors duration-300">
               <div className="w-[113px] h-[113px] sm:w-[98px] sm:h-[98px] overflow-hidden">
                 <div
@@ -101,6 +140,23 @@ const newHomeData: SectionData[] = homeData.map((data: SectionData) => ({
                   }}
                   aria-label={`${section.sectionName} Icon`}
                 />
+
+                {/* <div
+                  className="w-36 h-24 opacity-20"
+                  style={{
+                    backgroundColor: "var(--brand-primary)",
+                    maskImage: `url(${section.sectionImage})`,
+                    WebkitMaskImage: `url(${section.sectionImage})`,
+                    maskRepeat: "no-repeat",
+                    WebkitMaskRepeat: "no-repeat",
+                    maskPosition: "right center",
+                    WebkitMaskPosition: "right center",
+                    maskSize: "contain",
+                    WebkitMaskSize: "contain",
+                  }}
+                  aria-label={`${section.sectionName} Icon`}
+                  role="img"
+                /> */}
               </div>
 
               <h2 className="font-secondary font-bold text-lg sm:text-2xl uppercase transition-colors duration-300">
