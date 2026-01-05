@@ -1,17 +1,7 @@
 
 import { useNavigate } from "react-router-dom";
 import PageLayout from "./PageLayout";
-import sales from "@/assets/RedIcons/Sales.png";
-// import transactions from "@/assets/home/transactions.svg";
-import customers from "@/assets/RedIcons/Customers.png";
-import agents from "@/assets/RedIcons/affiliate-marketing.png";
-import products from "@/assets/RedIcons/product.png";
-import inventory from "@/assets/RedIcons/Inventory.png";
-import contracts from "@/assets/RedIcons/Contract.png";
-// import support from "@/assets/home/support.svg";
-// import communication from "@/assets/home/communication.svg";
-import settings from "@/assets/RedIcons/settings.png";
-import reports from "@/assets/RedIcons/Reports.png";
+import { brandAssets } from "@/config/brandConfig";
 
 import useBreakpoint from "@/hooks/useBreakpoint";
 import ProceedButton from "@/Components/ProceedButtonComponent/ProceedButtonComponent";
@@ -42,22 +32,22 @@ const Home = () => {
   };
 
   const homeData = [
-    { sectionName: "Dashboard", sectionImage: sales, location: "/dashboard" },
-    { sectionName: "Sales", sectionImage: sales, location: "/sales" },
+    { sectionName: "Dashboard", sectionImage: brandAssets.homeIcons.dashboard, location: "/dashboard" },
+    { sectionName: "Sales", sectionImage: brandAssets.homeIcons.sales, location: "/sales" },
     // { sectionName: "Transactions", sectionImage: transactions, location: "/transactions" },
-    { sectionName: "Customers", sectionImage: customers, location: "/customers" },
-    { sectionName: "Agents", sectionImage: agents, location: "/agents" },
-    { sectionName: "Products", sectionImage: products, location: "/products" },
-    { sectionName: "Inventory", sectionImage: inventory, location: "/inventory" },
-    { sectionName: "Devices", sectionImage: inventory, location: "/devices" },
-    { sectionName: "Contracts", sectionImage: contracts, location: "/contracts" },
-    { sectionName: "Reports", sectionImage: reports, location: "/reports" },
+    { sectionName: "Customers", sectionImage: brandAssets.homeIcons.customers, location: "/customers" },
+    { sectionName: "Agents", sectionImage: brandAssets.homeIcons.agents, location: "/agents" },
+    { sectionName: "Products", sectionImage: brandAssets.homeIcons.products, location: "/products" },
+    { sectionName: "Inventory", sectionImage: brandAssets.homeIcons.inventory, location: "/inventory" },
+    { sectionName: "Devices", sectionImage: brandAssets.homeIcons.devices, location: "/devices" },
+    { sectionName: "Contracts", sectionImage: brandAssets.homeIcons.contracts, location: "/contracts" },
+    { sectionName: "Reports", sectionImage: brandAssets.homeIcons.reports, location: "/reports" },
     // { sectionName: "Support", sectionImage: support, location: "/support" },
     // { sectionName: "Communication", sectionImage: communication, location: "/communication" },
     { sectionName: "Settings", sectionImage: settings, location: "/settings" },
   ];
 
-  const newHomeData: SectionData[] = homeData.map((data: SectionData) => ({
+const newHomeData: SectionData[] = homeData.map((data: SectionData) => ({
     ...data,
     notificationCount:
       notificationCounts[data.sectionName as keyof typeof notificationCounts],
@@ -83,8 +73,8 @@ const Home = () => {
               border border-strokeGreyTwo bg-white
               transition-all duration-300 ease-out
               hover:-translate-y-[2px] hover:shadow-[0_14px_30px_rgba(0,0,0,0.12)]
-              hover:bg-primary-hex hover:border-primary-hex
-              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-hex focus-visible:ring-opacity-50
+              hover:bg-[var(--brand-primary)] hover:border-[var(--brand-primary)]
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary)]/50
             "
             onClick={() => {
               if (!isMobile) navigate(section.location);
@@ -92,16 +82,24 @@ const Home = () => {
           >
             <div/>
             <div className="flex flex-col items-center justify-center pb-4 sm:p-0 text-textDarkGrey group-hover:text-white transition-colors duration-300">
-              {/* Icon — turns white on hover using filter */}
               <div className="w-[113px] h-[113px] sm:w-[98px] sm:h-[98px] overflow-hidden">
-                <img
-                  src={section.sectionImage}
-                  alt={`${section.sectionName} Icon`}
+                <div
                   className="
-                    w-full h-full object-contain transition-transform duration-300 ease-out
+                    w-full h-full transition-transform duration-300 ease-out transition-colors
                     group-hover:scale-110
-                    filter group-hover:brightness-0 group-hover:invert
+                    bg-[var(--brand-primary)] group-hover:bg-white
                   "
+                  style={{
+                    maskImage: `url(${section.sectionImage})`,
+                    WebkitMaskImage: `url(${section.sectionImage})`,
+                    maskRepeat: "no-repeat",
+                    WebkitMaskRepeat: "no-repeat",
+                    maskPosition: "center",
+                    WebkitMaskPosition: "center",
+                    maskSize: "contain",
+                    WebkitMaskSize: "contain",
+                  }}
+                  aria-label={`${section.sectionName} Icon`}
                 />
               </div>
 

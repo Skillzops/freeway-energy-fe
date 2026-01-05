@@ -4,7 +4,7 @@ import PageLayout from "./PageLayout";
 import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
 import { useGetRequest, useApiCall } from "@/utils/useApiCall";
 import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
-import inventorybadge from "@/assets/RedIcons/Reports.png";
+import inventorybadge from "@/assets/RedIconsSvg/Reports.svg";
 import FiltersModal, { Filters } from "@/Components/ReportsTable/FiltersModal";
 import { Table, PaginationType } from "@/Components/TableComponent/Table";
 import ActionButton from "@/Components/ActionButtonComponent/ActionButton";

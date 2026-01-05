@@ -5,7 +5,7 @@ import PageLayout from "./PageLayout";
 import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
 import ActionButton from "@/Components/ActionButtonComponent/ActionButton";
 import wallet from "@/assets/agents/wallet.svg";
-import walletLogo from "@/assets/RedIcons/Inventory.png";
+import walletLogo from "@/assets/RedIconsSvg/Inventory.svg";
 import greencustomer from "@/assets/customers/greencustomer.svg";
 import redcustomerbag from "@/assets/customers/redcustomerbag.svg";
 import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";

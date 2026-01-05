@@ -8,7 +8,7 @@ import Icon1 from "@/assets/agents/Icon1.png";
 import Icon2 from "@/assets/agents/Icon2.png";
 import Icon3 from "@/assets/agents/Icon3.png";
 
-import dashboardbadge from "@/assets/RedIcons/Dashboard.png";
+import dashboardbadge from "@/assets/RedIconsSvg/Dashboard.svg";
 import DashboardCard from "@/Components/DashBoardCard/DashBoard";
 import SalesChart, { SalesGraphPoint } from "@/Components/DashBoardCard/SaleSGraph";
 import SalesCategoryPie from "@/Components/DashBoardCard/SalesCategoryPie";

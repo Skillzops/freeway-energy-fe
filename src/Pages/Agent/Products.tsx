@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import PageLayout from "./PageLayout";
-import productsbadge from "@/assets/RedIcons/product.png";
+import productsbadge from "@/assets/RedIconsSvg/product.svg";
 import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
 import productgradient from "@/assets/products/productgradient.svg";
 // import productgreen from "@/assets/products/productgreen.svg";

@@ -6,7 +6,7 @@ import { useWarehouse } from "../contexts/WarehouseContext";
 import { useWarehouseStats, useTransferRequests } from "../services/warehouseApi";
 import { useInventory } from "../services/inventoryApi";
 import { Link } from "react-router-dom";
-import dashboardbadge from "@/assets/dashboard/dashboardbadge.png";
+import dashboardbadge from "@/assets/dashboard/dashboardbadge.svg";
 
 // Icons
 const PackageIcon = () => (

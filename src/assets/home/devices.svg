@@ -1,0 +1,16 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="devicesGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="var(--brand-primary)" />
+      <stop offset="100%" stop-color="var(--brand-accent)" />
+    </linearGradient>
+  </defs>
+  <rect x="12" y="12" width="104" height="104" rx="22" fill="var(--brand-accent-10)" />
+  <rect x="34" y="28" width="60" height="72" rx="10" stroke="url(#devicesGradient)" stroke-width="3.5" fill="white"/>
+  <rect x="44" y="40" width="40" height="30" rx="4" stroke="var(--brand-primary)" stroke-width="3"/>
+  <path d="M50 48H82" stroke="var(--brand-primary)" stroke-width="3" stroke-linecap="round"/>
+  <path d="M50 56H70" stroke="var(--brand-primary)" stroke-width="3" stroke-linecap="round"/>
+  <path d="M46 80H82" stroke="var(--brand-primary)" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M58 90H70" stroke="var(--brand-primary)" stroke-width="3.5" stroke-linecap="round"/>
+  <circle cx="78" cy="90" r="3" fill="var(--brand-primary)"/>
+</svg>

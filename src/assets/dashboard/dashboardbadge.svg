@@ -1,0 +1,5 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="32" cy="32" r="30" fill="var(--brand-accent-10)" />
+  <path d="M32 12L38.472 24.1118L52 26.2223L42 36.0546L44.944 49.7777L32 43.3333L19.056 49.7777L22 36.0546L12 26.2223L25.528 24.1118L32 12Z" fill="var(--brand-primary)" opacity="0.9"/>
+  <circle cx="32" cy="32" r="6" fill="#FFFFFF" opacity="0.9"/>
+</svg>

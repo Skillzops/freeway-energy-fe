@@ -1,7 +1,3 @@
-const LogoFull = "/logo.svg";
-const LoginBackground = "/loginbg.jpg";
-const FaviconUrl = "/inrelifavicon.svg";
-
 const clamp = (v: number) => Math.max(0, Math.min(255, v));
 
 const hexToRgb = (hex: string) => {
@@ -104,6 +100,18 @@ type BrandAssets = {
     agent: string;
     installer: string;
   };
+  homeIcons: {
+    dashboard: string;
+    sales: string;
+    customers: string;
+    agents: string;
+    products: string;
+    inventory: string;
+    devices: string;
+    contracts: string;
+    reports: string;
+    settings: string;
+  };
   basePath: string;
   publicPath: string;
   illustrations: string;
@@ -181,6 +189,18 @@ export const BRAND_CONFIG: BrandConfig = {
       default: "/loginbg.jpg",
       agent: "/loginbg.jpg",
       installer: "/loginbg.jpg",
+    },
+    homeIcons: {
+      dashboard: "/assets/RedIconsSvg/Dashboard.svg",
+      sales: "/assets/RedIconsSvg/Sales.svg",
+      customers: "/assets/RedIconsSvg/Customers.svg",
+      agents: "/assets/RedIconsSvg/affiliate-marketing.svg",
+      products: "/assets/RedIconsSvg/product.svg",
+      inventory: "/assets/RedIconsSvg/Inventory.svg",
+      devices: "/assets/RedIconsSvg/Devices.svg",
+      contracts: "/assets/RedIconsSvg/Contract.svg",
+      reports: "/assets/RedIconsSvg/Reports.svg",
+      settings: "/assets/RedIconsSvg/settings.svg",
     },
     basePath: "src/assets",
     publicPath: "public",

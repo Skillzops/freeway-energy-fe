@@ -3,7 +3,7 @@ import PageLayout from "./PageLayout";
 import sales from "@/assets/home/sales.svg";
 // import transactions from "@/assets/home/transactions.svg";
 import customers from "@/assets/home/customers.svg";
-import wallet from "@/assets/dashboard/wallet.png";
+import wallet from "@/assets/dashboard/wallet.svg";
 import products from "@/assets/home/products.svg";
 import inventory from "@/assets/home/inventory.svg";
 import agents from "@/assets/home/agents.svg";
@@ -12,7 +12,7 @@ import agents from "@/assets/home/agents.svg";
 import settings from "@/assets/home/settings.svg";
 import useBreakpoint from "@/hooks/useBreakpoint";
 import ProceedButton from "@/Components/ProceedButtonComponent/ProceedButtonComponent";
-import dashboard from "@/assets/dashboard/dashboard.png";
+import dashboard from "@/assets/dashboard/dashboard.svg";
 
 type SectionData = {
   sectionName: string;

@@ -8,7 +8,7 @@ import {
   useNavigate,
 } from "react-router-dom";
 import PageLayout from "./PageLayout";
-import transactionsbadge from "@/assets/RedIcons/Sales.png";
+import transactionsbadge from "@/assets/RedIconsSvg/Sales.svg";
 import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
 import ActionButton from "@/Components/ActionButtonComponent/ActionButton";
 // import { DropDown } from "@/Components/DropDownComponent/DropDown";

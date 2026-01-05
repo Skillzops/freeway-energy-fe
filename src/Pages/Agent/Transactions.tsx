@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import PageLayout from "./PageLayout";
 import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
-import transactionsbadge from "@/assets/RedIcons/Inventory.png";
+import transactionsbadge from "@/assets/RedIconsSvg/Inventory.svg";
 import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
 import wallet from "@/assets/agents/wallet.svg";
 import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";

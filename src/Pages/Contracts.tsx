@@ -4,7 +4,7 @@ import { DropDown } from "@/Components/DropDownComponent/DropDown";
 import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import gradientcontract from "@/assets/contracts/gradientcontract.svg";
-import contractsbadge from "@/assets/RedIcons/Contract.png";
+import contractsbadge from "@/assets/RedIconsSvg/Contract.svg";
 import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
 import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
 import { useGetRequest } from "@/utils/useApiCall";

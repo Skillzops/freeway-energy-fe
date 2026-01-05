@@ -4,7 +4,7 @@ import PageLayout from "./PageLayout";
 import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
 // import ActionButton from "@/Components/ActionButtonComponent/ActionButton";
 // import circleAction from "@/assets/settings/addCircle.svg";
-import customerbadge from "@/assets/RedIcons/Customers.png";
+import customerbadge from "@/assets/RedIconsSvg/Customers.svg";
 import greencustomer from "@/assets/customers/greencustomer.svg";
 import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
 import { useGetRequest } from "@/utils/useApiCall";

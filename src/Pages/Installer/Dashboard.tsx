@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { observer } from "mobx-react-lite";
 import PageLayout from "./PageLayout";
-import dashboardbadge from "@/assets/RedIcons/Dashboard.png";
+import dashboardbadge from "@/assets/RedIconsSvg/Dashboard.svg";
 import { useGetRequest } from "@/utils/useApiCall";
 import TaskDetailsModal from "@/Components/Installer/Task/TaskDetailsModal";
 import StatisticsCard from "@/Components/Installer/Dashboard/StatisticsCard";
@@ -126,4 +126,3 @@ const InstallerDashboard = observer(() => {
 });
 
 export default InstallerDashboard;
-

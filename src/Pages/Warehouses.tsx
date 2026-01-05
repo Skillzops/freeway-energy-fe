@@ -7,7 +7,7 @@ import { NewWarehouseModal } from "@/Components/WareHouses/NewWarehouseModal";
 import { useWarehouseStats } from "../services/warehouseApi";
 import { useWarehouseManagement } from "../hooks/useWarehouseHooks";
 import useBreakpoint from "../hooks/useBreakpoint";
-import warehouseBadge from "@/assets/RedIcons/Warehouse red.png";
+import warehouseBadge from "@/assets/RedIconsSvg/warehouse-1073.svg";
 
 // Icons (you may need to adjust these based on your icon system)
 const PackageIcon = () => (

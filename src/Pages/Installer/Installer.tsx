@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 // import PageLayout from "../Pages/PageLayout";
-import productbadge from "@/assets/RedIcons/product.png";
+import productbadge from "@/assets/RedIconsSvg/product.svg";
 // import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
 import productgradient from "@/assets/products/productgradient.svg";
 import cancelIcon from "@/assets/cancel.svg";

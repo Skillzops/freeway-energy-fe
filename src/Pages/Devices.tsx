@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import PageLayout from "./PageLayout";
 import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
-import inventorybadge from "@/assets/RedIcons/Devices.png";
+import inventorybadge from "@/assets/RedIconsSvg/Devices.svg";
 import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
 import inventorygradient from "@/assets/inventory/inventorygradient.svg";
 import circleAction from "@/assets/settings/addCircle.svg";

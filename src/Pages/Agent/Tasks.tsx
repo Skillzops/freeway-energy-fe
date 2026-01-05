@@ -5,7 +5,7 @@ import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
 import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
 import { useGetRequest } from "@/utils/useApiCall";
 import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
-import greencustomer from "@/assets/RedIcons/Reports.png";
+import greencustomer from "@/assets/RedIconsSvg/Reports.svg";
 import TasksTable from "@/Components/Agents/Tasks/TasksTable";
 // import TasksTable from "@/Components/Tasks/TasksTable";
 
@@ -153,4 +153,3 @@ const Tasks = () => {
 };
 
 export default Tasks;
-
