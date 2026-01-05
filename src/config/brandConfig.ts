@@ -9,7 +9,7 @@ import ContractsIcon from "../assets/RedIconsSvg/Contract.svg?url";
 import ReportsIcon from "../assets/RedIconsSvg/Reports.svg?url";
 import SettingsIcon from "../assets/RedIconsSvg/settings.svg?url";
 
-const LogoFull = new URL("../assets/logo.svg", import.meta.url).href;
+const LogoFull = new URL("/logo.svg", import.meta.url).href;
 const LoginBackground = new URL("../assets/loginbg.jpg", import.meta.url).href;
 const FaviconUrl = "/logo.svg";
 
