@@ -77,6 +77,7 @@ const LoginPage = () => {
 
       // Create optimized user data with minimal permission data
       const userData = {
+        ...response.data,
         token: response.headers.access_token,
         id: response.data.id,
         firstname: response.data.firstname,
@@ -110,11 +111,11 @@ const LoginPage = () => {
         },
       };
 
-      if(userData?.role?.role !== "admin"){
-        toast.error("Unauthorized login attempt")
-        return
-      }
-      
+      // if (userData?.role?.role !== "admin") {
+      //   toast.error("Unauthorized login attempt");
+      //   return;
+      // }
+
       try {
         const cookiebar = JSON.stringify(userData);
         Cookies.set("userData", cookiebar, {
@@ -122,7 +123,19 @@ const LoginPage = () => {
           path: "/",
           sameSite: "Lax",
         }); // Token expires in 7 days
-        navigate(redirectPath || "/dashboard");
+
+        let url = "";
+
+        if (userData?.agentDetails?.category == "SALES") {
+          url = "/agent/dashboard";
+        } else if (userData?.agentDetails?.category == "INSTALLER") {
+          url = "/installer/dashboard";
+        } else if (userData?.role?.role == "admin") {
+          url = "/dashboard";
+        } else {
+          toast.error("Unauthorized login attempt");
+        }
+        navigate(redirectPath ?? url);
       } catch (error) {
         // Error handling without logging sensitive data
       }
