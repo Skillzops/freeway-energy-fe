@@ -159,7 +159,7 @@ const Home = () => {
                 /> */}
               </div>
 
-              <h2 className="font-secondary font-bold text-lg sm:text-2xl uppercase transition-colors duration-300">
+              <h2 className="mt-6 font-secondary font-bold text-lg sm:text-2xl uppercase transition-colors duration-300">
                 {section.sectionName}
               </h2>
             </div>

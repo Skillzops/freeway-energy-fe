@@ -1,3 +1,18 @@
+import DashboardIcon from "../assets/RedIconsSvg/Dashboard.svg?url";
+import SalesIcon from "../assets/RedIconsSvg/Sales.svg?url";
+import CustomersIcon from "../assets/RedIconsSvg/Customers.svg?url";
+import AgentsIcon from "../assets/RedIconsSvg/affiliate-marketing.svg?url";
+import ProductsIcon from "../assets/RedIconsSvg/product.svg?url";
+import InventoryIcon from "../assets/RedIconsSvg/Inventory.svg?url";
+import DevicesIcon from "../assets/RedIconsSvg/Devices.svg?url";
+import ContractsIcon from "../assets/RedIconsSvg/Contract.svg?url";
+import ReportsIcon from "../assets/RedIconsSvg/Reports.svg?url";
+import SettingsIcon from "../assets/RedIconsSvg/settings.svg?url";
+
+const LogoFull = new URL("../assets/logo.svg", import.meta.url).href;
+const LoginBackground = new URL("../assets/loginbg.jpg", import.meta.url).href;
+const FaviconUrl = "/logo.svg";
+
 const clamp = (v: number) => Math.max(0, Math.min(255, v));
 
 const hexToRgb = (hex: string) => {
@@ -143,7 +158,7 @@ export const BRAND_CONFIG: BrandConfig = {
   },
   colors: {
     legacy: {
-      brandPrimary: "#800621",
+      brandPrimary: "#9A1623",
       accent: "#000000",
       success: "#00AF50",
       warning: "#FFB86B",
@@ -183,24 +198,24 @@ export const BRAND_CONFIG: BrandConfig = {
     },
   },
   assets: {
-    logoFull: "/logo.svg",
-    faviconUrl: "/logo.svg",
+    logoFull: LogoFull,
+    faviconUrl: FaviconUrl,
     authBackgrounds: {
-      default: "/loginbg.jpg",
-      agent: "/loginbg.jpg",
-      installer: "/loginbg.jpg",
+      default: LoginBackground,
+      agent: LoginBackground,
+      installer: LoginBackground,
     },
     homeIcons: {
-      dashboard: "/assets/RedIconsSvg/Dashboard.svg",
-      sales: "/assets/RedIconsSvg/Sales.svg",
-      customers: "/assets/RedIconsSvg/Customers.svg",
-      agents: "/assets/RedIconsSvg/affiliate-marketing.svg",
-      products: "/assets/RedIconsSvg/product.svg",
-      inventory: "/assets/RedIconsSvg/Inventory.svg",
-      devices: "/assets/RedIconsSvg/Devices.svg",
-      contracts: "/assets/RedIconsSvg/Contract.svg",
-      reports: "/assets/RedIconsSvg/Reports.svg",
-      settings: "/assets/RedIconsSvg/settings.svg",
+      dashboard: DashboardIcon,
+      sales: SalesIcon,
+      customers: CustomersIcon,
+      agents: AgentsIcon,
+      products: ProductsIcon,
+      inventory: InventoryIcon,
+      devices: DevicesIcon,
+      contracts: ContractsIcon,
+      reports: ReportsIcon,
+      settings: SettingsIcon,
     },
     basePath: "src/assets",
     publicPath: "public",
