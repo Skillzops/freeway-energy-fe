@@ -21,7 +21,7 @@ const PageLayout: React.FC<LayoutProps> = ({
     <main className="relative flex flex-col items-center w-full pt-[67px] min-h-screen" >
       <div className="flex flex-col items-center justify-center w-full max-w-screen-2xl">
        <div className="mb-7"> <TopNavComponent /></div>
-        {showheaderBadge && (
+        {showheaderBadge &&  badge?.toLocaleLowerCase() !== "warehouses" && (
           <HeaderBadge pageName={pageName as string} image={badge as string} />
         )}
         <div className={`${className}`}>{children}</div>
