@@ -1,55 +1,52 @@
 // Warehouse system configuration
 export const WAREHOUSE_CONFIG = {
   // API Configuration
-  USE_MOCK_API: import.meta.env.VITE_USE_MOCK_API === 'false', // Use real API by default
+  USE_MOCK_API: import.meta.env.VITE_USE_MOCK_API === "false", // Use real API by default
   API_BASE_URL: import.meta.env.VITE_API_URL,
   WS_URL: import.meta.env.VITE_WS_URL,
-  
+
   // Feature flags
-  
+
   // UI Configuration
 
   // Cache Configuration
 
-  
   // File upload configuration
   UPLOAD: {
-    MAX_FILE_SIZE: parseInt(import.meta.env.VITE_MAX_FILE_SIZE || '5242880'), // 5MB
-    ALLOWED_TYPES: (import.meta.env.VITE_ALLOWED_FILE_TYPES || 'image/jpeg,image/png,image/gif,image/webp').split(','),
-    UPLOAD_ENDPOINT: '/v1/upload',
+    MAX_FILE_SIZE: parseInt(import.meta.env.VITE_MAX_FILE_SIZE || "5242880"), // 5MB
+    ALLOWED_TYPES: (
+      import.meta.env.VITE_ALLOWED_FILE_TYPES ||
+      "image/jpeg,image/png,image/gif,image/webp"
+    ).split(","),
+    UPLOAD_ENDPOINT: "/v1/upload",
   },
-  
+
   // Notification configuration
   NOTIFICATIONS: {
     TOAST_DURATION: 3000,
     MAX_NOTIFICATIONS: 10,
     ENABLE_SOUND: false,
   },
-  
-  // Mock API configuration
 
+  // Mock API configuration
 };
 
 // Environment detection
 export const getEnvironment = () => {
-  return import.meta.env.MODE || 'development';
+  return import.meta.env.MODE || "development";
 };
 
 export const isDevelopment = () => {
-  return getEnvironment() === 'development';
+  return getEnvironment() === "development";
 };
 
 export const isProduction = () => {
-  return getEnvironment() === 'production';
+  return getEnvironment() === "production";
 };
 
 // API service selector - automatically chooses mock or real API
 export const getApiService = () => {
-  if (WAREHOUSE_CONFIG.USE_MOCK_API) {
-    return import('../services/mockWarehouseApi');
-  } else {
-    return import('../services/warehouseApi');
-  }
+  return import("../services/warehouseApi");
 };
 
 // Debug configuration
@@ -65,17 +62,17 @@ export const BUSINESS_RULES = {
   WAREHOUSE: {
     MIN_NAME_LENGTH: 3,
     MAX_NAME_LENGTH: 100,
-    REQUIRED_FIELDS: ['name', 'location'],
+    REQUIRED_FIELDS: ["name", "location"],
     ALLOW_MULTIPLE_MAIN_WAREHOUSES: false,
   },
-  
+
   INVENTORY: {
     MIN_STOCK_LEVEL: 0,
     MAX_STOCK_LEVEL: 999999,
     LOW_STOCK_THRESHOLD: 0.3, // 30%
     CRITICAL_STOCK_THRESHOLD: 0.1, // 10%
   },
-  
+
   TRANSFERS: {
     MAX_QUANTITY_PER_REQUEST: 1000,
     AUTO_APPROVE_THRESHOLD: 10, // Auto-approve requests under 10 items
@@ -86,37 +83,37 @@ export const BUSINESS_RULES = {
 // Status definitions
 export const STATUS_DEFINITIONS = {
   WAREHOUSE: {
-    ACTIVE: 'active',
-    INACTIVE: 'inactive',
-    MAINTENANCE: 'maintenance',
-    ARCHIVED: 'archived',
+    ACTIVE: "active",
+    INACTIVE: "inactive",
+    MAINTENANCE: "maintenance",
+    ARCHIVED: "archived",
   },
-  
+
   PRODUCT: {
-    REGULAR: 'regular',
-    RETURNED: 'returned',
-    REFURBISHED: 'refurbished',
-    DAMAGED: 'damaged',
+    REGULAR: "regular",
+    RETURNED: "returned",
+    REFURBISHED: "refurbished",
+    DAMAGED: "damaged",
   },
-  
+
   TRANSFER: {
-    PENDING: 'pending',
-    APPROVED: 'approved',
-    IN_TRANSIT: 'in_transit',
-    PARTIAL: 'partial',
-    FULFILLED: 'fulfilled',
-    REJECTED: 'rejected',
-    CANCELLED: 'cancelled',
+    PENDING: "pending",
+    APPROVED: "approved",
+    IN_TRANSIT: "in_transit",
+    PARTIAL: "partial",
+    FULFILLED: "fulfilled",
+    REJECTED: "rejected",
+    CANCELLED: "cancelled",
   },
 };
 
 // Color scheme for status indicators
 export const STATUS_COLORS = {
-  SUCCESS: 'text-success bg-success/10',
-  WARNING: 'text-warning bg-warning/10',
-  ERROR: 'text-errorTwo bg-errorTwo/10',
-  INFO: 'text-primary bg-primary/10',
-  NEUTRAL: 'text-textDarkGrey bg-gray-100',
+  SUCCESS: "text-success bg-success/10",
+  WARNING: "text-warning bg-warning/10",
+  ERROR: "text-errorTwo bg-errorTwo/10",
+  INFO: "text-primary bg-primary/10",
+  NEUTRAL: "text-textDarkGrey bg-gray-100",
 };
 
 // Validation rules
@@ -134,7 +131,7 @@ export const VALIDATION_RULES = {
       maxLength: 200,
     },
   },
-  
+
   product: {
     name: {
       required: true,
@@ -143,7 +140,7 @@ export const VALIDATION_RULES = {
     },
     category: {
       required: true,
-      enum: ['solar', 'battery', 'inverter', 'accessory'],
+      enum: ["solar", "battery", "inverter", "accessory"],
     },
     stockLevel: {
       required: true,
@@ -151,7 +148,7 @@ export const VALIDATION_RULES = {
       max: BUSINESS_RULES.INVENTORY.MAX_STOCK_LEVEL,
     },
   },
-  
+
   transfer: {
     quantity: {
       required: true,

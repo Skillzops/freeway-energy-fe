@@ -11,7 +11,8 @@ import { formatNumberWithSuffix } from "../../hooks/useFormatNumberWithSuffix";
 import { Modal } from "@/Components/ModalComponent/Modal";
 
 const TopNavComponent = () => {
-  const { role } = useTokens();
+  const { role, agentDetails } = useTokens();
+
   const navigate = useNavigate();
   const currentDate = useFormattedCurrentDate();
 
@@ -59,20 +60,29 @@ const TopNavComponent = () => {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 z-20 bg-white flex items-center justify-center w-full px-2 md:px-8 py-4 h-max transition-shadow ${isScrolled ? "border-b border-b-strokeGreyThree shadow-md" : ""
-          }`}
+        className={`fixed top-0 left-0 z-20 bg-white flex items-center justify-center w-full px-2 md:px-8 py-4 h-max transition-shadow ${
+          isScrolled ? "border-b border-b-strokeGreyThree shadow-md" : ""
+        }`}
       >
-        <div className="flex items-start sm:items-center justify-between gap-1 w-full max-w-screen-2xl" >
+        <div className="flex items-start sm:items-center justify-between gap-1 w-full max-w-screen-2xl">
           <div className="flex flex-wrap sm:flex-nowrap items-center w-max gap-1 sm:gap-2">
             <img
-              src={'/logo.svg'}
+              src={"/logo.svg"}
               alt="Logo"
               // width="100px"
               className="w-[80px] sm:w-[80px] cursor-pointer"
-            // onClick={() => navigate("/home")}
+              // onClick={() => navigate("/home")}
             />
             <MenuButton />
-            <UserProfile role={role.role} />
+            <UserProfile
+              role={
+                agentDetails?.category?.toLowerCase() == "sales"
+                  ? "SALES AGENT"
+                  : agentDetails?.category?.toLowerCase() == "installer"
+                  ? "INSTALLER"
+                  : role?.role
+              }
+            />
           </div>
           <div className="flex items-center w-max max-w-[350px] gap-1 sm:gap-4">
             <span className="hidden sm:flex items-center justify-center bg-[#F6F8FA] h-[32px] px-2 py-1 text-xs text-textDarkGrey border-[0.6px] border-strokeGreyThree rounded-full">
