@@ -129,7 +129,7 @@ export default function Warehouses() {
     <PageLayout pageName="Warehouses" badge={warehouseBadge} className="w-full px-2 py-8 md:p-8">
       <div className="space-y-6 sm:space-y-8">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="mt-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-textBlack">Warehouses</h1>
             <p className="text-textDarkGrey text-sm sm:text-base">Manage your warehouse network</p>
