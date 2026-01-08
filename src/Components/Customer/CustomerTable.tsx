@@ -360,13 +360,17 @@ const CustomerTable = ({
       valueIsAComponent: true,
       customValue: (value: string) => {
         const val = (value || "PENDING").toUpperCase();
-        let style = "text-[#49526A] border-strokeGreyTwo";
-        if (val === "APPROVED") style = "text-success border-success";
-        else if (val === "REJECTED") style = "text-errorTwo border-errorTwo";
+        let style = "text-[#49526A] border-[#E1E5EA] bg-[#F6F8FA]";
+        if (val === "APPROVED")
+          style = "text-[#0E6F3D] border-[#B7E4C7] bg-[#EAF7EF]";
+        else if (val === "REJECTED")
+          style = "text-[#9B2B23] border-[#F3B5B0] bg-[#FCECEB]";
+        else if (val === "PENDING")
+          style = "text-[#9A6A00] border-[#F4D48A] bg-[#FFF6DA]";
 
         return (
           <span
-            className={`${style} flex items-center gap-1 w-max px-2 py-1 bg-[#F6F8FA] border-[0.4px] rounded-full uppercase text-[11px]`}
+            className={`${style} flex items-center gap-1 w-max px-2 py-1 border-[0.4px] rounded-full uppercase text-[11px]`}
           >
             <GoDotFill />
             {val}
@@ -448,10 +452,10 @@ const CustomerTable = ({
           return (
             <div className="flex items-center gap-2">
               <button
-                className={`px-2 py-1 text-[10px] rounded-full border-[0.2px] border-success text-success bg-[#F6F8FA] transition-all ${
+                className={`px-2 py-1 text-[10px] rounded-full border-[0.2px] border-[#0E6F3D] text-white bg-[#0E6F3D] transition-all ${
                   isRowLoading && actionType === "approve"
                     ? "opacity-60 cursor-not-allowed"
-                    : "hover:bg-green-50"
+                    : "hover:bg-[#0B5E34]"
                 }`}
                 disabled={isRowLoading}
                 onClick={() => {
@@ -466,10 +470,10 @@ const CustomerTable = ({
               </button>
 
               <button
-                className={`px-2 py-1 text-[10px] rounded-full border-[0.2px] border-errorTwo text-errorTwo bg-[#F6F8FA] transition-all ${
+                className={`px-2 py-1 text-[10px] rounded-full border-[0.2px] border-[#9B2B23] text-white bg-[#9B2B23] transition-all ${
                   isRowLoading && actionType === "reject"
                     ? "opacity-60 cursor-not-allowed"
-                    : "hover:bg-red-50"
+                    : "hover:bg-[#8A261F]"
                 }`}
                 disabled={isRowLoading}
                 onClick={() => {
@@ -509,10 +513,10 @@ const CustomerTable = ({
               View
             </span>
             <button
-              className={`px-2 py-1 text-[10px] rounded-full border-[0.2px] border-errorTwo text-errorTwo bg-[#F6F8FA] transition-all ${
+              className={`px-2 py-1 text-[10px] rounded-full border-[0.2px] border-[#9B2B23] text-white bg-[#9B2B23] transition-all ${
                 isRowLoading && actionType === "reject"
                   ? "opacity-60 cursor-not-allowed"
-                  : "hover:bg-red-50"
+                  : "hover:bg-[#8A261F]"
               }`}
               disabled={isRowLoading}
               onClick={() => {
