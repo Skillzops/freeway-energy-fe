@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { useLocation, Link } from "react-router-dom";
 import buttonIcon from "../../assets/menu/menu.svg";
 import { navData, AgentNavData, InstallerNavData } from "./navInfo";
@@ -18,14 +18,12 @@ export const MenuButton = ({ buttonStyle, sections }: MenuButtonType) => {
   const role = userData?.role?.role;
   const cate = userData?.agentDetails?.category;
 
-  const value =
-    cate === "INSTALLER"
-      ? InstallerNavData
-      : role === "AssignedAgent"
-        ? AgentNavData
-        : role === "admin"
-          ? navData
-          : [];
+  const value = useMemo(() => {
+    if (cate === "INSTALLER") return InstallerNavData;
+    if (role === "AssignedAgent") return AgentNavData;
+    if (role === "admin") return navData;
+    return [];
+  }, [cate, role]);
 
   const [sideMenuArray, setSideMenuArray] = useState(value);
   const [dialog, setDialog] = useState<boolean>(false);
@@ -98,40 +96,41 @@ export const MenuButton = ({ buttonStyle, sections }: MenuButtonType) => {
                        text-white border border-white/10
                        transition-transform duration-200 origin-top-left"
           >
-            {sideMenuArray.map((section, index) => {
-              const isActive = location.pathname.startsWith(section.link);
-              const isHover = hoveredIndex === index;
-              const pillClasses = isActive || isHover
-                ? "bg-white text-primary-hex border-white"
-                : "bg-white/10 text-white border-white/20";
+            <div className="flex flex-col gap-1">
+              {sideMenuArray.map((section, index) => {
+                const isActive = location.pathname.startsWith(section.link);
+                const isHover = hoveredIndex === index;
+                const pillClasses = isActive || isHover
+                  ? "bg-white text-primary-hex border-white"
+                  : "bg-white/10 text-white border-white/20";
 
-              const iconColor = isActive || isHover ? brandPrimaryHex : "#FFFFFF";
+                const iconColor = isActive || isHover ? brandPrimaryHex : "#FFFFFF";
 
-              return (
-                <div key={section.title} className="w-full"> 
-                  <Link
-                    to={section.link}
-                    role="menuitem"
-                    onClick={() => setDialog(false)}
-                    onMouseEnter={() => setHoveredIndex(index)}
-                    onMouseLeave={() => setHoveredIndex(null)}
-                    // style={{border: "2px solid white"}}
-                    className={`flex items-center w-full h-9 px-3 gap-2 rounded-full border 
-                                transition-all duration-200 select-none
-                                ${pillClasses} hover:shadow-sm active:scale-[0.99]`}
-                  >
-                    <section.icon width="16" height="16" stroke={iconColor} />
-                    <span className="text-[13px] font-semibold truncate" >
-                      {section.title}
-                    </span>
-                  </Link>
+                return (
+                  <div key={section.title} className="w-full">
+                    <Link
+                      to={section.link}
+                      role="menuitem"
+                      onClick={() => setDialog(false)}
+                      onMouseEnter={() => setHoveredIndex(index)}
+                      onMouseLeave={() => setHoveredIndex(null)}
+                      className={`flex items-center w-full h-9 px-3 gap-2 rounded-full border 
+                                  transition-all duration-200 select-none
+                                  ${pillClasses} hover:shadow-sm active:scale-[0.99]`}
+                    >
+                      <section.icon width="16" height="16" stroke={iconColor} />
+                      <span className="text-[13px] font-semibold truncate">
+                        {section.title}
+                      </span>
+                    </Link>
 
-                  {(index + 1) % 3 === 0 && index !== sideMenuArray.length - 1 && (
-                    <div className="w-full h-px my-2 border-t border-dashed border-white/20" />
-                  )}
-                </div>
-              );
-            })}
+                    {(index + 1) % 3 === 0 && index !== sideMenuArray.length - 1 && (
+                      <div className="w-full h-px my-2 border-t border-dashed border-white/20" />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
           <div className="relative">

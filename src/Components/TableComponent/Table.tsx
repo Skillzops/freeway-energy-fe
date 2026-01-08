@@ -242,62 +242,67 @@ export const Table = (props: TableType) => {
           <div className="w-full">
            <div className="flex flex-wrap gap-2">
            {tableType === "default" ? (
-              <table className="w-full table-auto whitespace-nowrap">
-                <thead className="sticky top-0 z-10 bg-white">
-                  <tr className="h-[36px]">
-                    {columnList.map((column, index) => (
-                      <th
-                        key={index}
-                        className={`${column.styles ?? ""} p-2 text-[13px] md:text-sm font-medium text-left text-textDarkGrey border-b-[0.2px] border-[#E0E0E0]`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 bg-strokeGreyTwo rounded-full" />
-                            <span>{column.title}</span>
+              <div className="w-[100%] p-2">
+                <table className="w-full bg-white table-auto whitespace-nowrap border-separate border-spacing-y-2">
+                  <thead className="sticky top-0 z-10">
+                    <tr className="h-[36px]">
+                      {columnList.map((column, index) => (
+                        <th
+                          key={index}
+                          className={`${column.styles ?? ""} p-2 text-[13px] md:text-sm font-medium text-left text-textDarkGrey border-b-[0.2px] border-[#E0E0E0]`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 bg-strokeGreyTwo rounded-full" />
+                              <span>{column.title}</span>
+                            </div>
+                            {column.rightIcon}
                           </div>
-                          {column.rightIcon}
-                        </div>
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {paginatedData.map((row, rowIndex) => (
-                    <tr key={rowIndex} className="h-[40px] hover:opacity-80">
-                      {columnList.map((column, colIndex) => {
-                        const cellValue = row[column.key];
-                        return (
-                          <td
-                            key={colIndex}
-                            className="px-2 text-xs md:text-[13px] text-textDarkGrey border-b-[0.2px] border-[#E0E0E0]"
-                            onMouseEnter={() => setHoveredCell({ rowIndex, colIndex })}
-                            onMouseLeave={() => setHoveredCell(null)}
-                          >
-                            {column.valueIsAComponent && column.customValue ? (
-                              column.customValue(cellValue, row)
-                            ) : (
-                              <div className="flex items-center justify-between">
-                                <span className="inline-block">{cellValue ?? "-"}</span>
-                                {colIndex === 0 || colIndex === columnList.length - 1 ? null : (
-                                  <span
-                                    className="flex items-center justify-center w-5 h-5 rounded-full cursor-pointer"
-                                    onClick={() => copyToClipboard(cellValue)}
-                                  >
-                                    {hoveredCell?.rowIndex === rowIndex && hoveredCell?.colIndex === colIndex ? (
-                                      <PiCopySimple />
-                                    ) : null}
-                                  </span>
-                                )}
-                              </div>
-                            )}
-                          </td>
-                        );
-                      })}
+                        </th>
+                      ))}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+
+                  <tbody>
+                    {paginatedData.map((row, rowIndex) => (
+                      <tr
+                        key={rowIndex}
+                        className="h-[40px] bg-white hover:opacity-80"
+                      >
+                        {columnList.map((column, colIndex) => {
+                          const cellValue = row[column.key];
+                          return (
+                            <td
+                              key={colIndex}
+                              className="px-2 text-xs md:text-[13px] text-textDarkGrey border-b-[0.2px] border-[#E0E0E0]"
+                              onMouseEnter={() => setHoveredCell({ rowIndex, colIndex })}
+                              onMouseLeave={() => setHoveredCell(null)}
+                            >
+                              {column.valueIsAComponent && column.customValue ? (
+                                column.customValue(cellValue, row)
+                              ) : (
+                                <div className="flex items-center justify-between">
+                                  <span className="inline-block">{cellValue ?? "-"}</span>
+                                  {colIndex === 0 || colIndex === columnList.length - 1 ? null : (
+                                    <span
+                                      className="flex items-center justify-center w-5 h-5 rounded-full cursor-pointer"
+                                      onClick={() => copyToClipboard(cellValue)}
+                                    >
+                                      {hoveredCell?.rowIndex === rowIndex && hoveredCell?.colIndex === colIndex ? (
+                                        <PiCopySimple />
+                                      ) : null}
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             ) : (
               cardComponent && cardComponent(paginatedData)
             )}
