@@ -207,6 +207,7 @@ const Sales = observer(() => {
               onClick={() => {
                 setIsOpen(true);
               }}
+              disabled
             />
             <DropDown {...dropDownList} />
           </div>

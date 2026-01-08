@@ -156,6 +156,7 @@ const SalesDetailsModal = ({
     return {
       totalPrice: correctTotalPrice,
       // totalPaid: sale.totalPaid || 0,
+      totalMonthlyPayment: sale.totalMonthlyPayment,
       totalPaid: Math.max(0, sale.totalPaid - sale.totalMiscellaneousPrice),
       paymentMode: saleData.paymentMode || "",
       totalInstallments:

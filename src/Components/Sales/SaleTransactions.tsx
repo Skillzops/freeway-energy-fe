@@ -39,6 +39,7 @@ interface PaymentSummaryProps {
   paymentsMade?: number;
   paymentProgress?: number;
   onPayNextPayment?: () => void;
+  totalMonthlyPayment?: number;
 }
 
 const PaymentSummary: React.FC<PaymentSummaryProps> = ({
@@ -51,6 +52,7 @@ const PaymentSummary: React.FC<PaymentSummaryProps> = ({
   paymentsMade = 0,
   paymentProgress = 0,
   onPayNextPayment,
+  totalMonthlyPayment,
 }) => {
   if (!isInstallment) return null;
 
@@ -58,6 +60,7 @@ const PaymentSummary: React.FC<PaymentSummaryProps> = ({
   const installmentProgress =
     totalInstallments > 0 ? (paymentsMade / totalInstallments) * 100 : 0;
   // const remainingInstallments = Math.max(totalInstallments - paymentsMade, 0);
+  const payNextAmountDisplay = remainingBalance == 0 ? 0: totalMonthlyPayment
 
   return (
     <div className="flex flex-col p-4 gap-3 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg mb-4">
@@ -151,7 +154,7 @@ const PaymentSummary: React.FC<PaymentSummaryProps> = ({
               onClick={onPayNextPayment}
               className="mt-2 px-3 py-1 text-xs bg-primaryGradient text-white rounded-md hover:bg-primary-dark transition-colors font-medium"
             >
-              Pay Next - ₦{formatNumberWithCommas(Math.min(remainingBalance, 6000).toString())}
+              Pay Next - ₦{formatNumberWithCommas(payNextAmountDisplay.toString())}
             </button>
           )}
         </div>
@@ -195,6 +198,7 @@ const SaleTransactions = ({
     paymentsMade?: number;
     paymentProgress?: number;
     miscellaneousCost?: number;
+    totalMonthlyPayment?: number;
   };
   refreshTable?: () => Promise<any>;
   refreshSingleSale?: () => Promise<any>;
@@ -618,6 +622,7 @@ const SaleTransactions = ({
       {/* Payment Summary for Installments */}
       <PaymentSummary
         {...paymentSummary}
+        totalMonthlyPayment={saleData?.totalMonthlyPayment}
         onPayNextPayment={() => {
           // Set up next payment data with suggested amount
           const suggestedAmount = Math.min(
