@@ -81,7 +81,9 @@ const InventaryTable: React.FC<InventoryTableProps> = ({ inventoryData, isLoadin
       : [{ id: "empty", name: "—", range: "—", percent: 0 }];
 
   return (
-    <div className="w-[360px] rounded-3xl border border-slate-200 shadow-sm bg-white p-3">
+    <div
+      className="flex h-full w-[360px] flex-col rounded-3xl border border-slate-200 bg-white p-3 shadow-sm"
+    >
       {/* Header */}
       <div className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-2">
         <div className="text-[11px] font-bold tracking-wide text-slate-700 uppercase">
@@ -109,7 +111,7 @@ const InventaryTable: React.FC<InventoryTableProps> = ({ inventoryData, isLoadin
       </div>
 
       {/* List */}
-      <div className="max-h-[520px] overflow-y-auto pr-1">
+      <div className="min-h-0 flex-1 overflow-y-auto pr-1">
         {isLoading ? (
           <div className="px-2 py-3 text-[12px] text-slate-500">Loading…</div>
         ) : (
@@ -159,4 +161,3 @@ const InventaryTable: React.FC<InventoryTableProps> = ({ inventoryData, isLoadin
 };
 
 export default InventaryTable;
-

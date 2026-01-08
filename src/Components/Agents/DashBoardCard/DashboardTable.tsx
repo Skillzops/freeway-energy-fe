@@ -63,7 +63,7 @@ const WalletCard: React.FC<WalletCardProps> = ({
   };
 
   return (
-    <div className="bg-walletCream rounded-2xl shadow-sm p-6 border border-[#E3F0FF] w-[359px] h-[640px] flex flex-col items-center gap-6">
+    <div className="bg-white h-full rounded-2xl shadow-sm p-6 border border-[#E3F0FF] w-[359px] flex flex-col items-center gap-6">
       <div className="w-[327px] min-h-[160px] border border-gray-300 rounded-lg bg-white">
         <div className="flex items-center gap-3 mb-6 pt-4 pl-2">
           <div className="p-2 rounded-full bg-[#F5F9FF]">
@@ -114,7 +114,7 @@ const WalletCard: React.FC<WalletCardProps> = ({
         </h3>
       </div>
 
-      <div className="space-y-3 w-[327px] h-[368px] bg-activities2 overflow-y-auto">
+      <div className="space-y-3 w-[327px] h-[470px] bg-activities2 overflow-y-auto" >
         {isFetching ? (
           <div className="px-2 text-xs text-textGrey">Loading…</div>
         ) : activities.length === 0 ? (

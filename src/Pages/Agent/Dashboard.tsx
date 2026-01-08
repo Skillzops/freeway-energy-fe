@@ -402,7 +402,7 @@ const Dashboard: React.FC = () => {
           </div>
 
           {/* Wallet Card */}
-          <div>
+          <div >
             <WalletCard
               onPurchaseCredit={handleOpenPurchaseCredit}
               onTopUpWallet={handleOpenTopUpModal}

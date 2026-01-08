@@ -263,7 +263,7 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          <div>
+          <div className="">
             <InventaryTable
               inventoryData={data}
               isLoading={isFetching}

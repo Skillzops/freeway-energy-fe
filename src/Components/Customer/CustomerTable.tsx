@@ -115,6 +115,7 @@ type ConfirmModalProps = {
   loading?: boolean;
   onConfirm: () => void;
   onClose: () => void;
+  confirmClassName?: string;
   showReason?: boolean;
   reason?: string;
   onReasonChange?: (v: string) => void;
@@ -131,6 +132,7 @@ const ConfirmModal = ({
   loading = false,
   onConfirm,
   onClose,
+  confirmClassName,
   showReason = false,
   reason = "",
   onReasonChange,
@@ -179,7 +181,10 @@ const ConfirmModal = ({
             {cancelText}
           </button>
           <button
-            className="px-3 py-2 text-sm rounded-full border border-errorTwo text-white bg-errorTwo hover:opacity-90 disabled:opacity-60"
+            className={`px-3 py-2 text-sm rounded-full border text-white transition-colors disabled:opacity-60 ${
+              confirmClassName ||
+              "border-[#9B2B23] bg-[#9B2B23] hover:bg-[#8A261F]"
+            }`}
             onClick={onConfirm}
             disabled={loading}
           >
@@ -537,6 +542,11 @@ const CustomerTable = ({
     pendingAction.approve === false &&
     pendingAction.label !== "Deactivate";
 
+  const confirmButtonClassName =
+    pendingAction?.approve === true
+      ? "border-[#00AF50] bg-[#00AF50] hover:bg-[#009B46]"
+      : "border-[#9B2B23] bg-[#9B2B23] hover:bg-[#8A261F]";
+
   return (
     <>
       {!error ? (
@@ -599,6 +609,7 @@ const CustomerTable = ({
                 : "Reject"
             }
             cancelText="Cancel"
+            confirmClassName={confirmButtonClassName}
             showReason={showReasonField}
             reason={rejectionReason}
             onReasonChange={setRejectionReason}
