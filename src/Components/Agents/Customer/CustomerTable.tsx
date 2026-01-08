@@ -286,10 +286,13 @@ const CustomerTable = ({
       valueIsAComponent: true,
       customValue: (value: string, row?: CustomerEntries) => {
         const v = (value || "—").toUpperCase();
-        let style = "text-[#49526A] border-strokeGreyTwo";
-        if (v === "APPROVED") style = "text-success border-success";
-        else if (v === "REJECTED") style = "text-errorTwo border-errorTwo";
-        else if (v === "PENDING") style = "text-strokeCream border-strokeCream";
+        let style = "text-[#49526A] border-[#E1E5EA] bg-[#F6F8FA]";
+        if (v === "APPROVED")
+          style = "text-[#0E6F3D] border-[#B7E4C7] bg-[#EAF7EF]";
+        else if (v === "REJECTED")
+          style = "text-[#9B2B23] border-[#F3B5B0] bg-[#FCECEB]";
+        else if (v === "PENDING")
+          style = "text-[#9A6A00] border-[#F4D48A] bg-[#FFF6DA]";
 
         const reason =
           (v === "REJECTED" || v === "RESUBMITTED") &&
@@ -299,7 +302,7 @@ const CustomerTable = ({
 
         const badge = (
           <span
-            className={`${style} flex items-center gap-1 w-max px-2 py-1 bg-[#F6F8FA] border-[0.4px] rounded-full uppercase text-[11px]`}
+            className={`${style} flex items-center gap-1 w-max px-2 py-1 border-[0.4px] rounded-full uppercase text-[11px]`}
           >
             {reason ? <CgEye /> : <GoDotFill />}
 
