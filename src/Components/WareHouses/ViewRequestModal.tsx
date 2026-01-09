@@ -201,7 +201,7 @@ export function ViewRequestModal({
                 </div>
                 <div className="w-full bg-strokeGreyTwo rounded-full h-2">
                   <div 
-                    className="bg-success h-2 rounded-full transition-all duration-300"
+                    className="bg-gradient-to-r from-primary to-accent h-2 rounded-full transition-all duration-300"
                     style={{ 
                       width: `${request.requestedQuantity > 0 
                         ? Math.min(((request.fulfilledQuantity || 0) / request.requestedQuantity) * 100, 100)

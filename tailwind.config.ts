@@ -32,6 +32,7 @@ export default {
         "accent-10": "var(--brand-accent-10)",
         "accent-20": "var(--brand-accent-20)",
 
+        gold: "var(--gold)",
         success: "var(--success)",
         warning: "var(--warning)",
         danger: "var(--danger)",

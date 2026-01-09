@@ -37,7 +37,8 @@ interface Customer {
 }
 
 const generateListDataEntries = (data: any): ListDataType[] => {
-  return data?.updatedResults.map((product: any) => ({
+  const results = data?.updatedResults || data?.results || data?.data || [];
+  return results.map((product: any) => ({
     productId: product?.id,
     productImage: product?.image || "",
     productTag: product?.category?.name,
@@ -100,9 +101,9 @@ const SelectCustomerProductModal = observer(
       false
     );
     const fetchProductCategoryById = useGetRequest(
-      `/v1/agents/products?page=${currentPage}&limit=${entriesPerPage}&categoryId=${_filterValue}${
-        queryValue && `&search=${queryValue}`
-      }`,
+      `/v1/agents/products?page=${currentPage}&limit=${entriesPerPage}${
+        _filterValue ? `&categoryId=${_filterValue}` : ""
+      }${queryValue ? `&search=${queryValue}` : ""}`,
       false
     );
     // const fetchProductCategoryById = useGetRequest(
@@ -131,13 +132,13 @@ const SelectCustomerProductModal = observer(
     }, [fetchAllCustomers]);
 
     const tabNames: TabNamesType[] = useMemo(() => {
-      return (
+      const categoryTabs =
         fetchAllProductCategories.data?.map((data: { name: any; id: any }) => ({
           name: data.name,
           key: data.name,
           id: data.id,
-        })) || []
-      );
+        })) || [];
+      return [{ name: "All", key: "All", id: "" }, ...categoryTabs];
     }, [fetchAllProductCategories.data]);
 
     const fetchTabData = useCallback(
