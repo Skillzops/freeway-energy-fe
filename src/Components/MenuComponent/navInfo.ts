@@ -16,6 +16,7 @@ import {
   WalletIcon,
   SettingsIcon,
   WarehouseIcon,
+  AuditIcon
 } from "./Icons";
 
 export const navData = [
@@ -73,6 +74,11 @@ export const navData = [
     title: "Reports",
     icon: InventoryIcon,
     link: "/reports",
+  },
+  {
+    title: "Audit Logs",
+    icon: AuditIcon,
+    link: "/audit-logs",
   },
   {
     title: "Settings",

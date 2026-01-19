@@ -9,6 +9,7 @@ import Cookies from "js-cookie";
 import useTokens from "../../hooks/useTokens";
 import { formatNumberWithSuffix } from "../../hooks/useFormatNumberWithSuffix";
 import { Modal } from "@/Components/ModalComponent/Modal";
+import { brandAssets } from "@/config/brandConfig";
 
 const TopNavComponent = () => {
   const { role, agentDetails } = useTokens();
@@ -67,7 +68,7 @@ const TopNavComponent = () => {
         <div className="flex items-start sm:items-center justify-between gap-1 w-full max-w-screen-2xl">
           <div className="flex flex-wrap sm:flex-nowrap items-center w-max gap-1 sm:gap-2">
             <img
-              src={"/logo.svg"}
+              src={brandAssets.logoFull}
               alt="Logo"
               // width="100px"
               className="w-[80px] sm:w-[80px] cursor-pointer"

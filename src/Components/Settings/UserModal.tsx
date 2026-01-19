@@ -3,13 +3,14 @@ import roletwo from "../../assets/table/roletwo.svg";
 // import call from "../../assets/settings/call.svg";
 // import message from "../../assets/settings/message.svg";
 import editInput from "../../assets/settings/editInput.svg";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { GoDotFill } from "react-icons/go";
 import { DropDown } from "../DropDownComponent/DropDown";
 import { Modal } from "@/Components/ModalComponent/Modal";
 import { DataStateWrapper } from "../Loaders/DataStateWrapper";
 import StaffDetails from "./StaffDetails";
 import TabComponent from "../TabComponent/TabComponent";
+import { DateTimeTag, SimpleTag } from "../CardComponents/CardComponent";
 
 const UserModal = ({
   isOpen,
@@ -26,6 +27,24 @@ const UserModal = ({
     `/v1/users/single/${userID}`,
     true
   );
+  const isActivityTab = tabContent === "activityHistory";
+  const {
+    data: activityData,
+    isLoading: activityLoading,
+    error: activityError,
+    errorStates: activityErrorStates,
+    mutate: refreshActivity,
+  } = useGetRequest(
+    isActivityTab && userID ? `/v1/audit-logs/user/${userID}` : null,
+    true,
+    60000
+  );
+  const activityLogs = useMemo(() => {
+    if (Array.isArray(activityData)) return activityData;
+    if (Array.isArray(activityData?.logs)) return activityData.logs;
+    if (Array.isArray(activityData?.data)) return activityData.data;
+    return [];
+  }, [activityData]);
 
   // const handleCallClick = () => {
   //   const callURL = `tel:${data?.phone}`;
@@ -53,7 +72,7 @@ const UserModal = ({
         setIsOpen(false);
         refreshTable();
       } catch (error) {
-        console.error("User deletion failed:", error);
+        void 0;
       }
     } else {
       setIsOpen(false);
@@ -95,11 +114,63 @@ const UserModal = ({
     showCustomButton: true,
   };
 
-  const tabNames = [
-    { name: "Staff Details", key: "staffDetails", count: null },
-    { name: "Activity History", key: "activityHistory", count: 0 },
-    { name: "Messages", key: "messages", count: 0 },
-  ];
+const tabNames = [
+  { name: "Staff Details", key: "staffDetails", count: null },
+  { name: "Activity History", key: "activityHistory", count: 0 },
+  { name: "Messages", key: "messages", count: 0 },
+];
+
+const ActivityHistoryList = ({
+  logs,
+}: {
+  logs: Array<Record<string, any>>;
+}) => {
+  if (!logs || logs.length === 0) {
+    return (
+      <div className="border border-strokeGreyThree rounded-[12px] p-3 text-xs text-textGrey bg-[#F9FAFB]">
+        No activity found for this user.
+      </div>
+    );
+  }
+
+  const formatValues = (val: any) => {
+    if (!val || typeof val !== "object" || Object.keys(val).length === 0) return "none";
+    return JSON.stringify(val);
+  };
+
+  return (
+    <div className="flex flex-col gap-3">
+      {logs.map((log, idx) => (
+        <div
+          key={log.id || log._id || idx}
+          className="border border-strokeGreyThree rounded-[12px] p-3 bg-white shadow-[0_1px_4px_rgba(0,0,0,0.03)] flex flex-col gap-2"
+        >
+          <div className="flex items-center justify-between gap-2">
+            <SimpleTag
+              text={log.action || log.method || "N/A"}
+              dotColour="#9BA4BA"
+              containerClass="bg-[#F6F8FA] font-semibold text-textDarkGrey px-2 py-1 border-[0.4px] border-strokeGreyThree rounded-full"
+            />
+            {log.createdAt ? <DateTimeTag datetime={log.createdAt} showAll={false} /> : null}
+          </div>
+          <p className="text-xs text-textDarkGrey">
+            {log.entity || log.route || log.endpoint || log.metadata?.url || "Unknown resource"}
+          </p>
+          <p className="text-[11px] leading-snug text-textGrey">
+            Old Values: {formatValues(log.oldValues)} | New Values: {formatValues(log.newValues)} | Changes:{" "}
+            {formatValues(log.changes)}
+          </p>
+          {log.requestUrl ? (
+            <p className="text-[11px] text-textGrey">URL: {log.requestUrl}</p>
+          ) : null}
+          {log.statusCode ? (
+            <p className="text-[11px] text-textGrey">Status: {log.statusCode}</p>
+          ) : null}
+        </div>
+      ))}
+    </div>
+  );
+};
 
   return (
     <Modal
@@ -180,7 +251,7 @@ const UserModal = ({
             tabs={tabNames.map(({ name, key, count }) => ({
               name,
               key,
-              count,
+              count: key === "activityHistory" ? activityLogs.length : count,
             }))}
             onTabSelect={(key) => setTabContent(key)}
             tabsContainerClass="p-2 rounded-[20px]"
@@ -202,10 +273,19 @@ const UserModal = ({
                 setDisplayInput={setDisplayInput}
               />
             </DataStateWrapper>
+          ) : tabContent === "activityHistory" ? (
+            <DataStateWrapper
+              isLoading={activityLoading}
+              error={activityError}
+              errorStates={activityErrorStates}
+              refreshData={refreshActivity}
+              errorMessage="Failed to fetch activity history"
+            >
+              <ActivityHistoryList logs={activityLogs} />
+            </DataStateWrapper>
           ) : (
             <div>
-              {tabNames?.find((item) => item.key === tabContent)?.name} Coming
-              Soon
+              {tabNames?.find((item) => item.key === tabContent)?.name} Coming Soon
             </div>
           )}
         </div>
