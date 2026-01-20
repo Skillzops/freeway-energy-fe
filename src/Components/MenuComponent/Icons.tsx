@@ -565,3 +565,25 @@ export const WarehouseIcon = (props: React.SVGProps<SVGSVGElement>) => (
     />
   </svg>
 );
+
+
+
+export const AuditIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <path
+      d="M12 3a9 9 0 100 18 9 9 0 000-18zm0 1.5a7.5 7.5 0 110 15 7.5 7.5 0 010-15z"
+      fill="currentColor"
+    />
+    <path
+      d="M12 7.25a.75.75 0 01.75.75v3.19l2.02 2.02a.75.75 0 11-1.06 1.06l-2.21-2.21A.75.75 0 0111.25 12V8a.75.75 0 01.75-.75z"
+      fill="currentColor"
+    />
+  </svg>
+);

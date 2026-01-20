@@ -277,7 +277,7 @@ const NewTasks: React.FC<Props> = ({
                   {/* Assign button per card */}
                   <div className="pt-2">
                     <button
-                      className="w-full py-2 rounded-full bg-[#932819] text-white font-semibold text-sm disabled:opacity-60"
+                      className="w-full py-2 rounded-full bg-gradient-to-r from-primary-hex to-primary-shade-1 text-white font-semibold text-sm disabled:opacity-60 disabled:cursor-not-allowed transition-opacity hover:opacity-90"
                       onClick={(e) => {
                         e.stopPropagation(); // don't toggle selection when clicking button
                         onAssign(ui.id);

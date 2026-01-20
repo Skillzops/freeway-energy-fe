@@ -9,8 +9,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        primary: ['"Red Hat Display"', "sans-serif"],
-        secondary: ['"Lora"', "serif"],
+        primary: ["var(--font-primary)", "sans-serif"],
+        secondary: ["var(--font-secondary)", "serif"],
       },
       colors: {
         background: "hsl(var(--background))",

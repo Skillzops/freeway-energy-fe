@@ -54,6 +54,7 @@ import WareHouses from "./Pages/Agent/WareHouse";
 import InstallerLoginPage from "./Pages/Installer/LoginPage";
 import AgentLoginPage from "./Pages/Agent/LoginPage";
 import InstallerSettings from "./Pages/Installer/Settings";
+import AuditLogs from "./Pages/AuditLogs";
 
 function App() {
   return (
@@ -97,6 +98,8 @@ function App() {
             <Route path="/warehouses/:id" element={<WarehouseProvider><WarehouseDetail /></WarehouseProvider>} />
             <Route path="/transfers" element={<Transfers />} />
             <Route path="/reports" element={<Reports />} />
+            <Route path="/audit-logs" element={<AuditLogs />} />
+
 
 
             {/* //INSTALLER ROUTE */}

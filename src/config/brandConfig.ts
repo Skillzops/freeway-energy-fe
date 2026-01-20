@@ -107,6 +107,11 @@ type BrandColors = {
   };
 };
 
+type FontConfig = {
+  fontFamily: string;
+  importUrl?: string;
+};
+
 type BrandAssets = {
   logoFull: string;
   faviconUrl: string;
@@ -140,8 +145,8 @@ export type BrandConfig = {
   companyName: string;
   domains: string[];
   typography: {
-    primary: string;
-    secondary: string;
+    primary: FontConfig;
+    secondary: FontConfig;
   };
   colors: BrandColors;
   assets: BrandAssets;
@@ -153,8 +158,15 @@ export const BRAND_CONFIG: BrandConfig = {
   companyName: "Inreli Energy",
   domains: ["inrelicrm.com", "inreli-energy-cmvgn.ondigitalocean.app"],
   typography: {
-    primary: '"Red Hat Display", sans-serif',
-    secondary: '"Lora", serif',
+    primary: {
+      fontFamily: '"Red Hat Display", sans-serif',
+      importUrl:
+        "https://fonts.googleapis.com/css2?family=Red+Hat+Display:ital,wght@0,300..900;1,300..900&display=swap",
+    },
+    secondary: {
+      fontFamily: '"Lora", serif',
+      importUrl: "https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&display=swap",
+    },
   },
   colors: {
     legacy: {
@@ -236,6 +248,7 @@ export const BRAND_CONFIG: BrandConfig = {
 
 const createBrandCssVariables = (config: BrandConfig) => {
   const {
+    typography,
     colors: { gradients, legacy, palette },
   } = config;
 
@@ -281,6 +294,8 @@ const createBrandCssVariables = (config: BrandConfig) => {
 
   return `
 :root {
+  --font-primary: ${typography.primary.fontFamily};
+  --font-secondary: ${typography.secondary.fontFamily};
   --background: ${derivedLight.background};
   --foreground: ${derivedLight.foreground};
   --card: ${derivedLight.card};
@@ -313,6 +328,8 @@ ${paletteVars.join("\n")}
 
 :root.dark,
 [data-mode="dark"] {
+  --font-primary: ${typography.primary.fontFamily};
+  --font-secondary: ${typography.secondary.fontFamily};
   --background: ${derivedDark.background};
   --foreground: ${derivedDark.foreground};
   --card: ${derivedDark.card};
@@ -373,6 +390,21 @@ export const applyBranding = (config: BrandConfig = BRAND_CONFIG) => {
   }
 
   styleEl.innerHTML = createBrandCssVariables(config);
+
+  const ensureFontLink = (id: string, href?: string) => {
+    if (!href) return;
+    let fontLink = document.getElementById(id) as HTMLLinkElement | null;
+    if (!fontLink) {
+      fontLink = document.createElement("link");
+      fontLink.rel = "stylesheet";
+      fontLink.id = id;
+      document.head.appendChild(fontLink);
+    }
+    fontLink.href = href;
+  };
+
+  ensureFontLink("brand-font-primary", config.typography.primary.importUrl);
+  ensureFontLink("brand-font-secondary", config.typography.secondary.importUrl);
 };
 
 export const brandAssets = BRAND_CONFIG.assets;

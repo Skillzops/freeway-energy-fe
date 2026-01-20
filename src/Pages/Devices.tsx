@@ -12,7 +12,6 @@ import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
 import { useGetRequest } from "@/utils/useApiCall";
 import CreateNewDevice from "@/Components/Devices/CreateNewDevice";
 import GenerateTokens from "@/Components/Tokens/GenerateTokens";
-import { Modal } from "@/Components/ModalComponent/Modal";
 import sale from "@/assets/titlepill/sale.svg";
 
 const DevicesTable = lazy(() => import("@/Components/Devices/DevicesTable"));

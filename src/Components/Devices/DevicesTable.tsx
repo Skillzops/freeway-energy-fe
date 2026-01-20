@@ -24,9 +24,15 @@ export type DeviceEntries = {
   hardwareModel: string;
   firmwareVersion: string;
   isTokenable: boolean;
+  customer?: {
+    firstname?: string | null;
+    lastname?: string | null;
+  } | null;
+  customerName?: string | null;
   saleItemId?: string | null;
   saleItemIDs?: string[];
   tokens?: TokenEntry[];
+  installationStatus?: string | null;
   createdAt?: string;
   updatedAt?: string;
 };
@@ -35,9 +41,14 @@ export type DeviceEntries = {
 const generateDeviceEntries = (data: any): DeviceEntries[] => {
   const entries: DeviceEntries[] = data?.devices?.map(
     (item: DeviceEntries, index: number) => {
+      const fullName = [item.customer?.firstname, item.customer?.lastname]
+        .filter(Boolean)
+        .join(" ");
+
       return {
         ...item,
         no: index + 1,
+        customerName: fullName.length > 0 ? fullName : null,
       };
     }
   );
@@ -94,12 +105,26 @@ const DevicesTable = ({
 
   const columnList = [
     { title: "S/N", key: "no" },
+    { title: "Customer Name", key: "customerName" },
     { title: "Serial Number", key: "serialNumber" },
     { title: "Key", key: "key" },
     { title: "Hardware Model", key: "hardwareModel" },
-    {title: "Installation Status", key: "saleItemId", valueIsAComponent: true, customValue: (value: string | null) => {
-      return <>{value ? "Installed" : "Not Installed"}</>;
-    }},
+    {
+      title: "Installation Status",
+      key: "installationStatus",
+      valueIsAComponent: true,
+      customValue: (value: string | null, rowData?: DeviceEntries) => {
+        if (!value) {
+          return <>{rowData?.saleItemId ? "Installed" : "Not Installed"}</>;
+        }
+        const normalized = value.toLowerCase().replace(/[\s-]/g, "_");
+        if (normalized === "installed") return <>Installed</>;
+        if (normalized === "not_installed" || normalized === "notinstalled") {
+          return <>Not Installed</>;
+        }
+        return <>{value}</>;
+      },
+    },
     { title: "Count", key: "count" },
     {
       title: "Is Tokenable",
