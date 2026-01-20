@@ -276,7 +276,7 @@ const AssignCustomersModal: React.FC<AssignCustomersModalProps> = ({
                   }}
                   disabled={!isFormValid}
                   className={`flex-1 py-3 px-4 text-sm font-medium rounded-2xl transition-colors ${isFormValid
-                      ? "bg-gradient-to-r from-[#982214] to-[#F8CB48] text-white hover:opacity-90 shadow-lg"
+                      ? "bg-gradient-to-r from-primary-hex to-primary-shade-1 text-white hover:opacity-90 shadow-lg"
                       : "bg-gray-100 text-textDarkGrey cursor-not-allowed"
                     }`}
                 >

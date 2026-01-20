@@ -544,7 +544,7 @@ const AssignDevicesModal: React.FC<AssignDevicesModalProps> = ({
                   disabled={!isFormValid || isSubmitting}
                   className={`flex-1 py-3.5 px-4 text-sm font-semibold rounded-2xl transition-all duration-200 ${
                     isFormValid && !isSubmitting
-                      ? "bg-gradient-to-r from-[#982214] to-[#F8CB48] text-white hover:opacity-90 shadow-lg hover:shadow-xl"
+                      ? "bg-gradient-to-r from-primary-hex to-primary-shade-1 text-white hover:opacity-90 shadow-lg hover:shadow-xl"
                       : "bg-gray-100 text-textDarkGrey cursor-not-allowed shadow-sm"
                   }`}
                 >

@@ -8,6 +8,7 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
+import { BRAND_CONFIG } from "@/config/brandConfig";
 
 export type SalesGraphPoint = {
   month: string;
@@ -19,6 +20,9 @@ type Props = {
   data: SalesGraphPoint[];
 };
 
+const gradientId = "salesChartPrimaryGradient";
+const { brandPrimary, accent } = BRAND_CONFIG.colors.legacy;
+
 const SalesChart: React.FC<Props> = ({ data }) => (
   <ResponsiveContainer width="100%" height="100%">
     <BarChart
@@ -28,9 +32,9 @@ const SalesChart: React.FC<Props> = ({ data }) => (
       barGap={4}
     >
       <defs>
-        <linearGradient id="primaryGradient" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="var(--brand-primary)" />
-          <stop offset="100%" stopColor="var(--brand-accent)" />
+        <linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor={brandPrimary} />
+          <stop offset="100%" stopColor={accent} />
         </linearGradient>
       </defs>
 
@@ -62,7 +66,7 @@ const SalesChart: React.FC<Props> = ({ data }) => (
 
       <Bar
         dataKey="sales"
-        fill="url(#primaryGradient)"
+        fill={`url(#${gradientId})`}
         radius={[12, 12, 12, 12]}
         barSize={30}
         name="Sales Count"

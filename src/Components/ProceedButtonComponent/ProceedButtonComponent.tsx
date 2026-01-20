@@ -1,3 +1,4 @@
+import { BRAND_CONFIG } from "@/config/brandConfig";
 import React, { useState } from "react";
 
 interface ButtonProps {
@@ -25,7 +26,7 @@ const ProceedButton: React.FC<ButtonProps> = ({
       "bg-[#FEF5DA] border border-[#A58730]/20 shadow-[2px_6px_8px_0px_rgba(0,0,0,0.15)] hover:bg-[#941C12] hover:border-[#63130C]/20",
     gray: "bg-[#E2E4EB] border border-[#9BA4BA]/20",
     gradient: "bg-[#FEF5DA] border border-[#A58730]/20 shadow-innerCustom",
-    red: "bg-[#941C12] border border-[#63130C]/20",
+    red: `bg-[${BRAND_CONFIG.colors.legacy.brandPrimary}] border border-[#63130C]/20`,
   };
 
   return loading ? (
