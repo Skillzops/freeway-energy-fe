@@ -22,6 +22,9 @@ const defaultFormData: FormData = {
   discount: 0,
 };
 
+const DEFAULT_INSTALLMENT_DURATION = 6;
+const DEFAULT_INITIAL_PAYMENT = 6000;
+
 // Calculate installment amount based on your specified logic
 const calculateInstallmentAmount = (
   productPrice: number,
@@ -40,6 +43,15 @@ const calculateInstallmentAmount = (
   const monthlyInstallment = totalAmount / installmentDuration;
   
   return Math.round(monthlyInstallment); // Round to nearest whole number
+};
+
+const INSTALLMENT_PLANS: Record<
+  number,
+  { installmentStartingPrice: number; monthlyPayment?: number }
+> = {
+  3: { installmentStartingPrice: 8000, monthlyPayment: 32300 },
+  6: { installmentStartingPrice: 5000, monthlyPayment: 17500 },
+  9: { installmentStartingPrice: 5000, monthlyPayment: 12500 },
 };
 
 const ParametersForm = ({
@@ -88,20 +100,8 @@ const ParametersForm = ({
       return Object.values(miscellaneousCosts || {}).reduce((sum: number, cost: any) => sum + (Number(cost) || 0), 0);
     }
   })();
-
-  // Keep initial payment as default ₦6,000 when switching to installment mode
-  useEffect(() => {
-    if (formData.paymentMode === "INSTALLMENT") {
-      // Only set default if no value is currently set
-      const currentInitialPayment = SaleStore.getParametersByProductId(currentProductId)?.installmentStartingPrice;
-      if (!currentInitialPayment || currentInitialPayment === 0) {
-        setFormData(prev => ({
-          ...prev,
-          installmentStartingPrice: 6000 // Fixed default initial payment - users can modify this
-        }));
-      }
-    }
-  }, [formData.paymentMode, currentProductId]);
+  const effectiveMiscellaneousCosts =
+    totalMiscellaneousCosts > 0 ? totalMiscellaneousCosts : 2000;
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -130,6 +130,32 @@ const ParametersForm = ({
   };
 
   const handleSelectChange = (name: string, values: string | string[]) => {
+    if (name === "paymentMode") {
+      const nextMode = values as "INSTALLMENT" | "ONE_OFF";
+      if (nextMode === "ONE_OFF") {
+        setFormData((prev) => ({
+          ...prev,
+          paymentMode: "ONE_OFF",
+          installmentDuration: 0,
+          installmentStartingPrice: 0,
+          discount: 0,
+        }));
+      } else {
+        const duration = resolveInstallmentDuration();
+        const plan = INSTALLMENT_PLANS[duration];
+        const initialPayment =
+          plan?.installmentStartingPrice ?? resolveInitialPayment();
+        setFormData((prev) => ({
+          ...prev,
+          paymentMode: "INSTALLMENT",
+          installmentDuration: duration,
+          installmentStartingPrice: initialPayment,
+          discount: 0,
+        }));
+      }
+      setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
+      return;
+    }
     setFormData((prev) => ({
       ...prev,
       [name]: values,
@@ -180,22 +206,48 @@ const ParametersForm = ({
     handleClose();
   };
 
-  const rawPaymentModes =
-    SaleStore.getProductById(currentProductId)?.productPaymentModes;
-  const paymentModesArray = rawPaymentModes
-    ?.split(",")
-    .map((mode) => mode.trim().toLowerCase());
+  const paymentOptions = [
+    { label: "Single Deposit", value: "ONE_OFF" },
+    { label: "Installment", value: "INSTALLMENT" },
+  ];
 
-  const hasInstallment = paymentModesArray?.includes("installment");
-  const hasMultipleModes = paymentModesArray && paymentModesArray.length > 1;
+  const resolveInstallmentDuration = () => {
+    const fromProduct =
+      typeof product?.installmentDuration === "number"
+        ? product.installmentDuration
+        : undefined;
+    if (fromProduct && fromProduct > 0) return fromProduct;
 
-  const paymentOptions =
-    hasInstallment && hasMultipleModes
-      ? [
-          { label: "Single Deposit", value: "ONE_OFF" },
-          { label: "Installment", value: "INSTALLMENT" },
-        ]
-      : [{ label: "Single Deposit", value: "ONE_OFF" }];
+    const label = `${product?.productName ?? ""} ${product?.productTag ?? ""}`;
+    const match = label.match(/(\d+)\s*(month|months|mo)/i);
+    if (match) return Number(match[1]);
+    return DEFAULT_INSTALLMENT_DURATION;
+  };
+
+  const resolveInitialPayment = () => {
+    const fromProduct =
+      typeof product?.installmentStartingPrice === "number"
+        ? product.installmentStartingPrice
+        : undefined;
+    if (fromProduct && fromProduct > 0) return fromProduct;
+    return DEFAULT_INITIAL_PAYMENT;
+  };
+
+  useEffect(() => {
+    const existingParams = SaleStore.getParametersByProductId(currentProductId);
+    if (existingParams) {
+      setFormData(existingParams);
+    }
+  }, [currentProductId]);
+
+  const derivedMonthlyPayment =
+    INSTALLMENT_PLANS[formData.installmentDuration || 0]?.monthlyPayment ??
+    (formData.installmentDuration && formData.installmentDuration > 0
+      ? Math.round(
+          (productPrice - (formData.installmentStartingPrice || 0)) /
+            formData.installmentDuration
+        )
+      : 0);
 
   // Show calculation breakdown for installment mode
   const showCalculationBreakdown = formData.paymentMode === "INSTALLMENT" && 
@@ -213,19 +265,8 @@ const ParametersForm = ({
           }
           placeholder="Select Payment Mode"
           required={true}
+          disabled={true}
           errorMessage={getFieldError("paymentMode")}
-        />
-        <Input
-          type="number"
-          name="discount"
-          label="DISCOUNT (%)"
-          value={formData.discount as number}
-          onChange={handleInputChange}
-          placeholder="Enter Discount Percentage"
-          required={false}
-          max={100}
-          errorMessage={getFieldError("discount")}
-          description={formData.discount === 0 ? "Enter Discount Percentage (0-100)" : ""}
         />
         {formData.paymentMode === "INSTALLMENT" ? (
           <Input
@@ -236,6 +277,7 @@ const ParametersForm = ({
             onChange={handleInputChange}
             placeholder="Number of Installments"
             required={true}
+            disabled={true}
             errorMessage={getFieldError("installmentDuration")}
             description={
               formData.installmentDuration === 0
@@ -253,8 +295,23 @@ const ParametersForm = ({
             onChange={handleInputChange}
             placeholder="Initial Payment Amount"
             required={true}
+            disabled={true}
             errorMessage={getFieldError("installmentStartingPrice")}
-            description={`Standard initial payment is ₦${formData.installmentStartingPrice}. You can modify this amount.`}
+            description="Standard initial payment amount."
+          />
+        ) : null}
+        {formData.paymentMode === "INSTALLMENT" ? (
+          <Input
+            type="text"
+            name="monthlyPayment"
+            label="MONTHLY PAYMENT"
+            value={Number(derivedMonthlyPayment || 0).toLocaleString()}
+            onChange={handleInputChange}
+            placeholder="Monthly Payment"
+            required={true}
+            disabled={true}
+            errorMessage={getFieldError("monthlyPayment")}
+            description="Monthly installment amount."
           />
         ) : null}
         
@@ -270,15 +327,18 @@ const ParametersForm = ({
               {(formData.discount || 0) > 0 && (
                 <p>Discounted Price: ₦{(productPrice - (((formData.discount || 0) / 100) * productPrice)).toLocaleString()}</p>
               )}
-              {/* <p>Miscellaneous Costs: +₦{totalMiscellaneousCosts.toLocaleString()}</p> */}
-              <p className="font-semibold">Total Amount: ₦{(productPrice - (((formData.discount || 0) / 100) * productPrice) + totalMiscellaneousCosts).toLocaleString()}</p>
+              {/* <p>Miscellaneous Costs: +₦{effectiveMiscellaneousCosts.toLocaleString()}</p> */}
+              <p className="font-semibold">Total Amount: ₦{(productPrice - (((formData.discount || 0) / 100) * productPrice)).toLocaleString()}</p>
               <p>Initial Payment: ₦{(formData.installmentStartingPrice || 0).toLocaleString()}</p>
               <p className="font-semibold text-blue-600">
-                Total Initial Deposit: ₦{((formData.installmentStartingPrice || 0) + totalMiscellaneousCosts).toLocaleString()}
-                <span className="block text-xs font-normal text-gray-500">(Initial Payment + Miscellaneous Costs)</span>
+                Total Initial Deposit: ₦{(formData.installmentStartingPrice || 0).toLocaleString()}
+                <span className="block text-xs font-normal text-gray-500">(Initial Payment)</span>
               </p>
-              <p className="font-semibold text-red-600">Remaining Balance: ₦{((productPrice - (((formData.discount || 0) / 100) * productPrice) + totalMiscellaneousCosts) - ((formData.installmentStartingPrice || 0) + totalMiscellaneousCosts)).toLocaleString()}</p>
-              <p className="font-semibold">Monthly Installment: ₦{Math.round(((productPrice - (((formData.discount || 0) / 100) * productPrice) + totalMiscellaneousCosts) - (formData.installmentStartingPrice || 0)) / (formData.installmentDuration || 1)).toLocaleString()} × {formData.installmentDuration || 0} months</p>
+              <p className="font-semibold text-red-600">Remaining Balance: ₦{((productPrice - (((formData.discount || 0) / 100) * productPrice)) - (formData.installmentStartingPrice || 0)).toLocaleString()}</p>
+              <p className="font-semibold">
+                Monthly Installment: ₦{Number(derivedMonthlyPayment || 0).toLocaleString()} ×{" "}
+                {formData.installmentDuration || 0} months
+              </p>
             </div>
           </div>
         )}
