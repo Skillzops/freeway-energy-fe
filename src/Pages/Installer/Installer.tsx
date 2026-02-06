@@ -164,6 +164,8 @@ const Installer = () => {
               activeTabName={
                 isTaskHistory ? "Task History" : "Installation History"
               }
+              variant="stacked"
+              tabsContainerClass="w-full"
             />
           </div>
 

@@ -82,7 +82,7 @@ const PaymentSummary: React.FC<PaymentSummaryProps> = ({
         <div
           className={`h-1 rounded-full transition-all duration-300 ${totalPaid > totalAmount
             ? "bg-gradient-to-r from-green-500 to-green-600"
-            : "bg-gradient-to-r from-gold to-primary"
+            : "bg-gradient-to-r from-primary to-accent"
             }`}
           style={{ width: `${Math.min(paymentProgress, 100)}%` }}
         ></div>

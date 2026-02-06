@@ -23,6 +23,10 @@ export type ListDataType = {
   productPrice: string;
   totalRemainingQuantities: number;
   productInventoryQuantity: number;
+  productPaymentModes?: string;
+  installmentDuration?: number;
+  installmentStartingPrice?: number;
+  monthlyPayment?: number;
 };
 
 type ProductInventoryType = {

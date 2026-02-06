@@ -30,6 +30,9 @@ const defaultFormData: FormData = {
   monthlyPayment: 0,
 };
 
+const DEFAULT_INSTALLMENT_DURATION = 6;
+const DEFAULT_INITIAL_PAYMENT = 6000;
+
 const calculateInstallmentAmount = (
   productPrice: number,
   discount: number,
@@ -41,6 +44,15 @@ const calculateInstallmentAmount = (
   const totalAmount = discountedPrice + miscellaneousCosts;
   const monthlyInstallment = totalAmount / installmentDuration;
   return Math.round(monthlyInstallment);
+};
+
+const INSTALLMENT_PLANS: Record<
+  number,
+  { installmentStartingPrice: number; monthlyPayment?: number }
+> = {
+  3: { installmentStartingPrice: 8000, monthlyPayment: 32300 },
+  6: { installmentStartingPrice: 5000, monthlyPayment: 17500 },
+  9: { installmentStartingPrice: 5000, monthlyPayment: 12500 },
 };
 
 const ParametersForm = ({
@@ -99,34 +111,21 @@ const ParametersForm = ({
       );
     }
   })();
+  const effectiveMiscellaneousCosts =
+    totalMiscellaneousCosts > 0 ? totalMiscellaneousCosts : 2000;
 
   useEffect(() => {
-    if (formData.paymentMode === "INSTALLMENT") {
-      const currentInitialPayment =
-        SaleStore.getParametersByProductId(
-          currentProductId
-        )?.installmentStartingPrice;
-      if (!currentInitialPayment || currentInitialPayment === 0) {
-        setFormData((prev) => ({
-          ...prev,
-          installmentStartingPrice: 6000,
-        }));
-      }
-    }
-  }, [formData.paymentMode, currentProductId]);
-
-  useEffect(() => {
-    if (
-      formData.paymentMode === "INSTALLMENT" &&
-      formData.installmentDuration &&
-      formData.installmentDuration > 0
-    ) {
-      const monthly = calculateInstallmentAmount(
-        productPrice,
-        formData.discount || 0,
-        totalMiscellaneousCosts,
-        formData.installmentDuration
-      );
+    if (formData.paymentMode !== "INSTALLMENT") return;
+    if (formData.installmentDuration && formData.installmentDuration > 0) {
+      const plan = INSTALLMENT_PLANS[formData.installmentDuration];
+      const monthly =
+        plan?.monthlyPayment ??
+        calculateInstallmentAmount(
+          productPrice,
+          formData.discount || 0,
+          totalMiscellaneousCosts,
+          formData.installmentDuration
+        );
       setFormData((prev) => ({ ...prev, monthlyPayment: monthly }));
     }
   }, [
@@ -162,6 +161,37 @@ const ParametersForm = ({
   };
 
   const handleSelectChange = (name: string, values: string | string[]) => {
+    if (name === "paymentMode") {
+      const nextMode = values as "INSTALLMENT" | "ONE_OFF";
+      if (nextMode === "ONE_OFF") {
+        setFormData((prev) => ({
+          ...prev,
+          paymentMode: "ONE_OFF",
+          installmentDuration: 0,
+          installmentStartingPrice: 0,
+          monthlyPayment: 0,
+        }));
+      } else {
+        const duration = resolveInstallmentDuration();
+        const plan = INSTALLMENT_PLANS[duration];
+        const initialPayment =
+          plan?.installmentStartingPrice ?? resolveInitialPayment();
+        const monthly =
+          plan?.monthlyPayment ??
+          (duration > 0
+            ? Math.round((productPrice - (initialPayment || 0)) / duration)
+            : 0);
+        setFormData((prev) => ({
+          ...prev,
+          paymentMode: "INSTALLMENT",
+          installmentDuration: duration,
+          installmentStartingPrice: initialPayment,
+          monthlyPayment: monthly,
+        }));
+      }
+      setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
+      return;
+    }
     setFormData((prev) => ({
       ...prev,
       [name]: values,
@@ -218,24 +248,39 @@ const ParametersForm = ({
     handleClose();
   };
 
-  const rawPaymentModes =
-    SaleStore.getProductById(currentProductId)?.productPaymentModes;
+  const paymentOptions = [
+    { label: "Single Deposit", value: "ONE_OFF" },
+    { label: "Installment", value: "INSTALLMENT" },
+  ];
 
-  const paymentModesArray = rawPaymentModes
-    ?.split(",")
-    .map((mode) => mode.trim().toLowerCase());
+  const resolveInstallmentDuration = () => {
+    const fromProduct =
+      typeof product?.installmentDuration === "number"
+        ? product.installmentDuration
+        : undefined;
+    if (fromProduct && fromProduct > 0) return fromProduct;
 
-  console.log(paymentModesArray, "dhhdh__d", rawPaymentModes);
+    const label = `${product?.productName ?? ""} ${product?.productTag ?? ""}`;
+    const match = label.match(/(\d+)\s*(month|months|mo)/i);
+    if (match) return Number(match[1]);
+    return DEFAULT_INSTALLMENT_DURATION;
+  };
 
-  const hasInstallment = paymentModesArray?.includes("installment");
-  // const hasMultipleModes = paymentModesArray && paymentModesArray.length > 1;
+  const resolveInitialPayment = () => {
+    const fromProduct =
+      typeof product?.installmentStartingPrice === "number"
+        ? product.installmentStartingPrice
+        : undefined;
+    if (fromProduct && fromProduct > 0) return fromProduct;
+    return DEFAULT_INITIAL_PAYMENT;
+  };
 
-  const paymentOptions = hasInstallment
-    ? [
-        { label: "Single Deposit", value: "ONE_OFF" },
-        { label: "Installment", value: "INSTALLMENT" },
-      ]
-    : [{ label: "Single Deposit", value: "ONE_OFF" }];
+  useEffect(() => {
+    const existingParams = SaleStore.getParametersByProductId(currentProductId);
+    if (existingParams) {
+      setFormData(existingParams);
+    }
+  }, [currentProductId]);
 
   const showCalculationBreakdown =
     formData.paymentMode === "INSTALLMENT" &&
@@ -256,18 +301,6 @@ const ParametersForm = ({
           required={true}
           errorMessage={getFieldError("paymentMode")}
         />
-        <Input
-          type="number"
-          name="discount"
-          label="DISCOUNT (%)"
-          value={formData.discount as number}
-          onChange={handleInputChange}
-          placeholder="Enter Discount Percentage"
-          required={false}
-          max={100}
-          errorMessage={getFieldError("discount")}
-        />
-
         {formData.paymentMode === "INSTALLMENT" && (
           <>
             <Input
@@ -278,6 +311,7 @@ const ParametersForm = ({
               onChange={handleInputChange}
               placeholder="Number of Installments"
               required={true}
+              disabled={true}
               errorMessage={getFieldError("installmentDuration")}
             />
             <Input
@@ -288,19 +322,21 @@ const ParametersForm = ({
               onChange={handleInputChange}
               placeholder="Initial Payment Amount"
               required={true}
+              disabled={true}
               errorMessage={getFieldError("installmentStartingPrice")}
-              description={`Standard initial payment is ₦${formData.installmentStartingPrice}. You can modify this amount.`}
+              description="Standard initial payment amount."
               />
             <Input
-              type="number"
+              type="text"
               name="monthlyPayment"
               label="MONTHLY PAYMENT"
-              value={formData.monthlyPayment as number}
+              value={Number(formData.monthlyPayment || 0).toLocaleString()}
               onChange={handleInputChange}
               placeholder="Enter Monthly Payment"
               required={true}
+              disabled={true}
               errorMessage={getFieldError("monthlyPayment")}
-              description="Enter the monthly installment amount."
+              description="Monthly installment amount."
             />
           </>
         )}
