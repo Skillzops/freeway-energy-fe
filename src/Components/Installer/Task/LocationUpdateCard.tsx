@@ -1,11 +1,18 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { z } from "zod";
-import closeIcon from '@/assets/close.svg';
+import closeIcon from "../../assets/close.svg";
 import curvedlines from "@/assets/sales/curvedlines.png";
 import redcustomerbag from "@/assets/customers/redcustomerbag.svg";
 import LocationSuccessCard from "./LocationSuccessCard";
-import SecondaryButton from '@/Components/SecondaryButton/SecondaryButton';
+import { FiMapPin } from "react-icons/fi";
 
+// import React, { useState, useEffect, useRef, useMemo } from 'react';
+// import { z } from "zod";
+// import closeIcon from '@/assets/close.svg';
+// import curvedlines from "@/assets/sales/curvedlines.png";
+// import redcustomerbag from "@/assets/customers/redcustomerbag.svg";
+// import LocationSuccessCard from "./LocationSuccessCard";
+import SecondaryButton from '@/Components/SecondaryButton/SecondaryButton';
 
 /* --------------------------- Validation (Zod) --------------------------- */
 const locationSchema = z.object({
@@ -40,7 +47,7 @@ function loadGoogleMaps(apiKey: string): Promise<void> {
       return;
     }
     const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_API_KEY || "AIzaSyDqKiQNSG3P4Wsx3Qjy_BSQO2fTgfZIZoE"}&libraries=places&loading=async`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&loading=async`;
     script.async = true;
     script.defer = true;
     script.onload = () => resolve();
@@ -65,11 +72,21 @@ const LocationUpdateCard: React.FC<LocationUpdateCardProps> = ({
   });
   const [errors, setErrors] = useState<Partial<LocationFormData>>({});
   const [showSuccess, setShowSuccess] = useState(false);
+  const [locStatus, setLocStatus] = useState<
+    | { state: "idle"; message?: string }
+    | { state: "loading"; message?: string }
+    | { state: "error"; message: string }
+    | { state: "success"; message?: string }
+  >({ state: "idle" });
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
 
   const inputRef = useRef<HTMLInputElement | null>(null);
   const acCleanupRef = useRef<(() => void) | null>(null);
 
-  const apiKey = useMemo(() => (import.meta.env.VITE_GOOGLE_API_KEY as string) ?? "", []);
+  const apiKey = useMemo(
+    () => (import.meta.env.VITE_GOOGLE_API_KEY as string) || "",
+    []
+  );
   const shouldInitMaps = isOpen && !!apiKey;
 
   // Initialize classic Places Autocomplete on the input
@@ -161,6 +178,73 @@ const LocationUpdateCard: React.FC<LocationUpdateCardProps> = ({
     console.log("Request token clicked");
   };
 
+  const reverseGeocode = async (lat: number, lng: number) => {
+    if (!apiKey) throw new Error("Google API key missing. Set VITE_GOOGLE_API_KEY.");
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("Failed to reach Google Geocoding API");
+    const data = await res.json();
+    if (data.status !== "OK") throw new Error(data.error_message || "Unable to resolve address");
+    return data.results?.[0]?.formatted_address as string | undefined;
+  };
+
+  const handleUseCurrentLocation = () => {
+    if (!apiKey) {
+      setLocStatus({
+        state: "error",
+        message: "Google API key not configured. Add VITE_GOOGLE_API_KEY to your .env file.",
+      });
+      return;
+    }
+
+    if (!navigator?.geolocation) {
+      setLocStatus({ state: "error", message: "Geolocation not supported on this device." });
+      return;
+    }
+
+    setLocStatus({ state: "loading", message: "Requesting device location..." });
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        const latStr = latitude.toString();
+        const lngStr = longitude.toString();
+
+        setFormData((prev) => ({ ...prev, latitude: latStr, longitude: lngStr }));
+
+        try {
+          const address = await reverseGeocode(latitude, longitude);
+          if (address) {
+            setFormData((prev) => ({ ...prev, address }));
+            setLocStatus({ state: "success", message: "Location auto-filled" });
+          } else {
+            setLocStatus({
+              state: "error",
+              message: "Coordinates found but address not resolved. Please edit manually.",
+            });
+          }
+        } catch (err: any) {
+          setLocStatus({
+            state: "error",
+            message: err?.message || "Couldn't fetch address. Coordinates filled.",
+          });
+        } finally {
+          setLastUpdated(new Date().toLocaleString());
+        }
+      },
+      (error) => {
+        const reason =
+          error.code === error.PERMISSION_DENIED
+            ? "Permission denied. Enable location access in your browser settings."
+            : error.code === error.POSITION_UNAVAILABLE
+            ? "Location unavailable. Check GPS/network."
+            : "Timed out while fetching location.";
+        setLocStatus({ state: "error", message: reason });
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -197,6 +281,37 @@ const LocationUpdateCard: React.FC<LocationUpdateCardProps> = ({
               </div>
 
               <div className="space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                  <p className="text-sm text-textBlack font-semibold">Quick fill</p>
+                  <SecondaryButton
+                    variant="secondary"
+                    className="bg-gradient-to-r from-red-500 to-red-700 text-white px-0 py-2"
+                    onClick={handleUseCurrentLocation}
+                    aria-label="Use current location"
+                    title="Use current location"
+                    size="sm"
+                  >
+                    {locStatus.state === "loading" ? (
+                      "Fetching..."
+                    ) : (
+                      <span className="flex items-center justify-center gap-1">
+                        <FiMapPin className="w-5 h-5" />
+                        <span className="sr-only">Use Current Location</span>
+                      </span>
+                    )}
+                  </SecondaryButton>
+                </div>
+                {locStatus.state !== "idle" && (
+                  <p
+                    className={`text-xs ${
+                      locStatus.state === "error" ? "text-red-600" : "text-green-700"
+                    }`}
+                  >
+                    {locStatus.message}
+                    {lastUpdated && ` • Last updated: ${lastUpdated}`}
+                  </p>
+                )}
+
                 {/* Address + Autocomplete */}
                 <div className="w-full">
                   <div className="relative autofill-parent flex items-center w-full px-[1.1em] py-[1.25em] gap-1 rounded-3xl h-[48px] border-[0.6px] border-strokeGrey transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white">

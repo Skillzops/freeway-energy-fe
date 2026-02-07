@@ -1,6 +1,18 @@
 
 
+import { BRAND_CONFIG } from "@/config/brandConfig";
 import { useEffect, useState } from "react";
+
+const shadeWithPrimary = (hex: string, percent: number) => {
+    const num = parseInt(hex.replace("#", ""), 16);
+    const clamp = (v: number) => Math.min(255, Math.max(0, v));
+    const delta = Math.round((percent / 100) * 255);
+    const r = clamp((num >> 16) + delta);
+    const g = clamp(((num >> 8) & 0xff) + delta);
+    const b = clamp((num & 0xff) + delta);
+    const toHex = (v: number) => v.toString(16).padStart(2, "0");
+    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+};
 
 const inputBase =
     "w-full border rounded-md px-3 py-2 text-sm placeholder:text-xs placeholder:text-gray-400/80 placeholder:font-normal focus:outline-none focus:ring-1 focus:ring-gray-300";
@@ -71,6 +83,12 @@ type FiltersModalProps = {
     // Clear both local draft and applied filters
     onClear: () => void;
 };
+
+const applyButtonGradient = (() => {
+    const { brandPrimary } = BRAND_CONFIG.colors.legacy;
+    const darkerPrimary = shadeWithPrimary(brandPrimary, -20);
+    return `linear-gradient(90deg, ${brandPrimary}, ${darkerPrimary})`;
+})();
 
 const dateInput = (v?: string) => (v ? v : "");
 
@@ -458,7 +476,11 @@ export default function FiltersModal({
                     </button>
 
                     <button
-                        className="text-sm border bg-[#B75A25] text-white rounded-md px-3 py-2 hover:opacity-95"
+                        className="text-sm text-white rounded-md px-3 py-2 border border-transparent hover:opacity-95"
+                        style={{
+                            backgroundImage: applyButtonGradient,
+                            borderColor: BRAND_CONFIG.colors.legacy.brandPrimary,
+                        }}
                         onClick={() => {
                             const next = trim(local); 
                             onApply(next);            
