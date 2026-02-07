@@ -54,6 +54,9 @@ const generateListDataEntries = (data: any): ListDataType[] => {
           )}`,
     totalRemainingQuantities: product?.inventories[0]?.totalRemainingQuantities,
     productPaymentModes: product?.paymentModes,
+    installmentDuration: product?.installmentDuration,
+    installmentStartingPrice: product?.installmentStartingPrice,
+    monthlyPayment: product?.monthlyPayment,
   }));
 };
 

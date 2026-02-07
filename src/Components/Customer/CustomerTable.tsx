@@ -390,7 +390,7 @@ const CustomerTable = ({
 
         return (
           <span
-            className={`${style} flex items-center gap-0.5 w-max px-2 py-1 bg-[#F6F8FA] border-[0.4px] border-strokeGreyTwo rounded-full uppercase`}
+            className={`${style} text-[11px] flex items-center gap-0.5 w-max px-2 py-1 bg-[#F6F8FA] border-[0.4px] border-strokeGreyTwo rounded-full uppercase`}
           >
             <GoDotFill />
             {value}

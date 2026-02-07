@@ -5,13 +5,13 @@ const UserPill = ({ role }: { role: string }) => {
   return (
     <Link
       to={"/settings/profile"}
-      className="flex items-center justify-center p-1 gap-1 w-max bg-[#FEF5DA] border-[0.2px] border-[#A58730] rounded-[32px]"
+      className="flex items-center justify-center p-1 gap-1 w-max bg-[#F6F8FA] border-[0.2px] border-strokeGreyThree rounded-[32px]"
       onClick={() => {}}
     >
       <img
         src={avatar}
         alt="User Image"
-        className="w-[24px] h-[24px] border-[0.2px] border-[#A58730] rounded-full"
+        className="w-[24px] h-[24px] border-[0.2px] border-strokeGreyThree rounded-full shadow-[0_2px_6px_rgba(0,0,0,0.15)]"
       />
       <p className="px-2 py-1 bg-[#32290E] text-xs text-white font-medium rounded-full capitalize">
         {role}

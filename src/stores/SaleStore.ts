@@ -125,6 +125,9 @@ const ProductModel = types.model({
   productImage: types.string,
   productTag: types.string,
   productPaymentModes: types.string,
+  installmentDuration: types.maybe(types.number),
+  installmentStartingPrice: types.maybe(types.number),
+  monthlyPayment: types.maybe(types.number),
 });
 
 const ParamModel = types.model({
