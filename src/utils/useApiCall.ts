@@ -38,7 +38,7 @@ export const useApiCall = () => {
     params = {},
     data = {},
     headers = {},
-    successMessage = "Successful",
+    successMessage = "",
     showToast = true,
     responseType,
   }: ApiCallOptions): Promise<any> => {

@@ -104,7 +104,8 @@ const LoginPage = () => {
     return () => {
       active = false;
     };
-  }, [apiCall, isResetPasswordRoute, userId, remember_token]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isResetPasswordRoute, userId, remember_token]);
 
   const canSubmit =
     Boolean(newPassword) &&
