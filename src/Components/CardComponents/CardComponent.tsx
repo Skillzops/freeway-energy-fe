@@ -930,7 +930,11 @@ export const CardComponent = ({
             {!showDropdown ? null : <DropDown {...dropDownList} cardData={productInfo} />}
           </div>
         ) : !showDropdown ? null : (
-          <DropDown {...dropDownList} cardData={productInfo} />
+          <DropDown
+            {...dropDownList}
+            cardData={productInfo}
+            menuAlign={variant === "product-no-image" ? "left" : "right"}
+          />
         )}
       </div>
     </div>
