@@ -21,6 +21,7 @@ import useTokens from "@/hooks/useTokens";
 import { copyToClipboard, formatDateTime } from "@/utils/helpers";
 import { FiSearch } from "react-icons/fi";
 import dropdownIcon from "@/assets/table/dropdown.svg";
+import ProductsTable from "@/Components/Agents/Products/ProductsTable";
 
 
 
@@ -1561,6 +1562,9 @@ const AgentModal = ({
   const [isTaskHistoryModalOpen, setIsTaskHistoryModalOpen] = useState<boolean>(false);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [devicesRefreshToken, setDevicesRefreshToken] = useState<number>(0);
+  const [productPage, setProductPage] = useState<number>(1);
+  const [productEntriesPerPage, setProductEntriesPerPage] = useState<number>(20);
+  const [productQueryParams, setProductQueryParams] = useState<Record<string, any> | null>({});
   const { role } = useTokens();
   const roleName = role?.role?.toLowerCase() || "";
   const canAssignDevices = roleName.includes("admin") || roleName.includes("inventory");
@@ -1617,6 +1621,23 @@ const AgentModal = ({
   );
 
   const assignedDevicesCount = getAssignedDevicesCount(assignedDevicesCountData);
+
+  const {
+    data: productsCountData,
+  } = useGetRequest(
+    isOpen && agentCategory !== "INSTALLER"
+      ? `/v1/products?page=1&limit=1&agentId=${agentID}`
+      : null,
+    isOpen && agentCategory !== "INSTALLER",
+    60000
+  );
+
+  const assignedProductsCount =
+    (productsCountData?.total ??
+      productsCountData?.count ??
+      productsCountData?.pagination?.total ??
+      assignedData?.products?.length) ||
+    0;
 
   // Get dropdown items based on agent category
   const getDropdownItems = () => {
@@ -1722,6 +1743,43 @@ const AgentModal = ({
     60000
   );
 
+  const productQueryString = Object.entries(productQueryParams || {})
+    .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+    .join("&");
+
+  const {
+    data: productData,
+    isLoading: productLoading,
+    mutate: refreshProducts,
+    error: productError,
+    errorStates: productErrorStates,
+  } = useGetRequest(
+    isOpen && agentCategory !== "INSTALLER" && tabContent === "products"
+      ? `/v1/products?page=${productPage}&limit=${productEntriesPerPage}&agentId=${agentID}${
+          productQueryString ? `&${productQueryString}` : ""
+        }`
+      : null,
+    isOpen && agentCategory !== "INSTALLER" && tabContent === "products",
+    60000
+  );
+
+  const productPaginationInfo = () => {
+    const total = productData?.total || 0;
+    return {
+      total,
+      currentPage: productPage,
+      entriesPerPage: productEntriesPerPage,
+      setCurrentPage: setProductPage,
+      setEntriesPerPage: setProductEntriesPerPage,
+    };
+  };
+
+  useEffect(() => {
+    if (tabContent !== "products") return;
+    setProductQueryParams({});
+    setProductPage(1);
+  }, [tabContent, agentID]);
+
   // Define tabs based on agent category
   const getTabNames = () => {
     if (agentCategory === "INSTALLER") {
@@ -1737,7 +1795,7 @@ const AgentModal = ({
         { name: "Customer", key: "customer", count: assignedCustomersCount },
         { name: "Installers", key: "installers", count: installersCountData?.agents?.length || 0 },
         { name: "Inventory", key: "inventory", count: 0 },
-        { name: "Products", key: "products", count: assignedData?.products?.length || 0 },
+        { name: "Products", key: "products", count: assignedProductsCount },
         { name: "Devices", key: "devices", count: assignedDevicesCount },
         { name: "Transactions", key: "transactions", count: 0 },
         { name: "Stats", key: "stats", count: 0 },
@@ -1831,6 +1889,16 @@ const AgentModal = ({
                 agentID={agentID}
                 onAssignDevices={() => setIsAssignDevicesModalOpen(true)}
                 refreshToken={devicesRefreshToken}
+              />
+            ) : tabContent === "products" ? (
+              <ProductsTable
+                productData={productData}
+                isLoading={productLoading}
+                refreshTable={refreshProducts}
+                error={productError}
+                errorData={productErrorStates}
+                paginationInfo={productPaginationInfo}
+                setTableQueryParams={setProductQueryParams}
               />
             ) : tabContent === "installationHistory" ? (
               <div className="flex flex-col p-2.5 gap-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px]">
