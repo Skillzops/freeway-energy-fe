@@ -70,7 +70,7 @@ const ProductModal = ({
   refreshTable: KeyedMutator<any>;
 }) => {
   const fetchSingleProduct = useGetRequest(
-    `/v1/agents/product/${productID}`,
+    `/v1/products/${productID}`,
     false
   );
 
