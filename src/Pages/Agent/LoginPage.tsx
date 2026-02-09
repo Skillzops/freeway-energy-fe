@@ -120,7 +120,7 @@ const AgentLoginPage = () => {
     try {
       const validatedData = forgotPasswordSchema.parse(formData);
       const contact = validatedData.email.trim();
-      const isEmail = /.+@.+\\..+/.test(contact);
+      const isEmail = /.+@.+\..+/.test(contact);
       const payload = isEmail ? { email: contact } : { phone: contact };
       await apiCall({
         endpoint: "/v1/auth/forgot-password",
