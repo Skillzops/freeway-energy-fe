@@ -17,8 +17,18 @@ const loginSchema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 
+const emailOrPhoneSchema = z
+  .string()
+  .trim()
+  .refine(
+    (val) =>
+      /.+@.+\..+/.test(val) ||
+      /^\+?[0-9\s().-]{7,20}$/.test(val.replace(/\s+/g, "")),
+    { message: "Enter a valid email or phone number" }
+  );
+
 const forgotPasswordSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  email: emailOrPhoneSchema,
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -109,10 +119,13 @@ const AgentLoginPage = () => {
 
     try {
       const validatedData = forgotPasswordSchema.parse(formData);
+      const contact = validatedData.email.trim();
+      const isEmail = /.+@.+\\..+/.test(contact);
+      const payload = isEmail ? { email: contact } : { phone: contact };
       await apiCall({
         endpoint: "/v1/auth/forgot-password",
         method: "post",
-        data: validatedData,
+        data: payload,
         successMessage: "Password reset email sent!",
       });
     } catch (error: any) {
@@ -167,9 +180,9 @@ const AgentLoginPage = () => {
             <h1 className="text-[32px] text-white font-medium font-secondary">
               {isForgotPassword ? "See who forgot something" : "Welcome Back"}
             </h1>
-            <em className="text-xs text-white text-center max-w-[220px]">
+            <em className="text-xs text-white text-center max-w-[260px]">
               {isForgotPassword
-                ? "Input your email below, we will send you a link to help reset your password."
+                ? "Enter your email or phone and we'll send a reset link or code."
                 : "Sign In to Access your Workplace"}
             </em>
           </div>
@@ -182,10 +195,10 @@ const AgentLoginPage = () => {
             <Input
               type="email"
               name="email"
-              label="EMAIL"
+              label="EMAIL OR PHONE"
               value={formData.email}
               onChange={handleInputChange}
-              placeholder="Email"
+              placeholder="Email or phone number"
               required={true}
               style="max-w-[400px]"
               className="flex flex-col items-center justify-center"
