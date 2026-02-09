@@ -2,8 +2,14 @@ import { ApiErrorStatesType } from "@/utils/useApiCall";
 import React, { useState } from "react";
 import { KeyedMutator } from "swr";
 import { ErrorComponent } from "@/Pages/ErrorPage";
-import DeviceDetailModal from "./DeviceDetailModal";
 import Table, { PaginationType } from "@/Components/TableComponent/Table";
+import { Modal } from "@/Components/ModalComponent/Modal";
+import useTokens from "@/hooks/useTokens";
+import {
+  DeviceHistoryModal,
+  ReassignDevicesModal,
+  UnassignDevicesModal,
+} from "../AgentsModal";
 
 export type DeviceEntries = {
   id: string;
@@ -54,9 +60,20 @@ const DevicesTable = ({
   >;
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [deviceID, setDeviceID] = useState<string>("");
   const [queryValue, setQueryValue] = useState<string>("");
   const [isSearchQuery, setIsSearchQuery] = useState<boolean>(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState<boolean>(false);
+  const [isReassignOpen, setIsReassignOpen] = useState<boolean>(false);
+  const [isUnassignOpen, setIsUnassignOpen] = useState<boolean>(false);
+  const [unassignAction, setUnassignAction] = useState<"RETURN" | "UNASSIGN">(
+    "UNASSIGN"
+  );
+  const [actionDevice, setActionDevice] = useState<DeviceEntries | null>(null);
+  const { role, agentDetails, id } = useTokens();
+  const roleName = role?.role?.toLowerCase() || "";
+  const canModifyAssignments = roleName.includes("admin");
+  const canViewHistory = true;
+  const currentAgentId = agentDetails?.id || id || "";
 
   const filterList = [
     {
@@ -92,16 +109,17 @@ const DevicesTable = ({
       title: "ACTIONS",
       key: "actions",
       valueIsAComponent: true,
-      customValue: (_value: any, rowData: { id: string }) => (
-        <span
-          className="px-2 py-1 text-[10px] text-textBlack font-medium bg-[#F6F8FA] border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom cursor-pointer transition-all hover:bg-gold"
+      customValue: (_value: any, rowData: DeviceEntries) => (
+        <button
+          type="button"
+          className="px-3 py-1 rounded-full border border-[#E5D9B8] bg-[#FFF7E2] text-[11px] font-semibold text-[#7A5B10] hover:bg-[#FCECC6] transition-colors"
           onClick={() => {
-            setDeviceID(rowData.id);
+            setActionDevice(rowData);
             setIsOpen(true);
           }}
         >
-          View
-        </span>
+          Actions
+        </button>
       ),
     },
   ];
@@ -127,14 +145,108 @@ const DevicesTable = ({
             paginationInfo={paginationInfo}
             clearFilters={() => setTableQueryParams({})}
           />
-          {deviceID && (
-            <DeviceDetailModal
-              isOpen={isOpen}
-              setIsOpen={setIsOpen}
-              deviceID={deviceID}
-              refreshTable={refreshTable}
-            />
-          )}
+          <Modal
+            isOpen={isOpen}
+            onClose={() => {
+              setIsOpen(false);
+              setActionDevice(null);
+            }}
+            layout="center"
+            size="small"
+          >
+            <div className="flex flex-col bg-white rounded-2xl overflow-hidden" >
+              <div className="flex items-start justify-between px-4 py-3 border-b border-strokeGreyThree bg-white rounded-t-2xl">
+                <h3 className="text-sm font-semibold text-textBlack">
+                  Device Actions
+                </h3>
+                <div className="flex flex-col items-end leading-tight">
+                  <span className="text-xs font-semibold text-textDarkGrey">
+                    {actionDevice?.serialNumber || "N/A"}
+                  </span>
+                  <span className="text-[10px] text-textGrey">Serial Number</span>
+                </div>
+              </div>
+              <div className="p-4 grid grid-cols-1 gap-3">
+                {canViewHistory ? (
+                  <button
+                    type="button"
+                    className="w-full px-4 py-2 rounded-xl border border-[#E5D9B8] bg-[#FFF7E2] text-[#7A5B10] text-sm font-semibold hover:bg-[#FCECC6] transition-colors"
+                    onClick={() => {
+                      if (actionDevice?.serialNumber) {
+                        setIsHistoryOpen(true);
+                      }
+                      setIsOpen(false);
+                    }}
+                  >
+                    View History
+                  </button>
+                ) : null}
+                {canModifyAssignments ? (
+                  <>
+                    <button
+                      type="button"
+                      className="w-full px-4 py-2 rounded-xl border border-[#CFE2FF] bg-[#F1F6FF] text-[#2457B2] text-sm font-semibold hover:bg-[#E3EEFF] transition-colors"
+                      onClick={() => {
+                        setIsReassignOpen(true);
+                        setIsOpen(false);
+                      }}
+                    >
+                      Reassign
+                    </button>
+                    <button
+                      type="button"
+                      className="w-full px-4 py-2 rounded-xl border border-[#F4C7C7] bg-[#FCECEC] text-[#A32A2A] text-sm font-semibold hover:bg-[#F9DCDC] transition-colors"
+                      onClick={() => {
+                        setUnassignAction("UNASSIGN");
+                        setIsUnassignOpen(true);
+                        setIsOpen(false);
+                      }}
+                    >
+                      Unassign
+                    </button>
+                  </>
+                ) : null}
+              </div>
+            </div>
+          </Modal>
+          <DeviceHistoryModal
+            isOpen={isHistoryOpen}
+            onClose={() => setIsHistoryOpen(false)}
+            deviceId={actionDevice?.id || null}
+          />
+          <ReassignDevicesModal
+            isOpen={isReassignOpen}
+            onClose={() => setIsReassignOpen(false)}
+            currentAgentId={currentAgentId}
+            selectedDevices={
+              actionDevice?.serialNumber
+                ? [{ serialNumber: actionDevice.serialNumber }]
+                : []
+            }
+            onSuccess={async () => {
+              setIsReassignOpen(false);
+              await refreshTable();
+            }}
+          />
+          <UnassignDevicesModal
+            isOpen={isUnassignOpen}
+            onClose={() => setIsUnassignOpen(false)}
+            actionType={unassignAction}
+            selectedDevices={
+              actionDevice?.serialNumber
+                ? [
+                    {
+                      serialNumber: actionDevice.serialNumber,
+                      deviceId: actionDevice.id,
+                    },
+                  ]
+                : []
+            }
+            onSuccess={async () => {
+              setIsUnassignOpen(false);
+              await refreshTable();
+            }}
+          />
         </div>
       ) : (
         <ErrorComponent

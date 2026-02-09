@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { z } from "zod";
-import closeIcon from "../../assets/close.svg";
+// import closeIcon from "../../assets/close.svg";
 import curvedlines from "@/assets/sales/curvedlines.png";
 import redcustomerbag from "@/assets/customers/redcustomerbag.svg";
 import LocationSuccessCard from "./LocationSuccessCard";
@@ -8,7 +8,7 @@ import { FiMapPin } from "react-icons/fi";
 
 // import React, { useState, useEffect, useRef, useMemo } from 'react';
 // import { z } from "zod";
-// import closeIcon from '@/assets/close.svg';
+import closeIcon from '@/assets/close.svg';
 // import curvedlines from "@/assets/sales/curvedlines.png";
 // import redcustomerbag from "@/assets/customers/redcustomerbag.svg";
 // import LocationSuccessCard from "./LocationSuccessCard";

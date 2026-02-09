@@ -7,7 +7,7 @@ export type ModalType = {
   onClose: () => void;
   children: React.ReactNode;
   size?: "small" | "medium" | "large";
-  layout?: "right" | "default";
+  layout?: "right" | "default" | "center";
   bodyStyle?: string;
   headerClass?: string;
   leftHeaderContainerClass?: string;
@@ -78,28 +78,30 @@ export const Modal = ({
   // Conditional layout styles
   const layoutClasses = clsx(
     layout === "right" &&
-      "h-[100vh] mt-2 mr-1.5 bg-white shadow-lg transition-transform transform rounded-md",
+      "relative z-50 h-[100vh] mt-2 mr-1.5 bg-white shadow-lg transition-transform transform rounded-md",
+    layout === "center" &&
+      "relative z-50 bg-white shadow-lg rounded-2xl transition-transform transform",
     sizeClasses[size],
     {
       "animate-slide-out-right": isClosing,
       "animate-slide-in-right": !isClosing && layout === "right",
       "translate-x-full": !isClosing && layout === "right",
-      "-translate-y-full mt-2": layout !== "right",
+      "-translate-y-full mt-2": layout === "default",
     }
   );
 
   const wrapperClasses = clsx(
     layout === "right"
       ? "fixed inset-0 z-50 flex items-center justify-end"
-      : "relative inline-block"
+      : layout === "center"
+        ? "fixed inset-0 z-50 flex items-center justify-center"
+        : "relative inline-block"
   );
 
   return (
     <div className={wrapperClasses}>
       <div
-        className={`fixed inset-0 ${
-          layout === "default" ? "z-40 rounded-md" : ""
-        } transition-opacity bg-black opacity-50`}
+        className="fixed inset-0 z-40 transition-opacity bg-black opacity-50"
         onClick={handleClose}
         aria-hidden="true"
       ></div>
@@ -142,6 +144,10 @@ export const Modal = ({
           <section className={`${bodyStyle} h-full overflow-auto`}>
             {children}
           </section>
+        </div>
+      ) : layout === "center" ? (
+        <div className={layoutClasses} role="dialog" aria-modal="true">
+          {children}
         </div>
       ) : (
         <section className={`${bodyStyle} h-full overflow-auto`}>
