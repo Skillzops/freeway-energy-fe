@@ -60,15 +60,15 @@ const TabComponent: React.FC<TabComponentProps> = ({
           onClick={() => handleTabClick(tab)}
         >
           {tab.name}
-          {tab.count !== null && (
+          {tab.count !== null && tab.count !== undefined && (
             <span
               className={`flex items-center justify-center max-w-max px-1 border-[0.2px] text-xs rounded-full transition-all ${
                 activeTab?.name === tab.name
-                  ? "bg-white/90 text-textDarkGrey border-white/70"
-                  : "bg-[#EAEEF2] text-textDarkGrey border-strokeGrey group-hover:bg-[#FEF5DA] group-hover:text-[#32290E] group-hover:border-[#A58730]"
+                  ? "bg-white text-[#1F1F1F] border-white/70"
+                  : "bg-[#EAEEF2] text-[#1F1F1F] border-strokeGrey group-hover:bg-[#FEF5DA] group-hover:text-[#32290E] group-hover:border-[#A58730]"
               }`}
             >
-              {tab.count && formatNumberWithSuffix(tab.count)}
+              {formatNumberWithSuffix(tab.count)}
             </span>
           )}
         </div>

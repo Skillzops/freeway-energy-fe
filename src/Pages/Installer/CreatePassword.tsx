@@ -18,11 +18,30 @@ const LoginPage = () => {
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const [formError, setFormError] = useState<string>("");
+  const [resetStatus, setResetStatus] = useState<"idle" | "verifying" | "valid" | "invalid">("idle");
+  const [resetMessage, setResetMessage] = useState<string>("");
 
   const isResetPasswordRoute = location.pathname.startsWith("/reset-password");
 
   const handleCreatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError("");
+    setResetMessage("");
+
+    if (!newPassword || !confirmPassword) {
+      setFormError("Please enter and confirm your password.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setFormError("Passwords do not match.");
+      return;
+    }
+    if (isResetPasswordRoute && resetStatus !== "valid") {
+      setFormError(resetMessage || "Reset link is invalid or expired.");
+      return;
+    }
+
     setLoading(true);
 
     const resetPayload = {
@@ -51,16 +70,47 @@ const LoginPage = () => {
       });
       navigate("/");
     } catch (error) {
-      console.error("Error:", error);
+      setFormError("Unable to update password. Please try again.");
     }
     setLoading(false);
   };
 
   useEffect(() => {
-    if (userId || remember_token) {
-      // User ID or token changed - no logging for security
+    if (!isResetPasswordRoute) return;
+    if (!userId || !remember_token) {
+      setResetStatus("invalid");
+      setResetMessage("Reset link is invalid or incomplete.");
+      return;
     }
-  }, [userId, remember_token]);
+    let active = true;
+    setResetStatus("verifying");
+    apiCall({
+      endpoint: `/v1/auth/verify-reset-token/${userId}/${remember_token}`,
+      method: "post",
+    })
+      .then(() => {
+        if (active) {
+          setResetStatus("valid");
+        }
+      })
+      .catch((error: any) => {
+        if (active) {
+          const message =
+            error?.response?.data?.message || "Reset link is invalid or expired.";
+          setResetStatus("invalid");
+          setResetMessage(message);
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, [apiCall, isResetPasswordRoute, userId, remember_token]);
+
+  const canSubmit =
+    Boolean(newPassword) &&
+    Boolean(confirmPassword) &&
+    newPassword === confirmPassword &&
+    (!isResetPasswordRoute || resetStatus === "valid");
 
   return (
     <main className="relative flex flex-col items-center justify-center gap-[60px] px-4 py-16 min-h-screen">
@@ -92,7 +142,10 @@ const LoginPage = () => {
             name="newPassword"
             label="NEW PASSWORD"
             value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
+            onChange={(e) => {
+              setNewPassword(e.target.value);
+              setFormError("");
+            }}
             placeholder="New Password"
             required={true}
             errorMessage=""
@@ -114,7 +167,10 @@ const LoginPage = () => {
             name="confirmPassword"
             label="CONFIRM PASSWORD"
             value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
+            onChange={(e) => {
+              setConfirmPassword(e.target.value);
+              setFormError("");
+            }}
             placeholder="Confirm New Password"
             required={true}
             errorMessage=""
@@ -131,12 +187,20 @@ const LoginPage = () => {
               />
             }
           />
+          {(formError || resetMessage) && (
+            <p className="mt-3 text-xs text-errorTwo text-center">
+              {formError || resetMessage}
+            </p>
+          )}
+          {isResetPasswordRoute && resetStatus === "verifying" && (
+            <p className="mt-2 text-xs text-textGrey text-center">Verifying reset link...</p>
+          )}
           <div className="flex flex-col items-center justify-center gap-8 pt-8">
             <ProceedButton
               type="submit"
               loading={loading}
-              variant={newPassword || confirmPassword ? "gradient" : "gray"}
-              disabled={false}
+              variant={canSubmit ? "gradient" : "gray"}
+              disabled={!canSubmit || loading}
             />
           </div>
         </form>

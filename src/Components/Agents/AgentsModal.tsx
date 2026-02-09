@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Modal } from "../ModalComponent/Modal";
 import TabComponent from "../TabComponent/TabComponent";
 import { DropDown } from "../DropDownComponent/DropDown";
@@ -19,6 +19,8 @@ import CommissionsTab from "./CommissionsTab";
 import AssignDevicesModal from "./AssignDevicesModal";
 import useTokens from "@/hooks/useTokens";
 import { copyToClipboard, formatDateTime } from "@/utils/helpers";
+import { FiSearch } from "react-icons/fi";
+import dropdownIcon from "@/assets/table/dropdown.svg";
 
 
 
@@ -272,7 +274,7 @@ const AssignedDevicesTable = ({
   const [dateFrom, setDateFrom] = useState<string>("");
   const [dateTo, setDateTo] = useState<string>("");
   const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
-  const [historySerial, setHistorySerial] = useState<string | null>(null);
+  const [historyDeviceId, setHistoryDeviceId] = useState<string | null>(null);
   const [isHistoryOpen, setIsHistoryOpen] = useState<boolean>(false);
   const [isReassignOpen, setIsReassignOpen] = useState<boolean>(false);
   const [isUnassignOpen, setIsUnassignOpen] = useState<boolean>(false);
@@ -293,7 +295,7 @@ const AssignedDevicesTable = ({
     mutate: refreshDevices,
   } = useGetRequest(
     agentID
-      ? `/v1/devices/assignments/agent/${agentID}?page=${currentPage}&limit=${entriesPerPage}`
+      ? `/v1/devices/assignments/agent/${agentID}/devices?page=${currentPage}&limit=${entriesPerPage}`
       : null,
     !!agentID,
     60000
@@ -389,10 +391,10 @@ const AssignedDevicesTable = ({
     }
   };
 
-  const openHistory = (serial: string) => {
-    if (!serial || !canViewHistory) return;
-    console.info("Device history serial:", serial);
-    setHistorySerial(serial);
+  const openHistory = (deviceId: string | null | undefined) => {
+    if (!deviceId || !canViewHistory) return;
+    console.info("Device history deviceId:", deviceId);
+    setHistoryDeviceId(deviceId);
     setIsHistoryOpen(true);
   };
 
@@ -437,7 +439,7 @@ const AssignedDevicesTable = ({
                 <button
                   type="button"
                   className="text-xs text-[#7A5B10] font-semibold"
-                  onClick={() => openHistory(selectedRows[0]?.serialNumber)}
+                  onClick={() => openHistory(selectedRows[0]?.deviceId)}
                   disabled={selectionCount !== 1}
                 >
                   View history
@@ -593,9 +595,9 @@ const AssignedDevicesTable = ({
         isOpen={isHistoryOpen}
         onClose={() => {
           setIsHistoryOpen(false);
-          setHistorySerial(null);
+          setHistoryDeviceId(null);
         }}
-        serialNumber={historySerial}
+        deviceId={historyDeviceId}
       />
       <ReassignDevicesModal
         isOpen={isReassignOpen}
@@ -628,19 +630,19 @@ const AssignedDevicesTable = ({
         layout="center"
         size="small"
       >
-        <div className="flex flex-col bg-white">
+        <div className="flex flex-col bg-white rounded">
           <div className="flex items-center justify-between px-4 py-3 border-b border-strokeGreyThree">
             <h3 className="text-sm font-semibold text-textBlack">Device Actions</h3>
             <span className="text-xs text-textGrey">{actionDevice?.serialNumber || "N/A"}</span>
           </div>
-          <div className="p-4 grid grid-cols-1 gap-3">
+          <div className="p-4 grid grid-cols-1 gap-3 mt-3">
             {canViewHistory ? (
               <button
                 type="button"
                 className="w-full px-4 py-2 rounded-xl border border-[#E5D9B8] bg-[#FFF7E2] text-[#7A5B10] text-sm font-semibold hover:bg-[#FCECC6] transition-colors"
                 onClick={() => {
-                  if (actionDevice?.serialNumber) {
-                    openHistory(actionDevice.serialNumber);
+                  if (actionDevice?.deviceId) {
+                    openHistory(actionDevice.deviceId);
                   }
                   setIsActionMenuOpen(false);
                 }}
@@ -684,14 +686,14 @@ const AssignedDevicesTable = ({
   );
 };
 
-const DeviceHistoryModal = ({
+export const DeviceHistoryModal = ({
   isOpen,
   onClose,
-  serialNumber,
+  deviceId,
 }: {
   isOpen: boolean;
   onClose: () => void;
-  serialNumber: string | null;
+  deviceId: string | null;
 }) => {
   const {
     data: historyData,
@@ -700,7 +702,7 @@ const DeviceHistoryModal = ({
     errorStates,
     mutate: refreshHistory,
   } = useGetRequest(
-    serialNumber ? `/v1/devices/assignments/history/${serialNumber}` : null,
+    deviceId ? `/v1/devices/assignments/history/${deviceId}` : null,
     isOpen,
     60000
   );
@@ -784,7 +786,7 @@ const DeviceHistoryModal = ({
   );
 };
 
-const ReassignDevicesModal = ({
+export const ReassignDevicesModal = ({
   isOpen,
   onClose,
   currentAgentId,
@@ -799,17 +801,22 @@ const ReassignDevicesModal = ({
   }[];
   onSuccess: () => void;
 }) => {
+  const MIN_AGENT_SEARCH_CHARS = 3;
+  const AGENT_SEARCH_DEBOUNCE_MS = 350;
   const { apiCall } = useApiCall();
-  const [search, setSearch] = useState<string>("");
-  const [debouncedSearch, setDebouncedSearch] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [entriesPerPage] = useState<number>(20);
+  const [entriesPerPage] = useState<number>(1000);
   const [targetAgentId, setTargetAgentId] = useState<string>("");
   const [reason, setReason] = useState<string>("TRANSFER");
   const [customReason, setCustomReason] = useState<string>("");
   const [note, setNote] = useState<string>("");
   const [mode, setMode] = useState<"ATOMIC" | "PARTIAL">("PARTIAL");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [isAgentDropdownOpen, setIsAgentDropdownOpen] = useState<boolean>(false);
+  const [agentSearchTerm, setAgentSearchTerm] = useState<string>("");
+  const [debouncedAgentSearchTerm, setDebouncedAgentSearchTerm] = useState<string>("");
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const [submitResult, setSubmitResult] = useState<{
     batchId?: string | null;
     successes: { serial: string }[];
@@ -824,25 +831,57 @@ const ReassignDevicesModal = ({
       setNote("");
       setMode("PARTIAL");
       setSubmitResult(null);
-      setSearch("");
-      setDebouncedSearch("");
       setCurrentPage(1);
+      setIsAgentDropdownOpen(false);
+      setAgentSearchTerm("");
+      setDebouncedAgentSearchTerm("");
     }
   }, [isOpen]);
 
   useEffect(() => {
-    const t = setTimeout(() => setDebouncedSearch(search.trim()), 350);
+    const t = setTimeout(
+      () => setDebouncedAgentSearchTerm(agentSearchTerm.trim()),
+      AGENT_SEARCH_DEBOUNCE_MS
+    );
     return () => clearTimeout(t);
-  }, [search]);
+  }, [agentSearchTerm]);
 
-  const effectiveSearch = debouncedSearch.length >= 3 ? debouncedSearch : "";
+  useEffect(() => {
+    const handleClickOutside = (event: Event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsAgentDropdownOpen(false);
+        setAgentSearchTerm("");
+      }
+    };
+
+    if (isAgentDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside as EventListener);
+      setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 100);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside as EventListener);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside as EventListener);
+    };
+  }, [isAgentDropdownOpen]);
+
+  const effectiveSearch =
+    debouncedAgentSearchTerm.length >= MIN_AGENT_SEARCH_CHARS
+      ? debouncedAgentSearchTerm
+      : "";
+
   useEffect(() => {
     setCurrentPage(1);
-  }, [effectiveSearch, entriesPerPage]);
+  }, [effectiveSearch]);
 
   const agentsUrl = useMemo(() => {
     const base = `/v1/agents?page=${currentPage}&limit=${entriesPerPage}`;
-    return effectiveSearch ? `${base}&search=${encodeURIComponent(effectiveSearch)}` : base;
+    return effectiveSearch
+      ? `${base}&search=${encodeURIComponent(effectiveSearch)}`
+      : base;
   }, [currentPage, entriesPerPage, effectiveSearch]);
 
   const { data: agentsData, isLoading, error, errorStates, mutate: refreshAgents } = useGetRequest(
@@ -852,6 +891,26 @@ const ReassignDevicesModal = ({
   );
 
   const agents = (agentsData?.agents ?? agentsData?.data ?? []).filter((agent: any) => agent?.id !== currentAgentId);
+  const filteredAgents = agents.filter((agent: any) => {
+    if (effectiveSearch) return true;
+    const name = [agent?.user?.firstname, agent?.user?.lastname].filter(Boolean).join(" ");
+    const email = agent?.user?.email || "";
+    const phone = agent?.user?.phone || "";
+    const searchValue = agentSearchTerm.trim().toLowerCase();
+    if (!searchValue) return true;
+    return (
+      name.toLowerCase().includes(searchValue) ||
+      email.toLowerCase().includes(searchValue) ||
+      phone.toLowerCase().includes(searchValue)
+    );
+  });
+
+  const selectedAgentLabel = (() => {
+    const selected = agents.find((agent: any) => agent.id === targetAgentId);
+    if (!selected) return "";
+    const name = [selected?.user?.firstname, selected?.user?.lastname].filter(Boolean).join(" ");
+    return name || selected?.user?.email || "Unknown Agent";
+  })();
   const serials = selectedDevices.map((device) => device.serialNumber).filter(Boolean);
 
   const reasonValue = reason === "OTHER" ? customReason : reason;
@@ -959,37 +1018,70 @@ const ReassignDevicesModal = ({
                 {serials.length} device{serials.length !== 1 ? "s" : ""} selected
               </p>
             </div>
-            <div className="mb-3">
-              <label className="block text-xs text-textGrey mb-1 font-medium">Search agents</label>
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Type at least 3 letters"
-                className="w-full h-10 rounded-xl border border-strokeGreyTwo px-3 text-sm outline-none focus:ring-2 focus:ring-[#A58730]/30"
-              />
-            </div>
-            <div className="max-h-[220px] overflow-y-auto border border-strokeGreyTwo rounded-lg">
-              {agents.map((agent: any) => {
-                const name = [agent?.user?.firstname, agent?.user?.lastname].filter(Boolean).join(" ");
-                return (
-                  <button
-                    type="button"
-                    key={agent.id}
-                    onClick={() => setTargetAgentId(agent.id)}
-                    className={`w-full flex items-center justify-between px-3 py-2 text-sm border-b border-strokeGreyTwo ${
-                      targetAgentId === agent.id ? "bg-[#FEF5DA]" : "hover:bg-gray-50"
-                    }`}
-                  >
-                    <span className="text-textBlack">{name || agent?.user?.email || "Unknown Agent"}</span>
-                    {targetAgentId === agent.id ? (
-                      <span className="text-xs text-[#A58730] font-semibold">Selected</span>
+            <div className="mb-4">
+              <label className="block text-xs text-textGrey mb-1 font-medium">Select agent</label>
+              <div ref={dropdownRef} className="relative w-full">
+                <button
+                  type="button"
+                  onClick={() => setIsAgentDropdownOpen((prev) => !prev)}
+                  className="w-full h-11 rounded-full border border-strokeGreyTwo px-4 pr-10 text-sm outline-none bg-white flex items-center justify-between"
+                >
+                  <span className={`${selectedAgentLabel ? "text-textBlack" : "text-textGrey italic"}`}>
+                    {selectedAgentLabel || "Select agent"}
+                  </span>
+                  <span className="text-textGrey">
+                    <img src={dropdownIcon} alt="" className="w-4 h-4" />
+                  </span>
+                </button>
+                {isAgentDropdownOpen ? (
+                  <div className="absolute mt-2 w-full bg-white border border-strokeGreyTwo rounded-2xl shadow-lg z-50 p-3">
+                    <div className="relative mb-2">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <FiSearch className="h-4 w-4 text-gray-400" />
+                      </div>
+                      <input
+                        ref={searchInputRef}
+                        type="text"
+                        placeholder="Search agents"
+                        value={agentSearchTerm}
+                        onChange={(e) => setAgentSearchTerm(e.target.value)}
+                        className="block w-full h-9 pl-9 pr-3 border border-strokeGreyTwo rounded-full text-sm outline-none"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                    {agentSearchTerm.trim().length > 0 &&
+                    agentSearchTerm.trim().length < MIN_AGENT_SEARCH_CHARS ? (
+                      <p className="mt-1 text-[11px] text-textGrey px-1">
+                        Keep typing… search starts after {MIN_AGENT_SEARCH_CHARS} letters.
+                      </p>
                     ) : null}
-                  </button>
-                );
-              })}
-              {agents.length === 0 ? (
-                <div className="px-3 py-6 text-center text-xs text-textGrey">No agents found.</div>
-              ) : null}
+                    <div className="max-h-48 overflow-y-auto">
+                      {filteredAgents.length > 0 ? (
+                        filteredAgents.map((agent: any) => {
+                          const name = [agent?.user?.firstname, agent?.user?.lastname].filter(Boolean).join(" ");
+                          const label = name || agent?.user?.email || "Unknown Agent";
+                          return (
+                            <button
+                              type="button"
+                              key={agent.id}
+                              onClick={() => {
+                                setTargetAgentId(agent.id);
+                                setIsAgentDropdownOpen(false);
+                                setAgentSearchTerm("");
+                              }}
+                              className="w-full text-left px-2 py-2 text-sm text-textDarkGrey hover:bg-[#F6F8FA] rounded-lg"
+                            >
+                              {label}
+                            </button>
+                          );
+                        })
+                      ) : (
+                        <div className="text-xs text-textGrey px-2 py-3 text-center">No agents found</div>
+                      )}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
             </div>
 
             <div className="mt-4">
@@ -1112,7 +1204,7 @@ const ReassignDevicesModal = ({
   );
 };
 
-const UnassignDevicesModal = ({
+export const UnassignDevicesModal = ({
   isOpen,
   onClose,
   actionType,
@@ -1518,7 +1610,7 @@ const AgentModal = ({
     mutate: refreshAssignedDevicesCount,
   } = useGetRequest(
     agentCategory !== "INSTALLER" && isOpen
-      ? `/v1/devices/assignments/agent/${agentID}?page=1&limit=1`
+      ? `/v1/devices/assignments/agent/${agentID}/devices?page=1&limit=1`
       : null,
     agentCategory !== "INSTALLER" && isOpen,
     60000
