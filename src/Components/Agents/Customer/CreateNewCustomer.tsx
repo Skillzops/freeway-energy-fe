@@ -20,6 +20,20 @@ interface CreatNewCustomerProps {
   allCustomerRefresh: KeyedMutator<any>;
 }
 
+const MAX_UPLOAD_MB = 1;
+
+const validateFileSize = (file: File | undefined, ctx: z.RefinementCtx, field: string) => {
+  if (!file) return;
+  const maxBytes = MAX_UPLOAD_MB * 1024 * 1024;
+  if (file.size > maxBytes) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `${field} must be <= ${MAX_UPLOAD_MB}MB`,
+      path: [field],
+    });
+  }
+};
+
 const customerSchema = z.object({
   firstname: z.string().min(1, "First name is required"),
   lastname: z.string().min(1, "Last name is required"),
@@ -85,9 +99,9 @@ const customerSchema = z.object({
   idType: z.string().optional(),
   idNumber: z.string().optional(),
   type: z.string().optional(),
-  passportPhoto: z.instanceof(File).optional(),
-  idImage: z.instanceof(File).optional(),
-  contractFormImage: z.instanceof(File).optional(),
+  passportPhoto: z.instanceof(File).optional().superRefine((file, ctx) => validateFileSize(file, ctx, "passportPhoto")),
+  idImage: z.instanceof(File).optional().superRefine((file, ctx) => validateFileSize(file, ctx, "idImage")),
+  contractFormImage: z.instanceof(File).optional().superRefine((file, ctx) => validateFileSize(file, ctx, "contractFormImage")),
 });
 
 type CustomerFormData = z.infer<typeof customerSchema>;

@@ -27,12 +27,14 @@ export const UploadPhotoInput: React.FC<UploadPhotoInputProps> = ({
     const file = event.target.files?.[0];
     if (!file) return;
 
+    const maxBytes = (maxSizeInMB ?? 1) * 1024 * 1024;
     setLocalError("");
 
     // Check file size in MB before accepting
-    if (file.size > maxSizeInMB * 1024 * 1024) {
+    if (file.size > maxBytes) {
       setLocalError(`File size must be less than ${maxSizeInMB}MB`);
       event.target.value = ""; // reset the input so the same file can be re-selected
+      onChange(null); // clear parent state so filename is not shown
       return;
     }
 
@@ -44,6 +46,7 @@ export const UploadPhotoInput: React.FC<UploadPhotoInputProps> = ({
         `File type not supported. Please use files with extensions: ${allowedExtensions.join(", ")}`
       );
       event.target.value = "";
+      onChange(null);
       return;
     }
 
