@@ -313,11 +313,11 @@ const handleApiError = (
   if (axios.isAxiosError(error)) {
     if (error.response) {
       const status = error.response.status;
-
+      
       switch (status) {
         case 400:
           if (!errorStates.find((e) => e.endpoint === endpoint)?.toastShown) {
-            toast.error("Bad Request: Please check your submission.");
+            toast.error(error?.response?.data?.message|| error?.message || "Bad Request: Please check your submission.");
             setToastShown(endpoint);
           }
           setErrorState(true);

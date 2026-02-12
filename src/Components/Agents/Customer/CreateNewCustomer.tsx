@@ -70,11 +70,13 @@ const customerSchema = z.object({
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "Longitude must be a number",
+          path: ["longitude"],
         });
       } else if (num < -180 || num > 180) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "Longitude must be between -180 and 180",
+          path: ["longitude"],
         });
       }
     }),
@@ -88,11 +90,13 @@ const customerSchema = z.object({
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "Latitude must be a number",
+          path: ["latitude"],
         });
       } else if (num < -90 || num > 90) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "Latitude must be between -90 and 90",
+          path: ["latitude"],
         });
       }
     }),
@@ -138,11 +142,38 @@ const CreateNewCustomer = ({
   const [formData, setFormData] = useState<CustomerFormData>(defaultFormData);
   const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([]);
   const [apiError, setApiError] = useState<string | Record<string, string[]>>("");
+  const [uploadErrors, setUploadErrors] = useState<Record<string, string | undefined>>({});
+
+  const setCustomFieldError = (name: string, message: string) => {
+    setFormErrors((prev) => [
+      ...prev.filter((error) => error.path[0] !== name),
+      { code: z.ZodIssueCode.custom, message, path: [name] } as z.ZodIssue,
+    ]);
+  };
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
+
+    // Restrict latitude/longitude to decimals only
+    if (name === "latitude" || name === "longitude") {
+      const cleaned = value.replace(/[^\d.\-]/g, "");
+      const decimalPattern = /^-?\d*(\.\d*)?$/;
+
+      if (!decimalPattern.test(cleaned)) {
+        setCustomFieldError(name, "Only decimal numbers are allowed");
+      } else {
+        resetFormErrors(name);
+      }
+
+      setFormData((prev) => ({
+        ...prev,
+        [name]: cleaned,
+      }));
+      return;
+    }
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -182,6 +213,13 @@ const CreateNewCustomer = ({
     resetFormErrors(name);
   };
 
+  const setUploadError = (field: "passportPhoto" | "idImage" | "contractFormImage", msg?: string) => {
+    setUploadErrors((prev) => ({ ...prev, [field]: msg }));
+    if (!msg) {
+      resetFormErrors(field);
+    }
+  };
+
   const resetFormErrors = (name: string) => {
     // Clear the error for this field when the user starts typing
     setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
@@ -191,6 +229,13 @@ const CreateNewCustomer = ({
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
+
+    // prevent submit when any upload validation error exists
+    const activeUploadErrors = Object.values(uploadErrors).filter(Boolean);
+    if (activeUploadErrors.length > 0) {
+      setLoading(false);
+      return;
+    }
 
     try {
       const validatedData = customerSchema.parse(formData);
@@ -231,9 +276,12 @@ const CreateNewCustomer = ({
   };
 
   const isFormFilled = customerSchema.safeParse(formData).success;
+  const hasUploadErrors = Object.values(uploadErrors).some(Boolean);
+
+  console.log(isFormFilled, 'hasUploadErrors__')
 
   const getFieldError = (fieldName: string) => {
-    return formErrors.find((error) => error.path[0] === fieldName)?.message;
+    return formErrors.find((error) => error.path[0] === fieldName)?.message || uploadErrors[fieldName];
   };
 
   return (
@@ -267,6 +315,7 @@ const CreateNewCustomer = ({
             label="Photograph"
             value={formData.passportPhoto}
             onChange={handlePhotoChange}
+            onValidationError={(msg) => setUploadError("passportPhoto", msg)}
             errorMessage={getFieldError("passportPhoto")}
             required={false}
             maxSizeInMB={1}
@@ -375,6 +424,7 @@ const CreateNewCustomer = ({
             label="ID Image"
             value={formData.idImage}
             onChange={handleIdImageChange}
+            onValidationError={(msg) => setUploadError("idImage", msg)}
             errorMessage={getFieldError("idImage")}
             required={false}
             maxSizeInMB={1}
@@ -383,6 +433,7 @@ const CreateNewCustomer = ({
             label="Contract Form Image"
             value={formData.contractFormImage}
             onChange={handleContractFormImageChange}
+            onValidationError={(msg) => setUploadError("contractFormImage", msg)}
             errorMessage={getFieldError("contractFormImage")}
             required={false}
             maxSizeInMB={1}
@@ -443,8 +494,8 @@ const CreateNewCustomer = ({
           <ProceedButton
             type="submit"
             loading={loading}
-            variant={isFormFilled ? "gradient" : "gray"}
-            disabled={!isFormFilled}
+            variant={isFormFilled && !hasUploadErrors ? "gradient" : "gray"}
+            disabled={!isFormFilled || hasUploadErrors}
           />
         </div>
       </form>
