@@ -46,8 +46,42 @@ const customerSchema = z.object({
   lga: z.string().min(1, "LGA is required"),
   state: z.string().min(1, "State is required"),
   location: z.string().trim().min(1, "Location is required"),
-  longitude: z.string().optional(),
-  latitude: z.string().optional(),
+  longitude: z
+    .string()
+    .optional()
+    .superRefine((val, ctx) => {
+      if (!val) return;
+      const num = Number(val);
+      if (Number.isNaN(num)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Longitude must be a number",
+        });
+      } else if (num < -180 || num > 180) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Longitude must be between -180 and 180",
+        });
+      }
+    }),
+  latitude: z
+    .string()
+    .optional()
+    .superRefine((val, ctx) => {
+      if (!val) return;
+      const num = Number(val);
+      if (Number.isNaN(num)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Latitude must be a number",
+        });
+      } else if (num < -90 || num > 90) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Latitude must be between -90 and 90",
+        });
+      }
+    }),
   idType: z.string().optional(),
   idNumber: z.string().optional(),
   type: z.string().optional(),
@@ -221,7 +255,7 @@ const CreateNewCustomer = ({
             onChange={handlePhotoChange}
             errorMessage={getFieldError("passportPhoto")}
             required={false}
-            maxSizeInMB={2}
+            maxSizeInMB={1}
           />
           <Input
             type="text"
@@ -329,7 +363,7 @@ const CreateNewCustomer = ({
             onChange={handleIdImageChange}
             errorMessage={getFieldError("idImage")}
             required={false}
-            maxSizeInMB={2}
+            maxSizeInMB={1}
           />
           <UploadPhotoInput
             label="Contract Form Image"
@@ -337,7 +371,7 @@ const CreateNewCustomer = ({
             onChange={handleContractFormImageChange}
             errorMessage={getFieldError("contractFormImage")}
             required={false}
-            maxSizeInMB={2}
+            maxSizeInMB={1}
           />
           <Input
             type="text"

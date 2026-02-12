@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { LuImagePlus } from "react-icons/lu";
 
 interface UploadPhotoInputProps {
@@ -18,28 +18,35 @@ export const UploadPhotoInput: React.FC<UploadPhotoInputProps> = ({
   errorMessage,
   required = false,
   accept = ".jpeg,.jpg,.png,.svg",
-  maxSizeInMB = 5,
+  maxSizeInMB = 1,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [localError, setLocalError] = useState<string>("");
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    
-    // Check file size
+
+    setLocalError("");
+
+    // Check file size in MB before accepting
     if (file.size > maxSizeInMB * 1024 * 1024) {
-      alert(`File size must be less than ${maxSizeInMB}MB`);
+      setLocalError(`File size must be less than ${maxSizeInMB}MB`);
+      event.target.value = ""; // reset the input so the same file can be re-selected
       return;
     }
-    
+
     // Check file extension to match backend validation
-    const allowedExtensions = ['jpeg', 'jpg', 'png', 'svg'];
-    const fileExtension = file.name.toLowerCase().split('.').pop();
+    const allowedExtensions = ["jpeg", "jpg", "png", "svg"];
+    const fileExtension = file.name.toLowerCase().split(".").pop();
     if (!fileExtension || !allowedExtensions.includes(fileExtension)) {
-      alert(`File type not supported. Please use files with extensions: ${allowedExtensions.join(', ')}`);
+      setLocalError(
+        `File type not supported. Please use files with extensions: ${allowedExtensions.join(", ")}`
+      );
+      event.target.value = "";
       return;
     }
-    
+
     onChange(file);
   };
 
@@ -66,9 +73,9 @@ export const UploadPhotoInput: React.FC<UploadPhotoInputProps> = ({
           onChange={handleFileChange}
         />
       </div>
-      {errorMessage && (
-        <p className="text-xs text-red-500 mt-1">{errorMessage}</p>
+      {(errorMessage || localError) && (
+        <p className="text-xs text-red-500 mt-1">{errorMessage || localError}</p>
       )}
     </div>
   );
-}; 
+};
