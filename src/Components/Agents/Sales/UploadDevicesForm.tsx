@@ -249,7 +249,9 @@ const UploadDevicesForm = observer(
 
     revalidateStore(SaleStore);
 
-    const filteredAvailableDevices = (data?.devices || []).filter(
+    const devicesSource = filteredDevices ?? data?.devices ?? [];
+
+    const filteredAvailableDevices = devicesSource.filter(
       (device: DeviceResponse) => {
         const allLinkedDevices: string[] =
           SaleStore.getAllTentativeDevices(currentProductId);
