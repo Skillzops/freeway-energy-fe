@@ -132,6 +132,48 @@ const defaultFormData: CustomerFormData = {
   contractFormImage: undefined,
 };
 
+const safeStringify = (value: unknown): string => {
+  const seen = new WeakSet<object>();
+  return JSON.stringify(
+    value,
+    (_key, val) => {
+      if (typeof val === "object" && val !== null) {
+        if (seen.has(val)) return "[Circular]";
+        seen.add(val);
+      }
+      return val;
+    },
+    2
+  );
+};
+
+const formatApiError = (error: any): string => {
+  try {
+    if (error?.response) {
+      return safeStringify({
+        message: error?.message,
+        status: error?.response?.status,
+        statusText: error?.response?.statusText,
+        data: error?.response?.data,
+        endpoint: error?.config?.url,
+        method: error?.config?.method,
+      });
+    }
+
+    if (error instanceof Error) {
+      return safeStringify({
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+      });
+    }
+
+    return safeStringify(error);
+  } catch {
+    return "Customer_ Creation Failed: Unable to stringify error object";
+  }
+};
+
 const CreateNewCustomer = ({
   isOpen,
   setIsOpen,
@@ -265,10 +307,7 @@ const CreateNewCustomer = ({
       if (error instanceof z.ZodError) {
         setFormErrors(error.issues);
       } else {
-        const message =
-          error?.response?.data?.message ||
-          "Customer Creation Failed: Internal Server Error";
-        setApiError(message);
+        setApiError(formatApiError(error));
       }
     } finally {
       setLoading(false);
