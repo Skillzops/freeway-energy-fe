@@ -8,6 +8,7 @@ import ProceedButton from "@/Components/ProceedButtonComponent/ProceedButtonComp
 import { useApiCall } from "@/utils/useApiCall";
 import React, { useState } from "react";
 import { KeyedMutator } from "swr";
+import axios from "axios";
 // import StateLgaSelect from "../InputComponent/StateLgaSelect";
 // import IdTypeSelect from "../InputComponent/IdTypeSelect";
 // import { UploadPhotoInput } from "../InputComponent/UploadPhotoInput";
@@ -132,46 +133,89 @@ const defaultFormData: CustomerFormData = {
   contractFormImage: undefined,
 };
 
-const safeStringify = (value: unknown): string => {
-  const seen = new WeakSet<object>();
-  return JSON.stringify(
-    value,
-    (_key, val) => {
-      if (typeof val === "object" && val !== null) {
-        if (seen.has(val)) return "[Circular]";
-        seen.add(val);
+const formatApiError = (error: unknown): string => {
+  const networkMessage =
+    "Customer creation failed_H: unable to reach the server. Please check your connection and try again.";
+
+  if (axios.isAxiosError(error)) {
+    const serverMessage =
+      (error.response?.data as any)?.message ||
+      (error.response?.data as any)?.error;
+    if (serverMessage) {
+      if (typeof serverMessage === "string") {
+        try {
+          const parsed = JSON.parse(serverMessage);
+          if (parsed?.message === "Network Error") return networkMessage;
+          if (typeof parsed?.message === "string" && parsed.message.trim()) {
+            return parsed.message;
+          }
+        } catch {
+          // keep plain-text message
+        }
+
+        if (
+          serverMessage.includes("AxiosError") &&
+          serverMessage.includes("Network Error")
+        ) {
+          return networkMessage;
+        }
+
+        return serverMessage;
       }
-      return val;
-    },
-    2
-  );
+
+      if (
+        typeof serverMessage === "object" &&
+        serverMessage !== null &&
+        "message" in serverMessage &&
+        typeof (serverMessage as { message?: unknown }).message === "string"
+      ) {
+        const message = (serverMessage as { message: string }).message;
+        if (message === "Network Error") return networkMessage;
+        return message;
+      }
+
+      return "Customer creation failed_O: request was rejected by the server.";
+    }
+
+    if (!error.response) {
+      const attemptedUrl =
+        error.config?.baseURL && error.config?.url
+          ? `${error.config.baseURL}${error.config.url}`
+          : error.config?.url;
+
+      if (attemptedUrl) {
+        return `${networkMessage} (Request: ${attemptedUrl})`;
+      }
+
+      return networkMessage;
+    }
+  }
+
+  return "Customer creation failed_I: an unexpected error occurred.";
 };
 
-const formatApiError = (error: any): string => {
-  try {
-    if (error?.response) {
-      return safeStringify({
-        message: error?.message,
-        status: error?.response?.status,
-        statusText: error?.response?.statusText,
-        data: error?.response?.data,
-        endpoint: error?.config?.url,
-        method: error?.config?.method,
-      });
-    }
+const hasAnyUpload = (data: CustomerFormData): boolean =>
+  Boolean(data.passportPhoto || data.idImage || data.contractFormImage);
 
-    if (error instanceof Error) {
-      return safeStringify({
-        name: error.name,
-        message: error.message,
-        stack: error.stack,
-      });
+const toJsonPayload = (data: CustomerFormData) => {
+  const payload: Record<string, string> = {};
+  Object.entries(data).forEach(([key, value]) => {
+    if (value instanceof File) return;
+    if (value !== undefined && value !== "") {
+      payload[key] = String(value);
     }
+  });
+  return payload;
+};
 
-    return safeStringify(error);
-  } catch {
-    return "Customer_ Creation Failed: Unable to stringify error object";
-  }
+const toFormDataPayload = (data: CustomerFormData) => {
+  const payload = new FormData();
+  Object.entries(data).forEach(([key, value]) => {
+    if (value !== undefined && value !== "") {
+      payload.append(key, value);
+    }
+  });
+  return payload;
 };
 
 const CreateNewCustomer = ({
@@ -281,19 +325,14 @@ const CreateNewCustomer = ({
 
     try {
       const validatedData = customerSchema.parse(formData);
-      
-      // Create FormData for multipart/form-data
-      const formDataToSend = new FormData();
-      Object.entries(validatedData).forEach(([key, value]) => {
-        if (value !== undefined && value !== "") {
-          formDataToSend.append(key, value);
-        }
-      });
+      const payload = hasAnyUpload(validatedData)
+        ? toFormDataPayload(validatedData)
+        : toJsonPayload(validatedData);
 
       await apiCall({
         endpoint: "/v1/customers/create",
         method: "post",
-        data: formDataToSend,
+        data: payload,
         successMessage: "Customer created successfully!",
       });
 
@@ -313,8 +352,6 @@ const CreateNewCustomer = ({
 
   const isFormFilled = customerSchema.safeParse(formData).success;
   const hasUploadErrors = Object.values(uploadErrors).some(Boolean);
-
-  console.log(isFormFilled, 'hasUploadErrors__')
 
   const getFieldError = (fieldName: string) => {
     return formErrors.find((error) => error.path[0] === fieldName)?.message || uploadErrors[fieldName];
