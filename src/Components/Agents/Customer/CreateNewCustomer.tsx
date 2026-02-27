@@ -135,7 +135,7 @@ const defaultFormData: CustomerFormData = {
 
 const formatApiError = (error: unknown): string => {
   const networkMessage =
-    "Customer creation failed_H: unable to reach the server. Please check your connection and try again.";
+    "Customer creation failed*H: unable to reach the server. Please check your connection and try again.";
 
   if (axios.isAxiosError(error)) {
     const serverMessage =
@@ -174,7 +174,7 @@ const formatApiError = (error: unknown): string => {
         return message;
       }
 
-      return "Customer creation failed_O: request was rejected by the server.";
+      return "Customer creation failed*O: request was rejected by the server.";
     }
 
     if (!error.response) {
@@ -191,7 +191,7 @@ const formatApiError = (error: unknown): string => {
     }
   }
 
-  return "Customer creation failed_I: an unexpected error occurred.";
+  return "Customer creation failed*I: an unexpected error occurred.";
 };
 
 const hasAnyUpload = (data: CustomerFormData): boolean =>
@@ -333,6 +333,9 @@ const CreateNewCustomer = ({
         endpoint: "/v1/customers/create",
         method: "post",
         data: payload,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
         successMessage: "Customer created successfully!",
       });
 
