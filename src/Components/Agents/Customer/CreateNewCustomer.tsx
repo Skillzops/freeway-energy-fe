@@ -380,7 +380,7 @@ const CreateNewCustomer = ({
             style={{ textShadow: "1px 1px grey" }}
             className="text-xl text-textBlack font-semibold font-secondary"
           >
-            New Customer.
+            New Customer
           </h2>
         </div>
         <div className="flex flex-col items-center justify-center w-full px-4 gap-4 py-8">
