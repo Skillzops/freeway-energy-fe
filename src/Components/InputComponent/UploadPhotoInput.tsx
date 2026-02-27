@@ -19,7 +19,7 @@ export const UploadPhotoInput: React.FC<UploadPhotoInputProps> = ({
   onValidationError,
   errorMessage,
   required = false,
-  accept = ".jpeg,.jpg,.png,.svg",
+  accept = ".jpeg,.jpg,.png",
   maxSizeInMB = 1,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -55,7 +55,7 @@ export const UploadPhotoInput: React.FC<UploadPhotoInputProps> = ({
     }
 
     // Check file extension to match backend validation
-    const allowedExtensions = ["jpeg", "jpg", "png", "svg"];
+    const allowedExtensions = ["jpeg", "jpg", "png"];
     const fileExtension = file.name.toLowerCase().split(".").pop();
     if (!fileExtension || !allowedExtensions.includes(fileExtension)) {
       const msg = `File type not supported. Please use files with extensions: ${allowedExtensions.join(", ")}`;
