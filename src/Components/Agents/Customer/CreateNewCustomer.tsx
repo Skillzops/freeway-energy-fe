@@ -333,9 +333,6 @@ const CreateNewCustomer = ({
         endpoint: "/v1/customers/create",
         method: "post",
         data: payload,
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
         successMessage: "Customer created successfully!",
       });
 
