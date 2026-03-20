@@ -18,6 +18,7 @@ export type PaginationType = () => {
 export type TableType = {
   showHeader?: boolean;
   tableTitle?: string;
+  tableTitleClassname?: string;
   filterList?: {
     name?: string;
     items?: string[];
@@ -52,6 +53,7 @@ export const Table = (props: TableType) => {
   const {
     showHeader = true,
     tableTitle,
+    tableTitleClassname = "",
     filterList,
     columnList = [],
     tableClassname,
@@ -137,19 +139,6 @@ export const Table = (props: TableType) => {
     </>
   );
 
-  const PaginationComponent = () => (
-    <Pagination
-      totalEntries={totalEntries}
-      entriesPerPage={entriesPerPage}
-      currentPage={currentPage}
-      onPageChange={setCurrentPage}
-      onEntriesPerPageChange={(n) => {
-        setEntriesPerPage(n);
-        setCurrentPage(1); 
-      }}
-    />
-  );
-
   if (loading) {
     return (
       <div className="flex flex-col w-full gap-2">
@@ -186,7 +175,7 @@ export const Table = (props: TableType) => {
       {showHeader ? (
         <header className="flex items-center justify-between gap-2 p-[8px_8px_8px_16px] bg-paleGrayGradient border-[0.6px] border-strokeGreyThree rounded-full">
           <div className="flex items-center gap-2">
-            <h2 className="text-sm md:text-base font-semibold text-textDarkGrey">{tableTitle}</h2>
+            <h2 className={`text-sm md:text-base font-semibold text-textDarkGrey ${tableTitleClassname}`}>{tableTitle}</h2>
             <button
               className="bg-white text-xs px-2 py-1 text-textDarkGrey font-medium border border-strokeGreyTwo rounded-full hover:text-textBlack hover:border-textBlack transition-all"
               onClick={async () => {
@@ -225,9 +214,7 @@ export const Table = (props: TableType) => {
         </header>
       ) : null}
 
-      <section
-        // className={`${tableClassname ?? ""} w-full border-[0.6px] border-strokeGreyThree rounded-[20px] overflow-hidden`}
-      >
+      <section className={`${tableClassname ?? ""}`}>
         <div
           ref={scrollRef}
           // className="flex"

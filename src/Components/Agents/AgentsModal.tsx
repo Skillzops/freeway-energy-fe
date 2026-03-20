@@ -19,7 +19,7 @@ import CommissionsTab from "./CommissionsTab";
 import AssignDevicesModal from "./AssignDevicesModal";
 import useTokens from "@/hooks/useTokens";
 import { copyToClipboard, formatDateTime } from "@/utils/helpers";
-import { FiSearch } from "react-icons/fi";
+import { FiEye, FiEyeOff, FiSearch } from "react-icons/fi";
 import dropdownIcon from "@/assets/table/dropdown.svg";
 import ProductsTable from "@/Components/Agents/Products/ProductsTable";
 
@@ -272,8 +272,6 @@ const AssignedDevicesTable = ({
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [entriesPerPage] = useState<number>(12);
   const [search, setSearch] = useState<string>("");
-  const [dateFrom, setDateFrom] = useState<string>("");
-  const [dateTo, setDateTo] = useState<string>("");
   const [selectedRowKeys, setSelectedRowKeys] = useState<string[]>([]);
   const [historyDeviceId, setHistoryDeviceId] = useState<string | null>(null);
   const [isHistoryOpen, setIsHistoryOpen] = useState<boolean>(false);
@@ -345,7 +343,7 @@ const AssignedDevicesTable = ({
       // }
       return true;
     });
-  }, [rows, search, dateFrom, dateTo]);
+  }, [rows, search]);
 
   const selectedRows = filteredRows.filter((row) => selectedRowKeys.includes(row.rowKey));
   const hasBlockedSelection = selectedRows.some((row) => isBlockedAssignmentStatus(row.assignmentStatusRaw));
@@ -972,7 +970,7 @@ export const ReassignDevicesModal = ({
           failures: [],
         });
       }
-    } catch (err) {
+    } catch {
       void 0;
     } finally {
       setIsSubmitting(false);
@@ -1437,7 +1435,6 @@ const InstallersTable = ({ agentID }: { agentID: string }) => {
 
   // Then fetch installers data for the specific agent
   const {
-    data: installersData,
     isLoading: installersLoading,
     error: installersError,
     errorStates: installersErrorStates,
@@ -1557,6 +1554,12 @@ const AgentModal = ({
   const [isAssignInstallersModalOpen, setIsAssignInstallersModalOpen] = useState<boolean>(false);
   const [isAssignDevicesModalOpen, setIsAssignDevicesModalOpen] = useState<boolean>(false);
   const [isWalletTopUpModalOpen, setIsWalletTopUpModalOpen] = useState<boolean>(false);
+  const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] = useState<boolean>(false);
+  const [adminPassword, setAdminPassword] = useState<string>("");
+  const [showAdminPassword, setShowAdminPassword] = useState<boolean>(false);
+  const [isResettingPassword, setIsResettingPassword] = useState<boolean>(false);
+  const [resetPasswordError, setResetPasswordError] = useState<string>("");
+  const [temporaryPassword, setTemporaryPassword] = useState<string>("");
   const [isInstallationHistoryModalOpen, setIsInstallationHistoryModalOpen] = useState<boolean>(false);
   const [selectedInstallationId, setSelectedInstallationId] = useState<string | null>(null);
   const [isTaskHistoryModalOpen, setIsTaskHistoryModalOpen] = useState<boolean>(false);
@@ -1568,6 +1571,7 @@ const AgentModal = ({
   const { role } = useTokens();
   const roleName = role?.role?.toLowerCase() || "";
   const canAssignDevices = roleName.includes("admin") || roleName.includes("inventory");
+  const { apiCall } = useApiCall();
 
   const fetchSingleAgent = useGetRequest(`/v1/agents/${agentID}`, false);
 
@@ -1599,7 +1603,6 @@ const AgentModal = ({
   // Fetch installers data for the count
   const {
     data: installersCountData,
-    isLoading: installersCountLoading,
   } = useGetRequest(
     `/v1/agents?category=INSTALLER`,
     true,
@@ -1648,7 +1651,7 @@ const AgentModal = ({
       if (canAssignDevices) {
         items.push("Assign Device");
       }
-      items.push("Top Up wallet", "Block Sales Agent", "Cancel Agent");
+      items.push("Top Up wallet", "Reset Password", "Block Sales Agent", "Cancel Agent");
       return items;
     }
   };
@@ -1699,6 +1702,13 @@ const AgentModal = ({
           case "Top Up wallet":
             void 0;
             setIsWalletTopUpModalOpen(true);
+            break;
+          case "Reset Password":
+            setAdminPassword("");
+            setResetPasswordError("");
+            setTemporaryPassword("");
+            setShowAdminPassword(false);
+            setIsResetPasswordModalOpen(true);
             break;
           case "Block Sales Agent":
             void 0;
@@ -1807,6 +1817,48 @@ const AgentModal = ({
   };
 
   const tabNames = getTabNames();
+  const agentDisplayName = `${fetchSingleAgent?.data?.user?.firstname || "This agent"} ${
+    fetchSingleAgent?.data?.user?.lastname || ""
+  }`.trim();
+
+  const handleResetPassword = async () => {
+    if (!adminPassword.trim()) {
+      setResetPasswordError("Admin password is required");
+      return;
+    }
+    try {
+      setIsResettingPassword(true);
+      setResetPasswordError("");
+      const response = await apiCall({
+        endpoint: `/v1/agents/admin/reset-password`,
+        method: "post",
+        data: {
+          agentId: agentID,
+          adminPassword: adminPassword.trim(),
+        },
+        showToast: false,
+      });
+      const password =
+        response?.data?.temporaryPassword ||
+        response?.data?.tempPassword ||
+        response?.data?.password ||
+        response?.temporaryPassword ||
+        "";
+      if (!password) {
+        setResetPasswordError("Password reset succeeded but no temporary password was returned.");
+        return;
+      }
+      setTemporaryPassword(String(password));
+      setAdminPassword("");
+      setShowAdminPassword(false);
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.message || "Failed to reset agent password";
+      setResetPasswordError(Array.isArray(message) ? message.join(", ") : String(message));
+    } finally {
+      setIsResettingPassword(false);
+    }
+  };
 
   return (
     <>
@@ -1818,6 +1870,11 @@ const AgentModal = ({
         onClose={() => {
           setIsOpen(false);
           setTabContent("agentDetails");
+          setIsResetPasswordModalOpen(false);
+          setAdminPassword("");
+          setResetPasswordError("");
+          setTemporaryPassword("");
+          setShowAdminPassword(false);
           // setDisplayInput(false)
         }}
         rightHeaderComponents={
@@ -2081,6 +2138,111 @@ const AgentModal = ({
               refreshTable={fetchSingleAgent.mutate}
             />
           </div>
+        </div>
+      </Modal>
+
+      {/* Reset Password Modal */}
+      <Modal
+        isOpen={isResetPasswordModalOpen}
+        onClose={() => {
+          setIsResetPasswordModalOpen(false);
+          setAdminPassword("");
+          setResetPasswordError("");
+          setTemporaryPassword("");
+          setShowAdminPassword(false);
+        }}
+        layout="right"
+        size="small"
+        bodyStyle="pb-24 overflow-auto"
+      >
+        <div className="bg-white h-full">
+          {!temporaryPassword ? (
+            <>
+              <div className="flex items-center justify-center min-h-[84px] border-b border-[#DDE4EE] bg-paleGrayGradientLeft">
+                <h2 className="text-[20px] font-semibold text-textBlack font-secondary">
+                  Reset Agent Password
+                </h2>
+              </div>
+              <div className="p-4">
+                <p className="text-sm text-textDarkGrey">
+                  Confirm this action with your current admin password.
+                </p>
+                <div className="mt-4">
+                  <div className="relative">
+                    <input
+                      type={showAdminPassword ? "text" : "password"}
+                      value={adminPassword}
+                      onChange={(e) => {
+                        setAdminPassword(e.target.value);
+                        setResetPasswordError("");
+                      }}
+                      placeholder="Enter your admin password"
+                      className="w-full h-[50px] rounded-full border border-[#D4DCE8] px-4 pr-10 text-base placeholder:text-[#8A96B4] outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowAdminPassword((prev) => !prev)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8A96B4]"
+                    >
+                      {showAdminPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
+                    </button>
+                  </div>
+                  {resetPasswordError ? (
+                    <p className="mt-2 text-xs text-error">{resetPasswordError}</p>
+                  ) : null}
+                </div>
+                <div className="flex items-center justify-center mt-10">
+                  <button
+                    type="button"
+                    onClick={handleResetPassword}
+                    disabled={isResettingPassword}
+                    className="w-[72px] h-[72px] rounded-full bg-[#E8EDF4] text-[#7682A0] text-[30px] leading-none disabled:opacity-60"
+                    title="Reset Password"
+                  >
+                    {isResettingPassword ? "..." : "→"}
+                  </button>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="flex items-center justify-center min-h-[84px] border-b border-[#DDE4EE] bg-[#FFF7E2]">
+                <h2 className="text-[20px] font-semibold text-textBlack font-secondary">
+                  Agent Password Reset
+                </h2>
+              </div>
+              <div className="p-4">
+                <p className="text-base text-textDarkGrey">
+                  {agentDisplayName}'s password has been reset.
+                </p>
+                <div className="mt-4 rounded-[14px] border border-[#D4DCE8] bg-[#F8FAFC] px-3 py-3 flex items-center justify-between gap-2">
+                  <p className="text-base text-textDarkGrey">
+                    Temporary Password: {temporaryPassword}
+                  </p>
+                  <button
+                    type="button"
+                    className="text-[#B1462B] text-base font-semibold"
+                    onClick={() => copyToClipboard(temporaryPassword)}
+                  >
+                    Copy
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  className="mt-4 h-[48px] w-full rounded-[12px] bg-primaryGradient text-white text-[16px] font-semibold"
+                  onClick={() => {
+                    setIsResetPasswordModalOpen(false);
+                    setTemporaryPassword("");
+                    setAdminPassword("");
+                    setResetPasswordError("");
+                    setShowAdminPassword(false);
+                  }}
+                >
+                  Close
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </Modal>
 

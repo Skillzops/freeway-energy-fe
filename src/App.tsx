@@ -48,7 +48,8 @@ import AgentCommissions from "./Pages/Agent/AgentCommissions";
 import InstallerDashboard from "./Pages/Installer/Dashboard";
 import AgentDashboard from "./Pages/Agent/Dashboard";
 import Transactions from "./Pages/Agent/Transactions";
-import Tasks from "./Pages/Agent/Tasks";
+import AgentTasks from "./Pages/Agent/Tasks";
+import Tasks from "./Pages/Tasks";
 import Wallets from "./Pages/Agent/Wallet";
 import WareHouses from "./Pages/Agent/WareHouse";
 import InstallerLoginPage from "./Pages/Installer/LoginPage";
@@ -89,6 +90,7 @@ function App() {
             {/* <Route path="/transactions/*" element={<Transactions />} /> */}
             <Route path="/customers/*" element={<Customers />} />
             <Route path="/agents/*" element={<Agent />} />
+            <Route path="/tasks/*" element={<Tasks />} />
             <Route path="/products/*" element={<Products />} />
             <Route path="/inventory/*" element={<Inventory />} />
             <Route path="/devices/*" element={<Devices />} />
@@ -116,7 +118,7 @@ function App() {
             {<Route path="/agent/transactions/*" element={<Transactions />} />}
             <Route path="/agent/customers/*" element={<AgentCustomers />} />
             <Route path="/agent/commissions/*" element={<AgentCommissions />} />
-            <Route path="/agent/tasks/*" element={<Tasks />} />
+            <Route path="/agent/tasks/*" element={<AgentTasks />} />
 
             <Route path="/agent/installers/*" element={<AgentInstaller />} />
             <Route path="/agent/products/*" element={<AgentProducts />} />

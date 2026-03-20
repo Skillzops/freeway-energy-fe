@@ -36,6 +36,8 @@ export type DropDownType = {
   showSearchIcon?: boolean; // optional
   isLoading?: boolean;
   menuAlign?: "left" | "right";
+  customButtonIcon?: string;
+  customButtonClassName?: string;
 };
 
 export const DropDown = (props: DropDownType) => {
@@ -75,6 +77,8 @@ export const DropDown = (props: DropDownType) => {
     showSearchIcon = true,
     isLoading = false,
     menuAlign = "right",
+    customButtonIcon,
+    customButtonClassName,
   } = props;
 
   const formatDateOnly = (date: Date) => {
@@ -183,8 +187,11 @@ export const DropDown = (props: DropDownType) => {
   return (
     <div className={`relative flex ${containerWidthClass}`}>
       {showCustomButton ? (
-        <div onClick={handleClick} className="w-max cursor-pointer">
-          <Icon icon={edit} />
+        <div
+          onClick={handleClick}
+          className={`w-max cursor-pointer ${customButtonClassName ?? ""}`}
+        >
+          <Icon icon={customButtonIcon || edit} />
         </div>
       ) : (
         <button

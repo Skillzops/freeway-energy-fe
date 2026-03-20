@@ -9,6 +9,10 @@ import SaleTransactions from "./SaleTransactions";
 import { useGetRequest } from "@/utils/useApiCall";
 import SaleDevices from "./SaleDevices";
 import SaleInventory from "./SaleInventory";
+import EditSaleModal from "./EditSaleModal";
+import { DropDown } from "../DropDownComponent/DropDown";
+import threeDotsIcon from "../../assets/settings/3dots.svg";
+import SaleLog from "./SaleLog";
 
 export type SaleDetailsType = {
   daysToNextInstallment: string;
@@ -59,6 +63,7 @@ const SalesDetailsModal = ({
   refreshTable?: () => Promise<any>;
 }) => {
   const [tabContent, setTabContent] = useState<string>("details");
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const fetchSingleSale = useGetRequest(`/v1/sales/${salesID}`, true);
 
@@ -187,7 +192,48 @@ const SalesDetailsModal = ({
       key: "transactions",
       count: fetchSingleSale?.data?.sale?.payment?.length || 0,
     },
+    {
+      name: "Sale Log",
+      key: "log",
+      count:
+        (Array.isArray(fetchSingleSale?.data?.logs) ? fetchSingleSale?.data?.logs.length : 0) ||
+        (Array.isArray(fetchSingleSale?.data?.sale?.logs)
+          ? fetchSingleSale?.data?.sale?.logs.length
+          : 0) ||
+        (Array.isArray(fetchSingleSale?.data?.activityLogs)
+          ? fetchSingleSale?.data?.activityLogs.length
+          : 0) ||
+        (Array.isArray(fetchSingleSale?.data?.sale?.activityLogs)
+          ? fetchSingleSale?.data?.sale?.activityLogs.length
+          : 0),
+    },
   ];
+
+  const saleLogs =
+    (Array.isArray(fetchSingleSale?.data?.logs) && fetchSingleSale?.data?.logs) ||
+    (Array.isArray(fetchSingleSale?.data?.sale?.logs) && fetchSingleSale?.data?.sale?.logs) ||
+    (Array.isArray(fetchSingleSale?.data?.activityLogs) && fetchSingleSale?.data?.activityLogs) ||
+    (Array.isArray(fetchSingleSale?.data?.sale?.activityLogs) &&
+      fetchSingleSale?.data?.sale?.activityLogs) ||
+    [];
+
+  const dropDownList = {
+    items: ["Edit Sale"],
+    onClickLink: (index: number) => {
+      switch (index) {
+        case 0:
+          setIsEditModalOpen(true);
+          break;
+        default:
+          break;
+      }
+    },
+    defaultStyle: true,
+    showCustomButton: true,
+    customButtonIcon: threeDotsIcon,
+    customButtonClassName:
+      "rounded-full shadow-[0_6px_18px_rgba(30,41,59,0.22)] ring-1 ring-[#DCE2EE]",
+  };
 
   return (
     <Modal
@@ -197,6 +243,7 @@ const SalesDetailsModal = ({
       isOpen={isOpen}
       onClose={() => {
         setTabContent("details");
+        setIsEditModalOpen(false);
         setIsOpen(false);
       }}
       leftHeaderComponents={
@@ -230,9 +277,9 @@ const SalesDetailsModal = ({
               <p className="text-textBlack text-xs">{data?.paymentMode}</p>
             </div>
           )}
-          {/* {fetchSingleSale?.data?.sale?.status === "COMPLETED" ? null : (
+          {fetchSingleSale?.data?.sale?.status === "COMPLETED" ? null : (
             <DropDown {...dropDownList} />
-          )} */}
+          )}
         </header>
         <div className="flex flex-col w-full gap-4 px-4 py-2">
           <TabComponent
@@ -258,6 +305,8 @@ const SalesDetailsModal = ({
               />
             ) : tabContent === "devices" ? (
               <SaleDevices data={fetchSingleSale?.data?.devices} />
+            ) : tabContent === "log" ? (
+              <SaleLog logs={saleLogs} />
             ) : (
               <SaleTransactions 
                 data={generateSaleTransactionEntries()} 
@@ -269,6 +318,14 @@ const SalesDetailsModal = ({
           </DataStateWrapper>
         </div>
       </div>
+      <EditSaleModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        saleId={salesID}
+        saleData={fetchSingleSale?.data}
+        refreshSingleSale={fetchSingleSale?.mutate}
+        refreshTable={refreshTable}
+      />
     </Modal>
   );
 };

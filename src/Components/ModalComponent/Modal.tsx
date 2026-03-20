@@ -6,7 +6,7 @@ export type ModalType = {
   isOpen: boolean;
   onClose: () => void;
   children: React.ReactNode;
-  size?: "small" | "medium" | "large";
+  size?: "small" | "medium" | "large" | "xlarge";
   layout?: "right" | "default" | "center";
   bodyStyle?: string;
   headerClass?: string;
@@ -57,12 +57,29 @@ export const Modal = ({
 
   // Prevent background scroll when modal is open
   useEffect(() => {
-    const originalStyle = window.getComputedStyle(document.body).overflow;
+    const body = document.body;
+    const currentCount = Number(body.dataset.modalOpenCount || "0");
+
     if (isOpen) {
-      document.body.style.overflow = "hidden";
+      if (currentCount === 0) {
+        body.dataset.modalOriginalOverflow =
+          window.getComputedStyle(body).overflow || "auto";
+        body.style.overflow = "hidden";
+      }
+      body.dataset.modalOpenCount = String(currentCount + 1);
     }
+
     return () => {
-      document.body.style.overflow = originalStyle;
+      const count = Number(body.dataset.modalOpenCount || "0");
+      const nextCount = Math.max(0, count - (isOpen ? 1 : 0));
+
+      if (nextCount === 0) {
+        body.style.overflow = body.dataset.modalOriginalOverflow || "";
+        delete body.dataset.modalOriginalOverflow;
+        delete body.dataset.modalOpenCount;
+      } else {
+        body.dataset.modalOpenCount = String(nextCount);
+      }
     };
   }, [isOpen]);
 
@@ -72,7 +89,9 @@ export const Modal = ({
   const sizeClasses = {
     small: "w-[90vw] sm:w-[50vw] md:w-[40vw] lg:w-[30vw] xl:w-[25vw] max-w-[360px]",
     medium: "w-[95vw] sm:w-[70vw] md:w-[60vw] lg:w-[50vw] xl:w-[42vw] max-w-[530px]",
-    large: "w-[100vw] sm:w-[92vw] md:w-[80vw] lg:w-[72vw] xl:w-[60vw] max-w-[820px]",
+    large: "w-[100vw] sm:w-[90vw] md:w-[75vw] lg:w-[65vw] xl:w-[50vw] max-w-[660px]",
+    xlarge: "w-[100vw] sm:w-[95vw] md:w-[85vw] lg:w-[75vw] xl:w-[60vw] max-w-[820px]",
+
   };
 
   // Conditional layout styles

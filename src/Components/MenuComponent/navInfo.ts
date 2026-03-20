@@ -46,6 +46,11 @@ export const navData = [
     link: "/agents",
   },
   {
+    title: "Task",
+    icon: ProductsIcon,
+    link: "/tasks",
+  },
+  {
     title: "Products",
     icon: ProductsIcon,
     link: "/products",
