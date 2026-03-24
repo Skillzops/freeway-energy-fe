@@ -7,6 +7,7 @@ import { ErrorComponent } from "./ErrorPage";
 import { DateTimeTag, NameTag } from "@/Components/CardComponents/CardComponent";
 import settingsbadge from "@/assets/settings/settingsbadge.png";
 import ActionButton from "@/Components/ActionButtonComponent/ActionButton";
+import SecondaryModal from "@/Components/ModalSecondary/SecondaryModal";
 
 type AuditRow = {
   no: number;
@@ -62,6 +63,8 @@ const AuditLogs = () => {
   const [isSearchQuery, setIsSearchQuery] = useState(false);
   const [timelineUserId, setTimelineUserId] = useState<string | null>(null);
   const [timelineUserName, setTimelineUserName] = useState<string | null>(null);
+  const [selectedLog, setSelectedLog] = useState<AuditRow | null>(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
   const queryString = useMemo(
     () =>
@@ -169,6 +172,44 @@ const AuditLogs = () => {
     return parts.join(" | ");
   };
 
+  const stringifyBlock = (value: any) => {
+    if (value === null || value === undefined) return "none";
+    if (typeof value === "string") return value;
+    if (typeof value === "object" && Object.keys(value || {}).length === 0) return "none";
+    try {
+      return JSON.stringify(value, null, 2);
+    } catch {
+      return String(value);
+    }
+  };
+
+  const openDetailsModal = (row: AuditRow) => {
+    setSelectedLog(row);
+    setIsDetailsModalOpen(true);
+  };
+
+  const fullActionDetails = useMemo(() => {
+    if (!selectedLog) return "";
+    return [
+      `Action: ${selectedLog.action || "N/A"}`,
+      `User: ${selectedLog.user || "N/A"}`,
+      `Email: ${selectedLog.actorEmail || "N/A"}`,
+      `User ID: ${selectedLog.userId || "N/A"}`,
+      `Route: ${selectedLog.route || "N/A"}`,
+      `Description: ${selectedLog.description || "N/A"}`,
+      `Time: ${selectedLog.createdAt || "N/A"}`,
+      "",
+      "Changes:",
+      stringifyBlock(selectedLog.changes),
+      "",
+      "Old Values:",
+      stringifyBlock(selectedLog.oldValues),
+      "",
+      "New Values:",
+      stringifyBlock(selectedLog.newValues),
+    ].join("\n");
+  }, [selectedLog]);
+
   const columnList = [
     { title: "S/N", key: "no" },
     {
@@ -180,6 +221,15 @@ const AuditLogs = () => {
     {
       title: "EMAIL",
       key: "actorEmail",
+      valueIsAComponent: true,
+      customValue: (value: string) => (
+        <span
+          className="inline-block max-w-[220px] overflow-hidden text-ellipsis whitespace-nowrap align-bottom"
+          title={value || "-"}
+        >
+          {value || "-"}
+        </span>
+      ),
     },
     {
       title: "TIME",
@@ -193,7 +243,16 @@ const AuditLogs = () => {
       valueIsAComponent: true,
       customValue: (_: any, row: AuditRow) => {
         const summary = summarizeChange(row);
-        return <span className="text-[11px] text-textDarkGrey leading-snug">{summary}</span>;
+        return (
+          <button
+            type="button"
+            className="inline-block max-w-[520px] overflow-hidden text-ellipsis whitespace-nowrap text-[11px] text-textDarkGrey leading-snug align-bottom text-left hover:underline cursor-pointer"
+            title="Click to view full action details"
+            onClick={() => openDetailsModal(row)}
+          >
+            {summary}
+          </button>
+        );
       },
     },
   ];
@@ -250,6 +309,21 @@ const AuditLogs = () => {
           errorData={errorStates}
         />
       )}
+      <SecondaryModal
+        isOpen={isDetailsModalOpen}
+        onClose={() => setIsDetailsModalOpen(false)}
+        width="w-[95vw] max-w-[900px]"
+        height="h-[80vh]"
+      >
+        <div className="flex flex-col h-full gap-3">
+          <h3 className="text-2xl font-semibold text-textBlack">Full Action Details</h3>
+          <div className="flex-1 overflow-auto rounded-xl border border-strokeGreyThree bg-[#F6F8FA] p-4">
+            <pre className="whitespace-pre-wrap break-words text-[13px] leading-7 text-textDarkGrey font-mono">
+              {fullActionDetails}
+            </pre>
+          </div>
+        </div>
+      </SecondaryModal>
     </PageLayout>
   );
 };

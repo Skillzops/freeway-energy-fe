@@ -197,17 +197,82 @@ export default function WarehouseDetail() {
     return product?.name || "Unknown Product";
   };
 
+  const toNumber = (value: unknown): number => {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : 0;
+  };
+
+  const getStockLevel = (product: any) =>
+    toNumber(
+      product?.totalRemainingQuantities ??
+      product?.remainingQuantity ??
+      product?.quantity ??
+      product?.stockLevel
+    );
+
+  const getMaxCapacity = (product: any, stockLevel: number) =>
+    Math.max(
+      1,
+      toNumber(
+      product?.totalInitialQuantities ??
+      product?.numberOfStock ??
+      product?.maxCapacity ??
+      stockLevel
+      )
+    );
+
+  const getSalePrice = (product: any) =>
+    toNumber(
+      product?.salePrice?.minimumInventoryBatchPrice ??
+      product?.salePrice?.maximumInventoryBatchPrice ??
+      product?.salePrice ??
+      product?.price
+    );
+
+  const computedTotalItems = inventoryArray.reduce(
+    (sum: number, product: any) => sum + getStockLevel(product),
+    0
+  );
+  const computedTotalValue = inventoryArray.reduce((sum: number, product: any) => {
+    const stockLevel = getStockLevel(product);
+    const inventoryValue = toNumber(product?.inventoryValue);
+    const valueFromPrice = getSalePrice(product) * stockLevel;
+    return sum + (inventoryValue > 0 ? inventoryValue : valueFromPrice);
+  }, 0);
+
   const lowStockItems = inventoryArray.filter((product: any) => {
-    const stockLevel = product.totalRemainingQuantities || 0;
-    const maxCapacity = product.totalInitialQuantities || stockLevel || 1;
+    const stockLevel = getStockLevel(product);
+    const maxCapacity = getMaxCapacity(product, stockLevel);
     return (stockLevel / maxCapacity) < 0.3;
   });
-  const totalItems = inventoryArray.reduce((sum: number, product: any) => sum + (product.totalRemainingQuantities || 0), 0);
-  const totalValue = inventoryArray.reduce((sum: number, product: any) => {
-    const salePrice = product.salePrice?.minimumInventoryBatchPrice || product.salePrice?.maximumInventoryBatchPrice || 0;
-    const stockLevel = product.totalRemainingQuantities || 0;
-    return sum + (salePrice * stockLevel);
-  }, 0);
+
+  // Prefer API-provided warehouse totals from /v1/warehouses and fallback to computed values.
+  const totalItemsFromApi =
+    warehouse?.totalItems ??
+    warehouse?.inventoryStats?.totalItems ??
+    warehouse?.metrics?.totalItems;
+  const totalItems =
+    totalItemsFromApi !== undefined && totalItemsFromApi !== null
+      ? toNumber(totalItemsFromApi)
+      : computedTotalItems;
+
+  const totalValueFromApi =
+    warehouse?.totalValue ??
+    warehouse?.inventoryStats?.totalValue ??
+    warehouse?.metrics?.totalValue;
+  const totalValue =
+    totalValueFromApi !== undefined && totalValueFromApi !== null
+      ? toNumber(totalValueFromApi)
+      : computedTotalValue;
+
+  const lowStockCountFromApi =
+    warehouse?.lowStockItems ??
+    warehouse?.inventoryStats?.lowStockItems ??
+    warehouse?.metrics?.lowStockItems;
+  const lowStockCount =
+    lowStockCountFromApi !== undefined && lowStockCountFromApi !== null
+      ? toNumber(lowStockCountFromApi)
+      : lowStockItems.length;
 
   // Get requests for this warehouse - data is already filtered by API
   const requests = transfersArray; // Already filtered by API based on warehouse type
@@ -398,9 +463,9 @@ export default function WarehouseDetail() {
           />
           <MetricCard
             title="Low Stock Items"
-            value={inventoryLoading ? "..." : lowStockItems.length}
+            value={inventoryLoading ? "..." : lowStockCount}
             icon={<AlertTriangleIcon />}
-            trend={lowStockItems.length > 0 ? { value: "Needs attention", isPositive: false } : undefined}
+            trend={lowStockCount > 0 ? { value: "Needs attention", isPositive: false } : undefined}
           />
           {warehouse.isMainWarehouse && (
             <MetricCard

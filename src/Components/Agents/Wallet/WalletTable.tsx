@@ -6,6 +6,43 @@ import { ErrorComponent } from "@/Pages/ErrorPage";
 import { ApiErrorStatesType } from "@/utils/useApiCall";
 import Table from "@/Components/TableComponent/Table";
 
+const normalizeStatus = (value?: string) => {
+  return String(value || "unknown")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "_");
+};
+
+const getStatusBadgeClasses = (status: string) => {
+  const normalized = normalizeStatus(status);
+
+  switch (normalized) {
+    case "successful":
+    case "success":
+    case "completed":
+    case "active":
+      return "text-emerald-700 bg-emerald-50 border-emerald-200";
+    case "pending":
+      return "text-amber-700 bg-amber-50 border-amber-200";
+    case "processing":
+    case "in_progress":
+      return "text-blue-700 bg-blue-50 border-blue-200";
+    case "failed":
+    case "reversed":
+    case "cancelled":
+    case "canceled":
+    case "suspended":
+      return "text-red-700 bg-red-50 border-red-200";
+    default:
+      return "text-gray-700 bg-gray-50 border-gray-200";
+  }
+};
+
+const formatStatusLabel = (status: string) => {
+  const normalized = normalizeStatus(status);
+  return normalized.replace(/_/g, " ").toUpperCase();
+};
+
 const WalletTable = ({
   walletData,
   isLoading,
@@ -57,32 +94,13 @@ const WalletTable = ({
       key: "status",
       valueIsAComponent: true,
       customValue: (value: string) => {
-        const v = String(value || "").toLowerCase();
-        const getStatusStyle = (status: string) => {
-          switch (status) {
-            case "successful":
-            case "completed":
-            case "active":
-              return "text-success";
-            case "pending":
-              return "text-yellow-600";
-            case "failed":
-            case "reversed":
-            case "suspended":
-              return "text-red-500";
-            case "processing":
-              return "text-blue-500";
-            default:
-              return "text-gray-500";
-          }
-        };
-        const style = getStatusStyle(v);
+        const badgeClasses = getStatusBadgeClasses(value);
         return (
           <span
-            className={`${style} flex items-center gap-0.5 w-max px-2 py-1 bg-[#F6F8FA] border border-strokeGreyTwo rounded-full uppercase`}
+            className={`${badgeClasses} flex items-center gap-1 w-max px-2.5 py-1 border rounded-full text-[11px] font-semibold`}
           >
-            <GoDotFill />
-            {v || "unknown"}
+            <GoDotFill className="text-[10px]" />
+            {formatStatusLabel(value)}
           </span>
         );
       },

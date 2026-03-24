@@ -8,6 +8,7 @@ import inventorybadge from "../assets/inventory/inventorybadge.png";
 import FiltersModal, { Filters } from "@/Components/ReportsTable/FiltersModal";
 import { Table, PaginationType } from "@/Components/TableComponent/Table";
 import ActionButton from "@/Components/ActionButtonComponent/ActionButton";
+import { toast } from "react-toastify";
 
 const EXPORT_TYPES = [
   "sales",
@@ -21,6 +22,7 @@ const EXPORT_TYPES = [
   "total_outstanding_receivables",
 ] as const;
 type ExportType = typeof EXPORT_TYPES[number];
+const DOWNLOAD_MAX_LIMIT = 5000;
 
 type BoolAny = "any" | "true" | "false";
 
@@ -78,6 +80,24 @@ function downloadBlobCSV(blob: Blob, name: string) {
   a.remove();
   URL.revokeObjectURL(url);
 }
+
+const DownloadSpinner = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    className="animate-spin"
+    aria-hidden="true"
+  >
+    <path
+      d="M12 2a10 10 0 1 0 10 10"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    />
+  </svg>
+);
 
 const amountKeyPattern = /(amount|price|revenue|total|debt|balance|outstanding|receivable|monthlypayment)s?/i;
 const nf = new Intl.NumberFormat("en-NG");
@@ -197,6 +217,7 @@ const Reports = () => {
   const [filters, setFilters] = useState<Filters>({});
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [reloadTick, setReloadTick] = useState(0);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const { apiCall } = useApiCall();
 
@@ -239,7 +260,10 @@ const Reports = () => {
     const hasPagination = "page" in rest || "limit" in rest;
     if (!hasPagination) return rest;
 
-    const maxLimit = totalFromApi > 0 ? totalFromApi : rest.limit || entriesPerPage;
+    const maxLimit = Math.min(
+      totalFromApi > 0 ? totalFromApi : rest.limit || entriesPerPage,
+      DOWNLOAD_MAX_LIMIT
+    );
     return {
       ...rest,
       page: 1,
@@ -300,7 +324,9 @@ const Reports = () => {
 
   const cancelFlag = useRef<number>(0);
   const triggerCsvDownload = async (selected: ExportType) => {
+    if (isDownloading) return;
     const myFlag = ++cancelFlag.current;
+    setIsDownloading(true);
     try {
       const res = await apiCall({
         endpoint: "/v1/export/data",
@@ -311,15 +337,46 @@ const Reports = () => {
         showToast: false,
       });
       if (myFlag !== cancelFlag.current) return;
-      const contentType = (res?.headers?.["content-type"] as string | undefined) ?? "";
-      if (contentType.includes("csv")) {
-        downloadBlobCSV(res.data as Blob, fileName(selected));
-      } else {
-        const text = await (res.data as Blob).text();
-        downloadBlobCSV(new Blob([text], { type: "text/csv;charset=utf-8" }), fileName(selected));
+      const contentType = (
+        (res?.headers?.["content-type"] as string | undefined) ?? ""
+      ).toLowerCase();
+      const blobData = res.data as Blob;
+
+      if (!blobData || blobData.size === 0) {
+        toast.error("No data available to download for this report.");
+        return;
       }
-    } catch (err) {
-      void 0;
+
+      if (contentType.includes("application/json")) {
+        const text = await blobData.text();
+        let message = "Failed to download report. Please try again.";
+        try {
+          const parsed = JSON.parse(text);
+          const apiMessage = parsed?.message;
+          message = Array.isArray(apiMessage)
+            ? apiMessage.join(", ")
+            : apiMessage || message;
+        } catch {
+          void 0;
+        }
+        toast.error(message);
+        return;
+      }
+
+      if (contentType.includes("csv") || contentType.includes("text/plain")) {
+        downloadBlobCSV(res.data as Blob, fileName(selected));
+        toast.success("Report downloaded successfully.");
+      } else {
+        const text = await blobData.text();
+        downloadBlobCSV(new Blob([text], { type: "text/csv;charset=utf-8" }), fileName(selected));
+        toast.success("Report downloaded successfully.");
+      }
+    } catch {
+      toast.error("Failed to download report. Please try again.");
+    } finally {
+      if (myFlag === cancelFlag.current) {
+        setIsDownloading(false);
+      }
     }
   };
 
@@ -449,8 +506,10 @@ const Reports = () => {
           </button>
 
           <ActionButton
-            label="Download"
+            label={isDownloading ? "Downloading..." : "Download"}
+            icon={isDownloading ? <DownloadSpinner /> : undefined}
             onClick={() => triggerCsvDownload(exportType)}
+            disabled={isDownloading}
           />
         </div>
       </section>

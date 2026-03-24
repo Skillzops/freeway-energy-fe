@@ -56,6 +56,7 @@ import InstallerLoginPage from "./Pages/Installer/LoginPage";
 import AgentLoginPage from "./Pages/Agent/LoginPage";
 import InstallerSettings from "./Pages/Installer/Settings";
 import AuditLogs from "./Pages/AuditLogs";
+import FailedJobs from "./Pages/FailedJobs";
 
 function App() {
   return (
@@ -101,6 +102,7 @@ function App() {
             <Route path="/transfers" element={<Transfers />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/audit-logs" element={<AuditLogs />} />
+            <Route path="/failed-jobs" element={<FailedJobs />} />
 
 
 

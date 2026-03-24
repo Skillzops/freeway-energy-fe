@@ -8,20 +8,29 @@ import inventorygradient from "@/assets/inventory/inventorygradient.svg";
 import { DropDown } from "@/Components/DropDownComponent/DropDown";
 import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
 import { useGetRequest } from "@/utils/useApiCall";
-import CreateNewDevice from "@/Components/Devices/CreateNewDevice";
-// import GenerateTokens from "@/Components/Tokens/GenerateTokens";
-import { Modal } from "@/Components/ModalComponent/Modal";
+import CreateNewDevice from "@/Components/Agents/Devices/CreateNewDevice";
 import GenerateTokens from "@/Components/Agents/Tokens/GenerateTokens";
 
 const DevicesTable = lazy(() => import("@/Components/Agents/Devices/DevicesTable"));
-const TokensTable = lazy(() => import("@/Components/Agents/Tokens/TokensTable"));
 
 const Devices = () => {
+  const getTotalCount = (payload: any): number => {
+    if (typeof payload?.total === "number") return payload.total;
+    if (typeof payload?.pagination?.total === "number") {
+      return payload.pagination.total;
+    }
+    if (typeof payload?.data?.total === "number") return payload.data.total;
+    if (typeof payload?.data?.pagination?.total === "number") {
+      return payload.data.pagination.total;
+    }
+
+    const devices = payload?.devices ?? payload?.data?.devices;
+    return Array.isArray(devices) ? devices.length : 0;
+  };
+
   const location = useLocation();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isTokensOpen, setIsTokensOpen] = useState<boolean>(false);
-  const [isTokensHistoryOpen, setIsTokensHistoryOpen] =
-    useState<boolean>(false);
   const [formType, setFormType] = useState<"singleUpload" | "batchUpload">(
     "singleUpload"
   );
@@ -35,19 +44,8 @@ const Devices = () => {
     any
   > | null>({});
 
-  // Tokens history state
-  const [tokensCurrentPage, setTokensCurrentPage] = useState<number>(1);
-  const [tokensEntriesPerPage, setTokensEntriesPerPage] = useState<number>(20);
-  const [tokensTableQueryParams, setTokensTableQueryParams] = useState<Record<
-    string,
-    any
-  > | null>({});
-
   const queryString = Object.entries(tableQueryParams || {})
-    .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
-    .join("&");
-
-  const tokensQueryString = Object.entries(tokensTableQueryParams || {})
+    .filter(([, value]) => value !== undefined && value !== null && value !== "")
     .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
     .join("&");
 
@@ -57,28 +55,33 @@ const Devices = () => {
     mutate: allDeviceRefresh,
     errorStates: allDevicesErrorStates,
   } = useGetRequest(
-    `/v1/agents/devices?page=${currentPage}&limit=${entriesPerPage}${
-      queryString && `&${queryString}`
+    `/v1/devices/assignments/my-devices?page=${currentPage}&limit=${entriesPerPage}${
+      queryString ? `&${queryString}` : ""
     }`,
     true,
     60000
   );
 
-  const {
-    data: tokensData,
-    isLoading: tokensLoading,
-    mutate: allTokensRefresh,
-    errorStates: allTokensErrorStates,
-  } = useGetRequest(
-    `/v1/tokens?page=${tokensCurrentPage}&limit=${tokensEntriesPerPage}${
-      tokensQueryString && `&${tokensQueryString}`
-    }`,
+  const { data: allDevicesCountData } = useGetRequest(
+    "/v1/devices/assignments/my-devices?page=1&limit=1",
+    true,
+    60000
+  );
+
+  const { data: toBeInstalledCountData } = useGetRequest(
+    "/v1/devices/assignments/my-devices?page=1&limit=1&installationStatus=not_installed",
+    true,
+    60000
+  );
+
+  const { data: installedCountData } = useGetRequest(
+    "/v1/devices/assignments/my-devices?page=1&limit=1&installationStatus=installed",
     true,
     60000
   );
 
   const paginationInfo = () => {
-    const total = deviceData?.total;
+    const total = getTotalCount(deviceData);
     return {
       total,
       currentPage,
@@ -88,63 +91,55 @@ const Devices = () => {
     };
   };
 
-  const tokensPaginationInfo = () => {
-    const total = tokensData?.total || 0;
-    return {
-      total,
-      currentPage: tokensCurrentPage,
-      entriesPerPage: tokensEntriesPerPage,
-      setCurrentPage: setTokensCurrentPage,
-      setEntriesPerPage: setTokensEntriesPerPage,
-    };
-  };
+  const allDevicesTotal = getTotalCount(allDevicesCountData || deviceData);
+  const toBeInstalledTotal = getTotalCount(toBeInstalledCountData);
+  const installedTotal = getTotalCount(installedCountData);
 
-  // ✅ Side menu links now match the routes below
   const navigationList = [
     {
       title: "All Devices",
       link: "/agent/devices/all",
-      count: deviceData?.total || 0,
+      count: allDevicesTotal,
     },
     {
       title: "To be Installed",
       link: "/agent/devices/to-be-installed",
-      count: deviceData?.total || 0,
+      count: toBeInstalledTotal,
     },
     {
       title: "Installed Devices",
       link: "/agent/devices/installed",
-      count: deviceData?.total || 0,
+      count: installedTotal,
     },
   ];
 
-  // ✅ Map route -> installationStatus filter
   useEffect(() => {
-    setTableQueryParams({});
     switch (location.pathname) {
       case "/agent/devices/installed":
-        setTableQueryParams(() => ({ installationStatus: "installed" }));
+        setTableQueryParams({ installationStatus: "installed" });
         break;
       case "/agent/devices/to-be-installed":
-        // choose the status your BE expects for "to be installed":
-        setTableQueryParams(() => ({
-          installationStatus: "ready_for_installation",
-        }));
+        setTableQueryParams({ installationStatus: "not_installed" });
         break;
-      // If you also want to support not_installed directly, add a menu and a case:
-      // case "/devices/not-installed":
-      //   setTableQueryParams(() => ({ installationStatus: "not_installed" }));
-      //   break;
       default:
-        // '/devices/all' -> no installationStatus filter
-        setTableQueryParams((prev) => ({ ...(prev || {}) }));
+        setTableQueryParams({});
+        break;
     }
-    // Optionally reset page when switching tabs
     setCurrentPage(1);
   }, [location.pathname]);
 
-  // ✅ Add the new routes here
   const devicesPaths = ["all", "installed", "to-be-installed"];
+
+  const dropDownList = {
+    items: ["Generate Tokens (Batch)"],
+    onClickLink: (index: number) => {
+      if (index === 0) {
+        setTokensFormType("batchUpload");
+        setIsTokensOpen(true);
+      }
+    },
+    showCustomButton: true,
+  };
 
   return (
     <>
@@ -156,24 +151,11 @@ const Devices = () => {
               iconBgColor="bg-[#FDEEC2]"
               topText="All"
               bottomText="DEVICES"
-              value={deviceData?.total || 0}
+              value={allDevicesTotal}
             />
           </div>
           <div className="flex w-full items-center justify-between gap-2 min-w-max sm:w-max sm:justify-end">
-            <DropDown
-              {...{
-                items: [
-                  "Generate Tokens (Batch)",
-                ],
-                onClickLink: (index: number) => {
-                  if (index === 0) {
-                    setTokensFormType("batchUpload");
-                    setIsTokensOpen(true);
-                  }
-                },
-                showCustomButton: true,
-              }}
-            />
+            <DropDown {...dropDownList} />
           </div>
         </section>
 
@@ -225,40 +207,6 @@ const Devices = () => {
         allDevicesRefresh={allDeviceRefresh}
         formType={tokensFormType}
       />
-
-      <Modal
-        isOpen={isTokensHistoryOpen}
-        onClose={() => setIsTokensHistoryOpen(false)}
-        size="large"
-      >
-        <div className="fixed inset-0 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-[90vw] h-[80vh] max-w-6xl overflow-hidden">
-            <div className="flex items-center justify-between p-4 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-800">
-                Tokens History
-              </h2>
-              <button
-                onClick={() => setIsTokensHistoryOpen(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="p-4 h-full overflow-auto">
-              <Suspense fallback={<div>Loading tokens...</div>}>
-                <TokensTable
-                  tokensData={tokensData}
-                  errorData={allTokensErrorStates}
-                  isLoading={tokensLoading}
-                  refreshTable={allTokensRefresh}
-                  paginationInfo={tokensPaginationInfo}
-                  setTableQueryParams={setTokensTableQueryParams}
-                />
-              </Suspense>
-            </div>
-          </div>
-        </div>
-      </Modal>
     </>
   );
 };

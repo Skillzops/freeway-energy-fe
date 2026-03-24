@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { KeyedMutator } from "swr";
 import { PaginationType, Table } from "../TableComponent/Table";
 import { GoDotFill } from "react-icons/go";
-import { formatNumberWithCommas } from "@/utils/helpers";
+import { formatDateTime, formatNumberWithCommas } from "@/utils/helpers";
 import { NairaSymbol } from "../CardComponents/CardComponent";
 import InventoryDetailModal from "./InventoryDetailModal";
 import { ApiErrorStatesType } from "@/utils/useApiCall";
@@ -13,6 +13,7 @@ interface InventoryEntries {
   id: string;
   no: number;
   name: { image: string; text: string };
+  date: string;
   class: string;
   salePrice: {
     minimumInventoryBatchPrice: number;
@@ -53,6 +54,7 @@ type InventoryRecord = {
   manufacturerName: string;
   sku: string;
   image: string;
+  createdAt: string;
   dateOfManufacture: string;
   status: string;
   class: string;
@@ -75,6 +77,7 @@ const generateInventoryEntries = (data: any): InventoryEntries[] => {
         id: item?.id,
         no: index + 1,
         name: { image: item?.image, text: item?.name },
+        date: item?.createdAt || item?.dateOfManufacture || "",
         class: item?.class,
         salePrice: item?.salePrice,
         inventoryValue: item?.inventoryValue || 0,
@@ -186,6 +189,21 @@ const InventoryTable = ({
             </div>
             <span className="text-textBlack text-sm">{value.text}</span>
           </div>
+        );
+      },
+    },
+    {
+      title: "DATE",
+      key: "date",
+      valueIsAComponent: true,
+      customValue: (value: string) => {
+        if (!value) return <span className="text-textGrey">N/A</span>;
+        const parsedDate = new Date(value);
+        const isValidDate = !Number.isNaN(parsedDate.getTime());
+        return (
+          <span className="text-textDarkGrey text-sm">
+            {isValidDate ? formatDateTime("datetime", value) : value}
+          </span>
         );
       },
     },
