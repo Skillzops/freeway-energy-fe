@@ -217,7 +217,6 @@ export const Table = (props: TableType) => {
       <section className={`${tableClassname ?? ""}`}>
         <div
           ref={scrollRef}
-          // className="flex"
           className="overflow-x-auto overflow-y-hidden cursor-grab active:cursor-grabbing select-none"
           style={{ touchAction: "pan-y" }}
           onPointerDown={onPointerDown}
