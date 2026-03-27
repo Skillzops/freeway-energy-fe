@@ -1,45 +1,50 @@
 import { ApiErrorStatesType } from "@/utils/useApiCall";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { KeyedMutator } from "swr";
 import { ErrorComponent } from "@/Pages/ErrorPage";
 import Table, { PaginationType } from "@/Components/TableComponent/Table";
-import { Modal } from "@/Components/ModalComponent/Modal";
-import useTokens from "@/hooks/useTokens";
-import {
-  DeviceHistoryModal,
-  ReassignDevicesModal,
-  UnassignDevicesModal,
-} from "../AgentsModal";
+import DeviceDetailModal from "./DeviceDetailModal";
 
 export type DeviceEntries = {
   id: string;
   no?: number;
   serialNumber: string;
-  key: string;
-  startingCode: string;
-  count: number | string;
-  timeDivider: string;
-  restrictedDigitMode: boolean;
-  hardwareModel: string;
-  firmwareVersion: string;
-  isTokenable: boolean;
-  installationStatus?: "installed" | "not_installed" | string;
+  key?: string;
+  startingCode?: string;
+  count?: number | string;
+  timeDivider?: string;
+  restrictedDigitMode?: boolean;
+  hardwareModel?: string;
+  firmwareVersion?: string;
+  isTokenable?: boolean;
+  installationStatus?: "installed" | "not_installed" | string | null;
   saleItemIDs?: string[];
   createdAt?: string;
   updatedAt?: string;
 };
 
-// Helper function to map the API data to the desired format
 const generateDeviceEntries = (data: any): DeviceEntries[] => {
-  const entries: DeviceEntries[] = data?.devices?.map(
-    (item: DeviceEntries, index: number) => {
-      return {
-        ...item,
-        no: index + 1,
-      };
-    }
-  );
-  return entries;
+  const devices = data?.devices ?? data?.data?.devices ?? [];
+  return devices.map((item: DeviceEntries, index: number) => ({
+    ...item,
+    no: index + 1,
+  }));
+};
+
+const formatInstallationStatus = (value: string | null | undefined) => {
+  if (!value) return "N/A";
+  const normalized = value.toLowerCase().replace(/[-\s]/g, "_");
+
+  if (normalized === "installed") return "installed";
+  if (normalized === "not_installed" || normalized === "notinstalled") {
+    return "not_installed";
+  }
+  if (normalized === "ready_for_installation") {
+    return "ready_for_installation";
+  }
+
+  return value;
 };
 
 const DevicesTable = ({
@@ -59,42 +64,49 @@ const DevicesTable = ({
     React.SetStateAction<Record<string, any> | null>
   >;
 }) => {
+  const location = useLocation();
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [deviceID, setDeviceID] = useState<string>("");
   const [queryValue, setQueryValue] = useState<string>("");
   const [isSearchQuery, setIsSearchQuery] = useState<boolean>(false);
-  const [isHistoryOpen, setIsHistoryOpen] = useState<boolean>(false);
-  const [isReassignOpen, setIsReassignOpen] = useState<boolean>(false);
-  const [isUnassignOpen, setIsUnassignOpen] = useState<boolean>(false);
-  const [unassignAction, setUnassignAction] = useState<"RETURN" | "UNASSIGN">(
-    "UNASSIGN"
-  );
-  const [actionDevice, setActionDevice] = useState<DeviceEntries | null>(null);
-  const { role, agentDetails, id } = useTokens();
-  const roleName = role?.role?.toLowerCase() || "";
-  const canModifyAssignments = roleName.includes("admin");
-  const canViewHistory = true;
-  const currentAgentId = agentDetails?.id || id || "";
+
+  const defaultFilters = useMemo(() => {
+    if (location.pathname === "/agent/devices/installed") {
+      return { installationStatus: "installed" };
+    }
+    if (location.pathname === "/agent/devices/to-be-installed") {
+      return { installationStatus: "not_installed" };
+    }
+    return {};
+  }, [location.pathname]);
 
   const filterList = [
     {
       name: "Search",
       onSearch: async (query: string) => {
-        setQueryValue(query);
+        const searchText = query.trim();
+        setQueryValue(searchText);
         setIsSearchQuery(true);
-        setTableQueryParams((prevParams) => ({
-          ...prevParams,
-          search: query,
-        }));
+        setTableQueryParams((prevParams) => {
+          const nextParams = { ...(prevParams || {}) };
+          if (searchText) {
+            nextParams.search = searchText;
+          } else {
+            delete nextParams.search;
+          }
+          return nextParams;
+        });
       },
       isSearch: true,
     },
     {
       onDateClick: (date: string) => {
-        setQueryValue(date);
+        const createdAt = date.split("T")[0];
+        setQueryValue(createdAt);
         setIsSearchQuery(false);
         setTableQueryParams((prevParams) => ({
-          ...prevParams,
-          createdAt: date.split("T")[0],
+          ...(prevParams || {}),
+          createdAt,
         }));
       },
       isDate: true,
@@ -104,29 +116,34 @@ const DevicesTable = ({
   const columnList = [
     { title: "S/N", key: "no" },
     { title: "SERIAL NUMBER", key: "serialNumber" },
-    { title: "INSTALLATION STATUS", key: "installationStatus" },
+    {
+      title: "INSTALLATION STATUS",
+      key: "installationStatus",
+      valueIsAComponent: true,
+      customValue: (value: string | null | undefined) => (
+        <>{formatInstallationStatus(value)}</>
+      ),
+    },
     {
       title: "ACTIONS",
       key: "actions",
       valueIsAComponent: true,
-      customValue: (_value: any, rowData: DeviceEntries) => (
-        <button
-          type="button"
-          className="px-3 py-1 rounded-full border border-[#E5D9B8] bg-[#FFF7E2] text-[11px] font-semibold text-[#7A5B10] hover:bg-[#FCECC6] transition-colors"
-          onClick={() => {
-            setActionDevice(rowData);
-            setIsOpen(true);
-          }}
-        >
-          Actions
-        </button>
-      ),
+      customValue: (_value: any, rowData: DeviceEntries) => {
+        return (
+          <button
+            type="button"
+            className="px-2 py-1 text-[10px] text-textBlack font-medium bg-[#F6F8FA] border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom cursor-pointer transition-all hover:bg-gold"
+            onClick={() => {
+              setDeviceID(rowData.id);
+              setIsOpen(true);
+            }}
+          >
+            View
+          </button>
+        );
+      },
     },
   ];
-
-  const getTableData = () => {
-    return generateDeviceEntries(devicesData);
-  };
 
   return (
     <>
@@ -137,120 +154,30 @@ const DevicesTable = ({
             filterList={filterList}
             columnList={columnList}
             loading={isLoading}
-            tableData={getTableData()}
+            tableData={generateDeviceEntries(devicesData)}
             refreshTable={async () => {
               await refreshTable();
             }}
             queryValue={isSearchQuery ? queryValue : ""}
             paginationInfo={paginationInfo}
-            clearFilters={() => setTableQueryParams({})}
-          />
-          <Modal
-            isOpen={isOpen}
-            onClose={() => {
-              setIsOpen(false);
-              setActionDevice(null);
-            }}
-            layout="center"
-            size="small"
-          >
-            <div className="flex flex-col bg-white rounded-2xl overflow-hidden" >
-              <div className="flex items-start justify-between px-4 py-3 border-b border-strokeGreyThree bg-white rounded-t-2xl">
-                <h3 className="text-sm font-semibold text-textBlack">
-                  Device Actions
-                </h3>
-                <div className="flex flex-col items-end leading-tight">
-                  <span className="text-xs font-semibold text-textDarkGrey">
-                    {actionDevice?.serialNumber || "N/A"}
-                  </span>
-                  <span className="text-[10px] text-textGrey">Serial Number</span>
-                </div>
-              </div>
-              <div className="p-4 grid grid-cols-1 gap-3">
-                {canViewHistory ? (
-                  <button
-                    type="button"
-                    className="w-full px-4 py-2 rounded-xl border border-[#E5D9B8] bg-[#FFF7E2] text-[#7A5B10] text-sm font-semibold hover:bg-[#FCECC6] transition-colors"
-                    onClick={() => {
-                      if (actionDevice?.serialNumber) {
-                        setIsHistoryOpen(true);
-                      }
-                      setIsOpen(false);
-                    }}
-                  >
-                    View History
-                  </button>
-                ) : null}
-                {canModifyAssignments ? (
-                  <>
-                    <button
-                      type="button"
-                      className="w-full px-4 py-2 rounded-xl border border-[#CFE2FF] bg-[#F1F6FF] text-[#2457B2] text-sm font-semibold hover:bg-[#E3EEFF] transition-colors"
-                      onClick={() => {
-                        setIsReassignOpen(true);
-                        setIsOpen(false);
-                      }}
-                    >
-                      Reassign
-                    </button>
-                    <button
-                      type="button"
-                      className="w-full px-4 py-2 rounded-xl border border-[#F4C7C7] bg-[#FCECEC] text-[#A32A2A] text-sm font-semibold hover:bg-[#F9DCDC] transition-colors"
-                      onClick={() => {
-                        setUnassignAction("UNASSIGN");
-                        setIsUnassignOpen(true);
-                        setIsOpen(false);
-                      }}
-                    >
-                      Unassign
-                    </button>
-                  </>
-                ) : null}
-              </div>
-            </div>
-          </Modal>
-          <DeviceHistoryModal
-            isOpen={isHistoryOpen}
-            onClose={() => setIsHistoryOpen(false)}
-            deviceId={actionDevice?.id || null}
-          />
-          <ReassignDevicesModal
-            isOpen={isReassignOpen}
-            onClose={() => setIsReassignOpen(false)}
-            currentAgentId={currentAgentId}
-            selectedDevices={
-              actionDevice?.serialNumber
-                ? [{ serialNumber: actionDevice.serialNumber }]
-                : []
-            }
-            onSuccess={async () => {
-              setIsReassignOpen(false);
-              await refreshTable();
+            clearFilters={() => {
+              setQueryValue("");
+              setIsSearchQuery(false);
+              setTableQueryParams(defaultFilters);
             }}
           />
-          <UnassignDevicesModal
-            isOpen={isUnassignOpen}
-            onClose={() => setIsUnassignOpen(false)}
-            actionType={unassignAction}
-            selectedDevices={
-              actionDevice?.serialNumber
-                ? [
-                    {
-                      serialNumber: actionDevice.serialNumber,
-                      deviceId: actionDevice.id,
-                    },
-                  ]
-                : []
-            }
-            onSuccess={async () => {
-              setIsUnassignOpen(false);
-              await refreshTable();
-            }}
-          />
+          {deviceID ? (
+            <DeviceDetailModal
+              isOpen={isOpen}
+              setIsOpen={setIsOpen}
+              deviceID={deviceID}
+              refreshTable={refreshTable}
+            />
+          ) : null}
         </div>
       ) : (
         <ErrorComponent
-          message="Failed to fetch inventory list."
+          message="Failed to fetch device list."
           className="rounded-[20px]"
           refreshData={refreshTable}
           errorData={errorData}

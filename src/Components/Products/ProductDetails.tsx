@@ -19,6 +19,9 @@ interface ProductDetailsProps {
     maximumInventoryBatchPrice: number;
   };
   paymentModes: string[] | string;
+  defaultInstallmentDuration?: number;
+  defaultInstallmentStartPrice?: number;
+  defaultMonthlyPayment?: number;
   datetime: string;
   name: string;
   displayInput?: boolean;
@@ -49,6 +52,9 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
     maximumInventoryBatchPrice: 0,
   },
   paymentModes = [],
+  defaultInstallmentDuration,
+  defaultInstallmentStartPrice,
+  defaultMonthlyPayment,
   datetime = "",
   name = "",
   displayInput = false,
@@ -207,6 +213,30 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
               </div>
             </div>
           )}
+        </div>
+        <div className="flex items-center justify-between">
+          <Tag name="Payment Duration" />
+          <p className="text-xs font-bold text-textDarkGrey">
+            {typeof defaultInstallmentDuration === "number"
+              ? `${defaultInstallmentDuration} months`
+              : "—"}
+          </p>
+        </div>
+        <div className="flex items-center justify-between">
+          <Tag name="Initial Deposit" />
+          <p className="text-xs font-bold text-textDarkGrey">
+            {typeof defaultInstallmentStartPrice === "number"
+              ? `₦ ${formatNumberWithCommas(defaultInstallmentStartPrice)}`
+              : "—"}
+          </p>
+        </div>
+        <div className="flex items-center justify-between">
+          <Tag name="Monthly Payment" />
+          <p className="text-xs font-bold text-textDarkGrey">
+            {typeof defaultMonthlyPayment === "number"
+              ? `₦ ${formatNumberWithCommas(defaultMonthlyPayment)}`
+              : "—"}
+          </p>
         </div>
       </div>
 

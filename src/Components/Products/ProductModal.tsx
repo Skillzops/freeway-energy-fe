@@ -22,6 +22,9 @@ type ProductDetails = {
   };
   currency: string;
   paymentModes: string;
+  defaultInstallmentDuration?: number;
+  defaultInstallmentStartPrice?: number;
+  defaultMonthlyPayment?: number;
   creatorId: string;
   categoryId: string;
   createdAt: string;
@@ -64,7 +67,18 @@ const ProductModal = ({
       productName: data?.name,
       productTag: data?.category?.name,
       productPrice: data?.priceRange,
-      paymentModes: data?.paymentModes?.split(", ").map((mode) => mode.trim()),
+      paymentModes: (data?.paymentModes || "")
+        .split(",")
+        .map((mode) => mode.trim())
+        .filter(Boolean),
+      defaultInstallmentDuration:
+        data?.defaultInstallmentDuration ?? (data as any)?.installmentDuration,
+      defaultInstallmentStartPrice:
+        data?.defaultInstallmentStartPrice ??
+        (data as any)?.defaultInstallmentStartingPrice ??
+        (data as any)?.installmentStartingPrice,
+      defaultMonthlyPayment:
+        data?.defaultMonthlyPayment ?? (data as any)?.monthlyPayment,
       datetime: data?.createdAt,
       name: data?.creatorDetails?.firstname
         ? `${data?.creatorDetails?.firstname} ${data?.creatorDetails?.lastname}`

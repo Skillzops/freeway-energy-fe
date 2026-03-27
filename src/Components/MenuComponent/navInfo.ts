@@ -46,6 +46,11 @@ export const navData = [
     link: "/agents",
   },
   {
+    title: "Task",
+    icon: ProductsIcon,
+    link: "/tasks",
+  },
+  {
     title: "Products",
     icon: ProductsIcon,
     link: "/products",
@@ -81,6 +86,11 @@ export const navData = [
     link: "/audit-logs",
   },
   {
+    title: "Failed Jobs",
+    icon: AuditIcon,
+    link: "/failed-jobs",
+  },
+  {
     title: "Settings",
     icon: SettingsIcon,
     link: "/settings",
@@ -102,6 +112,11 @@ export const AgentNavData = [
     title: "Sales",
     icon: SalesIcon,
     link: "/agent/sales",
+  },
+  {
+    title: "Devices",
+    icon: InventoryIcon,
+    link: "/agent/devices",
   },
   {
     title: "Wallet",

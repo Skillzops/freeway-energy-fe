@@ -154,6 +154,34 @@ const TooltipBadge: React.FC<{
   );
 };
 
+const normalizeStatus = (value?: string) =>
+  String(value || "unknown")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "_");
+
+const getStatusBadgeClasses = (status: string) => {
+  const normalized = normalizeStatus(status);
+  switch (normalized) {
+    case "active":
+      return "text-emerald-700 bg-emerald-50 border-emerald-200";
+    case "inactive":
+      return "text-gray-700 bg-gray-50 border-gray-200";
+    case "pending":
+      return "text-amber-700 bg-amber-50 border-amber-200";
+    case "barred":
+    case "suspended":
+    case "blocked":
+    case "blacklisted":
+      return "text-red-700 bg-red-50 border-red-200";
+    default:
+      return "text-slate-700 bg-slate-50 border-slate-200";
+  }
+};
+
+const formatStatusLabel = (status: string) =>
+  normalizeStatus(status).replace(/_/g, " ").toUpperCase();
+
 const generateCustomerEntries = (data: any): CustomerEntries[] => {
   const entries: CustomerEntries[] = data?.customers?.map(
     (item: any, index: number) => ({
@@ -318,18 +346,14 @@ const CustomerTable = ({
       title: "STATUS",
       key: "status",
       valueIsAComponent: true,
-      customValue: (value: any) => {
-        let style = "";
-        if (value === "active") style = "text-success";
-        else if (value === "inactive") style = "text-strokeCream";
-        else style = "text-errorTwo";
-
+      customValue: (value: string) => {
+        const badgeClasses = getStatusBadgeClasses(value);
         return (
           <span
-            className={`${style} text-[11px] flex items-center gap-0.5 w-max px-2 py-1 bg-[#F6F8FA] border-[0.4px] border-strokeGreyTwo rounded-full uppercase`}
+            className={`${badgeClasses} text-[11px] flex items-center gap-1 w-max px-2 py-1 border rounded-full font-medium`}
           >
-            <GoDotFill />
-            {value}
+            <GoDotFill className="text-[10px]" />
+            {formatStatusLabel(value)}
           </span>
         );
       },

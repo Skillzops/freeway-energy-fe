@@ -1,13 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Tag } from "../Products/ProductDetails";
-import { SmallFileInput } from "../InputComponent/Input";
-import { LuImagePlus } from "react-icons/lu";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 import inventoryIcon from "../../assets/inventory/inventoryIcon.svg";
 import { GoDotFill } from "react-icons/go";
 import { formatDateTime, formatNumberWithCommas } from "@/utils/helpers";
 import { NairaSymbol } from "../CardComponents/CardComponent";
 import { KeyedMutator } from "swr";
+import { useApiCall } from "@/utils/useApiCall";
+import ApiErrorMessage from "../ApiErrorMessage";
 
 type InventoryDetailsProps = {
   inventoryId: string | number;
@@ -22,10 +22,12 @@ type InventoryDetailsProps = {
   remainingQuantity: number;
   costPrice: number;
   salePrice: number;
-  stockValue: string;
+  stockValue: string | number;
   displayInput?: boolean;
+  setDisplayInput?: React.Dispatch<React.SetStateAction<boolean>>;
   tagStyle: (value: string) => string;
   refreshTable: KeyedMutator<any>;
+  refreshListView: KeyedMutator<any>;
 };
 
 const InventoryDetails: React.FC<InventoryDetailsProps> = ({
@@ -43,24 +45,30 @@ const InventoryDetails: React.FC<InventoryDetailsProps> = ({
   salePrice = 0,
   stockValue,
   displayInput = false,
+  setDisplayInput,
   tagStyle,
   refreshTable,
+  refreshListView,
 }) => {
-  const [formData, setFormData] = useState({
-    inventoryId,
-    inventoryImage,
-    inventoryName,
-    inventoryClass,
-    inventoryCategory,
-    sku,
-    manufacturerName,
-    dateOfManufacture,
-    numberOfStock,
-    costPrice,
-    salePrice,
-  });
+  const { apiCall } = useApiCall();
+  const defaultFormData = useMemo(
+    () => ({
+      inventoryName,
+      inventoryClass,
+      sku,
+      manufacturerName,
+      dateOfManufacture: dateOfManufacture || "",
+    }),
+    [inventoryName, inventoryClass, sku, manufacturerName, dateOfManufacture]
+  );
+  const [formData, setFormData] = useState(defaultFormData);
   const [loading, setLoading] = useState<boolean>(false);
-  // const [unsavedChanges, setUnsavedChanges] = useState(false);
+  const [apiError, setApiError] = useState<string | string[] | Record<string, unknown> | null>(null);
+
+  useEffect(() => {
+    setFormData(defaultFormData);
+    if (!displayInput) setApiError(null);
+  }, [defaultFormData, displayInput]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -70,23 +78,49 @@ const InventoryDetails: React.FC<InventoryDetailsProps> = ({
       ...prevData,
       [name]: value,
     }));
-
-    // Check for unsaved changes by comparing the form data with the initial userData
-    // if (data[name] !== value) {
-    //   setUnsavedChanges(true);
-    // } else {
-    //   setUnsavedChanges(false);
-    // }
+    setApiError(null);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const updatedPayload = {
+    ...(formData.inventoryName.trim() !== defaultFormData.inventoryName.trim() && {
+      name: formData.inventoryName.trim(),
+    }),
+    ...(formData.manufacturerName.trim() !== defaultFormData.manufacturerName.trim() && {
+      manufacturerName: formData.manufacturerName.trim(),
+    }),
+    ...(formData.sku.trim() !== defaultFormData.sku.trim() && {
+      sku: formData.sku.trim(),
+    }),
+    ...(formData.inventoryClass !== defaultFormData.inventoryClass && {
+      class: formData.inventoryClass,
+    }),
+    ...(String(formData.dateOfManufacture || "") !==
+      String(defaultFormData.dateOfManufacture || "") && {
+      dateOfManufacture: formData.dateOfManufacture || "",
+    }),
+  };
+
+  const isFormFilled = Object.keys(updatedPayload).length > 0;
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isFormFilled) return;
     setLoading(true);
+    setApiError(null);
     try {
-      console.log("Submitted Data:", formData);
-      refreshTable();
+      await apiCall({
+        endpoint: `/v1/inventory/${inventoryId}`,
+        method: "patch",
+        data: updatedPayload,
+        successMessage: "Inventory updated successfully!",
+      });
+      await Promise.all([refreshListView(), refreshTable()]);
+      setDisplayInput?.(false);
     } catch (error) {
-      console.error(error);
+      const message =
+        (error as any)?.response?.data?.message ||
+        "Inventory update failed: Internal Server Error";
+      setApiError(message);
     } finally {
       setLoading(false);
     }
@@ -96,23 +130,13 @@ const InventoryDetails: React.FC<InventoryDetailsProps> = ({
     <form onSubmit={handleSubmit} className="flex flex-col w-full gap-4">
       <div className="flex items-center justify-between p-2.5 gap-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px]">
         <Tag name="Inventory Picture" variant="ink" />
-        {displayInput ? (
-          <SmallFileInput
-            name="inventoryImage"
-            onChange={handleChange}
-            placeholder="Upload Image"
-            required={false}
-            iconRight={<LuImagePlus />}
+        <div className="flex items-center justify-center w-full p-2 max-w-[100px] h-[100px] gap-2 border-[0.6px] border-strokeCream rounded-full overflow-clip">
+          <img
+            src={inventoryImage}
+            alt="Inventory Image"
+            className="w-full h-full object-cover rounded-full"
           />
-        ) : (
-          <div className="flex items-center justify-center w-full p-2 max-w-[100px] h-[100px] gap-2 border-[0.6px] border-strokeCream rounded-full overflow-clip">
-            <img
-              src={inventoryImage}
-              alt="Inventory Image"
-              className="w-full h-full object-cover rounded-full"
-            />
-          </div>
-        )}
+        </div>
       </div>
 
       <div className="flex flex-col p-2.5 gap-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px]">
@@ -164,19 +188,7 @@ const InventoryDetails: React.FC<InventoryDetailsProps> = ({
         </div>
         <div className="flex items-center justify-between">
           <Tag name="Category" variant="ink" />
-          {displayInput ? (
-            <select
-              name="inventoryCategory"
-              value={formData.inventoryCategory}
-              onChange={handleChange}
-              required={true}
-              className="text-xs text-textDarkGrey px-2 py-1 w-full max-w-[160px] border-[0.6px] border-strokeGreyThree rounded-[10px]"
-            >
-              <option value="solarPanel">Solar Panel</option>
-              <option value="inverter">Inverter</option>
-              <option value="battery">Batttery</option>
-            </select>
-          ) : inventoryCategory ? (
+          {inventoryCategory ? (
             <span className="flex items-center justify-center bg-[#FEF5DA] gap-0.5 w-max px-2 h-[24px] text-textDarkBrown text-xs uppercase rounded-full">
               <GoDotFill width={4} height={4} />
               {inventoryCategory}
@@ -255,21 +267,9 @@ const InventoryDetails: React.FC<InventoryDetailsProps> = ({
         </p>
         <div className="flex items-center justify-between">
           <Tag name="Total Quantity of Stock" />
-          {displayInput ? (
-            <input
-              type="number"
-              name="numberOfStock"
-              value={formData.numberOfStock}
-              onChange={handleChange}
-              placeholder="Enter Number of Stock"
-              required={true}
-              className="text-xs text-textDarkGrey px-2 py-1 w-full max-w-[160px] border-[0.6px] border-strokeGreyThree rounded-full"
-            />
-          ) : (
-            <p className="text-xs font-bold text-textDarkGrey">
-              {formatNumberWithCommas(numberOfStock)}
-            </p>
-          )}
+          <p className="text-xs font-bold text-textDarkGrey">
+            {formatNumberWithCommas(numberOfStock)}
+          </p>
         </div>
         <div className="flex items-center justify-between">
           <Tag name="Remaining Quantity of Stock" />
@@ -279,41 +279,17 @@ const InventoryDetails: React.FC<InventoryDetailsProps> = ({
         </div>
         <div className="flex items-center justify-between">
           <Tag name="Cost of Stock" />
-          {displayInput ? (
-            <input
-              type="number"
-              name="costPrice"
-              value={formData.costPrice}
-              onChange={handleChange}
-              placeholder="Enter Cost Price"
-              required={true}
-              className="text-xs text-textDarkGrey px-2 py-1 w-full max-w-[160px] border-[0.6px] border-strokeGreyThree rounded-full"
-            />
-          ) : (
-            <p className="flex items-center justify-end gap-1 w-max text-xs font-bold text-textDarkGrey">
-              <NairaSymbol color="#828DA9" />
-              {formatNumberWithCommas(costPrice)}
-            </p>
-          )}
+          <p className="flex items-center justify-end gap-1 w-max text-xs font-bold text-textDarkGrey">
+            <NairaSymbol color="#828DA9" />
+            {formatNumberWithCommas(costPrice)}
+          </p>
         </div>
         <div className="flex items-center justify-between">
           <Tag name="Price of Stock" />
-          {displayInput ? (
-            <input
-              type="number"
-              name="salePrice"
-              value={formData.salePrice}
-              onChange={handleChange}
-              placeholder="Enter Selling Price"
-              required={true}
-              className="text-xs text-textDarkGrey px-2 py-1 w-full max-w-[160px] border-[0.6px] border-strokeGreyThree rounded-full"
-            />
-          ) : (
-            <p className="flex items-center justify-end gap-1 w-max text-xs font-bold text-textDarkGrey">
-              <NairaSymbol color="#828DA9" />
-              {formatNumberWithCommas(salePrice)}
-            </p>
-          )}
+          <p className="flex items-center justify-end gap-1 w-max text-xs font-bold text-textDarkGrey">
+            <NairaSymbol color="#828DA9" />
+            {formatNumberWithCommas(salePrice)}
+          </p>
         </div>
         <div className="flex items-center justify-between">
           <Tag name="Stock Value" />
@@ -324,13 +300,15 @@ const InventoryDetails: React.FC<InventoryDetailsProps> = ({
         </div>
       </div>
 
+      <ApiErrorMessage apiError={apiError} />
+
       {displayInput && (
         <div className="flex items-center justify-center w-full pt-5 pb-5">
           <ProceedButton
             type="submit"
             loading={loading}
-            variant={"gray"}
-            disabled={false}
+            variant={isFormFilled ? "gradient" : "gray"}
+            disabled={!isFormFilled}
           />
         </div>
       )}

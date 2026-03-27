@@ -11,6 +11,8 @@ import TabComponent from "../TabComponent/TabComponent";
 // import message from "../../assets/settings/message.svg";
 import CustomerDetails, { DetailsType } from "./CustomerDetails";
 import { DataStateWrapper } from "../Loaders/DataStateWrapper";
+import CustomerProductDetails from "./CustomerProductDetails";
+import CustomerInteraction from "./CustomerInteraction";
 
 const CustomerModal = ({
   isOpen,
@@ -25,11 +27,30 @@ const CustomerModal = ({
 }) => {
   const [displayInput, setDisplayInput] = useState<boolean>(false);
   const [tabContent, setTabContent] = useState<string>("customerDetails");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
+  const [deletingCustomer, setDeletingCustomer] = useState<boolean>(false);
 
   const fetchSingleCustomer = useGetRequest(
     `/v1/customers/single/${customerID}`,
     false
   );
+  const fetchInteractionStats = useGetRequest(
+    `/v1/customers/${customerID}/interactions/stats`,
+    true
+  );
+  const fetchInteractionFallbackCount = useGetRequest(
+    `/v1/customers/${customerID}/interactions?page=1&limit=1`,
+    true
+  );
+
+  const interactionCount =
+    Number(fetchInteractionStats?.data?.totalInteractions) ||
+    Number(fetchInteractionStats?.data?.total) ||
+    Number(fetchInteractionStats?.data?.count) ||
+    Number(fetchInteractionFallbackCount?.data?.total) ||
+    Number(fetchInteractionFallbackCount?.data?.count) ||
+    Number(fetchInteractionFallbackCount?.data?.pagination?.total) ||
+    0;
 
   const { apiCall } = useApiCall();
 
@@ -59,17 +80,20 @@ const CustomerModal = ({
   };
 
   const handleDeleteCustomer = async (customerId: string) => {
-    if (!window.confirm("Are you sure you want to delete this customer?")) return;
     try {
+      setDeletingCustomer(true);
       await apiCall({
         endpoint: `/v1/customers/${customerId}`,
         method: "delete",
         successMessage: "Customer deleted successfully!",
       });
+      setShowDeleteConfirm(false);
       setIsOpen(false);
       refreshTable();
     } catch (error) {
       console.error("Error deleting customer:", error);
+    } finally {
+      setDeletingCustomer(false);
     }
   };
 
@@ -78,7 +102,7 @@ const CustomerModal = ({
     onClickLink: (index: number) => {
       switch (index) {
         case 0:
-          handleDeleteCustomer(customerID);
+          setShowDeleteConfirm(true);
           break;
         case 1:
           setDisplayInput(true);
@@ -93,9 +117,10 @@ const CustomerModal = ({
 
   const tabNames = [
     { name: "Customer Details", key: "customerDetails", count: null },
-    { name: "Product Details", key: "stats", count: null },
+    { name: "Product Details", key: "productDetails", count: null },
     { name: "Registration History", key: "registrationHistory", count: null },
     { name: "Contracts", key: "contracts", count: null },
+    { name: "Customer Interaction", key: "customerInteraction", count: interactionCount },
     { name: "Transactions", key: "transactions", count: 0 },
     { name: "Tickets", key: "tickets", count: 0 },
   ];
@@ -113,12 +138,14 @@ const CustomerModal = ({
   return (
     <Modal
       layout="right"
+      size="xlarge"
       bodyStyle="pb-44 overflow-auto"
       isOpen={isOpen}
       onClose={() => {
         setTabContent("customerDetails");
         setIsOpen(false);
         setDisplayInput(false);
+        setShowDeleteConfirm(false);
       }}
       leftHeaderContainerClass="pl-2"
       // rightHeaderComponents={
@@ -188,6 +215,18 @@ const CustomerModal = ({
                 displayInput={displayInput}
               />
             </DataStateWrapper>
+          ) : tabContent === "productDetails" ? (
+            <DataStateWrapper
+              isLoading={fetchSingleCustomer?.isLoading}
+              error={fetchSingleCustomer?.error}
+              errorStates={fetchSingleCustomer?.errorStates}
+              refreshData={fetchSingleCustomer?.mutate}
+              errorMessage="Failed to fetch product details"
+            >
+              <CustomerProductDetails customer={fetchSingleCustomer?.data} />
+            </DataStateWrapper>
+          ) : tabContent === "customerInteraction" ? (
+            <CustomerInteraction customerId={customerID} />
           ) : (
             <div>
               {tabNames?.find((item) => item.key === tabContent)?.name} Coming
@@ -196,6 +235,36 @@ const CustomerModal = ({
           )}
         </div>
       </div>
+      <Modal
+        layout="center"
+        size="small"
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+      >
+        <div className="w-full rounded-2xl bg-white border border-[#DDE4EE] p-4">
+          <p className="text-base font-semibold text-textBlack">Delete Customer</p>
+          <p className="mt-2 text-sm text-textLightGrey">
+            Are you sure you want to delete this customer? This action cannot be undone.
+          </p>
+          <div className="mt-4 flex items-center justify-end gap-2">
+            <button
+              className="h-[36px] rounded-full border border-[#D4DCE8] bg-[#F6F8FA] px-4 text-sm font-medium text-textDarkGrey"
+              onClick={() => setShowDeleteConfirm(false)}
+              disabled={deletingCustomer}
+            >
+              Cancel
+            </button>
+            <button
+              className="h-[36px] rounded-full px-4 text-sm font-semibold text-white"
+              style={{ backgroundColor: "#901420" }}
+              onClick={() => handleDeleteCustomer(customerID)}
+              disabled={deletingCustomer}
+            >
+              {deletingCustomer ? "Deleting..." : "Delete"}
+            </button>
+          </div>
+        </div>
+      </Modal>
     </Modal>
   );
 };

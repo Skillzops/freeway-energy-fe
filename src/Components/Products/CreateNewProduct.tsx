@@ -57,6 +57,18 @@ const formSchema = z.object({
     )
     .nullable()
     .default(null),
+  defaultInstallmentDuration: z.preprocess(
+    (value) => (value === "" || value === null || value === undefined ? undefined : Number(value)),
+    z.number().positive("Default installment duration must be greater than 0").optional()
+  ),
+  defaultInstallmentStartPrice: z.preprocess(
+    (value) => (value === "" || value === null || value === undefined ? undefined : Number(value)),
+    z.number().min(0, "Default installment starting/deposit price cannot be negative").optional()
+  ),
+  defaultMonthlyPayment: z.preprocess(
+    (value) => (value === "" || value === null || value === undefined ? undefined : Number(value)),
+    z.number().min(0, "Default monthly installment amount cannot be negative").optional()
+  ),
 });
 
 const paymentModesSchema = z
@@ -89,6 +101,9 @@ const defaultFormData = {
   inventories: [],
   paymentModes: [],
   productImage: null,
+  defaultInstallmentDuration: "",
+  defaultInstallmentStartPrice: "",
+  defaultMonthlyPayment: "",
 };
 
 const OtherSubmissonData = {
@@ -250,7 +265,14 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
     };
 
     const selectedProducts = ProductStore.products;
-    const { categoryId, name, productImage } = formData;
+    const {
+      categoryId,
+      name,
+      productImage,
+      defaultInstallmentDuration,
+      defaultInstallmentStartPrice,
+      defaultMonthlyPayment,
+    } = formData;
     const isFormFilled =
       formType === "newProduct"
         ? productImage &&
@@ -364,6 +386,33 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
                     placeholder="Select Payment Modes"
                     required={true}
                     errorMessage={getFieldError("paymentModes")}
+                  />
+                  <Input
+                    type="number"
+                    name="defaultInstallmentDuration"
+                    label="DEFAULT INSTALLMENT DURATION (MONTHS)"
+                    value={defaultInstallmentDuration as any}
+                    onChange={handleInputChange}
+                    placeholder="Default installment duration in months (e.g. 12)"
+                    errorMessage={getFieldError("defaultInstallmentDuration")}
+                  />
+                  <Input
+                    type="number"
+                    name="defaultInstallmentStartPrice"
+                    label="DEFAULT INSTALLMENT STARTING/DEPOSIT PRICE"
+                    value={defaultInstallmentStartPrice as any}
+                    onChange={handleInputChange}
+                    placeholder="Default installment starting/deposit price (e.g. 40000)"
+                    errorMessage={getFieldError("defaultInstallmentStartPrice")}
+                  />
+                  <Input
+                    type="number"
+                    name="defaultMonthlyPayment"
+                    label="DEFAULT MONTHLY INSTALLMENT AMOUNT"
+                    value={defaultMonthlyPayment as any}
+                    onChange={handleInputChange}
+                    placeholder="Default monthly installment amount (e.g. 45000)"
+                    errorMessage={getFieldError("defaultMonthlyPayment")}
                   />
                   <FileInput
                     name="productImage"

@@ -383,17 +383,22 @@ const CustomerTable = ({
       key: "status",
       valueIsAComponent: true,
       customValue: (value: string) => {
-        let style = "";
-        if (value === "active") style = "text-success";
-        else if (value === "inactive") style = "text-strokeCream";
-        else style = "text-errorTwo";
+        const status = (value || "").toLowerCase();
+        let style = "text-[#49526A] border-[#E1E5EA] bg-[#F6F8FA]";
+        if (status === "active") {
+          style = "text-[#0E6F3D] border-[#B7E4C7] bg-[#EAF7EF]";
+        } else if (status === "inactive") {
+          style = "text-[#9A6A00] border-[#F4D48A] bg-[#FFF6DA]";
+        } else if (status === "barred" || status === "blocked") {
+          style = "text-[#9B2B23] border-[#F3B5B0] bg-[#FCECEB]";
+        }
 
         return (
           <span
-            className={`${style} text-[11px] flex items-center gap-0.5 w-max px-2 py-1 bg-[#F6F8FA] border-[0.4px] border-strokeGreyTwo rounded-full uppercase`}
+            className={`${style} text-[11px] flex items-center gap-0.5 w-max px-2 py-1 border-[0.4px] rounded-full uppercase`}
           >
             <GoDotFill />
-            {value}
+            {status || "N/A"}
           </span>
         );
       },

@@ -8,7 +8,7 @@ import InventoryDetails from "./InventoryDetails";
 import InventoryStats from "./InventoryStats";
 import InventoryHistory, { Batch } from "./InventoryHistory";
 import { GoDotFill } from "react-icons/go";
-import { useGetRequest } from "../../utils/useApiCall";
+import { useApiCall, useGetRequest } from "../../utils/useApiCall";
 import { KeyedMutator } from "swr";
 import { DataStateWrapper } from "../Loaders/DataStateWrapper";
 import CreateInventoryBatchForm from "./CreateInventoryBatchForm";
@@ -77,16 +77,20 @@ const InventoryDetailModal = ({
   refreshTable: KeyedMutator<any>;
   inventoryIdParamExists: boolean;
 }) => {
+  const { apiCall } = useApiCall();
   const fetchSingleBatchInventory = useGetRequest(
     `/v1/inventory/${inventoryID}`,
     false
   );
-  // const [displayInput, setDisplayInput] = useState<boolean>(false);
+  const [displayInput, setDisplayInput] = useState<boolean>(false);
   const [tabContent, setTabContent] = useState<string>("details");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
   const [secModal, setSecModal] = useState<boolean>(false);
   const [paramError, setParamError] = useState<boolean>(false);
+  const [showToggleConfirm, setShowToggleConfirm] = useState<boolean>(false);
+  const [toggleVisibilityLoading, setToggleVisibilityLoading] =
+    useState<boolean>(false);
 
   useEffect(() => {
     if (fetchSingleBatchInventory?.error && inventoryIdParamExists) {
@@ -131,7 +135,24 @@ const InventoryDetailModal = ({
     return getInventoryData(fetchSingleBatchInventory?.data);
   }, [fetchSingleBatchInventory]);
 
-  // const handleCancelClick = () => setDisplayInput(false);
+  const handleCancelClick = () => setDisplayInput(false);
+
+  const toggleInventoryVisibility = async () => {
+    try {
+      setToggleVisibilityLoading(true);
+      await apiCall({
+        endpoint: `/v1/inventory/${inventoryID}/toggle-hide`,
+        method: "post",
+        successMessage: "Inventory visibility updated successfully!",
+      });
+      await Promise.all([fetchSingleBatchInventory?.mutate(), refreshTable()]);
+      setShowToggleConfirm(false);
+    } catch (error) {
+      console.error("Failed to toggle inventory visibility:", error);
+    } finally {
+      setToggleVisibilityLoading(false);
+    }
+  };
 
   const getStatsData = (data: InventoryData) => {
     // Early return if data is undefined or doesn't have batches
@@ -172,33 +193,22 @@ const InventoryDetailModal = ({
 
   const dropDownList = {
     items: [
+      "Edit Inventory",
       "Create New Batch",
-      // "Request Restock",
-      // "Change Stock Status",
-      // "Transfer Stock Details",
-      // "Reset Stock Levels",
-      // "Delete Stock",
+      "Toggle Visibility",
     ],
     onClickLink: (index: number) => {
       switch (index) {
         case 0:
+          setTabContent("details");
+          setDisplayInput(true);
+          break;
+        case 1:
           setSecModal(true);
           break;
-        // case 1:
-        //   console.log("Request Restock");
-        //   break;
-        // case 2:
-        //   console.log("Change Stock Status");
-        //   break;
-        // case 3:
-        //   console.log("Transfer Stock Details");
-        //   break;
-        // case 4:
-        //   console.log("Reset Stock Levels");
-        //   break;
-        // case 5:
-        //   console.log("Delete Stock");
-        //   break;
+        case 2:
+          setShowToggleConfirm(true);
+          break;
         default:
           break;
       }
@@ -235,9 +245,22 @@ const InventoryDetailModal = ({
         isOpen={isOpen}
         onClose={() => {
           setTabContent("details");
+          setDisplayInput(false);
+          setShowToggleConfirm(false);
           setIsOpen(false);
         }}
         leftHeaderContainerClass="pl-2"
+        rightHeaderComponents={
+          displayInput ? (
+            <p
+              className="text-xs text-textDarkGrey font-semibold cursor-pointer over"
+              onClick={handleCancelClick}
+              title="Close edit mode"
+            >
+              Close Edit
+            </p>
+          ) : null
+        }
         leftHeaderComponents={
           inventoryData.inventoryClass && (
             <span
@@ -310,8 +333,10 @@ const InventoryDetailModal = ({
                 <InventoryDetails
                   {...inventoryData}
                   tagStyle={tagStyle}
-                  displayInput={false}
+                  displayInput={displayInput}
+                  setDisplayInput={setDisplayInput}
                   refreshTable={refreshTable}
+                  refreshListView={fetchSingleBatchInventory?.mutate}
                 />
               </DataStateWrapper>
             ) : tabContent === "stats" ? (
@@ -339,6 +364,43 @@ const InventoryDetailModal = ({
           onClose={() => setSecModal(false)}
         />
       </SecondaryModal>
+      <Modal
+        layout="center"
+        size="medium"
+        isOpen={showToggleConfirm}
+        onClose={() => {
+          if (!toggleVisibilityLoading) setShowToggleConfirm(false);
+        }}
+      >
+        <div className="w-full rounded-2xl bg-white border border-[#DDE4EE] p-4">
+          <p className="text-base font-semibold text-textBlack">
+            Toggle Visibility
+          </p>
+          <p className="mt-2 text-sm text-textLightGrey">
+            Are you sure you want to toggle visibility for{" "}
+            <span className="font-semibold text-textDarkGrey">
+              {inventoryData?.inventoryName || "this inventory"}
+            </span>
+            ?
+          </p>
+          <div className="mt-4 flex items-center justify-end gap-2">
+            <button
+              className="h-[38px] rounded-full border border-[#D4DCE8] bg-[#F6F8FA] px-5 text-sm font-medium text-textDarkGrey"
+              onClick={() => setShowToggleConfirm(false)}
+              disabled={toggleVisibilityLoading}
+            >
+              Cancel
+            </button>
+            <button
+              className="h-[38px] rounded-full px-5 text-sm font-semibold text-white bg-gradient-to-r from-[#941C12] to-[#F4C541]"
+              onClick={toggleInventoryVisibility}
+              disabled={toggleVisibilityLoading}
+            >
+              {toggleVisibilityLoading ? "Toggling..." : "Yes, Toggle"}
+            </button>
+          </div>
+        </div>
+      </Modal>
     </>
   );
 };
