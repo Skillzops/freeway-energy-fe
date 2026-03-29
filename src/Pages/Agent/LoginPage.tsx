@@ -176,11 +176,11 @@ const AgentLoginPage = () => {
           </div>
         </>
         <section className="flex w-full flex-col items-center justify-center gap-2 z-10 max-w-[500px]">
-          <div className="flex flex-col items-center justify-center">
-            <h1 className="text-[32px] text-white font-medium font-secondary">
+          <div className="flex flex-col items-center justify-center rounded-[28px] bg-white/40 px-8 py-5 shadow-[0_18px_60px_rgba(24,121,197,0.12)] backdrop-blur-[6px]">
+            <h1 className="text-[32px] text-[#12385E] font-semibold font-secondary drop-shadow-[0_1px_0_rgba(255,255,255,0.7)]">
               {isForgotPassword ? "See who forgot something" : "Welcome Back"}
             </h1>
-            <em className="text-xs text-white text-center max-w-[260px]">
+            <em className="text-sm text-[#3A628A] text-center max-w-[280px] not-italic">
               {isForgotPassword
                 ? "Enter your email or phone and we'll send a reset link or code."
                 : "Sign In to Access your Workplace"}

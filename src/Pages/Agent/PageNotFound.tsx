@@ -1,16 +1,23 @@
 import { Link } from "react-router-dom";
 import { TbAlertCircleFilled } from "react-icons/tb";
+import { brandAssets } from "@/config/brandConfig";
 
 const PageNotFound = () => {
   const statusCode = 404;
   const title = "Page Not Found";
+  const brandLogo = brandAssets.logoFull;
+  const brandBg = brandAssets.authBackgrounds.agent;
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      {/* Error content */}
-      <div className="flex-grow flex items-center justify-center">
-        <div className="max-w-xl w-full px-4">
-          <div className="text-center">
+    <main className="relative flex min-h-screen flex-col items-center justify-center gap-10 overflow-hidden px-4 py-16">
+      <img
+        src={brandBg}
+        alt="background"
+        className="absolute inset-0 h-full w-full object-cover object-center opacity-40"
+      />
+      <img src={brandLogo} alt="Logo" className="z-10 w-[120px]" />
+      <div className="z-10 w-full max-w-xl rounded-[32px] bg-white/55 px-6 py-10 text-center shadow-[0_24px_80px_rgba(24,121,197,0.14)] backdrop-blur-[10px] sm:px-10">
+        <div className="text-center">
             <div className="relative">
               <svg height="0" width="0">
                 <defs>
@@ -43,13 +50,13 @@ const PageNotFound = () => {
                 }}
               />
             </div>
-            <h1 className="mt-4 text-4xl font-bold text-gray-900 tracking-tight sm:text-5xl">
+            <h1 className="mt-4 text-4xl font-bold tracking-tight text-[#12385E] sm:text-5xl">
               {statusCode}
             </h1>
-            <h2 className="mt-2 text-3xl font-semibold text-gray-700">
+            <h2 className="mt-2 text-3xl font-semibold text-[#174A74]">
               {title}
             </h2>
-            <p className="mt-4 text-lg text-center text-gray-500">
+            <p className="mt-4 text-lg text-center text-[#4D7097]">
               The page{" "}
               <span className="text-primary font-medium">
                 {window.location.href}
@@ -64,10 +71,9 @@ const PageNotFound = () => {
                 Go back Home
               </Link>
             </div>
-          </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 };
 

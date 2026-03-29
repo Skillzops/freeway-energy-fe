@@ -124,13 +124,13 @@ const LoginPage = () => {
       />
       <img src={brandLogo} alt="Logo" className="w-[120px] z-10" />
       <section className="flex w-full flex-col items-center justify-center gap-2 z-10 max-w-[500px]">
-        <div className="flex flex-col items-center justify-center">
-          <h1 className="text-[32px] text-primary font-medium font-secondary">
+        <div className="flex flex-col items-center justify-center rounded-[28px] bg-white/40 px-8 py-5 shadow-[0_18px_60px_rgba(24,121,197,0.12)] backdrop-blur-[6px]">
+          <h1 className="text-[32px] text-[#12385E] font-semibold font-secondary drop-shadow-[0_1px_0_rgba(255,255,255,0.7)]">
             Welcome
           </h1>
-          <em className="text-xs text-textDarkGrey text-center max-w-[220px]">
+          <em className="text-sm text-[#3A628A] text-center max-w-[280px] not-italic">
             {isResetPasswordRoute
-              ? "Hopefully you don't forgot this password."
+              ? "Set a new password to get back into your workspace."
               : "Since this is your first time here, create your password below."}
           </em>
         </div>

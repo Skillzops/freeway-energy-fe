@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { TbAlertTriangleFilled } from "react-icons/tb";
 import { KeyedMutator } from "swr";
 import { ApiErrorStatesType } from "@/utils/useApiCall";
-import { BRAND_CONFIG } from "@/config/brandConfig";
+import { BRAND_CONFIG, brandAssets } from "@/config/brandConfig";
 
 export default function ErrorPage({
   error,
@@ -25,13 +25,19 @@ export default function ErrorPage({
     : "Sorry, something went wrong on our end. We're working to fix it.";
   const supportEmail = BRAND_CONFIG.supportEmail;
   const supportEmailHref = `mailto:${supportEmail}`;
+  const brandLogo = brandAssets.logoFull;
+  const brandBg = brandAssets.authBackgrounds.agent;
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      {/* Error content */}
-      <div className="flex-grow flex items-center justify-center">
-        <div className="max-w-md w-full px-4 sm:px-6 lg:px-6">
-          <div className="text-center">
+    <main className="relative flex min-h-screen flex-col items-center justify-center gap-10 overflow-hidden px-4 py-16">
+      <img
+        src={brandBg}
+        alt="background"
+        className="absolute inset-0 h-full w-full object-cover object-center opacity-40"
+      />
+      <img src={brandLogo} alt="Logo" className="z-10 w-[120px]" />
+      <div className="z-10 w-full max-w-md rounded-[32px] bg-white/55 px-6 py-10 text-center shadow-[0_24px_80px_rgba(24,121,197,0.14)] backdrop-blur-[10px] sm:px-8">
+        <div className="text-center">
             <div className="relative">
               <svg height="0" width="0">
                 <defs>
@@ -64,13 +70,13 @@ export default function ErrorPage({
                 }}
               />
             </div>
-            <h1 className="mt-4 text-4xl font-bold text-gray-900 tracking-tight sm:text-5xl">
+            <h1 className="mt-4 text-4xl font-bold tracking-tight text-[#12385E] sm:text-5xl">
               {statusCode}
             </h1>
-            <h2 className="mt-2 text-3xl font-semibold text-gray-700">
+            <h2 className="mt-2 text-3xl font-semibold text-[#174A74]">
               {title}
             </h2>
-            <p className="mt-2 text-lg text-gray-500">{message}</p>
+            <p className="mt-2 text-lg text-[#4D7097]">{message}</p>
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row mt-6">
               {!networkError && (
                 <Link
@@ -92,7 +98,7 @@ export default function ErrorPage({
               </div>
             </div>
             {!networkError && (
-              <p className="mt-4 text-[15px] text-gray-500">
+              <p className="mt-4 text-[15px] text-[#4D7097]">
                 If this problem persists, please contact our support team by
                 sending an email to{" "}
                 <a
@@ -104,10 +110,9 @@ export default function ErrorPage({
                 .
               </p>
             )}
-          </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
 
