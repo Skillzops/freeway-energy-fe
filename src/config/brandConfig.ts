@@ -9,9 +9,9 @@ import ContractsIcon from "../assets/RedIconsSvg/Contract.svg?url";
 import ReportsIcon from "../assets/RedIconsSvg/Reports.svg?url";
 import SettingsIcon from "../assets/RedIconsSvg/settings.svg?url";
 
-const LogoFull = new URL("/logo.svg", import.meta.url).href;
-const LoginBackground = new URL("../assets/loginbg.jpg", import.meta.url).href;
-const FaviconUrl = "/logo.svg";
+const LogoFull = new URL("/freewave-logo.svg", import.meta.url).href;
+const LoginBackground = new URL("../assets/freewave-auth-bg.svg", import.meta.url).href;
+const FaviconUrl = "/freewave-logo.svg";
 
 const clamp = (v: number) => Math.max(0, Math.min(255, v));
 
@@ -143,6 +143,8 @@ export type BrandConfig = {
   id: string;
   appName: string;
   companyName: string;
+  companyLegalName?: string;
+  supportEmail?: string;
   domains: string[];
   typography: {
     primary: FontConfig;
@@ -153,10 +155,12 @@ export type BrandConfig = {
 };
 
 export const BRAND_CONFIG: BrandConfig = {
-  id: "inreli",
-  appName: "Inreli Solar",
-  companyName: "Inreli Energy",
-  domains: ["inrelicrm.com", "inreli-energy-cmvgn.ondigitalocean.app"],
+  id: "freewave",
+  appName: "Freewave Energy",
+  companyName: "Freewave",
+  companyLegalName: "Freewave Consult Limited",
+  supportEmail: "support@freewave.com",
+  domains: ["freewavecrm.com", "freewave-energy-cmvgn.ondigitalocean.app"],
   typography: {
     primary: {
       fontFamily: '"Red Hat Display", sans-serif',
@@ -170,38 +174,38 @@ export const BRAND_CONFIG: BrandConfig = {
   },
   colors: {
     legacy: {
-      brandPrimary: "#9A1623",
-      accent: "#000000",
+      brandPrimary: "#1879C5",
+      accent: "#26A7E8",
       success: "#00AF50",
-      warning: "#FFB86B",
-      danger: "#FC4C5D",
+      warning: "#F0B44C",
+      danger: "#E34A67",
     },
     palette: {
       textBlack: "#050505",
-      textGrey: "#828DA9",
-      textLightGrey: "#9BA4BA",
-      textDarkGrey: "#49526A",
-      textDarkBrown: "#32290E",
-      strokeGrey: "#9DA3AA",
+      textGrey: "#6F84A4",
+      textLightGrey: "#9CB4D3",
+      textDarkGrey: "#385270",
+      textDarkBrown: "#203245",
+      strokeGrey: "#9CB8D4",
       strokeGreyTwo: "#E0E0E0",
-      strokeGreyThree: "#EAEEF2",
-      strokeCream: "#D3C6A1",
-      error: "#EA91B4",
-      errorTwo: "#FC4C5D",
-      paleLightBlue: "#EFF2FF",
-      brightBlue: "#007AFF",
-      successTwo: "#E3FAD6",
-      successThree: "#AEF1A7",
+      strokeGreyThree: "#E3EEF8",
+      strokeCream: "#C9DFF2",
+      error: "#F2A0B7",
+      errorTwo: "#E34A67",
+      paleLightBlue: "#EAF7FF",
+      brightBlue: "#1EA3F0",
+      successTwo: "#D9F7E8",
+      successThree: "#A7E8C7",
       disabled: "#E2E4EB",
-      blackBrown: "#1E0604",
-      gold: "#F8CB48",
-      purpleBlue: "#DADFF8",
-      pink: "#F7D3E1",
-      inkBlue: "#8396E7",
-      inkBlueTwo: "#3951B6",
-      paleYellow: "#FFF3D5",
-      chalk: "#FFFFFC",
-      grape: "#EAD2D0",
+      blackBrown: "#0B2336",
+      gold: "#F3C95E",
+      purpleBlue: "#D8EBFA",
+      pink: "#F8D7E5",
+      inkBlue: "#7BB8EC",
+      inkBlueTwo: "#156CB1",
+      paleYellow: "#FFF5D9",
+      chalk: "#FCFEFF",
+      grape: "#D5E8F6",
     },
     gradients: {
       primary: "linear-gradient(to right, var(--brand-primary), var(--brand-accent))",
@@ -257,9 +261,9 @@ const createBrandCssVariables = (config: BrandConfig) => {
     foreground: "240 6% 10%",
     card: "0 0% 100%",
     cardForeground: "240 6% 12%",
-    border: "220 15% 90%",
-    muted: "220 14% 96%",
-    mutedForeground: "220 10% 46%",
+    border: "205 35% 89%",
+    muted: "204 55% 96%",
+    mutedForeground: "210 18% 42%",
     primary: toHslString(legacy.brandPrimary),
     primaryForeground: "0 0% 100%",
     accent: toHslString(legacy.accent),
@@ -272,11 +276,11 @@ const createBrandCssVariables = (config: BrandConfig) => {
   const derivedDark: ThemePalette = {
     background: "240 6% 7%",
     foreground: "0 0% 100%",
-    card: "240 6% 10%",
+    card: "210 36% 14%",
     cardForeground: "0 0% 100%",
-    border: "240 6% 22%",
-    muted: "240 6% 14%",
-    mutedForeground: "240 6% 65%",
+    border: "210 34% 24%",
+    muted: "210 30% 16%",
+    mutedForeground: "205 18% 70%",
     primary: toHslString(legacy.brandPrimary),
     primaryForeground: "0 0% 100%",
     accent: toHslString(legacy.accent),

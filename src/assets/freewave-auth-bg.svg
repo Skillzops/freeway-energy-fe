@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1536 1024" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky" x1="50%" x2="50%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#FDFEFF" />
+      <stop offset="55%" stop-color="#D9F0FF" />
+      <stop offset="100%" stop-color="#0C5CB0" />
+    </linearGradient>
+    <linearGradient id="waveA" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#8DD6FF" stop-opacity=".85" />
+      <stop offset="100%" stop-color="#1686DA" stop-opacity=".92" />
+    </linearGradient>
+    <linearGradient id="waveB" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#BFEAFF" stop-opacity=".8" />
+      <stop offset="100%" stop-color="#0E6EC4" stop-opacity=".88" />
+    </linearGradient>
+    <linearGradient id="waveC" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#52B7F9" stop-opacity=".78" />
+      <stop offset="100%" stop-color="#084F9A" stop-opacity=".98" />
+    </linearGradient>
+  </defs>
+  <rect width="1536" height="1024" fill="url(#sky)" />
+  <g fill="#FFFFFF" opacity=".55">
+    <circle cx="139" cy="163" r="3" />
+    <circle cx="287" cy="344" r="4" />
+    <circle cx="1301" cy="198" r="4" />
+    <circle cx="1358" cy="705" r="3" />
+    <circle cx="457" cy="812" r="3" />
+    <circle cx="1205" cy="601" r="4" />
+  </g>
+  <path d="M-40 263c160 6 244 182 492 224 279 46 509-139 728-113 171 20 267 93 396 132v518H-40V263Z" fill="#FFFFFF" opacity=".56"/>
+  <path d="M-56 350c177 74 267 172 478 180 335 12 553-242 862-226 136 8 215 49 308 93v627H-56V350Z" fill="url(#waveB)" opacity=".68"/>
+  <path d="M-51 464c225 112 395 133 620 83 256-57 451-217 735-187 132 14 214 57 283 96v568H-51V464Z" fill="url(#waveA)" opacity=".78"/>
+  <path d="M-30 653c227 110 452 126 662 78 272-62 465-248 903-173v466H-30V653Z" fill="url(#waveC)"/>
+</svg>
