@@ -70,8 +70,7 @@ const TopNavComponent = () => {
             <img
               src={brandAssets.logoFull}
               alt="Logo"
-              // width="100px"
-              className="w-[80px] sm:w-[80px] cursor-pointer"
+              className="h-[28px] sm:h-[34px] w-auto object-contain cursor-pointer shrink-0"
               // onClick={() => navigate("/home")}
             />
             <MenuButton />
