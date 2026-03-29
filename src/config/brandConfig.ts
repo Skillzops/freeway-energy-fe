@@ -9,9 +9,9 @@ import ContractsIcon from "../assets/RedIconsSvg/Contract.svg?url";
 import ReportsIcon from "../assets/RedIconsSvg/Reports.svg?url";
 import SettingsIcon from "../assets/RedIconsSvg/settings.svg?url";
 
-const LogoFull = new URL("/freewave-logo.svg", import.meta.url).href;
-const LoginBackground = new URL("../assets/freewave-auth-bg.svg", import.meta.url).href;
-const FaviconUrl = "/freewave-logo.svg";
+const LogoFull = new URL("/freewave-logo.png", import.meta.url).href;
+const LoginBackground = new URL("../assets/freewave-auth-bg.png", import.meta.url).href;
+const FaviconUrl = "/freewave-logo.png";
 
 const clamp = (v: number) => Math.max(0, Math.min(255, v));
 
