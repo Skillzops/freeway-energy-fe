@@ -140,7 +140,7 @@ const InstallersTable = ({
           <Table
             tableType="card"
             tableTitle="ALL INSTALLERS"
-            tableClassname="flex flex-wrap items-center gap-4"
+            tableClassname="w-full"
             tableData={entries} // ✅ flat installers list
             loading={isLoading}
             filterList={filterList}

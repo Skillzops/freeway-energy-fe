@@ -5,8 +5,8 @@ import {
   Routes,
   useLocation,
   useSearchParams,
-  useNavigate,
-} from "react-router-dom";
+  useNavigate } from
+"react-router-dom";
 import PageLayout from "./PageLayout";
 import transactionsbadge from "@/assets/RedIconsSvg/Sales.svg";
 import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
@@ -27,7 +27,7 @@ const SalesTable = lazy(() => import("@/Components/Sales/SalesTable"));
 
 const Sales = observer(() => {
   const location = useLocation();
-  const navigate = useNavigate();
+  const _navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { apiCall } = useApiCall();
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -35,25 +35,25 @@ const Sales = observer(() => {
   const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
   const [tableQueryParams, setTableQueryParams] = useState<Record<
     string,
-    any
-  > | null>({});
+    any> |
+  null>({});
 
   const [isBatchOpen, setIsBatchOpen] = useState<boolean>(false);
 
-  const queryString = Object.entries(tableQueryParams || {})
-    .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
-    .join("&");
+  const queryString = Object.entries(tableQueryParams || {}).
+  map(([key, value]) => `${key}=${encodeURIComponent(value)}`).
+  join("&");
 
   const {
     data: salesData,
     isLoading: salesLoading,
     mutate: allSalesRefresh,
     error: allSalesError,
-    errorStates: allSalesErrorStates,
+    errorStates: allSalesErrorStates
   } = useGetRequest(
     `/v1/sales?page=${currentPage}&limit=${entriesPerPage}${
-      queryString && `&${queryString}`
-    }`,
+    queryString && `&${queryString}`}`,
+
     true,
     60000
   );
@@ -65,7 +65,7 @@ const Sales = observer(() => {
       currentPage,
       entriesPerPage,
       setCurrentPage,
-      setEntriesPerPage,
+      setEntriesPerPage
     };
   };
 
@@ -74,12 +74,12 @@ const Sales = observer(() => {
     switch (location.pathname) {
       case "/sales/all":
         setTableQueryParams((prevParams) => ({
-          ...prevParams,
+          ...prevParams
         }));
         break;
       default:
         setTableQueryParams((prevParams) => ({
-          ...prevParams,
+          ...prevParams
         }));
     }
   }, [location.pathname]);
@@ -89,12 +89,12 @@ const Sales = observer(() => {
   }, []);
 
   const navigationList = [
-    {
-      title: "All Sales",
-      link: "/sales/all",
-      count: salesData?.total || 0,
-    },
-  ];
+  {
+    title: "All Sales",
+    link: "/sales/all",
+    count: salesData?.total || 0
+  }];
+
 
   const dropDownList = {
     items: ["Batch Upload Sales"], // Changed to be sales-specific
@@ -107,7 +107,7 @@ const Sales = observer(() => {
           break;
       }
     },
-    showCustomButton: true,
+    showCustomButton: true
   };
 
   const salesPaths = ["all"];
@@ -123,34 +123,34 @@ const Sales = observer(() => {
     }
 
     try {
-      
-      
+
+
       const response = await apiCall({
         endpoint: "/v1/payment/verify/callback",
         method: "get",
         params: {
           tx_ref: tx_ref_param,
-          transaction_id: transaction_id,
+          transaction_id: transaction_id
         },
-        showToast: false,
+        showToast: false
       });
 
-      
-      
+
+
       if (response?.data) {
-        
-        
+
+
         // Check what the response contains
         // if (response.data.status) {
 
         // }
         // if (response.data.saleId) {
-          
+
         // }
         // if (response.data.paymentStatus) {
-          
+
         // }
-        
+
         // Refresh sales data to show updated status
         if (allSalesRefresh) {
           await allSalesRefresh();
@@ -158,7 +158,7 @@ const Sales = observer(() => {
       }
     } catch (error: any) {
       console.error("Payment verification failed:", error);
-      
+
       // Log detailed error information
       const errorDetails = {
         message: error.response?.data?.message || error.message,
@@ -167,11 +167,11 @@ const Sales = observer(() => {
         params: { tx_ref_param, transaction_id }
       };
       console.error("Error details:", errorDetails);
-      
+
       // Show user-friendly error message
-      const errorMessage = error.response?.data?.message || 
-        "Payment verification failed. Please contact support if the issue persists.";
-      
+      const errorMessage = error.response?.data?.message ||
+      "Payment verification failed. Please contact support if the issue persists.";
+
       // Don't show toast for verification errors as they might be expected
       // (e.g., when user cancels payment and returns to page)
       console.warn("Payment verification error:", errorMessage);
@@ -180,7 +180,7 @@ const Sales = observer(() => {
 
   useEffect(() => {
     if (tx_ref_param && transaction_id) {
-      
+
       verifyPayment();
     } else if (tx_ref_param || transaction_id) {
       console.warn("Incomplete payment verification params:", { tx_ref_param, transaction_id });
@@ -197,8 +197,8 @@ const Sales = observer(() => {
               iconBgColor="bg-[#FDEEC2]"
               topText="All"
               bottomText="SALES"
-              value={salesData?.total}
-            />
+              value={salesData?.total} />
+
           </div>
           <div className="flex w-full items-center justify-between gap-2 min-w-max sm:w-max sm:justify-end">
             <ActionButton
@@ -207,8 +207,8 @@ const Sales = observer(() => {
               onClick={() => {
                 setIsOpen(true);
               }}
-              disabled
-            />
+              disabled />
+
             <DropDown {...dropDownList} />
           </div>
         </section>
@@ -217,31 +217,31 @@ const Sales = observer(() => {
           <section className="relative items-start justify-center flex min-h-[415px] w-full overflow-hidden">
             <Suspense
               fallback={
-                <LoadingSpinner parentClass="absolute top-[50%] w-full" />
-              }
-            >
+              <LoadingSpinner parentClass="absolute top-[50%] w-full" />
+              }>
+
               <Routes>
                 <Route
                   path="/"
-                  element={<Navigate to="/sales/all" replace />}
-                />
-                {salesPaths.map((path) => (
-                  <Route
-                    key={path}
-                    path={path}
-                    element={
-                      <SalesTable
-                        salesData={salesData}
-                        isLoading={salesLoading}
-                        refreshTable={allSalesRefresh}
-                        error={allSalesError}
-                        errorData={allSalesErrorStates}
-                        paginationInfo={paginationInfo}
-                        setTableQueryParams={setTableQueryParams}
-                      />
-                    }
-                  />
-                ))}
+                  element={<Navigate to="/sales/all" replace />} />
+
+                {salesPaths.map((path) =>
+                <Route
+                  key={path}
+                  path={path}
+                  element={
+                  <SalesTable
+                    salesData={salesData}
+                    isLoading={salesLoading}
+                    refreshTable={allSalesRefresh}
+                    error={allSalesError}
+                    errorData={allSalesErrorStates}
+                    paginationInfo={paginationInfo}
+                    setTableQueryParams={setTableQueryParams} />
+
+                  } />
+
+                )}
               </Routes>
             </Suspense>
           </section>
@@ -250,16 +250,16 @@ const Sales = observer(() => {
       <CreateNewSale
         isOpen={isOpen}
         setIsOpen={setIsOpen}
-        allSalesRefresh={allSalesRefresh}
-      />
+        allSalesRefresh={allSalesRefresh} />
+
 
       <BatchUploadSales
         isOpen={isBatchOpen}
         setIsOpen={setIsBatchOpen}
-        allSalesRefresh={allSalesRefresh}
-      />
-    </>
-  );
+        allSalesRefresh={allSalesRefresh} />
+
+    </>);
+
 });
 
 export default Sales;

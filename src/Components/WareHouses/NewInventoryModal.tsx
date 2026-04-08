@@ -17,7 +17,7 @@ export function NewInventoryModal({ open, onOpenChange, warehouseId }: NewInvent
   const { id } = useParams();
   const currentWarehouseId = warehouseId || id;
   const isMobile = useBreakpoint("max", 640);
-  
+
   // Use exact same fields as main inventory creation
   const [formData, setFormData] = useState({
     class: "",
@@ -31,20 +31,20 @@ export function NewInventoryModal({ open, onOpenChange, warehouseId }: NewInvent
     costOfItem: "",
     price: "",
     inventoryImage: null as File | null,
-    warehouseId: currentWarehouseId || "",
+    warehouseId: currentWarehouseId || ""
   });
-  
+
   const [availableSubCategories, setAvailableSubCategories] = useState<any[]>([]);
   const [imagePreview, setImagePreview] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const { createInventoryItem } = useInventoryApi();
+  const { createInventoryItem: _createInventoryItem } = useInventoryApi();
   const { data: warehouses = [] } = useWarehouses();
   const { data: categories = [] } = useInventoryCategories();
   const { apiCall } = useApiCall();
 
   const handleInputChange = (field: string, value: any) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [field]: value
     }));
@@ -54,7 +54,7 @@ export function NewInventoryModal({ open, onOpenChange, warehouseId }: NewInvent
       const selectedCategory = categories.find((cat: any) => cat.id === value);
       setAvailableSubCategories(selectedCategory?.subCategories || []);
       // Reset subcategory when category changes
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         inventorySubCategoryId: ''
       }));
@@ -64,7 +64,7 @@ export function NewInventoryModal({ open, onOpenChange, warehouseId }: NewInvent
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setFormData(prev => ({ ...prev, inventoryImage: file }));
+      setFormData((prev) => ({ ...prev, inventoryImage: file }));
       const reader = new FileReader();
       reader.onload = (e) => {
         setImagePreview(e.target?.result as string);
@@ -73,13 +73,13 @@ export function NewInventoryModal({ open, onOpenChange, warehouseId }: NewInvent
     }
   };
 
-  const formatCurrency = (value: string) => {
+  const _formatCurrency = (value: string) => {
     const numericValue = value.replace(/[^\d.]/g, '');
     if (numericValue) {
       const formatted = parseFloat(numericValue).toLocaleString('en-NG', {
         style: 'currency',
         currency: 'NGN',
-        minimumFractionDigits: 0,
+        minimumFractionDigits: 0
       });
       return formatted;
     }
@@ -88,17 +88,17 @@ export function NewInventoryModal({ open, onOpenChange, warehouseId }: NewInvent
 
   const handleCostChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/[^\d.]/g, '');
-    setFormData(prev => ({ ...prev, costOfItem: value }));
+    setFormData((prev) => ({ ...prev, costOfItem: value }));
   };
 
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/[^\d.]/g, '');
-    setFormData(prev => ({ ...prev, price: value }));
+    setFormData((prev) => ({ ...prev, price: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.class || !formData.inventoryCategoryId || !formData.inventorySubCategoryId || !formData.name || !formData.manufacturerName || !formData.numberOfStock || !formData.costOfItem || !formData.price || !formData.inventoryImage) {
       toast.error("Please fill in all required fields including image upload");
       return;
@@ -122,7 +122,7 @@ export function NewInventoryModal({ open, onOpenChange, warehouseId }: NewInvent
     try {
       // Use same approach as main inventory system - FormData for file uploads
       const submissionData = new FormData();
-      
+
       // Add all form fields to FormData
       submissionData.append('class', formData.class);
       submissionData.append('inventoryCategoryId', formData.inventoryCategoryId);
@@ -135,7 +135,7 @@ export function NewInventoryModal({ open, onOpenChange, warehouseId }: NewInvent
       submissionData.append('costOfItem', formData.costOfItem);
       submissionData.append('price', formData.price);
       submissionData.append('warehouseId', currentWarehouseId); // Add warehouse assignment
-      
+
       // Add file if present
       if (formData.inventoryImage instanceof File) {
         submissionData.append('inventoryImage', formData.inventoryImage);
@@ -149,7 +149,7 @@ export function NewInventoryModal({ open, onOpenChange, warehouseId }: NewInvent
         method: "post",
         data: submissionData,
         headers: { "Content-Type": "multipart/form-data" },
-        successMessage: "Inventory created successfully!",
+        successMessage: "Inventory created successfully!"
       });
 
       toast.success('Inventory item added successfully');
@@ -167,7 +167,7 @@ export function NewInventoryModal({ open, onOpenChange, warehouseId }: NewInvent
         costOfItem: "",
         price: "",
         inventoryImage: null,
-        warehouseId: currentWarehouseId || "",
+        warehouseId: currentWarehouseId || ""
       });
       setAvailableSubCategories([]);
       setImagePreview("");
@@ -181,15 +181,15 @@ export function NewInventoryModal({ open, onOpenChange, warehouseId }: NewInvent
   };
 
   return (
-    <Modal 
-      isOpen={open} 
+    <Modal
+      isOpen={open}
       onClose={() => onOpenChange(false)}
       size={isMobile ? "large" : "medium"}
       layout="right"
       leftHeaderComponents={
-        <h2 className="text-lg font-semibold text-textBlack">New Inventory Item</h2>
-      }
-    >
+      <h2 className="text-lg font-semibold text-textBlack">New Inventory Item</h2>
+      }>
+
       <div className="p-4 sm:p-6 h-full overflow-y-auto">
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           {/* Warehouse Selection */}
@@ -202,14 +202,14 @@ export function NewInventoryModal({ open, onOpenChange, warehouseId }: NewInvent
               value={formData.warehouseId}
               onChange={(e) => handleInputChange('warehouseId', e.target.value)}
               className="w-full px-3 py-2 sm:py-3 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm sm:text-base"
-              required
-            >
+              required>
+
               <option value="">Select Warehouse</option>
-              {warehouses.map((warehouse: any) => (
-                <option key={warehouse.id} value={warehouse.id}>
+              {warehouses.map((warehouse: any) =>
+              <option key={warehouse.id} value={warehouse.id}>
                   {warehouse.name} - {warehouse.location}
                 </option>
-              ))}
+              )}
             </select>
           </div>
 
@@ -223,8 +223,8 @@ export function NewInventoryModal({ open, onOpenChange, warehouseId }: NewInvent
               value={formData.class}
               onChange={(e) => handleInputChange('class', e.target.value)}
               className="w-full px-3 py-2 sm:py-3 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm sm:text-base"
-              required
-            >
+              required>
+
               <option value="">Choose Inventory Class</option>
               <option value="REGULAR">REGULAR</option>
               <option value="RETURNED">RETURNED</option>
@@ -245,46 +245,46 @@ export function NewInventoryModal({ open, onOpenChange, warehouseId }: NewInvent
                 // Update subcategories when category changes - use children array
                 const selectedCategory = categories.find((cat: any) => cat.id === e.target.value);
                 setAvailableSubCategories(selectedCategory?.children || []);
-                setFormData(prev => ({ ...prev, inventorySubCategoryId: '' }));
+                setFormData((prev) => ({ ...prev, inventorySubCategoryId: '' }));
               }}
               className="w-full px-3 py-2 sm:py-3 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm sm:text-base"
-              required
-            >
+              required>
+
               <option value="">Choose Item Category</option>
-              {categories.map((category: any) => (
-                <option key={category.id} value={category.id}>
+              {categories.map((category: any) =>
+              <option key={category.id} value={category.id}>
                   {category.name}
                 </option>
-              ))}
+              )}
             </select>
           </div>
 
           {/* Sub Category - Always visible when category is selected */}
-          {formData.inventoryCategoryId && (
-            <div className="space-y-2">
+          {formData.inventoryCategoryId &&
+          <div className="space-y-2">
               <label htmlFor="item-subcategory" className="block text-sm font-medium text-textBlack">
                 Choose Item Sub Category *
               </label>
               <select
-                id="item-subcategory"
-                value={formData.inventorySubCategoryId}
-                onChange={(e) => handleInputChange('inventorySubCategoryId', e.target.value)}
-                className="w-full px-3 py-2 sm:py-3 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm sm:text-base"
-                required
-              >
+              id="item-subcategory"
+              value={formData.inventorySubCategoryId}
+              onChange={(e) => handleInputChange('inventorySubCategoryId', e.target.value)}
+              className="w-full px-3 py-2 sm:py-3 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm sm:text-base"
+              required>
+
                 <option value="">Choose Sub Category</option>
-                {availableSubCategories.length > 0 ? (
-                  availableSubCategories.map((subCategory: any) => (
-                    <option key={subCategory.id} value={subCategory.id}>
+                {availableSubCategories.length > 0 ?
+              availableSubCategories.map((subCategory: any) =>
+              <option key={subCategory.id} value={subCategory.id}>
                       {subCategory.name}
                     </option>
-                  ))
-                ) : (
-                  <option value="" disabled>No subcategories available</option>
-                )}
+              ) :
+
+              <option value="" disabled>No subcategories available</option>
+              }
               </select>
             </div>
-          )}
+          }
 
           {/* Item Name */}
           <div className="space-y-2">
@@ -298,8 +298,8 @@ export function NewInventoryModal({ open, onOpenChange, warehouseId }: NewInvent
               onChange={(e) => handleInputChange('name', e.target.value)}
               placeholder="Item Name"
               className="w-full px-3 py-2 sm:py-3 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm sm:text-base"
-              required
-            />
+              required />
+
           </div>
 
           {/* Manufacturer Name */}
@@ -314,8 +314,8 @@ export function NewInventoryModal({ open, onOpenChange, warehouseId }: NewInvent
               onChange={(e) => handleInputChange('manufacturerName', e.target.value)}
               placeholder="Manufacturer Name"
               className="w-full px-3 py-2 sm:py-3 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm sm:text-base"
-              required
-            />
+              required />
+
           </div>
 
           {/* Date of Manufacture */}
@@ -328,8 +328,8 @@ export function NewInventoryModal({ open, onOpenChange, warehouseId }: NewInvent
               type="date"
               value={formData.dateOfManufacture}
               onChange={(e) => handleInputChange('dateOfManufacture', e.target.value)}
-              className="w-full px-3 py-2 sm:py-3 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm sm:text-base"
-            />
+              className="w-full px-3 py-2 sm:py-3 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm sm:text-base" />
+
           </div>
 
           {/* SKU */}
@@ -343,8 +343,8 @@ export function NewInventoryModal({ open, onOpenChange, warehouseId }: NewInvent
               value={formData.sku}
               onChange={(e) => handleInputChange('sku', e.target.value)}
               placeholder="SKU Code"
-              className="w-full px-3 py-2 sm:py-3 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm sm:text-base"
-            />
+              className="w-full px-3 py-2 sm:py-3 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm sm:text-base" />
+
           </div>
 
           {/* Number of Stock */}
@@ -360,8 +360,8 @@ export function NewInventoryModal({ open, onOpenChange, warehouseId }: NewInvent
               placeholder="Number of Stock"
               min="0"
               className="w-full px-3 py-2 sm:py-3 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm sm:text-base"
-              required
-            />
+              required />
+
           </div>
 
           {/* Cost of Item */}
@@ -376,8 +376,8 @@ export function NewInventoryModal({ open, onOpenChange, warehouseId }: NewInvent
               onChange={handleCostChange}
               placeholder="₦0"
               className="w-full px-3 py-2 sm:py-3 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm sm:text-base"
-              required
-            />
+              required />
+
           </div>
 
           {/* Sale Price */}
@@ -392,8 +392,8 @@ export function NewInventoryModal({ open, onOpenChange, warehouseId }: NewInvent
               onChange={handlePriceChange}
               placeholder="₦0"
               className="w-full px-3 py-2 sm:py-3 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm sm:text-base"
-              required
-            />
+              required />
+
           </div>
 
           {/* Inventory Image */}
@@ -407,13 +407,13 @@ export function NewInventoryModal({ open, onOpenChange, warehouseId }: NewInvent
               accept="image/png,image/jpeg,image/jpg,image/svg+xml"
               onChange={handleImageChange}
               className="w-full px-3 py-2 sm:py-3 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm sm:text-base"
-              required
-            />
-            {imagePreview && (
-              <div className="mt-2">
+              required />
+
+            {imagePreview &&
+            <div className="mt-2">
                 <img src={imagePreview} alt="Preview" className="w-20 h-20 object-cover rounded-lg" />
               </div>
-            )}
+            }
           </div>
 
           {/* Submit Buttons */}
@@ -421,20 +421,20 @@ export function NewInventoryModal({ open, onOpenChange, warehouseId }: NewInvent
             <button
               type="button"
               onClick={() => onOpenChange(false)}
-              className="w-full sm:w-auto px-4 py-2 border border-strokeGreyThree text-textBlack rounded-lg hover:bg-gray-50 transition-colors text-sm sm:text-base"
-            >
+              className="w-full sm:w-auto px-4 py-2 border border-strokeGreyThree text-textBlack rounded-lg hover:bg-gray-50 transition-colors text-sm sm:text-base">
+
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full sm:w-auto px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm sm:text-base disabled:opacity-50"
-            >
+              className="w-full sm:w-auto px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors text-sm sm:text-base disabled:opacity-50">
+
               {isLoading ? "Adding..." : "Add Inventory Item"}
             </button>
           </div>
         </form>
       </div>
-    </Modal>
-  );
+    </Modal>);
+
 }

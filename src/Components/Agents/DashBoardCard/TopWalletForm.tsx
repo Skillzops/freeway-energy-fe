@@ -9,11 +9,11 @@ import { Input } from "@/Components/InputComponent/Input";
 
 const TopUpWalletForm = ({
   handleClose,
-  refreshTable,
-}: {
-  handleClose: () => void;
-  refreshTable: () => void;
-}) => {
+  refreshTable
+
+
+
+}: {handleClose: () => void;refreshTable: () => void;}) => {
   const [amount, setAmount] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -45,8 +45,8 @@ const TopUpWalletForm = ({
         method: "post",
         data: {
           amount: Number(parsedAmount),
-          gateway: PaymentGateway.FLUTTERWAVE,
-        },
+          gateway: PaymentGateway.FLUTTERWAVE
+        }
       });
 
       console.log(res, "res___");
@@ -64,7 +64,7 @@ const TopUpWalletForm = ({
 
       refreshTable();
       handleClose(); // Close the modal
-    } catch (err) {
+    } catch (_err) {
       toast.error("Failed to top up wallet. Please try again.");
     } finally {
       setLoading(false);
@@ -82,24 +82,24 @@ const TopUpWalletForm = ({
           onChange={handleInputChange}
           placeholder="Enter amount"
           required
-          errorMessage={error}
-        />
+          errorMessage={error} />
+
       </div>
 
       <div className="flex items-center justify-between gap-1 mt-4">
         <SecondaryButton
           variant="secondary"
           onClick={handleClose}
-          disabled={loading}
-        >
+          disabled={loading}>
+
           Cancel
         </SecondaryButton>
         <SecondaryButton onClick={handleSave} disabled={loading}>
           {loading ? "Saving..." : "Save"}
         </SecondaryButton>
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default TopUpWalletForm;

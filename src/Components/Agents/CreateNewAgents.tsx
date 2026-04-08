@@ -6,6 +6,8 @@ import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 import { useApiCall } from "../../utils/useApiCall";
 import { z } from "zod";
 import ApiErrorMessage from "../ApiErrorMessage";
+import { copyToClipboard } from "@/utils/helpers";
+import { FiCopy } from "react-icons/fi";
 // import { GooglePlacesInput } from "../InputComponent/GooglePlacesInput";
 
 interface CreateNewAgentsProps {
@@ -39,6 +41,14 @@ const agentSchema = z.object({
 
 type AgentFormData = z.infer<typeof agentSchema>;
 
+type AgentCredentials = {
+  agentId: string;
+  name: string;
+  category: string;
+  email: string;
+  password: string;
+};
+
 const defaultAgentsFormData = {
   firstname: "",
   lastname: "",
@@ -66,6 +76,31 @@ const CreateNewAgents = ({
   const [apiError, setApiError] = useState<string | Record<string, string[]>>(
     ""
   );
+  const [createdCredentials, setCreatedCredentials] =
+    useState<AgentCredentials | null>(null);
+
+  const resetState = () => {
+    setFormData(defaultAgentsFormData);
+    setFormErrors([]);
+    setApiError("");
+    setCreatedCredentials(null);
+  };
+
+  const getFirstValue = (
+    source: Record<string, any> | null | undefined,
+    paths: string[]
+  ) => {
+    if (!source) return undefined;
+    for (const path of paths) {
+      const value = path
+        .split(".")
+        .reduce<any>((acc, key) => (acc && acc[key] !== undefined ? acc[key] : undefined), source);
+      if (value !== undefined && value !== null && String(value).trim() !== "") {
+        return value;
+      }
+    }
+    return undefined;
+  };
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -97,15 +132,76 @@ const CreateNewAgents = ({
     setLoading(true);
     try {
       const validatedData = agentSchema.parse(formData);
-      await apiCall({
+      const response = await apiCall({
         endpoint: "/v1/agents/create",
         method: "post",
         data: validatedData,
         successMessage: "Agent created successfully!",
       });
 
+      const responseData = response?.data ?? response ?? {};
+      const payload =
+        responseData?.data ||
+        responseData?.agent ||
+        responseData?.agentData ||
+        responseData;
+
+      const responsePassword = getFirstValue(payload, [
+        "temporaryPassword",
+        "tempPassword",
+        "plainPassword",
+        "generatedPassword",
+        "password",
+        "credentials.password",
+        "user.temporaryPassword",
+        "user.tempPassword",
+      ]);
+
+      const safePassword =
+        responsePassword && !String(responsePassword).startsWith("$argon2")
+          ? String(responsePassword)
+          : "Not returned";
+
+      const responseAgentId = getFirstValue(payload, [
+        "agentId",
+        "id",
+        "agent.id",
+        "data.agentId",
+      ]);
+
+      const responseEmail = getFirstValue(payload, [
+        "email",
+        "user.email",
+        "credentials.email",
+      ]);
+
+      const responseCategory = getFirstValue(payload, [
+        "category",
+        "user.category",
+        "agent.category",
+      ]);
+
+      const responseFirstname = getFirstValue(payload, [
+        "firstname",
+        "user.firstname",
+      ]);
+      const responseLastname = getFirstValue(payload, [
+        "lastname",
+        "user.lastname",
+      ]);
+
+      setCreatedCredentials({
+        agentId: String(responseAgentId ?? "N/A"),
+        name:
+          `${String(responseFirstname ?? validatedData.firstname)} ${String(
+            responseLastname ?? validatedData.lastname
+          )}`.trim() || "N/A",
+        category: String(responseCategory ?? validatedData.category ?? "SALES"),
+        email: String(responseEmail ?? validatedData.email ?? "N/A"),
+        password: safePassword,
+      });
+
       await refreshTable();
-      setIsOpen(false);
       setFormData(defaultAgentsFormData);
     } catch (error: any) {
       if (error instanceof z.ZodError) {
@@ -257,42 +353,119 @@ const CreateNewAgents = ({
   return (
     <Modal
       isOpen={isOpen}
-      onClose={() => setIsOpen(false)}
+      onClose={() => {
+        setIsOpen(false);
+        resetState();
+      }}
       layout="right"
       bodyStyle="pb-44"
     >
-      <form
-        className="flex flex-col items-center bg-white"
-        onSubmit={handleSubmit}
-        noValidate
-      >
-        <div
-          className={`flex items-center justify-center px-4 w-full min-h-[64px] border-b-[0.6px] border-strokeGreyThree ${
-            isFormFilled
-              ? "bg-paleCreamGradientLeft"
-              : "bg-paleGrayGradientLeft"
-          }`}
+      {!createdCredentials ? (
+        <form
+          className="flex flex-col items-center bg-white"
+          onSubmit={handleSubmit}
+          noValidate
         >
-          <h2
-            style={{ textShadow: "1px 1px grey" }}
-            className="text-xl text-textBlack font-semibold font-secondary"
+          <div
+            className={`flex items-center justify-center px-4 w-full min-h-[64px] border-b-[0.6px] border-strokeGreyThree ${
+              isFormFilled
+                ? "bg-paleCreamGradientLeft"
+                : "bg-paleGrayGradientLeft"
+            }`}
           >
-            New Agents
-          </h2>
-        </div>
-        <div className="flex flex-col items-center justify-center w-full px-4 gap-4 py-8">
-          {renderForm()}
+            <h2
+              style={{ textShadow: "1px 1px grey" }}
+              className="text-xl text-textBlack font-semibold font-secondary"
+            >
+              New Agents
+            </h2>
+          </div>
+          <div className="flex flex-col items-center justify-center w-full px-4 gap-4 py-8">
+            {renderForm()}
 
-          <ApiErrorMessage apiError={apiError} />
+            <ApiErrorMessage apiError={apiError} />
 
-          <ProceedButton
-            type="submit"
-            loading={loading}
-            variant={isFormFilled ? "gradient" : "gray"}
-            disabled={!isFormFilled}
-          />
+            <ProceedButton
+              type="submit"
+              loading={loading}
+              variant={isFormFilled ? "gradient" : "gray"}
+              disabled={!isFormFilled}
+            />
+          </div>
+        </form>
+      ) : (
+        <div className="bg-white min-h-full">
+          <div className="flex items-center justify-center min-h-[84px] border-b border-[#DDE4EE] bg-[#FFF7E2]">
+            <h2 className="text-[20px] font-semibold text-textBlack font-secondary">
+              Agent Credentials
+            </h2>
+          </div>
+
+          <div className="p-4">
+            <p className="text-[18px] text-textDarkGrey">
+              These login credentials will not be shown again. Please store them securely now.
+            </p>
+
+            <div className="relative mt-4 rounded-[14px] border border-[#D4DCE8] bg-[#F8FAFC] px-4 py-4">
+              <button
+                type="button"
+                className="absolute right-3 top-3 text-[#A31D18]"
+                onClick={() =>
+                  copyToClipboard(
+                    `Agent ID: ${createdCredentials.agentId}\nName: ${createdCredentials.name}\nCategory: ${createdCredentials.category}\nEmail: ${createdCredentials.email}\nPassword: ${createdCredentials.password}`
+                  )
+                }
+                title="Copy all"
+              >
+                <FiCopy size={18} />
+              </button>
+
+              <div className="space-y-2">
+                <p className="text-[18px] text-textDarkGrey">
+                  <span className="font-semibold">Agent ID:</span> {createdCredentials.agentId}
+                </p>
+                <p className="text-[18px] text-textDarkGrey">
+                  <span className="font-semibold">Name:</span> {createdCredentials.name}
+                </p>
+                <p className="text-[18px] text-textDarkGrey">
+                  <span className="font-semibold">Category:</span> {createdCredentials.category}
+                </p>
+                <p className="text-[18px] text-textDarkGrey">
+                  <span className="font-semibold">Email:</span> {createdCredentials.email}{" "}
+                  <button
+                    type="button"
+                    className="text-[#B1462B] font-semibold ml-1"
+                    onClick={() => copyToClipboard(createdCredentials.email)}
+                  >
+                    Copy
+                  </button>
+                </p>
+                <p className="text-[18px] text-textDarkGrey">
+                  <span className="font-semibold">Password:</span> {createdCredentials.password}{" "}
+                  <button
+                    type="button"
+                    className="text-[#B1462B] font-semibold ml-1"
+                    onClick={() => copyToClipboard(createdCredentials.password)}
+                  >
+                    Copy
+                  </button>
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              className="mt-4 h-[56px] w-full rounded-[12px] bg-primaryGradient text-white text-[16px] font-semibold"
+              onClick={() => {
+                setIsOpen(false);
+                resetState();
+              }}
+            >
+              I have stored these credentials
+            </button>
+          </div>
         </div>
-      </form>
+      )}
     </Modal>
   );
 };

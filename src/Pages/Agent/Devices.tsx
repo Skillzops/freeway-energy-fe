@@ -31,33 +31,33 @@ const Devices = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isTokensOpen, setIsTokensOpen] = useState<boolean>(false);
-  const [formType, setFormType] = useState<"singleUpload" | "batchUpload">(
+  const [formType, _setFormType] = useState<"singleUpload" | "batchUpload">(
     "singleUpload"
   );
   const [tokensFormType, setTokensFormType] = useState<
-    "singleUpload" | "batchUpload"
-  >("singleUpload");
+    "singleUpload" | "batchUpload">(
+    "singleUpload");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
   const [tableQueryParams, setTableQueryParams] = useState<Record<
     string,
-    any
-  > | null>({});
+    any> |
+  null>({});
 
-  const queryString = Object.entries(tableQueryParams || {})
-    .filter(([, value]) => value !== undefined && value !== null && value !== "")
-    .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
-    .join("&");
+  const queryString = Object.entries(tableQueryParams || {}).
+  filter(([, value]) => value !== undefined && value !== null && value !== "").
+  map(([key, value]) => `${key}=${encodeURIComponent(value)}`).
+  join("&");
 
   const {
     data: deviceData,
     isLoading: deviceLoading,
     mutate: allDeviceRefresh,
-    errorStates: allDevicesErrorStates,
+    errorStates: allDevicesErrorStates
   } = useGetRequest(
     `/v1/devices/assignments/my-devices?page=${currentPage}&limit=${entriesPerPage}${
-      queryString ? `&${queryString}` : ""
-    }`,
+    queryString ? `&${queryString}` : ""}`,
+
     true,
     60000
   );
@@ -87,7 +87,7 @@ const Devices = () => {
       currentPage,
       entriesPerPage,
       setCurrentPage,
-      setEntriesPerPage,
+      setEntriesPerPage
     };
   };
 
@@ -96,22 +96,22 @@ const Devices = () => {
   const installedTotal = getTotalCount(installedCountData);
 
   const navigationList = [
-    {
-      title: "All Devices",
-      link: "/agent/devices/all",
-      count: allDevicesTotal,
-    },
-    {
-      title: "To be Installed",
-      link: "/agent/devices/to-be-installed",
-      count: toBeInstalledTotal,
-    },
-    {
-      title: "Installed Devices",
-      link: "/agent/devices/installed",
-      count: installedTotal,
-    },
-  ];
+  {
+    title: "All Devices",
+    link: "/agent/devices/all",
+    count: allDevicesTotal
+  },
+  {
+    title: "To be Installed",
+    link: "/agent/devices/to-be-installed",
+    count: toBeInstalledTotal
+  },
+  {
+    title: "Installed Devices",
+    link: "/agent/devices/installed",
+    count: installedTotal
+  }];
+
 
   useEffect(() => {
     switch (location.pathname) {
@@ -138,7 +138,7 @@ const Devices = () => {
         setIsTokensOpen(true);
       }
     },
-    showCustomButton: true,
+    showCustomButton: true
   };
 
   return (
@@ -151,8 +151,8 @@ const Devices = () => {
               iconBgColor="bg-[#FDEEC2]"
               topText="All"
               bottomText="DEVICES"
-              value={allDevicesTotal}
-            />
+              value={allDevicesTotal} />
+
           </div>
           <div className="flex w-full items-center justify-between gap-2 min-w-max sm:w-max sm:justify-end">
             <DropDown {...dropDownList} />
@@ -164,30 +164,30 @@ const Devices = () => {
           <section className="relative items-start justify-center flex min-h-[415px] w-full overflow-hidden">
             <Suspense
               fallback={
-                <LoadingSpinner parentClass="absolute top-[50%] w-full" />
-              }
-            >
+              <LoadingSpinner parentClass="absolute top-[50%] w-full" />
+              }>
+
               <Routes>
                 <Route
                   path="/"
-                  element={<Navigate to="/agent/devices/all" replace />}
-                />
-                {devicesPaths.map((path) => (
-                  <Route
-                    key={path}
-                    path={path}
-                    element={
-                      <DevicesTable
-                        devicesData={deviceData}
-                        isLoading={deviceLoading}
-                        refreshTable={allDeviceRefresh}
-                        errorData={allDevicesErrorStates}
-                        paginationInfo={paginationInfo}
-                        setTableQueryParams={setTableQueryParams}
-                      />
-                    }
-                  />
-                ))}
+                  element={<Navigate to="/agent/devices/all" replace />} />
+
+                {devicesPaths.map((path) =>
+                <Route
+                  key={path}
+                  path={path}
+                  element={
+                  <DevicesTable
+                    devicesData={deviceData}
+                    isLoading={deviceLoading}
+                    refreshTable={allDeviceRefresh}
+                    errorData={allDevicesErrorStates}
+                    paginationInfo={paginationInfo}
+                    setTableQueryParams={setTableQueryParams} />
+
+                  } />
+
+                )}
               </Routes>
             </Suspense>
           </section>
@@ -198,17 +198,17 @@ const Devices = () => {
         isOpen={isOpen}
         setIsOpen={setIsOpen}
         allDevicesRefresh={allDeviceRefresh}
-        formType={formType}
-      />
+        formType={formType} />
+
 
       <GenerateTokens
         isOpen={isTokensOpen}
         setIsOpen={setIsTokensOpen}
         allDevicesRefresh={allDeviceRefresh}
-        formType={tokensFormType}
-      />
-    </>
-  );
+        formType={tokensFormType} />
+
+    </>);
+
 };
 
 export default Devices;

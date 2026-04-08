@@ -77,21 +77,34 @@ const SalesTable = ({
       onSearch: async (query: string) => {
         setQueryValue(query);
         setIsSearchQuery(true);
-        setTableQueryParams((prevParams) => ({
-          ...prevParams,
-          search: query,
-        }));
+        setTableQueryParams((prevParams) => {
+          const nextParams = { ...(prevParams || {}) };
+          delete nextParams.startDate;
+          delete nextParams.endDate;
+
+          if (query) {
+            nextParams.search = query;
+          } else {
+            delete nextParams.search;
+          }
+
+          return nextParams;
+        });
       },
       isSearch: true,
     },
     {
-      onDateClick: (date: string) => {
-        setQueryValue(date);
+      onDateClick: (startDate: string, endDate?: string) => {
+        const end = endDate || startDate;
+        setQueryValue(endDate ? `${startDate} - ${end}` : startDate);
         setIsSearchQuery(false);
-        setTableQueryParams((prevParams) => ({
-          ...prevParams,
-          createdAt: date.split("T")[0],
-        }));
+        setTableQueryParams((prevParams) => {
+          const nextParams = { ...(prevParams || {}) };
+          delete nextParams.search;
+          nextParams.startDate = startDate;
+          nextParams.endDate = end;
+          return nextParams;
+        });
       },
       isDate: true,
     },
@@ -243,7 +256,7 @@ const SalesTable = ({
             loading={isLoading}
             tableData={getTableData()}
             refreshTable={async () => {
-              await refreshTable();
+              await refreshTable(undefined, { revalidate: true });
             }}
             queryValue={isSearchQuery ? queryValue : ""}
             paginationInfo={paginationInfo}

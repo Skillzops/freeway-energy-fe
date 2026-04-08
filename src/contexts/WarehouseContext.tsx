@@ -1,7 +1,8 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, ReactNode } from 'react';
 import type { Warehouse } from '../data/warehouseData';
 import { useWarehouses, useWarehouseApi } from '../services/warehouseApi';
-import { toast } from 'react-toastify';
+import { toast as _toast } from 'react-toastify';
 
 interface WarehouseContextType {
   warehouses: Warehouse[];
@@ -16,16 +17,16 @@ interface WarehouseContextType {
 
 const WarehouseContext = createContext<WarehouseContextType | undefined>(undefined);
 
-export function WarehouseProvider({ children }: { children: ReactNode }) {
+export function WarehouseProvider({ children }: {children: ReactNode;}) {
   // Use real API endpoints
   const { data: warehouses = [], isLoading, error, mutate } = useWarehouses();
-  
+
   // Get real API functions
   const {
     createWarehouse,
     updateWarehouse: updateWarehouseApi,
     deleteWarehouse: deleteWarehouseApi,
-    toggleWarehouseStatus: toggleWarehouseStatusApi,
+    toggleWarehouseStatus: toggleWarehouseStatusApi
   } = useWarehouseApi();
 
   const addWarehouse = async (warehouse: Omit<Warehouse, 'id'>) => {
@@ -84,11 +85,11 @@ export function WarehouseProvider({ children }: { children: ReactNode }) {
       addWarehouse,
       updateWarehouse,
       deleteWarehouse,
-      toggleWarehouseStatus,
+      toggleWarehouseStatus
     }}>
       {children}
-    </WarehouseContext.Provider>
-  );
+    </WarehouseContext.Provider>);
+
 }
 
 export function useWarehouse() {

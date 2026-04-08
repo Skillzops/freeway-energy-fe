@@ -1,4 +1,3 @@
-import { BRAND_CONFIG } from "@/config/brandConfig";
 import React, { useState } from "react";
 
 interface ButtonProps {
@@ -19,6 +18,7 @@ const ProceedButton: React.FC<ButtonProps> = ({
   disabled = true,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const isInteractive = !disabled && !loading;
 
   // Define different styles for each variant
   const variantClasses = {
@@ -26,7 +26,7 @@ const ProceedButton: React.FC<ButtonProps> = ({
       "bg-[#FEF5DA] border border-[#A58730]/20 shadow-[2px_6px_8px_0px_rgba(0,0,0,0.15)] hover:bg-[#941C12] hover:border-[#63130C]/20",
     gray: "bg-[#E2E4EB] border border-[#9BA4BA]/20",
     gradient: "bg-[#FEF5DA] border border-[#A58730]/20 shadow-innerCustom",
-    red: `bg-[${BRAND_CONFIG.colors.legacy.brandPrimary}] border border-[#63130C]/20`,
+    red: "bg-primary-hex border border-[#63130C]/20 shadow-[0_10px_20px_-12px_rgba(144,20,32,0.65)]",
   };
 
   return loading ? (
@@ -37,11 +37,17 @@ const ProceedButton: React.FC<ButtonProps> = ({
     <button
       onClick={onClick}
       type={type}
-      className={`flex items-center justify-center w-16 h-16 rounded-full transition-all ${
+      className={`flex items-center justify-center w-16 h-16 rounded-full transition-all duration-200 ${
         isHovered ? variantClasses.red : variantClasses[variant]
-      } ${className} ${disabled ? "cursor-not-allowed opacity-75" : ""}`}
+      } ${className} ${
+        isInteractive
+          ? "hover:-translate-y-[2px] hover:shadow-[0_14px_24px_-12px_rgba(144,20,32,0.65)] active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#901420]/20"
+          : "cursor-not-allowed opacity-75"
+      }`}
       disabled={disabled}
-      onMouseOver={() => setIsHovered(true)}
+      onMouseEnter={() => {
+        if (isInteractive) setIsHovered(true);
+      }}
       onMouseLeave={() => setIsHovered(false)}
     >
       {variant !== "gradient" ? (

@@ -69,71 +69,349 @@ const buildActorName = (actor: any) => {
   return name || user?.email || "N/A";
 };
 
+const isCustomerAssignedToAgent = (customer: any, agentID: string) => {
+  if (!customer || !agentID) return false;
+
+  const directAgentIds = [
+    customer?.agentId,
+    customer?.assignedAgentId,
+    customer?.agent?.id,
+  ].filter(Boolean);
+
+  if (directAgentIds.includes(agentID)) return true;
+
+  const assignments = Array.isArray(customer?.assignedAgents) ? customer.assignedAgents : [];
+  return assignments.some((assignment: any) => {
+    const assignmentAgentId =
+      assignment?.agent?.id ??
+      assignment?.agentId ??
+      assignment?.id;
+    return assignmentAgentId === agentID;
+  });
+};
+
 // Customer Table Component
-const CustomerTable = ({ 
-  agentID, 
-  onAssignCustomers 
-}: { 
+const getAssignedCustomersCount = (data: any) => {
+  const total =
+    data?.total ??
+    data?.count ??
+    data?.meta?.total ??
+    data?.pagination?.total;
+  if (typeof total === "number") return total;
+
+  const list = data?.customers ?? data?.data ?? data?.results ?? [];
+  return Array.isArray(list) ? list.length : 0;
+};
+
+type ReassignCustomerEntry = {
+  id: string;
+  name: string;
+  email?: string;
+};
+
+const ReassignCustomersModal = ({
+  isOpen,
+  onClose,
+  sourceAgentId,
+  customers,
+  onSuccess,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  sourceAgentId: string;
+  customers: ReassignCustomerEntry[];
+  onSuccess: () => void;
+}) => {
+  const { apiCall } = useApiCall();
+  const [search, setSearch] = useState<string>("");
+  const [debouncedSearch, setDebouncedSearch] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [entriesPerPage] = useState<number>(20);
+  const [targetAgentId, setTargetAgentId] = useState<string>("");
+  const [reason, setReason] = useState<string>("Agent transfer");
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setTargetAgentId("");
+    setReason("Agent transfer");
+    setSearch("");
+    setDebouncedSearch("");
+    setCurrentPage(1);
+    setIsSubmitting(false);
+  }, [isOpen]);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setDebouncedSearch(search.trim());
+    }, 350);
+    return () => clearTimeout(timeout);
+  }, [search]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch]);
+
+  const agentsUrl = useMemo(() => {
+    if (!isOpen) return null;
+    const base = `/v1/agents?page=${currentPage}&limit=${entriesPerPage}`;
+    return debouncedSearch
+      ? `${base}&search=${encodeURIComponent(debouncedSearch)}`
+      : base;
+  }, [isOpen, currentPage, entriesPerPage, debouncedSearch]);
+
+  const {
+    data: agentsData,
+    isLoading,
+    error,
+    errorStates,
+    mutate: refreshAgents,
+  } = useGetRequest(agentsUrl, isOpen, 60000);
+
+  const agents = useMemo(() => {
+    const list = agentsData?.agents ?? agentsData?.data ?? agentsData?.results ?? [];
+    if (!Array.isArray(list)) return [];
+    return list.filter((agent: any) => agent?.id && agent?.id !== sourceAgentId);
+  }, [agentsData, sourceAgentId]);
+
+  const totalAgents =
+    agentsData?.total ??
+    agentsData?.count ??
+    agentsData?.pagination?.total ??
+    agents.length;
+
+  const selectedAgent = agents.find((agent: any) => agent?.id === targetAgentId);
+
+  const customerIds = customers.map((customer) => customer.id).filter(Boolean);
+
+  const getAgentLabel = (agent: any) => {
+    const name = [agent?.user?.firstname, agent?.user?.lastname].filter(Boolean).join(" ");
+    const phone = agent?.user?.phone || agent?.phone || "";
+    const email = agent?.user?.email || agent?.email || "";
+    if (name) return `${name}${phone ? ` (${phone})` : ""}`;
+    return email || agent?.id || "Unknown Agent";
+  };
+
+  const handleSubmit = async () => {
+    if (!targetAgentId || customerIds.length === 0 || !reason.trim() || isSubmitting) return;
+
+    setIsSubmitting(true);
+    try {
+      await apiCall({
+        endpoint: `/v1/agents/${sourceAgentId}/reassign-customers`,
+        method: "post",
+        data: {
+          toAgentId: targetAgentId,
+          customerIds,
+          reason: reason.trim(),
+        },
+        successMessage:
+          customerIds.length > 1
+            ? "Customers reassigned successfully"
+            : "Customer reassigned successfully",
+      });
+
+      onSuccess();
+      onClose();
+    } catch {
+      void 0;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} layout="right" bodyStyle="pb-44">
+      <div className="flex flex-col items-center bg-white">
+        <div className="flex items-center justify-center px-4 w-full min-h-[64px] border-b-[0.6px] border-strokeGreyThree bg-paleGrayGradientLeft">
+          <h2 className="text-xl text-textBlack font-semibold font-secondary">
+            Reassign Customer{customerIds.length !== 1 ? "s" : ""}
+          </h2>
+        </div>
+
+        <div className="w-full px-4 py-6">
+          <DataStateWrapper
+            isLoading={isLoading}
+            error={error}
+            errorStates={errorStates}
+            refreshData={refreshAgents}
+            errorMessage="Failed to fetch agents"
+          >
+            <div className="mb-4">
+              <p className="text-xs text-textGrey">
+                {customerIds.length} customer{customerIds.length !== 1 ? "s" : ""} selected
+              </p>
+              <div className="mt-2 space-y-1">
+                {customers.map((customer) => (
+                  <p key={customer.id} className="text-sm text-textDarkGrey">
+                    {customer.name}
+                    {customer.email ? ` (${customer.email})` : ""}
+                  </p>
+                ))}
+              </div>
+            </div>
+
+            <div className="mb-3">
+              <label className="block text-xs text-textGrey mb-1 font-medium">Search agents</label>
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search by name, phone, or email"
+                className="w-full rounded-xl border border-strokeGreyTwo px-3 py-2 text-sm outline-none"
+              />
+            </div>
+
+            <div className="mb-3">
+              <label className="block text-xs text-textGrey mb-1 font-medium">Target agent</label>
+              <select
+                value={targetAgentId}
+                onChange={(e) => setTargetAgentId(e.target.value)}
+                className="w-full rounded-xl border border-strokeGreyTwo px-3 py-2 text-sm outline-none"
+              >
+                <option value="">Select agent</option>
+                {agents.map((agent: any) => (
+                  <option key={agent?.id} value={agent?.id}>
+                    {getAgentLabel(agent)}
+                  </option>
+                ))}
+              </select>
+              {!isLoading && agents.length === 0 ? (
+                <p className="mt-2 text-xs text-textGrey">No agents found.</p>
+              ) : null}
+              {totalAgents > entriesPerPage ? (
+                <div className="mt-3 flex justify-end">
+                  <ListPagination
+                    currentPage={currentPage}
+                    totalItems={totalAgents}
+                    itemsPerPage={entriesPerPage}
+                    onPageChange={setCurrentPage}
+                    label="Agents"
+                  />
+                </div>
+              ) : null}
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-xs text-textGrey mb-1 font-medium">Reason</label>
+              <textarea
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                rows={3}
+                className="w-full rounded-xl border border-strokeGreyTwo px-3 py-2 text-sm outline-none"
+                placeholder="Enter reason for reassignment"
+              />
+            </div>
+
+            {selectedAgent ? (
+              <div className="mb-4 rounded-xl border border-strokeGreyTwo bg-[#F9FAFB] px-3 py-2 text-xs text-textGrey">
+                Reassigning to: <span className="font-semibold text-textDarkGrey">{getAgentLabel(selectedAgent)}</span>
+              </div>
+            ) : null}
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 py-3 text-sm font-semibold text-textDarkGrey bg-gray-100 rounded-2xl hover:bg-gray-200"
+                disabled={isSubmitting}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={!targetAgentId || !reason.trim() || customerIds.length === 0 || isSubmitting}
+                className={`flex-1 py-3 text-sm font-semibold rounded-2xl transition-all ${
+                  targetAgentId && reason.trim() && customerIds.length > 0 && !isSubmitting
+                    ? "bg-gradient-to-r from-[#982214] to-[#F8CB48] text-white"
+                    : "bg-gray-100 text-textDarkGrey cursor-not-allowed"
+                }`}
+              >
+                {isSubmitting ? "Reassigning..." : "Reassign"}
+              </button>
+            </div>
+          </DataStateWrapper>
+        </div>
+      </div>
+    </Modal>
+  );
+};
+
+const CustomerTable = ({
+  agentID,
+  onAssignCustomers,
+  onCustomersReassigned,
+  refreshToken,
+}: {
   agentID: string;
   onAssignCustomers: () => void;
+  onCustomersReassigned?: () => void;
+  refreshToken: number;
 }) => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [entriesPerPage] = useState<number>(12);
+  const [isReassignCustomersModalOpen, setIsReassignCustomersModalOpen] = useState<boolean>(false);
+  const [customersToReassign, setCustomersToReassign] = useState<ReassignCustomerEntry[]>([]);
 
-  // Fetch all customers from the API
   const {
     data: customersData,
-    isLoading: customersLoading,
-    error: customersError,
-    errorStates: customersErrorStates,
-    mutate: refreshCustomers
+    isLoading,
+    error,
+    errorStates,
+    mutate: refreshCustomers,
   } = useGetRequest(
-    `/v1/customers`,
-    true,
+    agentID
+      ? `/v1/customers?page=${currentPage}&limit=${entriesPerPage}&agentId=${encodeURIComponent(agentID)}`
+      : null,
+    !!agentID,
     60000
   );
 
+  useEffect(() => {
+    if (refreshToken > 0) {
+      refreshCustomers();
+    }
+  }, [refreshToken, refreshCustomers]);
 
+  const rawCustomers = useMemo(() => {
+    const list = customersData?.customers ?? customersData?.data ?? customersData?.results ?? [];
+    return Array.isArray(list) ? list : [];
+  }, [customersData]);
 
-  // Get current assigned customers from store
-  const { agentAssignmentStore } = rootStore;
-  const storeAssignments = agentAssignmentStore.assignments;
-  const storeAssignedData = storeAssignments.find(a => a.agentId === agentID);
-  const storeAssignedCustomerIds = storeAssignedData?.customers?.map((customer: any) => customer.id || customer.customerId) || [];
+  const isScopedResponse = useMemo(
+    () => rawCustomers.length === 0 || rawCustomers.every((customer: any) => isCustomerAssignedToAgent(customer, agentID)),
+    [rawCustomers, agentID]
+  );
 
-  // For now, just use store data since the API endpoint returns forbidden
-  const allAssignedCustomerIds = storeAssignedCustomerIds;
+  const allAssignedCustomers = useMemo(() => {
+    if (isScopedResponse) return rawCustomers;
+    return rawCustomers.filter((customer: any) => isCustomerAssignedToAgent(customer, agentID));
+  }, [rawCustomers, isScopedResponse, agentID]);
 
-  // Filter customers to show only those currently assigned to this agent
-  const allAssignedCustomers = customersData?.customers?.filter((customer: any) => 
-    allAssignedCustomerIds.includes(customer.id)
-  ) || [];
+  const totalAssignedCustomers = useMemo(() => {
+    const backendTotal = getAssignedCustomersCount(customersData);
+    if (isScopedResponse) return backendTotal;
+    return allAssignedCustomers.length;
+  }, [customersData, isScopedResponse, allAssignedCustomers.length]);
 
-  // Use only customers loading state
-  const isLoading = customersLoading;
-  const error = customersError;
-  const errorStates = customersErrorStates;
-  const refreshData = refreshCustomers;
-
-  // Transform assigned customers to table format
-  const tableCustomersData = {
-    data: allAssignedCustomers.map((customer: any, index: number) => ({
-      id: customer.id || index + 1,
-      user: { 
-        firstname: customer.firstname || customer.user?.firstname || 'N/A', 
-        lastname: customer.lastname || customer.user?.lastname || 'N/A' 
-      },
-      product: { 
-        type: customer.productType || customer.product?.type || 'N/A', 
-        paymentType: customer.paymentMode || customer.product?.paymentType || 'N/A' 
-      },
-      status: customer.status || 'ACTIVE',
-      dueDate: customer.dueDate || 'N/A',
-      phone: customer.phone || customer.user?.phone || 'N/A',
-      email: customer.email || customer.user?.email || 'N/A',
-      location: customer.location || customer.user?.location || 'N/A'
-    }))
-  };
+  const tableCustomersData = useMemo(
+    () =>
+      allAssignedCustomers.map((customer: any, index: number) => ({
+        id: customer?.id || `${index + 1}`,
+        user: {
+          firstname: customer?.firstname || customer?.user?.firstname || "N/A",
+          lastname: customer?.lastname || customer?.user?.lastname || "N/A",
+        },
+        product: {
+          type: customer?.productType || customer?.product?.type || "N/A",
+          paymentType: customer?.paymentMode || customer?.product?.paymentType || "N/A",
+        },
+        status: customer?.status || "ACTIVE",
+        dueDate: customer?.dueDate || "N/A",
+        email: customer?.email || customer?.user?.email || "",
+      })),
+    [allAssignedCustomers]
+  );
 
   return (
     <div className="flex flex-col p-2.5 gap-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px]">
@@ -141,110 +419,154 @@ const CustomerTable = ({
         isLoading={isLoading}
         error={error}
         errorStates={errorStates}
-        refreshData={refreshData}
+        refreshData={refreshCustomers}
         errorMessage="Failed to fetch customers data"
       >
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-textBlack">Assigned Customers</h3>
           <span className="text-sm text-textGrey">
-            {allAssignedCustomers.length} customer{allAssignedCustomers.length !== 1 ? 's' : ''} assigned
+            {totalAssignedCustomers} customer{totalAssignedCustomers !== 1 ? "s" : ""} assigned
           </span>
         </div>
-        {allAssignedCustomers.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-8 text-center">
-          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
+
+        {tableCustomersData.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-8 text-center">
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No Customer History</h3>
+            <p className="text-sm text-gray-500 mb-4">This agent hasn't had any customers assigned yet.</p>
+            <button
+              onClick={onAssignCustomers}
+              className="px-4 py-2 bg-primaryGradient text-white rounded-full text-sm font-medium hover:bg-primary transition-colors"
+            >
+              Assign Customers
+            </button>
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No Customer History</h3>
-          <p className="text-sm text-gray-500 mb-4">This agent hasn't had any customers assigned yet.</p>
-          <button 
-            onClick={onAssignCustomers}
-            className="px-4 py-2 bg-primaryGradient text-white rounded-full text-sm font-medium hover:bg-primary transition-colors"
-          >
-            Assign Customers
-          </button>
-        </div>
-      ) : (
-        <>
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-gray-100">
-              <th className="text-left p-3 text-sm font-medium text-[#8990A5]">S/N</th>
-              <th className="text-left p-3 text-sm font-medium text-[#8990A5]">NAME</th>
-              <th className="text-left p-3 text-sm font-medium text-[#8990A5]">PRODUCT</th>
-              <th className="text-left p-3 text-sm font-medium text-[#8990A5]">STATUS</th>
-              <th className="text-left p-3 text-sm font-medium text-[#8990A5]">ACTIONS</th>
-            </tr>
-          </thead>
-          <tbody>
-                {tableCustomersData?.data?.slice((currentPage - 1) * entriesPerPage, currentPage * entriesPerPage).map((customer: any, index: number) => (
-              <tr key={customer.id} className="border-b border-[#F6F8FA]">
-                <td className="p-3 text-sm text-textDarkGrey">
-                  {String(index + 1).padStart(2, '0')}
-                </td>
-                <td className="p-3 text-sm text-textDarkGrey">
-                  {customer?.user?.firstname} {customer?.user?.lastname}
-                </td>
-                <td className="p-3 text-sm">
-                  <div className="flex items-center gap-2">
-                    <span className={`px-2 py-1 rounded-full text-xs ${
-                      customer?.product?.type === 'EAAS' ? 'bg-[#E3FAD6]' :
-                      customer?.product?.type === 'SHS' ? 'bg-[#FDEEC2]' :
-                      'bg-[#FDEEC2]'
-                    }`}>
-                      {customer?.product?.type || 'N/A'}
-                    </span>
-                    <span className="text-textDarkGrey">
-                      {customer?.product?.paymentType || 'N/A'}
-                    </span>
-                  </div>
-                </td>
-                <td className="p-3 text-sm">
-                                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs whitespace-nowrap ${
-                    customer?.status === 'COMPLETED' ? 'bg-[#F6F8FA] text-[#00AF50]' :
-                    customer?.status === 'DEFAULTED' ? 'bg-[#F6F8FA] text-[#FC4C5D]' :
-                    'bg-[#F6F8FA] text-[#00AF50]'
-                  }`}>
-                    {customer?.status === 'DEFAULTED' ? `DEFAULTED: ${customer?.daysDefaulted || 29} DAYS` :
-                     customer?.status === 'DUE' ? `DUE: ${customer?.dueDate || 'SEPT 11 2024'}` :
-                     customer?.status || 'N/A'}
-                  </span>
-                </td>
-                <td className="p-3">
-                  <button className="px-4 py-1 text-xs bg-[#F6F8FA] text-textDarkGrey rounded-full hover:bg-gray-200">
-                    View
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <div className="flex items-center justify-between px-4 py-3">
-        <div className="flex items-center gap-2">
-          <p className="text-xs text-textGrey">
-            Showing <span className="font-semibold">{(currentPage - 1) * entriesPerPage + 1}</span> to{" "}
-              <span className="font-semibold">{Math.min(currentPage * entriesPerPage, tableCustomersData.data.length)}</span> of{" "}
-              <span className="font-semibold">{tableCustomersData.data.length}</span> Customers
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-textGrey">Page</span>
-          <ListPagination
-            currentPage={currentPage}
-              totalItems={tableCustomersData.data.length}
-            itemsPerPage={entriesPerPage}
-            onPageChange={setCurrentPage}
-            label="Customers"
-          />
-        </div>
-      </div>
-        </>
+        ) : (
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-100">
+                    <th className="text-left p-3 text-sm font-medium text-[#8990A5]">S/N</th>
+                    <th className="text-left p-3 text-sm font-medium text-[#8990A5]">NAME</th>
+                    <th className="text-left p-3 text-sm font-medium text-[#8990A5]">PRODUCT</th>
+                    <th className="text-left p-3 text-sm font-medium text-[#8990A5]">STATUS</th>
+                    <th className="text-left p-3 text-sm font-medium text-[#8990A5]">ACTIONS</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {tableCustomersData.map((customer: any, index: number) => (
+                    <tr key={customer.id} className="border-b border-[#F6F8FA]">
+                      <td className="p-3 text-sm text-textDarkGrey">
+                        {String((currentPage - 1) * entriesPerPage + index + 1).padStart(2, "0")}
+                      </td>
+                      <td className="p-3 text-sm text-textDarkGrey">
+                        {customer?.user?.firstname} {customer?.user?.lastname}
+                      </td>
+                      <td className="p-3 text-sm">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs ${
+                              customer?.product?.type === "EAAS"
+                                ? "bg-[#E3FAD6]"
+                                : customer?.product?.type === "SHS"
+                                ? "bg-[#FDEEC2]"
+                                : "bg-[#FDEEC2]"
+                            }`}
+                          >
+                            {customer?.product?.type || "N/A"}
+                          </span>
+                          <span className="text-textDarkGrey">{customer?.product?.paymentType || "N/A"}</span>
+                        </div>
+                      </td>
+                      <td className="p-3 text-sm">
+                        <span
+                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs whitespace-nowrap ${
+                            customer?.status === "COMPLETED"
+                              ? "bg-[#F6F8FA] text-[#00AF50]"
+                              : customer?.status === "DEFAULTED"
+                              ? "bg-[#F6F8FA] text-[#FC4C5D]"
+                              : "bg-[#F6F8FA] text-[#00AF50]"
+                          }`}
+                        >
+                          {customer?.status === "DEFAULTED"
+                            ? `DEFAULTED: ${customer?.daysDefaulted || 29} DAYS`
+                            : customer?.status === "DUE"
+                            ? `DUE: ${customer?.dueDate || "SEPT 11 2024"}`
+                            : customer?.status || "N/A"}
+                        </span>
+                      </td>
+                      <td className="p-3">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setCustomersToReassign([
+                              {
+                                id: customer.id,
+                                name:
+                                  `${customer?.user?.firstname || ""} ${customer?.user?.lastname || ""}`.trim() ||
+                                  customer?.email ||
+                                  "Customer",
+                                email: customer?.email || undefined,
+                              },
+                            ]);
+                            setIsReassignCustomersModalOpen(true);
+                          }}
+                          className="px-4 py-1 text-xs bg-[#F6F8FA] text-textDarkGrey rounded-full hover:bg-gray-200"
+                        >
+                          Reassign
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="flex items-center justify-between px-4 py-3">
+              <div className="flex items-center gap-2">
+                <p className="text-xs text-textGrey">
+                  Showing <span className="font-semibold">{tableCustomersData.length === 0 ? 0 : (currentPage - 1) * entriesPerPage + 1}</span> to{" "}
+                  <span className="font-semibold">
+                    {tableCustomersData.length === 0
+                      ? 0
+                      : Math.min((currentPage - 1) * entriesPerPage + tableCustomersData.length, totalAssignedCustomers)}
+                  </span>{" "}
+                  of <span className="font-semibold">{totalAssignedCustomers}</span> Customers
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-textGrey">Page</span>
+                <ListPagination
+                  currentPage={currentPage}
+                  totalItems={totalAssignedCustomers}
+                  itemsPerPage={entriesPerPage}
+                  onPageChange={setCurrentPage}
+                  label="Customers"
+                />
+              </div>
+            </div>
+          </>
         )}
       </DataStateWrapper>
+
+      <ReassignCustomersModal
+        isOpen={isReassignCustomersModalOpen}
+        onClose={() => {
+          setIsReassignCustomersModalOpen(false);
+          setCustomersToReassign([]);
+        }}
+        sourceAgentId={agentID}
+        customers={customersToReassign}
+        onSuccess={() => {
+          refreshCustomers();
+          onCustomersReassigned?.();
+        }}
+      />
     </div>
   );
 };
@@ -294,7 +616,9 @@ const AssignedDevicesTable = ({
     mutate: refreshDevices,
   } = useGetRequest(
     agentID
-      ? `/v1/devices/assignments/agent/${agentID}/devices?page=${currentPage}&limit=${entriesPerPage}`
+      ? `/v1/devices/assignments/agent/${agentID}/devices?page=${currentPage}&limit=${entriesPerPage}${
+          search.trim() ? `&search=${encodeURIComponent(search.trim())}` : ""
+        }`
       : null,
     !!agentID,
     60000
@@ -321,31 +645,7 @@ const AssignedDevicesTable = ({
     };
   });
 
-  const filteredRows = useMemo<AssignedDeviceRow[]>(() => {
-    const searchValue = search.trim().toLowerCase();
-    return rows.filter((row) => {
-      if (searchValue) {
-        const matchesSerial = row.serialNumber?.toLowerCase().includes(searchValue);
-        const matchesModel = row.hardwareModel?.toLowerCase().includes(searchValue);
-        const matchesStatus = row.assignmentStatus?.toLowerCase().includes(searchValue);
-        if (!matchesSerial && !matchesModel && !matchesStatus) return false;
-      }
-      // Date range filter temporarily disabled.
-      // if (dateFrom && dateTo) {
-      //   if (!row.assignedAt) return false;
-      //   const assignedDate = new Date(row.assignedAt);
-      //   if (Number.isNaN(assignedDate.getTime())) return false;
-      //   const fromDate = new Date(dateFrom);
-      //   const toDate = new Date(dateTo);
-      //   toDate.setHours(23, 59, 59, 999);
-      //   if (assignedDate < fromDate) return false;
-      //   if (assignedDate > toDate) return false;
-      // }
-      return true;
-    });
-  }, [rows, search]);
-
-  const selectedRows = filteredRows.filter((row) => selectedRowKeys.includes(row.rowKey));
+  const selectedRows = rows.filter((row) => selectedRowKeys.includes(row.rowKey));
   const hasBlockedSelection = selectedRows.some((row) => isBlockedAssignmentStatus(row.assignmentStatusRaw));
   const selectionCount = selectedRows.length;
 
@@ -366,11 +666,11 @@ const AssignedDevicesTable = ({
   };
 
   const toggleSelectAll = () => {
-    if (filteredRows.length === 0) return;
-    if (selectedRowKeys.length === filteredRows.length) {
+    if (rows.length === 0) return;
+    if (selectedRowKeys.length === rows.length) {
       setSelectedRowKeys([]);
     } else {
-      setSelectedRowKeys(filteredRows.map((row) => row.rowKey));
+      setSelectedRowKeys(rows.map((row) => row.rowKey));
     }
   };
 
@@ -423,7 +723,10 @@ const AssignedDevicesTable = ({
               <label className="block text-xs text-textGrey mb-1 font-medium">Search</label>
               <input
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setCurrentPage(1);
+                }}
                 placeholder="Search by serial, status, or model"
                 className="w-full h-9 rounded-xl border border-strokeGreyTwo px-3 text-sm outline-none focus:ring-2 focus:ring-[#A58730]/20"
               />
@@ -474,7 +777,7 @@ const AssignedDevicesTable = ({
           ) : null}
         </div>
 
-        {filteredRows.length === 0 ? (
+        {rows.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-8 text-center">
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
               <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -482,12 +785,12 @@ const AssignedDevicesTable = ({
               </svg>
             </div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">
-              {rows.length === 0 ? "No Devices Assigned" : "No Devices Match Filters"}
+              {search.trim() ? "No Devices Match Search" : "No Devices Assigned"}
             </h3>
             <p className="text-sm text-gray-500 mb-4">
-              {rows.length === 0
-                ? "Assign devices to this agent to see them here."
-                : "Try adjusting your filters or search term."}
+              {search.trim()
+                ? "Try a different search term."
+                : "Assign devices to this agent to see them here."}
             </p>
             {canAssignDevices ? (
               <button
@@ -507,7 +810,7 @@ const AssignedDevicesTable = ({
                     <th className="text-left p-3 text-[11px] font-semibold tracking-wide text-[#7B8398]">
                       <input
                         type="checkbox"
-                        checked={filteredRows.length > 0 && selectedRowKeys.length === filteredRows.length}
+                        checked={rows.length > 0 && selectedRowKeys.length === rows.length}
                         onChange={toggleSelectAll}
                         className="h-4 w-4 accent-[#A58730]"
                       />
@@ -521,7 +824,7 @@ const AssignedDevicesTable = ({
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredRows.map((device: any, index: number) => (
+                  {rows.map((device: any, index: number) => (
                       <tr key={device.id} className="border-b border-[#F6F8FA] hover:bg-[#FCFDFE]">
                         <td className="p-3 text-sm text-textDarkGrey">
                           <input
@@ -567,11 +870,11 @@ const AssignedDevicesTable = ({
             <div className="flex items-center justify-between px-4 py-3">
               <div className="flex items-center gap-2">
                 <p className="text-xs text-textGrey">
-                  Showing <span className="font-semibold">{filteredRows.length === 0 ? 0 : (currentPage - 1) * entriesPerPage + 1}</span> to{" "}
+                  Showing <span className="font-semibold">{rows.length === 0 ? 0 : (currentPage - 1) * entriesPerPage + 1}</span> to{" "}
                   <span className="font-semibold">
-                    {filteredRows.length === 0
+                    {rows.length === 0
                       ? 0
-                      : Math.min((currentPage - 1) * entriesPerPage + filteredRows.length, totalDevices)}
+                      : Math.min((currentPage - 1) * entriesPerPage + rows.length, totalDevices)}
                   </span>{" "}
                   of <span className="font-semibold">{totalDevices}</span> Devices
                 </p>
@@ -1565,6 +1868,7 @@ const AgentModal = ({
   const [isTaskHistoryModalOpen, setIsTaskHistoryModalOpen] = useState<boolean>(false);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [devicesRefreshToken, setDevicesRefreshToken] = useState<number>(0);
+  const [customersRefreshToken, setCustomersRefreshToken] = useState<number>(0);
   const [productPage, setProductPage] = useState<number>(1);
   const [productEntriesPerPage, setProductEntriesPerPage] = useState<number>(20);
   const [productQueryParams, setProductQueryParams] = useState<Record<string, any> | null>({});
@@ -1597,8 +1901,7 @@ const AgentModal = ({
   // Get assigned data from store
   const { agentAssignmentStore } = rootStore;
   const assignments = agentAssignmentStore.assignments;
-  const assignedData = assignments.find(a => a.agentId === agentID);
-  const assignedCustomersCount = assignedData?.customers?.length || 0;
+  const assignedData = assignments.find((a) => a.agentId === agentID);
 
   // Fetch installers data for the count
   const {
@@ -1611,6 +1914,31 @@ const AgentModal = ({
 
   // Get agent category to determine which tabs to show
   const agentCategory = fetchSingleAgent?.data?.category || fetchSingleAgent?.data?.user?.category || "SALES";
+
+  const {
+    data: assignedCustomersCountData,
+    mutate: refreshAssignedCustomersCount,
+  } = useGetRequest(
+    isOpen && agentCategory !== "INSTALLER"
+      ? `/v1/customers?page=1&limit=1&agentId=${encodeURIComponent(agentID)}`
+      : null,
+    isOpen && agentCategory !== "INSTALLER",
+    60000
+  );
+
+  const assignedCustomersCount = useMemo(() => {
+    const backendCount = getAssignedCustomersCount(assignedCustomersCountData);
+    const rows =
+      assignedCustomersCountData?.customers ??
+      assignedCustomersCountData?.data ??
+      assignedCustomersCountData?.results ??
+      [];
+
+    if (!Array.isArray(rows) || rows.length === 0) return backendCount;
+    const allRowsMatchAgent = rows.every((customer: any) => isCustomerAssignedToAgent(customer, agentID));
+    if (allRowsMatchAgent) return backendCount;
+    return rows.filter((customer: any) => isCustomerAssignedToAgent(customer, agentID)).length;
+  }, [assignedCustomersCountData, agentID]);
 
   const {
     data: assignedDevicesCountData,
@@ -1935,9 +2263,14 @@ const AgentModal = ({
                 />
               </DataStateWrapper>
             ) : tabContent === "customer" ? (
-              <CustomerTable 
-                agentID={agentID} 
+              <CustomerTable
+                agentID={agentID}
+                refreshToken={customersRefreshToken}
                 onAssignCustomers={() => setIsAssignCustomersModalOpen(true)}
+                onCustomersReassigned={() => {
+                  refreshAssignedCustomersCount();
+                  setCustomersRefreshToken((prev) => prev + 1);
+                }}
               />
             ) : tabContent === "installers" ? (
               <InstallersTable agentID={agentID} />
@@ -2077,6 +2410,8 @@ const AgentModal = ({
         onSuccess={() => {
           // Refresh agent data after assigning customers
           fetchSingleAgent.mutate();
+          refreshAssignedCustomersCount();
+          setCustomersRefreshToken((prev) => prev + 1);
         }}
       />
       

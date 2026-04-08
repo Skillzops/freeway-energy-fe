@@ -79,7 +79,9 @@ const InstallationDetailModal: React.FC<InstallationDetailModalProps> = ({
       });
 
       // Refresh the task list
-      await refreshTable && refreshTable();
+      if (refreshTable) {
+        await refreshTable();
+      }
       setIsLocationUpdateOpen(false);
       onClose()
     } catch (error) {

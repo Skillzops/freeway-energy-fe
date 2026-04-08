@@ -11,14 +11,13 @@ import { formatNumberWithCommas } from "@/utils/helpers";
 import { toast } from "react-toastify";
 import { useApiCall } from "@/utils/useApiCall";
 import PaymentModeSelector from "./PaymentModeSelector";
-import { useFlutterwave } from "flutterwave-react-v3";
 import { FlutterwaveConfig } from "flutterwave-react-v3/dist/types";
 
 // Flutterwave configuration
 const public_key =
-  import.meta.env.VITE_FLW_PUBLIC_KEY ||
-  "FLWPUBK_TEST-720d3bd8434091e9b28a01452ebdd2e0-X";
-const base_url = import.meta.env.VITE_API_BASE_URL;
+import.meta.env.VITE_FLW_PUBLIC_KEY ||
+"FLWPUBK_TEST-720d3bd8434091e9b28a01452ebdd2e0-X";
+const _base_url = import.meta.env.VITE_API_BASE_URL;
 
 // Payment types
 
@@ -32,9 +31,9 @@ interface SaleResponse {
     id: string | number;
   };
   paymentData?: {
-  amount: number;
-  tx_ref: string;
-  transaction_id: string;
+    amount: number;
+    tx_ref: string;
+    transaction_id: string;
   };
 }
 
@@ -42,7 +41,7 @@ interface PaymentVerificationResponse {
   status?: string;
   message?: string;
   jobId?: string;
-  paymentStatus?: "PENDING" | "INCOMPLETE" | "COMPLETED"
+  paymentStatus?: "PENDING" | "INCOMPLETE" | "COMPLETED";
 }
 
 interface SalesSummaryProps {
@@ -62,7 +61,7 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
   getIsFormFilled,
   apiErrorMessage,
   payload,
-  refreshTable,
+  refreshTable
 }) => {
   const { apiCall } = useApiCall();
   const [paymentError, setPaymentError] = useState<string | null>(null);
@@ -74,7 +73,7 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
 
   // Helper function to determine if payment is installment
   const isInstallmentPayment = useCallback(() => {
-    return SaleStore.products.some(item => {
+    return SaleStore.products.some((item) => {
       const params = SaleStore.getParametersByProductId(item?.productId);
       return params?.paymentMode === "INSTALLMENT";
     });
@@ -86,25 +85,25 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
   const getTotalInitialDeposit = useCallback(() => {
     console.log('=== getTotalInitialDeposit Debug ===');
     console.log('SaleStore.products:', SaleStore.products);
-    
+
     return SaleStore.products.reduce((total, product) => {
       console.log('Processing product:', product);
       const params = SaleStore.getParametersByProductId(product.productId);
       console.log('Product params:', params);
-      
+
       if (params?.paymentMode === "INSTALLMENT") {
         const installmentStartingPrice = params.installmentStartingPrice || 0;
         console.log('installmentStartingPrice:', installmentStartingPrice);
-        
+
         // Get miscellaneous costs for this product
         const miscPrices = SaleStore.getMiscellaneousByProductId(product.productId);
-        const miscellaneousCosts = miscPrices ? 
-          Array.from(miscPrices.costs.entries()).reduce((sum, [, cost]) => sum + cost, 0) : 0;
+        const miscellaneousCosts = miscPrices ?
+        Array.from(miscPrices.costs.entries()).reduce((sum, [, cost]) => sum + cost, 0) : 0;
         console.log('miscellaneousCosts:', miscellaneousCosts);
-        
+
         const productTotal = installmentStartingPrice + miscellaneousCosts;
         console.log('productTotal for', product.productId, ':', productTotal);
-        
+
         return total + productTotal;
       }
       return total;
@@ -112,8 +111,8 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
   }, []);
 
   const [paymentGateway, setPaymentGateway] = useState<
-    "OGARANYA" | "FLUTTERWAVE"
-  >("OGARANYA");
+    "OGARANYA" | "FLUTTERWAVE">(
+    "OGARANYA");
   const [showOgaranyaModal, setShowOgaranyaModal] = useState(false);
   const [ogaranyaPaymentData, setOgaranyaPaymentData] = useState<any>(null);
 
@@ -122,12 +121,12 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
     saleId: string;
     totalAmount: number;
     tx_ref: string;
-    paymentData: any  }
-  > => {
+    paymentData: any;}> =>
+  {
     const freshPayload = {
       ...payload,
       paymentMethod: SaleStore.paymentMethod,
-      paymentGateway: paymentGateway,
+      paymentGateway: paymentGateway
     };
 
     console.log("Creating sale with payload:", freshPayload);
@@ -146,7 +145,7 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
       endpoint: "/v1/sales/create",
       method: "post",
       data: freshPayload,
-      successMessage: "Sale created successfully!",
+      successMessage: "Sale created successfully!"
     });
 
     console.log("Sale creation response:", saleResponse);
@@ -183,7 +182,7 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
       saleId: String(saleId),
       totalAmount,
       tx_ref,
-      paymentData,
+      paymentData
     };
   };
 
@@ -202,7 +201,7 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
         notes,
         status: "COMPLETED" // Always use COMPLETED for cash payments
       },
-      showToast: false,
+      showToast: false
     });
 
     console.log('Cash payment record response:', paymentResponse);
@@ -212,7 +211,7 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
 
 
   // Handle payment initialization
-  const handlePayment = useCallback(async () => {
+  const handlePayment = async () => {
     setPaymentError(null);
     setIsSubmitting(true);
 
@@ -222,7 +221,7 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
         // Step 1: Create the sale first (will be PENDING)
         console.log('Creating sale for cash payment...');
         const { saleId, totalAmount } = await createSale();
-        
+
         // Step 2: Record cash payment with COMPLETED status
         console.log('Recording cash payment...');
         const notes = paymentNotes || `Cash payment of ₦${formatNumberWithCommas(totalAmount)}`;
@@ -256,9 +255,9 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
         // Create sale first for online payments
         console.log('Creating sale for online payment...');
         const { saleId, totalAmount, tx_ref, paymentData } = await createSale();
-        
+
         const paymentAmount = totalAmount;
-        
+
         console.log('Initiating Flutterwave payment:', { saleId, paymentAmount, tx_ref });
 
         if (paymentGateway == "FLUTTERWAVE") {
@@ -273,29 +272,32 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
             customer: {
               email: SaleStore.customer.email,
               name: SaleStore.customer.customerName || "",
-              phone_number: SaleStore.customer.phone || "",
+              phone_number: SaleStore.customer.phone || ""
             },
             customizations: {
               title: "Product Purchase",
               description: `Payment for sale ${saleId}`,
-              logo: "https://res.cloudinary.com/bluebberies/image/upload/v1726242207/Screenshot_2024-09-04_at_2.43.01_PM_fcjlf3.png",
+              logo: "https://res.cloudinary.com/bluebberies/image/upload/v1726242207/Screenshot_2024-09-04_at_2.43.01_PM_fcjlf3.png"
             },
             meta: {
-              saleId: saleId,
-            },
+              saleId: saleId
+            }
           };
 
-          const handleFlutterPayment = useFlutterwave(flutterwaveConfig);
+          const checkout = (window as any)?.FlutterwaveCheckout;
+          if (typeof checkout !== "function") {
+            throw new Error("Flutterwave SDK is unavailable. Please refresh and try again.");
+          }
 
-          handleFlutterPayment({
+          checkout({
+            ...flutterwaveConfig,
             callback: async (response: any) => {
               console.log("Flutterwave payment response:", response);
               console.log("Calling verifyPayment with:", {
                 tx_ref: response.tx_ref,
-                transaction_id: response.transaction_id,
+                transaction_id: response.transaction_id
               });
               if (response.status === "successful") {
-                // Pass both tx_ref and transaction_id for verification
                 const isVerified = await verifyPayment(
                   String(response.tx_ref),
                   response.transaction_id
@@ -308,9 +310,7 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
                 }
               } else {
                 toast.error("Payment failed. Please try again.");
-                setPaymentError(
-                  "Payment was not successful. Please try again."
-                );
+                setPaymentError("Payment was not successful. Please try again.");
               }
             },
             onClose: () => {
@@ -322,24 +322,24 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
             setOgaranyaPaymentData(paymentData);
             setShowOgaranyaModal(true);
             setIsSubmitting(false);
-          }          
+          }
         }
       }
     } catch (error: any) {
       console.error("Error processing payment:", error);
-      const errorMessage = error.response?.data?.message ||
-        (Array.isArray(error.response?.data?.message) ?
-          error.response?.data?.message[0] :
-          error.message ||
-          "Failed to process payment. Please try again.");
+      const errorMessage = error.response?.data?.message || (
+      Array.isArray(error.response?.data?.message) ?
+      error.response?.data?.message[0] :
+      error.message ||
+      "Failed to process payment. Please try again.");
       setPaymentError(errorMessage);
       toast.error(errorMessage);
       setIsSubmitting(false);
     }
-  }, [createSale, recordCashPayment, refreshTable, resetSaleModalState, paymentNotes]);
+  };
 
 
-  function handleOgaranayaSuccessModalClose() { 
+  function handleOgaranayaSuccessModalClose() {
     setShowOgaranyaModal(false);
     resetSaleModalState();
   }
@@ -351,7 +351,7 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
   }, [paymentInfo]);
 
   // Verify payment with backend (EXACTLY like SaleTransactions)
-  const verifyPayment = async (tx_ref: string, transaction_id?: string) => {
+  async function verifyPayment(tx_ref: string, transaction_id?: string) {
     try {
       console.log('Verifying payment with tx_ref:', tx_ref, 'transaction_id:', transaction_id);
       let endpoint = `/v1/payment/verify/callback?tx_ref=${tx_ref}`;
@@ -359,14 +359,14 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
         endpoint += `&transaction_id=${transaction_id}`;
       }
       console.log("Verification endpoint:", endpoint);
-      const response = await apiCall({
+      const response = (await apiCall({
         endpoint,
         method: "get",
-        showToast: false,
-      }) as { data: PaymentVerificationResponse };
+        showToast: false
+      })) as {data: PaymentVerificationResponse;};
       console.log('Payment verification response:', response);
       if (response?.data?.status === "successful" ||
-        response?.data?.status === "processing") {
+      response?.data?.status === "processing") {
         if (response?.data?.paymentStatus === "COMPLETED") {
           toast.success("Payment completed successfully!");
         } else if (response?.data?.paymentStatus === "INCOMPLETE") {
@@ -395,7 +395,7 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
       }
       return false;
     }
-  };
+  }
 
   // Remove old unused initialization code
 
@@ -407,8 +407,8 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
       <div className="flex w-full">
         <p
           className="flex gap-1 items-center text-xs font-bold text-textDarkGrey cursor-pointer hover:underline"
-          onClick={() => setSummaryState(false)}
-        >
+          onClick={() => setSummaryState(false)}>
+
           <IoReturnUpBack />
           Back to form
         </p>
@@ -436,16 +436,16 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
         return (
           <div
             key={index}
-            className="flex flex-col w-full p-2.5 gap-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px]"
-          >
+            className="flex flex-col w-full p-2.5 gap-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px]">
+
             <p className="flex gap-1 w-max text-textLightGrey text-xs font-medium pb-2">
               <img src={producticon} alt="Product Icon" /> PRODUCT {index + 1}
             </p>
 
             <ProductDetailRow
               label="Product Category"
-              value={item.productTag}
-            />
+              value={item.productTag} />
+
             <ProductDetailRow label="Product Name" value={item.productName} />
             <ProductDetailRow label="Product Units" value={item.productUnits} />
             <ProductDetailRow label="Product Price" value={item.productPrice} />
@@ -455,63 +455,63 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
               <ProductDetailRow
                 label="Payment Mode"
                 value={
-                  params?.paymentMode === "ONE_OFF"
-                    ? "Single Deposit"
-                    : "Installment"
-                }
-              />
-              {params?.paymentMode === "INSTALLMENT" && (
-                <>
+                params?.paymentMode === "ONE_OFF" ?
+                "Single Deposit" :
+                "Installment"
+                } />
+
+              {params?.paymentMode === "INSTALLMENT" &&
+              <>
                   <ProductDetailRow
-                    label="Number of Installments"
-                    value={formatNumberWithCommas(params?.installmentDuration)}
-                  />
+                  label="Number of Installments"
+                  value={formatNumberWithCommas(params?.installmentDuration)} />
+
                   <ProductDetailRow
-                    label="Initial Deposit"
-                    value={formatNumberWithCommas(
-                      params?.installmentStartingPrice
-                    )}
-                    showNaira={true}
-                  />
+                  label="Initial Deposit"
+                  value={formatNumberWithCommas(
+                    params?.installmentStartingPrice
+                  )}
+                  showNaira={true} />
+
                 </>
-              )}
-              {(params?.discount || 0) > 0 && (
-                <ProductDetailRow
-                  label="Discount"
-                  value={`${params?.discount}%`}
-                />
-              )}
+              }
+              {(params?.discount || 0) > 0 &&
+              <ProductDetailRow
+                label="Discount"
+                value={`${params?.discount}%`} />
+
+              }
             </div>
 
-            {miscCostsExist && (
-              <div className="flex flex-col w-full gap-2 bg-[#F9F9F9] p-3 border-[0.6px] border-strokeGreyThree rounded-[20px]">
+            {miscCostsExist &&
+            <div className="flex flex-col w-full gap-2 bg-[#F9F9F9] p-3 border-[0.6px] border-strokeGreyThree rounded-[20px]">
                 {Array.from(miscellaneousCosts.entries()).map(
-                  ([name, cost]) => (
-                    <ProductDetailRow
-                      key={`${index}-${name}`}
-                      label={name}
-                      value={formatNumberWithCommas(cost)}
-                      showNaira={true}
-                    />
-                  )
-                )}
+                ([name, cost]) =>
+                <ProductDetailRow
+                  key={`${index}-${name}`}
+                  label={name}
+                  value={formatNumberWithCommas(cost)}
+                  showNaira={true} />
+
+
+              )}
               </div>
-            )}
+            }
 
             <div className="flex flex-col w-full gap-2 bg-[#F9F9F9] p-3 border-[0.6px] border-strokeGreyThree rounded-[20px]">
               <ProductDetailRow
                 label="Recipient Name"
                 value={`${recipient?.firstname || ""} ${
-                  recipient?.lastname || ""
-                }`.trim()}
-              />
+                recipient?.lastname || ""}`.
+                trim()} />
+
               <ProductDetailRow
                 label="Recipient Address"
-                value={recipient?.address as string}
-              />
+                value={recipient?.address as string} />
+
             </div>
-          </div>
-        );
+          </div>);
+
       })}
       <PaymentModeSelector
         value={SaleStore.paymentMethod as "CASH" | "ONLINE"}
@@ -521,9 +521,9 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
         saleId={SaleStore.paymentDetails?.metadata?.saleId}
         // Use initial deposit for installment, otherwise use total
         amount={
-          isInstallmentPayment()
-            ? getTotalInitialDeposit()
-            : SaleStore.getTotal()
+        isInstallmentPayment() ?
+        getTotalInitialDeposit() :
+        SaleStore.getTotal()
         }
         onAmountChange={(newAmount) => {
           // if (SaleStore.paymentDetails) {
@@ -531,23 +531,23 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
           // }
           SaleStore.addPaymentDetails({
             ...SaleStore.paymentDetails,
-            amount: newAmount,
+            amount: newAmount
           });
         }}
         onNotesChange={(notes: string) => {
           setPaymentNotes(notes);
         }}
         paymentGateway={paymentGateway} // your gateway state
-        onPaymentGatewayChange={setPaymentGateway}
-      />
+        onPaymentGatewayChange={setPaymentGateway} />
+
 
       {/* Display error messages */}
-      {displayError && (
-        <div className="flex flex-col w-full p-3 bg-red-50 border border-red-200 rounded-lg">
+      {displayError &&
+      <div className="flex flex-col w-full p-3 bg-red-50 border border-red-200 rounded-lg">
           <p className="text-red-600 text-sm font-medium">Payment Error</p>
           <p className="text-red-500 text-xs mt-1">{displayError}</p>
         </div>
-      )}
+      }
 
       {apiErrorMessage}
 
@@ -559,9 +559,9 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
         <div className="flex items-center justify-between">
           <span className="text-sm text-textDarkGrey">Payment Method:</span>
           <span className="text-sm font-medium text-textBlack">
-            {SaleStore.paymentMethod === "ONLINE"
-              ? "Online Payment (Flutterwave)"
-              : "Cash Payment"}
+            {SaleStore.paymentMethod === "ONLINE" ?
+            "Online Payment (Flutterwave)" :
+            "Cash Payment"}
           </span>
         </div>
         <div className="flex items-center justify-between">
@@ -572,45 +572,45 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
             <NairaSymbol />
             <span className="text-sm font-bold text-textBlack">
               {formatNumberWithCommas(
-                isInstallmentPayment()
-                  ? getTotalInitialDeposit()
-                  : SaleStore.getTotal()
+                isInstallmentPayment() ?
+                getTotalInitialDeposit() :
+                SaleStore.getTotal()
               )}
             </span>
           </div>
         </div>
-        {SaleStore.paymentMethod === "ONLINE" && (
-          <div className="flex items-center justify-between">
+        {SaleStore.paymentMethod === "ONLINE" &&
+        <div className="flex items-center justify-between">
             <span className="text-sm text-textDarkGrey">Customer Email:</span>
             <span className="text-sm font-medium text-textBlack">
               {SaleStore.customer?.email || "Not provided"}
             </span>
           </div>
-        )}
+        }
       </div>
 
       <div className="flex flex-col items-center gap-2">
         <p className="text-sm text-textDarkGrey font-medium">
-          {SaleStore.paymentMethod === "ONLINE"
-            ? "Click to proceed to secure payment"
-            : "Click to complete sale with cash payment"}
+          {SaleStore.paymentMethod === "ONLINE" ?
+          "Click to proceed to secure payment" :
+          "Click to complete sale with cash payment"}
         </p>
         <ProceedButton
           type="submit"
           loading={isSubmitting || loading}
           variant={getIsFormFilled() ? "gradient" : "gray"}
           disabled={!getIsFormFilled() || isSubmitting}
-          onClick={handlePayment}
-        />
+          onClick={handlePayment} />
+
       </div>
-      {showOgaranyaModal && ogaranyaPaymentData && (
-        <OgaranyaPaymentModal
-          ogaranyaPaymentData={ogaranyaPaymentData}
-          handleOgaranayaSuccessModalClose={handleOgaranayaSuccessModalClose}
-        />
-      )}
-    </>
-  );
+      {showOgaranyaModal && ogaranyaPaymentData &&
+      <OgaranyaPaymentModal
+        ogaranyaPaymentData={ogaranyaPaymentData}
+        handleOgaranayaSuccessModalClose={handleOgaranayaSuccessModalClose} />
+
+      }
+    </>);
+
 };
 
 export default SalesSummary;
@@ -618,12 +618,12 @@ export default SalesSummary;
 
 const OgaranyaPaymentModal = ({
   ogaranyaPaymentData,
-  handleOgaranayaSuccessModalClose,
-}: {
-  ogaranyaPaymentData: any;
-  handleOgaranayaSuccessModalClose: () => void;
-}) => (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  handleOgaranayaSuccessModalClose
+
+
+
+}: {ogaranyaPaymentData: any;handleOgaranayaSuccessModalClose: () => void;}) =>
+<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
       <h3 className="text-lg font-bold mb-4">Ogaranya Payment Details</h3>
       <div className="space-y-3">
@@ -651,11 +651,10 @@ const OgaranyaPaymentModal = ({
         </div>
       </div>
       <button
-        onClick={handleOgaranayaSuccessModalClose}
-        className="mt-4 w-full bg-primaryGradient text-white py-2 rounded"
-      >
+      onClick={handleOgaranayaSuccessModalClose}
+      className="mt-4 w-full bg-primaryGradient text-white py-2 rounded">
+
         Close
       </button>
     </div>
-  </div>
-);
+  </div>;

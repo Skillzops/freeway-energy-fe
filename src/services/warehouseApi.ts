@@ -1,5 +1,5 @@
 import { useApiCall, useGetRequest } from '../utils/useApiCall';
-import type { Warehouse, Product, TransferRequest } from '../data/warehouseData';
+import type { Warehouse, Product as _Product, TransferRequest } from '../data/warehouseData';
 import { useMemo } from 'react';
 
 // API endpoints for warehouse operations - Updated to match new API structure
@@ -19,44 +19,44 @@ const WAREHOUSE_ENDPOINTS = {
   WAREHOUSE_INVENTORY_ITEM: (warehouseId: string, itemId: string) => `/v1/warehouses/${warehouseId}/inventory/${itemId}`,
   PRODUCTS: '/v1/products',
   PRODUCT_BY_ID: (id: string) => `/v1/products/${id}`,
-  USERS: '/v1/users',
+  USERS: '/v1/users'
 } as const;
 
 // Common headers
 const JSON_HEADERS = {
   'Accept': 'application/json',
-  'Content-Type': 'application/json',
+  'Content-Type': 'application/json'
 } as const;
 
 const FORM_DATA_HEADERS = {
-  'Accept': 'application/json',
+  'Accept': 'application/json'
 } as const;
 
 // Helper function to normalize API response data
 const normalizeArrayResponse = (data: any, fallbackKey?: string): any[] => {
   if (!data) return [];
   if (Array.isArray(data)) return data;
-  
+
   const possibleKeys = [
-    fallbackKey,
-    'data',
-    'warehouses',
-    'products',
-    'transferRequests',
-    'transfers',
-    'inventories',
-    'inventory',
-    'managers',
-    'users',
-    'categories'
-  ].filter(Boolean);
-  
+  fallbackKey,
+  'data',
+  'warehouses',
+  'products',
+  'transferRequests',
+  'transfers',
+  'inventories',
+  'inventory',
+  'managers',
+  'users',
+  'categories'].
+  filter(Boolean);
+
   for (const key of possibleKeys) {
     if (data[key] && Array.isArray(data[key])) {
       return data[key];
     }
   }
-  
+
   return [];
 };
 
@@ -68,7 +68,7 @@ export const useWarehouseApi = () => {
   const warehouseOperations = useMemo(() => ({
     create: async (warehouseData: Omit<Warehouse, 'id'>) => {
       const formData = new FormData();
-      
+
       // Append required fields
       Object.entries({
         name: warehouseData.name,
@@ -79,23 +79,23 @@ export const useWarehouseApi = () => {
         state: "LAGOS",
         ...(warehouseData.isActive !== undefined && { isActive: warehouseData.isActive.toString() })
       }).forEach(([key, value]) => formData.append(key, value));
-      
+
       // Append image if exists
       if (warehouseData.image instanceof File) {
         formData.append('image', warehouseData.image);
       }
-      
+
       const result = await apiCall({
         endpoint: WAREHOUSE_ENDPOINTS.WAREHOUSES,
         method: 'post',
         data: formData,
         headers: FORM_DATA_HEADERS,
-        successMessage: 'Warehouse created successfully',
+        successMessage: 'Warehouse created successfully'
       });
 
       // Trigger revalidation of warehouses data
       import('swr').then(({ mutate }) => {
-        mutate(key => typeof key === 'string' && key.includes('/v1/warehouses'));
+        mutate((key) => typeof key === 'string' && key.includes('/v1/warehouses'));
       });
 
       return result;
@@ -103,21 +103,21 @@ export const useWarehouseApi = () => {
 
     update: async (id: string, warehouseData: Partial<Warehouse> | FormData) => {
       const isFormData = warehouseData instanceof FormData;
-      
+
       const result = await apiCall({
         endpoint: WAREHOUSE_ENDPOINTS.WAREHOUSE_BY_ID(id),
         method: 'patch',
         data: warehouseData,
         headers: isFormData ? FORM_DATA_HEADERS : JSON_HEADERS,
-        successMessage: 'Warehouse updated successfully',
+        successMessage: 'Warehouse updated successfully'
       });
 
       // Trigger revalidation of warehouses data
       import('swr').then(({ mutate }) => {
-        mutate(key => typeof key === 'string' && (
-          key.includes('/v1/warehouses') || 
-          key.includes(`/v1/warehouses/${id}`)
-        ));
+        mutate((key) => typeof key === 'string' && (
+        key.includes('/v1/warehouses') ||
+        key.includes(`/v1/warehouses/${id}`))
+        );
       });
 
       return result;
@@ -128,40 +128,40 @@ export const useWarehouseApi = () => {
         endpoint: WAREHOUSE_ENDPOINTS.WAREHOUSE_BY_ID(id),
         method: 'delete',
         headers: FORM_DATA_HEADERS,
-        successMessage: 'Warehouse deleted successfully',
+        successMessage: 'Warehouse deleted successfully'
       });
 
       // Trigger revalidation of warehouses data
       import('swr').then(({ mutate }) => {
-        mutate(key => typeof key === 'string' && key.includes('/v1/warehouses'));
+        mutate((key) => typeof key === 'string' && key.includes('/v1/warehouses'));
       });
 
       return result;
     },
 
     toggleStatus: async (id: string, isActive: boolean) => {
-      const endpoint = isActive 
-        ? WAREHOUSE_ENDPOINTS.WAREHOUSE_ACTIVATE(id)
-        : WAREHOUSE_ENDPOINTS.WAREHOUSE_DEACTIVATE(id);
-      
+      const endpoint = isActive ?
+      WAREHOUSE_ENDPOINTS.WAREHOUSE_ACTIVATE(id) :
+      WAREHOUSE_ENDPOINTS.WAREHOUSE_DEACTIVATE(id);
+
       const result = await apiCall({
         endpoint,
         method: 'patch',
         data: {},
         headers: FORM_DATA_HEADERS,
-        successMessage: `Warehouse ${isActive ? 'activated' : 'deactivated'} successfully`,
+        successMessage: `Warehouse ${isActive ? 'activated' : 'deactivated'} successfully`
       });
 
       // Trigger revalidation of warehouses data
       import('swr').then(({ mutate }) => {
-        mutate(key => typeof key === 'string' && (
-          key.includes('/v1/warehouses') || 
-          key.includes(`/v1/warehouses/${id}`)
-        ));
+        mutate((key) => typeof key === 'string' && (
+        key.includes('/v1/warehouses') ||
+        key.includes(`/v1/warehouses/${id}`))
+        );
       });
 
       return result;
-    },
+    }
   }), [apiCall]);
 
   // Optimized transfer operations
@@ -172,7 +172,7 @@ export const useWarehouseApi = () => {
         toWarehouseId: transferData.toWarehouse,
         inventoryId: transferData.productId,
         requestedQuantity: transferData.requestedQuantity,
-        notes: transferData.notes,
+        notes: transferData.notes
       };
 
       const result = await apiCall({
@@ -180,12 +180,12 @@ export const useWarehouseApi = () => {
         method: 'post',
         data: apiData,
         headers: JSON_HEADERS,
-        successMessage: 'Transfer request created successfully',
+        successMessage: 'Transfer request created successfully'
       });
 
       // Trigger revalidation of transfer requests data
       import('swr').then(({ mutate }) => {
-        mutate(key => typeof key === 'string' && key.includes('/v1/warehouses/transfer-requests'));
+        mutate((key) => typeof key === 'string' && key.includes('/v1/warehouses/transfer-requests'));
       });
 
       return result;
@@ -197,15 +197,15 @@ export const useWarehouseApi = () => {
         method: 'patch',
         data: { quantity, notes },
         headers: JSON_HEADERS,
-        successMessage: 'Transfer request fulfilled successfully',
+        successMessage: 'Transfer request fulfilled successfully'
       });
 
       // Trigger revalidation of transfer requests and inventory data
       import('swr').then(({ mutate }) => {
-        mutate(key => typeof key === 'string' && (
-          key.includes('/v1/warehouses/transfer-requests') ||
-          key.includes('/v1/warehouses') && key.includes('/inventory')
-        ));
+        mutate((key) => typeof key === 'string' && (
+        key.includes('/v1/warehouses/transfer-requests') ||
+        key.includes('/v1/warehouses') && key.includes('/inventory'))
+        );
       });
 
       return result;
@@ -217,12 +217,12 @@ export const useWarehouseApi = () => {
         method: 'patch',
         data: { reason },
         headers: JSON_HEADERS,
-        successMessage: 'Transfer request rejected successfully',
+        successMessage: 'Transfer request rejected successfully'
       });
 
       // Trigger revalidation of transfer requests data
       import('swr').then(({ mutate }) => {
-        mutate(key => typeof key === 'string' && key.includes('/v1/warehouses/transfer-requests'));
+        mutate((key) => typeof key === 'string' && key.includes('/v1/warehouses/transfer-requests'));
       });
 
       return result;
@@ -234,16 +234,16 @@ export const useWarehouseApi = () => {
         method: 'patch',
         data: updates,
         headers: JSON_HEADERS,
-        successMessage: 'Transfer request updated successfully',
+        successMessage: 'Transfer request updated successfully'
       });
 
       // Trigger revalidation of transfer requests data
       import('swr').then(({ mutate }) => {
-        mutate(key => typeof key === 'string' && key.includes('/v1/warehouses/transfer-requests'));
+        mutate((key) => typeof key === 'string' && key.includes('/v1/warehouses/transfer-requests'));
       });
 
       return result;
-    },
+    }
   }), [apiCall]);
 
   // Optimized inventory operations
@@ -254,14 +254,14 @@ export const useWarehouseApi = () => {
         method: 'post',
         data: inventoryData,
         headers: JSON_HEADERS,
-        successMessage: 'Inventory item added successfully',
+        successMessage: 'Inventory item added successfully'
       });
 
       // Trigger revalidation of inventory data
       import('swr').then(({ mutate }) => {
-        mutate(key => typeof key === 'string' && (
-          key.includes('/v1/warehouses') && key.includes('/inventory')
-        ));
+        mutate((key) => typeof key === 'string' &&
+        key.includes('/v1/warehouses') && key.includes('/inventory')
+        );
       });
 
       return result;
@@ -273,14 +273,14 @@ export const useWarehouseApi = () => {
         method: 'patch',
         data: updates,
         headers: JSON_HEADERS,
-        successMessage: 'Inventory item updated successfully',
+        successMessage: 'Inventory item updated successfully'
       });
 
       // Trigger revalidation of inventory data
       import('swr').then(({ mutate }) => {
-        mutate(key => typeof key === 'string' && (
-          key.includes('/v1/warehouses') && key.includes('/inventory')
-        ));
+        mutate((key) => typeof key === 'string' &&
+        key.includes('/v1/warehouses') && key.includes('/inventory')
+        );
       });
 
       return result;
@@ -291,18 +291,18 @@ export const useWarehouseApi = () => {
         endpoint: WAREHOUSE_ENDPOINTS.WAREHOUSE_INVENTORY_ITEM(warehouseId, itemId),
         method: 'delete',
         headers: JSON_HEADERS,
-        successMessage: 'Inventory item deleted successfully',
+        successMessage: 'Inventory item deleted successfully'
       });
 
       // Trigger revalidation of inventory data
       import('swr').then(({ mutate }) => {
-        mutate(key => typeof key === 'string' && (
-          key.includes('/v1/warehouses') && key.includes('/inventory')
-        ));
+        mutate((key) => typeof key === 'string' &&
+        key.includes('/v1/warehouses') && key.includes('/inventory')
+        );
       });
 
       return result;
-    },
+    }
   }), [apiCall]);
 
   // Optimized manager operations
@@ -313,12 +313,12 @@ export const useWarehouseApi = () => {
         method: 'post',
         data: { userIds },
         headers: JSON_HEADERS,
-        successMessage: 'Warehouse managers assigned successfully',
+        successMessage: 'Warehouse managers assigned successfully'
       });
 
       // Trigger revalidation of managers data
       import('swr').then(({ mutate }) => {
-        mutate(key => typeof key === 'string' && key.includes(`/v1/warehouses/${warehouseId}/managers`));
+        mutate((key) => typeof key === 'string' && key.includes(`/v1/warehouses/${warehouseId}/managers`));
       });
 
       return result;
@@ -329,16 +329,16 @@ export const useWarehouseApi = () => {
         endpoint: WAREHOUSE_ENDPOINTS.UNASSIGN_MANAGER(managerId),
         method: 'delete',
         headers: FORM_DATA_HEADERS,
-        successMessage: 'Warehouse manager unassigned successfully',
+        successMessage: 'Warehouse manager unassigned successfully'
       });
 
       // Trigger revalidation of managers data
       import('swr').then(({ mutate }) => {
-        mutate(key => typeof key === 'string' && key.includes('/managers'));
+        mutate((key) => typeof key === 'string' && key.includes('/managers'));
       });
 
       return result;
-    },
+    }
   }), [apiCall]);
 
   return {
@@ -349,11 +349,11 @@ export const useWarehouseApi = () => {
     toggleWarehouseStatus: warehouseOperations.toggleStatus,
     activateWarehouse: (id: string) => warehouseOperations.toggleStatus(id, true),
     deactivateWarehouse: (id: string) => warehouseOperations.toggleStatus(id, false),
-    
+
     // Manager operations
     assignWarehouseManagers: managerOperations.assign,
     unassignWarehouseManager: managerOperations.unassign,
-    
+
     // Transfer operations
     createTransferRequest: transferOperations.create,
     fulfillTransferRequest: transferOperations.fulfill,
@@ -363,26 +363,26 @@ export const useWarehouseApi = () => {
     // Inventory operations
     addInventoryItem: inventoryOperations.add,
     updateInventoryItem: inventoryOperations.update,
-    deleteInventoryItem: inventoryOperations.delete,
+    deleteInventoryItem: inventoryOperations.delete
   };
 };
 
 // Optimized data fetching hooks with better caching and error handling
 export const useWarehouses = (revalidate = true, enabled = true) => {
   const result = useGetRequest(
-    enabled ? WAREHOUSE_ENDPOINTS.WAREHOUSES : null, 
+    enabled ? WAREHOUSE_ENDPOINTS.WAREHOUSES : null,
     revalidate
   );
-  
+
   const processedData = useMemo(() => {
     const rawData = normalizeArrayResponse(result.data, 'warehouses');
-    
+
     // Map and sort warehouses
     const mappedData = rawData.map((warehouse: any) => ({
       ...warehouse,
-      isMainWarehouse: warehouse.isMain || warehouse.isMainWarehouse || false,
+      isMainWarehouse: warehouse.isMain || warehouse.isMainWarehouse || false
     }));
-    
+
     // Sort: main warehouses first
     return mappedData.sort((a: any, b: any) => {
       if (a.isMainWarehouse && !b.isMainWarehouse) return -1;
@@ -390,7 +390,7 @@ export const useWarehouses = (revalidate = true, enabled = true) => {
       return 0;
     });
   }, [result.data]);
-  
+
   return { ...result, data: processedData };
 };
 
@@ -407,13 +407,13 @@ export const useWarehouseInventory = (warehouseId: string | null, revalidate = t
     warehouseId ? WAREHOUSE_ENDPOINTS.WAREHOUSE_INVENTORY(warehouseId) : null,
     revalidate
   );
-  
+
   // Handle the new API response structure
   const processedData = result.data ?
-    (Array.isArray(result.data) ? result.data :
-     Array.isArray(result.data.inventories) ? result.data.inventories :
-     Array.isArray(result.data.data) ? result.data.data : []) : [];
-  
+  Array.isArray(result.data) ? result.data :
+  Array.isArray(result.data.inventories) ? result.data.inventories :
+  Array.isArray(result.data.data) ? result.data.data : [] : [];
+
   return {
     ...result,
     data: processedData
@@ -422,16 +422,16 @@ export const useWarehouseInventory = (warehouseId: string | null, revalidate = t
 
 export const useProducts = (revalidate = true, enabled = true) => {
   const result = useGetRequest(
-    enabled ? WAREHOUSE_ENDPOINTS.PRODUCTS : null, 
+    enabled ? WAREHOUSE_ENDPOINTS.PRODUCTS : null,
     revalidate
   );
-  
+
   // Handle different API response structures
   const processedData = result.data ?
-    (Array.isArray(result.data) ? result.data :
-     Array.isArray(result.data.data) ? result.data.data :
-     Array.isArray(result.data.products) ? result.data.products : []) : [];
-  
+  Array.isArray(result.data) ? result.data :
+  Array.isArray(result.data.data) ? result.data.data :
+  Array.isArray(result.data.products) ? result.data.products : [] : [];
+
   return {
     ...result,
     data: processedData
@@ -453,7 +453,7 @@ export const useWarehouseTransferRequests = (filters: {
   page?: number;
   limit?: number;
 } = {}, revalidate = true) => {
-  
+
   const queryString = useMemo(() => {
     const params = new URLSearchParams();
     Object.entries(filters).forEach(([key, value]) => {
@@ -462,9 +462,9 @@ export const useWarehouseTransferRequests = (filters: {
     return params.toString();
   }, [filters]);
 
-  const endpoint = queryString 
-    ? `${WAREHOUSE_ENDPOINTS.TRANSFER_REQUESTS}?${queryString}` 
-    : WAREHOUSE_ENDPOINTS.TRANSFER_REQUESTS;
+  const endpoint = queryString ?
+  `${WAREHOUSE_ENDPOINTS.TRANSFER_REQUESTS}?${queryString}` :
+  WAREHOUSE_ENDPOINTS.TRANSFER_REQUESTS;
 
   const result = useGetRequest(endpoint, revalidate);
 
@@ -497,7 +497,7 @@ export const useTransferRequest = (id: string | null, revalidate = true) => {
 // Optimized stats hook
 export const useWarehouseStats = (revalidate = true, enabled = true) => {
   return useGetRequest(
-    enabled ? WAREHOUSE_ENDPOINTS.WAREHOUSE_STATS : null, 
+    enabled ? WAREHOUSE_ENDPOINTS.WAREHOUSE_STATS : null,
     revalidate
   );
 };
@@ -508,12 +508,12 @@ export const useWarehouseManagers = (warehouseId: string | null, revalidate = tr
     enabled && warehouseId ? WAREHOUSE_ENDPOINTS.WAREHOUSE_MANAGERS(warehouseId) : null,
     revalidate
   );
-  
-  const processedData = useMemo(() => 
-    normalizeArrayResponse(result.data, 'managers'), 
-    [result.data]
+
+  const processedData = useMemo(() =>
+  normalizeArrayResponse(result.data, 'managers'),
+  [result.data]
   );
-  
+
   return { ...result, data: processedData };
 };
 
@@ -523,16 +523,16 @@ export const useTransferRequests = () => useWarehouseTransferRequests({});
 
 export const useUsers = (revalidate = true, enabled = true) => {
   const result = useGetRequest(
-    enabled ? WAREHOUSE_ENDPOINTS.USERS : null, 
+    enabled ? WAREHOUSE_ENDPOINTS.USERS : null,
     revalidate
   );
-  
+
   // Handle different API response structures
   const processedData = result.data ?
-    (Array.isArray(result.data) ? result.data :
-     Array.isArray(result.data.data) ? result.data.data :
-     Array.isArray(result.data.users) ? result.data.users : []) : [];
-  
+  Array.isArray(result.data) ? result.data :
+  Array.isArray(result.data.data) ? result.data.data :
+  Array.isArray(result.data.users) ? result.data.users : [] : [];
+
   return {
     ...result,
     data: processedData

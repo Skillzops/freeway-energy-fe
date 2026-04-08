@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef as _useRef, useEffect } from "react";
 import { KeyedMutator } from "swr";
 import { Tag } from "../Products/ProductDetails";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
@@ -6,9 +6,9 @@ import customericon from "../../assets/customers/customericon.svg";
 import { useApiCall } from "@/utils/useApiCall";
 import ApiErrorMessage from "../ApiErrorMessage";
 import { UploadPhotoInput } from "../InputComponent/UploadPhotoInput";
-import StateLgaSelect from "../InputComponent/StateLgaSelect";
-import IdTypeSelect from "../InputComponent/IdTypeSelect";
-import { SelectInput } from "../InputComponent/Input";
+import _StateLgaSelect from "../InputComponent/StateLgaSelect";
+import _IdTypeSelect from "../InputComponent/IdTypeSelect";
+import { SelectInput as _SelectInput } from "../InputComponent/Input";
 
 export type DetailsType = {
   customerId?: string;
@@ -48,9 +48,9 @@ const CustomerDetails = ({
   ...data
 }: CustomerDetailsProps) => {
 
-  
 
-  
+
+
   const { apiCall } = useApiCall();
   const [loading, setLoading] = useState<boolean>(false);
   const [apiError, setApiError] = useState<string | Record<string, string[]>>("");
@@ -74,12 +74,12 @@ const CustomerDetails = ({
     type: data.type || "",
     passportPhotoUrl: data.passportPhotoUrl || "",
     idImageUrl: data.idImageUrl || "",
-    contractFormImageUrl: data.contractFormImageUrl || "",
+    contractFormImageUrl: data.contractFormImageUrl || ""
   });
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [idImageFile, setIdImageFile] = useState<File | null>(null);
   const [contractFile, setContractFile] = useState<File | null>(null);
-  const [selectedImage, setSelectedImage] = useState<{ url: string; title: string } | null>(null);
+  const [selectedImage, setSelectedImage] = useState<{url: string;title: string;} | null>(null);
   const [showImageModal, setShowImageModal] = useState<boolean>(false);
 
   // Reset image state when customer changes
@@ -90,7 +90,7 @@ const CustomerDetails = ({
     setSelectedImage(null);
     setShowImageModal(false);
     setApiError(""); // Clear any previous errors
-    
+
     // Update formData with new customer data
     setFormData({
       customerId: data.customerId || data.id,
@@ -112,9 +112,9 @@ const CustomerDetails = ({
       type: data.type || "",
       passportPhotoUrl: data.passportPhotoUrl || "",
       idImageUrl: data.idImageUrl || "",
-      contractFormImageUrl: data.contractFormImageUrl || "",
+      contractFormImageUrl: data.contractFormImageUrl || ""
     });
-  }, [data.customerId || data.id, data.firstname, data.lastname, data.email, data.phoneNumber, data.phone, data.alternatePhone, data.gender, data.addressType, data.installationAddress, data.lga, data.state, data.location, data.longitude, data.latitude, data.idType, data.idNumber, data.type, data.passportPhotoUrl, data.idImageUrl, data.contractFormImageUrl]);
+  }, [data]);
 
   // Cleanup object URLs on unmount
   useEffect(() => {
@@ -125,27 +125,27 @@ const CustomerDetails = ({
       if (idImageFile) {
         URL.revokeObjectURL(URL.createObjectURL(idImageFile));
       }
-      if (contractFile) { 
+      if (contractFile) {
         URL.revokeObjectURL(URL.createObjectURL(contractFile));
       }
     };
   }, [photoFile, idImageFile, contractFile]);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+  {
     const { name, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
-      [name]: value,
+      [name]: value
     }));
     setApiError(""); // Clear any previous errors when user makes changes
   };
 
-  const handleSelectChange = (name: string, value: string) => {
+  const _handleSelectChange = (name: string, value: string) => {
     setFormData((prevData) => ({
       ...prevData,
-      [name]: value,
+      [name]: value
     }));
     setApiError("");
   };
@@ -200,9 +200,9 @@ const CustomerDetails = ({
         method: "patch",
         data: formDataToSend,
         headers: {
-          "Content-Type": "multipart/form-data",
+          "Content-Type": "multipart/form-data"
         },
-        successMessage: "Customer updated successfully!",
+        successMessage: "Customer updated successfully!"
       });
 
       if (refreshTable) {
@@ -231,67 +231,67 @@ const CustomerDetails = ({
       {/* Photograph Row */}
       <div className="flex items-center justify-between h-[64px] px-4 bg-white border-[0.6px] border-strokeGreyThree rounded-full">
         <Tag name="Photograph" />
-        {displayInput ? (
-          <div className="flex items-center gap-2">
+        {displayInput ?
+        <div className="flex items-center gap-2">
             <div className="flex items-center justify-center max-w-[40px] h-[40px] border-[0.6px] border-strokeCream rounded-full overflow-clip">
-              {photoFile ? (
-                <img 
-                  src={URL.createObjectURL(photoFile)} 
-                  alt="New Profile" 
-                  className="w-full h-full object-cover rounded-full"
-                />
-              ) : data.passportPhotoUrl ? (
-                <img 
-                  src={data.passportPhotoUrl} 
-                  alt="Profile" 
-                  className="w-full h-full object-cover rounded-full"
-                  onError={(e) => {
-                    console.error('Error loading passport photo:', data.passportPhotoUrl);
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-              ) : (
-                <div className="w-full h-full bg-gray-50 flex items-center justify-center rounded-full">
+              {photoFile ?
+            <img
+              src={URL.createObjectURL(photoFile)}
+              alt="New Profile"
+              className="w-full h-full object-cover rounded-full" /> :
+
+            data.passportPhotoUrl ?
+            <img
+              src={data.passportPhotoUrl}
+              alt="Profile"
+              className="w-full h-full object-cover rounded-full"
+              onError={(e) => {
+                console.error('Error loading passport photo:', data.passportPhotoUrl);
+                e.currentTarget.style.display = 'none';
+              }} /> :
+
+
+            <div className="w-full h-full bg-gray-50 flex items-center justify-center rounded-full">
                   <span className="text-[10px] text-textLightGrey">No Passport</span>
                 </div>
-              )}
+            }
             </div>
             <UploadPhotoInput value={photoFile} onChange={handlePhotoChange} maxSizeInMB={2} />
-          </div>
-        ) : (
-          <div className="flex items-center gap-2">
+          </div> :
+
+        <div className="flex items-center gap-2">
             <div className="flex items-center justify-center max-w-[40px] h-[40px] border-[0.6px] border-strokeCream rounded-full overflow-clip">
-              {data.passportPhotoUrl ? (
-                <>
-                  <img 
-                    src={data.passportPhotoUrl} 
-                    alt="Profile" 
-                    className="w-full h-full object-cover rounded-full"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
+              {data.passportPhotoUrl ?
+            <>
+                  <img
+                src={data.passportPhotoUrl}
+                alt="Profile"
+                className="w-full h-full object-cover rounded-full"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }} />
+
                   <div className="w-full h-full bg-gray-50 flex items-center justify-center rounded-full hidden" id="passport-fallback">
                     <span className="text-[10px] text-textLightGrey">Error</span>
                   </div>
-                </>
-              ) : (
-                <div className="w-full h-full bg-gray-50 flex items-center justify-center rounded-full">
+                </> :
+
+            <div className="w-full h-full bg-gray-50 flex items-center justify-center rounded-full">
                   <span className="text-[10px] text-textLightGrey">No Passport</span>
                 </div>
-              )}
+            }
             </div>
-            {data.passportPhotoUrl && (
-              <button
-                onClick={() => handleViewImage(data.passportPhotoUrl!, "Passport Photo")}
-                className="px-2 py-1 text-xs bg-primaryGradient text-white rounded-full hover:bg-primaryGradient/80 transition-colors"
-                title="View Passport Photo"
-              >
+            {data.passportPhotoUrl &&
+          <button
+            onClick={() => handleViewImage(data.passportPhotoUrl!, "Passport Photo")}
+            className="px-2 py-1 text-xs bg-primaryGradient text-white rounded-full hover:bg-primaryGradient/80 transition-colors"
+            title="View Passport Photo">
+
                 View
               </button>
-            )}
+          }
           </div>
-        )}
+        }
       </div>
 
       {/* Personal Details Section */}
@@ -300,34 +300,34 @@ const CustomerDetails = ({
           <img src={customericon} alt="Customer Icon" /> PERSONAL DETAILS
         </p>
         {([
-          { label: "First Name", name: "firstname", value: data.firstname },
-          { label: "Last Name", name: "lastname", value: data.lastname },
-          { label: "Email", name: "email", value: data.email },
-          { label: "Phone Number", name: "phoneNumber", value: data.phoneNumber || data.phone },
-          { label: "Alternative Phone Number", name: "alternatePhone", value: data.alternatePhone },
-          { label: "Gender", name: "gender", value: data.gender },
-          { label: "Address Type", name: "addressType", value: data.addressType },
-          { label: "State", name: "state", value: data.state },
-          { label: "LGA", name: "lga", value: data.lga },
-          { label: "Address", name: "location", value: data.location },
-          { label: "Latitude", name: "latitude", value: data.latitude },
-          { label: "Longitude", name: "longitude", value: data.longitude },
-        ] as { label: string; name: keyof typeof formData; value: any }[]).map((item) => (
-          <div key={item.label} className="flex items-center justify-between">
+        { label: "First Name", name: "firstname", value: data.firstname },
+        { label: "Last Name", name: "lastname", value: data.lastname },
+        { label: "Email", name: "email", value: data.email },
+        { label: "Phone Number", name: "phoneNumber", value: data.phoneNumber || data.phone },
+        { label: "Alternative Phone Number", name: "alternatePhone", value: data.alternatePhone },
+        { label: "Gender", name: "gender", value: data.gender },
+        { label: "Address Type", name: "addressType", value: data.addressType },
+        { label: "State", name: "state", value: data.state },
+        { label: "LGA", name: "lga", value: data.lga },
+        { label: "Address", name: "location", value: data.location },
+        { label: "Latitude", name: "latitude", value: data.latitude },
+        { label: "Longitude", name: "longitude", value: data.longitude }] as
+        {label: string;name: keyof typeof formData;value: any;}[]).map((item) =>
+        <div key={item.label} className="flex items-center justify-between">
             <Tag name={item.label} />
-            {displayInput ? (
-              <input
-                type="text"
-                name={item.name}
-                value={formData[item.name]}
-                onChange={handleChange}
-                className="text-xs text-textDarkGrey px-2 py-1 w-full max-w-[160px] border-[0.6px] border-strokeGreyThree rounded-full"
-              />
-            ) : (
-              <p className="text-xs font-bold text-textDarkGrey">{item.value || "N/A"}</p>
-            )}
+            {displayInput ?
+          <input
+            type="text"
+            name={item.name}
+            value={formData[item.name]}
+            onChange={handleChange}
+            className="text-xs text-textDarkGrey px-2 py-1 w-full max-w-[160px] border-[0.6px] border-strokeGreyThree rounded-full" /> :
+
+
+          <p className="text-xs font-bold text-textDarkGrey">{item.value || "N/A"}</p>
+          }
           </div>
-        ))}
+        )}
       </div>
 
       {/* Installation Details Section */}
@@ -337,17 +337,17 @@ const CustomerDetails = ({
         </p>
         <div className="flex items-center justify-between">
           <Tag name="Installation Address" />
-          {displayInput ? (
-            <input
-              type="text"
-              name="installationAddress"
-              value={formData.installationAddress}
-              onChange={handleChange}
-              className="text-xs text-textDarkGrey px-2 py-1 w-full max-w-[160px] border-[0.6px] border-strokeGreyThree rounded-full"
-            />
-          ) : (
-            <p className="text-xs font-bold text-textDarkGrey">{data.installationAddress || "N/A"}</p>
-          )}
+          {displayInput ?
+          <input
+            type="text"
+            name="installationAddress"
+            value={formData.installationAddress}
+            onChange={handleChange}
+            className="text-xs text-textDarkGrey px-2 py-1 w-full max-w-[160px] border-[0.6px] border-strokeGreyThree rounded-full" /> :
+
+
+          <p className="text-xs font-bold text-textDarkGrey">{data.installationAddress || "N/A"}</p>
+          }
         </div>
       </div>
 
@@ -360,94 +360,94 @@ const CustomerDetails = ({
         </p>
         <div className="flex items-center justify-between">
           <Tag name="ID Type" />
-          {displayInput ? (
-            <input
-              type="text"
-              name="idType"
-              value={formData.idType}
-              onChange={handleChange}
-              className="text-xs text-textDarkGrey px-2 py-1 w-full max-w-[160px] border-[0.6px] border-strokeGreyThree rounded-full"
-            />
-          ) : (
-            <p className="text-xs font-bold text-textDarkGrey">{data.idType || "N/A"}</p>
-          )}
+          {displayInput ?
+          <input
+            type="text"
+            name="idType"
+            value={formData.idType}
+            onChange={handleChange}
+            className="text-xs text-textDarkGrey px-2 py-1 w-full max-w-[160px] border-[0.6px] border-strokeGreyThree rounded-full" /> :
+
+
+          <p className="text-xs font-bold text-textDarkGrey">{data.idType || "N/A"}</p>
+          }
         </div>
         <div className="flex items-center justify-between">
           <Tag name="ID Number" />
-          {displayInput ? (
-            <input
-              type="text"
-              name="idNumber"
-              value={formData.idNumber}
-              onChange={handleChange}
-              className="text-xs text-textDarkGrey px-2 py-1 w-full max-w-[160px] border-[0.6px] border-strokeGreyThree rounded-full"
-            />
-          ) : (
-            <p className="text-xs font-bold text-textDarkGrey">{data.idNumber || "N/A"}</p>
-          )}
+          {displayInput ?
+          <input
+            type="text"
+            name="idNumber"
+            value={formData.idNumber}
+            onChange={handleChange}
+            className="text-xs text-textDarkGrey px-2 py-1 w-full max-w-[160px] border-[0.6px] border-strokeGreyThree rounded-full" /> :
+
+
+          <p className="text-xs font-bold text-textDarkGrey">{data.idNumber || "N/A"}</p>
+          }
         </div>
         <div className="flex items-center justify-between">
           <Tag name="ID Image" />
-          {displayInput ? (
-            <div className="flex items-center gap-2">
+          {displayInput ?
+          <div className="flex items-center gap-2">
               <div className="flex items-center justify-center max-w-[40px] h-[40px] border-[0.6px] border-strokeCream rounded-full overflow-clip">
-                {idImageFile ? (
-                  <img 
-                    src={URL.createObjectURL(idImageFile)} 
-                    alt="New ID Image" 
-                    className="w-full h-full object-cover rounded-full"
-                  />
-                ) : data.idImageUrl ? (
-                  <img 
-                    src={data.idImageUrl} 
-                    alt="ID Image" 
-                    className="w-full h-full object-cover rounded-full"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gray-50 flex items-center justify-center rounded-full">
+                {idImageFile ?
+              <img
+                src={URL.createObjectURL(idImageFile)}
+                alt="New ID Image"
+                className="w-full h-full object-cover rounded-full" /> :
+
+              data.idImageUrl ?
+              <img
+                src={data.idImageUrl}
+                alt="ID Image"
+                className="w-full h-full object-cover rounded-full"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }} /> :
+
+
+              <div className="w-full h-full bg-gray-50 flex items-center justify-center rounded-full">
                     <span className="text-[10px] text-textLightGrey">No ID Image</span>
                   </div>
-                )}
+              }
               </div>
               <UploadPhotoInput value={idImageFile} onChange={handleIdImageChange} maxSizeInMB={2} />
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
+            </div> :
+
+          <div className="flex items-center gap-2">
               <div className="flex items-center justify-center max-w-[40px] h-[40px] border-[0.6px] border-strokeCream rounded-full overflow-clip">
-                {data.idImageUrl ? (
-                  <>
-                                      <img 
-                    src={data.idImageUrl} 
-                    alt="ID Image" 
-                    className="w-full h-full object-cover rounded-full"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
+                {data.idImageUrl ?
+              <>
+                                      <img
+                  src={data.idImageUrl}
+                  alt="ID Image"
+                  className="w-full h-full object-cover rounded-full"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }} />
+
                     <div className="w-full h-full bg-gray-50 flex items-center justify-center rounded-full hidden" id="id-fallback">
                       <span className="text-[10px] text-textLightGrey">Error</span>
                     </div>
-                  </>
-                ) : (
-                  <div className="w-full h-full bg-gray-50 flex items-center justify-center rounded-full">
+                  </> :
+
+              <div className="w-full h-full bg-gray-50 flex items-center justify-center rounded-full">
                     <span className="text-[10px] text-textLightGrey">No ID Image</span>
                   </div>
-                )}
+              }
               </div>
-              {data.idImageUrl && (
-                <button
-                  onClick={() => handleViewImage(data.idImageUrl!, "ID Image")}
-                  className="px-2 py-1 text-xs bg-primaryGradient text-white rounded-full hover:bg-primaryGradient/80 transition-colors"
-                  title="View ID Image"
-                >
+              {data.idImageUrl &&
+            <button
+              onClick={() => handleViewImage(data.idImageUrl!, "ID Image")}
+              className="px-2 py-1 text-xs bg-primaryGradient text-white rounded-full hover:bg-primaryGradient/80 transition-colors"
+              title="View ID Image">
+
                   View
                 </button>
-              )}
+            }
             </div>
-          )}
+          }
         </div>
       </div>
 
@@ -458,120 +458,120 @@ const CustomerDetails = ({
         </p>
         <div className="flex items-center justify-between">
           <Tag name="Contract Document" />
-          {displayInput ? (
-            <div className="flex items-center gap-2">
+          {displayInput ?
+          <div className="flex items-center gap-2">
               <div className="flex items-center justify-center max-w-[40px] h-[40px] border-[0.6px] border-strokeCream rounded-full overflow-clip">
-                {contractFile ? (
-                  <img
-                    src={URL.createObjectURL(contractFile)}
-                    alt="New Contract File"
-                    className="w-full h-full object-cover rounded-full"
-                  />
-                ) : data.contractFormImageUrl ? (
-                  <img
-                    src={data.contractFormImageUrl}
-                    alt="Contract File"
-                    className="w-full h-full object-cover rounded-full"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gray-50 flex items-center justify-center rounded-full">
+                {contractFile ?
+              <img
+                src={URL.createObjectURL(contractFile)}
+                alt="New Contract File"
+                className="w-full h-full object-cover rounded-full" /> :
+
+              data.contractFormImageUrl ?
+              <img
+                src={data.contractFormImageUrl}
+                alt="Contract File"
+                className="w-full h-full object-cover rounded-full"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }} /> :
+
+
+              <div className="w-full h-full bg-gray-50 flex items-center justify-center rounded-full">
                     <span className="text-[10px] text-textLightGrey">No Contract Document</span>
                   </div>
-                )}
+              }
               </div>
               <UploadPhotoInput value={contractFile} onChange={handleContractFileChange} maxSizeInMB={2} />
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
+            </div> :
+
+          <div className="flex items-center gap-2">
               <div className="flex items-center justify-center max-w-[40px] h-[40px] border-[0.6px] border-strokeCream rounded-full overflow-clip">
-                {data.contractFormImageUrl ? (
-                  <>
+                {data.contractFormImageUrl ?
+              <>
                     <img
-                      src={data.contractFormImageUrl}
-                      alt="Contract File"
-                      className="w-full h-full object-cover rounded-full"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                        const fallback = document.getElementById('contract-fallback');
-                        if (fallback) fallback.classList.remove('hidden');
-                      }}
-                    />
+                  src={data.contractFormImageUrl}
+                  alt="Contract File"
+                  className="w-full h-full object-cover rounded-full"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    const fallback = document.getElementById('contract-fallback');
+                    if (fallback) fallback.classList.remove('hidden');
+                  }} />
+
                     <div className="w-full h-full bg-gray-50 flex items-center justify-center rounded-full hidden" id="contract-fallback">
                       <span className="text-[10px] text-textLightGrey">Error</span>
                     </div>
-                  </>
-                ) : (
-                  <div className="w-full h-full bg-gray-50 flex items-center justify-center rounded-full">
+                  </> :
+
+              <div className="w-full h-full bg-gray-50 flex items-center justify-center rounded-full">
                     <span className="text-[10px] text-textLightGrey">No Contract Document</span>
                   </div>
-                )}
+              }
               </div>
-              {data.contractFormImageUrl && (
-                <button
-                  onClick={() => handleViewImage(data.contractFormImageUrl!, "Contract Document")}
-                  className="px-2 py-1 text-xs bg-primaryGradient text-white rounded-full hover:bg-primaryGradient/80 transition-colors"
-                  title="View Contract Document"
-                >
+              {data.contractFormImageUrl &&
+            <button
+              onClick={() => handleViewImage(data.contractFormImageUrl!, "Contract Document")}
+              className="px-2 py-1 text-xs bg-primaryGradient text-white rounded-full hover:bg-primaryGradient/80 transition-colors"
+              title="View Contract Document">
+
                   View
                 </button>
-              )}
+            }
             </div>
-          )}
+          }
         </div>
       </div>
       {apiError && <ApiErrorMessage apiError={apiError} />}
-      {displayInput && (
-        <div className="flex items-center justify-center w-full pt-5 pb-5">
+      {displayInput &&
+      <div className="flex items-center justify-center w-full pt-5 pb-5">
           <ProceedButton
-            type="submit"
-            loading={loading}
-            variant={loading ? "gray" : "gradient"}
-            disabled={loading}
-            onClick={handleSubmit}
-          />
+          type="submit"
+          loading={loading}
+          variant={loading ? "gray" : "gradient"}
+          disabled={loading}
+          onClick={handleSubmit} />
+
         </div>
-      )}
+      }
 
       {/* Image Modal */}
-      {showImageModal && selectedImage && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      {showImageModal && selectedImage &&
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-4 max-w-4xl max-h-[90vh] overflow-auto">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-800">{selectedImage.title}</h3>
               <button
-                onClick={() => setShowImageModal(false)}
-                className="text-gray-500 hover:text-gray-700 text-xl font-bold"
-              >
+              onClick={() => setShowImageModal(false)}
+              className="text-gray-500 hover:text-gray-700 text-xl font-bold">
+
                 ×
               </button>
             </div>
             <div className="flex justify-center">
               <img
-                src={selectedImage.url}
-                alt={selectedImage.title}
-                className="max-w-full max-h-[70vh] object-contain rounded"
-                onError={(e) => {
-                  console.error('Error loading image in modal:', selectedImage.url);
-                  e.currentTarget.style.display = 'none';
-                }}
-              />
+              src={selectedImage.url}
+              alt={selectedImage.title}
+              className="max-w-full max-h-[70vh] object-contain rounded"
+              onError={(e) => {
+                console.error('Error loading image in modal:', selectedImage.url);
+                e.currentTarget.style.display = 'none';
+              }} />
+
             </div>
             <div className="flex justify-center mt-4">
               <button
-                onClick={() => window.open(selectedImage.url, '_blank')}
-                className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/80 transition-colors"
-              >
+              onClick={() => window.open(selectedImage.url, '_blank')}
+              className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/80 transition-colors">
+
                 Expand Image
               </button>
             </div>
           </div>
         </div>
-      )}
-    </div>
-  );
+      }
+    </div>);
+
 };
 
 export default CustomerDetails;

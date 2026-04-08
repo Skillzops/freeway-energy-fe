@@ -33,6 +33,14 @@ export type DeviceEntries = {
   saleItemIDs?: string[];
   tokens?: TokenEntry[];
   installationStatus?: string | null;
+  isAssigned?: boolean;
+  assignedAgent?: {
+    id?: string;
+    name?: string;
+    phone?: string;
+    email?: string;
+    assignedAt?: string;
+  } | null;
   createdAt?: string;
   updatedAt?: string;
 };
@@ -74,6 +82,9 @@ const DevicesTable = ({
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [deviceID, setDeviceID] = useState<string>("");
+  const [selectedDevice, setSelectedDevice] = useState<DeviceEntries | null>(
+    null
+  );
   const [queryValue, setQueryValue] = useState<string>("");
   const [isSearchQuery, setIsSearchQuery] = useState<boolean>(false);
 
@@ -138,12 +149,13 @@ const DevicesTable = ({
       title: "ACTIONS",
       key: "actions",
       valueIsAComponent: true,
-      customValue: (_value: any, rowData: { id: string }) => {
+      customValue: (_value: any, rowData: DeviceEntries) => {
         return (
           <span
             className="px-2 py-1 text-[10px] text-textBlack font-medium bg-[#F6F8FA] border-[0.2px] border-strokeGreyTwo rounded-full shadow-innerCustom cursor-pointer transition-all hover:bg-gold"
             onClick={() => {
               setDeviceID(rowData.id);
+              setSelectedDevice(rowData);
               setIsOpen(true);
             }}
           >
@@ -183,6 +195,7 @@ const DevicesTable = ({
               isOpen={isOpen}
               setIsOpen={setIsOpen}
               deviceID={deviceID}
+              initialDeviceData={selectedDevice}
               refreshTable={refreshTable}
             />
           )}

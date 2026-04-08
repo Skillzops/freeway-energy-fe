@@ -5,7 +5,7 @@ import { KeyedMutator } from "swr";
 import { ErrorComponent } from "@/Pages/ErrorPage";
 import InstallationDetailModal from "./InstallationDetailmodal";
 
-type InstallationType = {
+type _InstallationType = {
   id: string;
   installationId: number;
   customerId: string;

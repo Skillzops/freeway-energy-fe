@@ -1,8 +1,8 @@
 import { CardComponent } from "../CardComponents/CardComponent";
 import { SaleTransactionsType } from "./SalesDetailsModal";
 import { toast } from "react-toastify";
-import { useCallback, useEffect, useState } from "react";
-import { useFlutterwave } from "flutterwave-react-v3";
+import { useCallback as _useCallback, useEffect, useState } from "react";
+import { useFlutterwave as _useFlutterwave } from "flutterwave-react-v3";
 import { useApiCall } from "@/utils/useApiCall";
 import PaymentModeSelector from "./PaymentModeSelector";
 import { formatNumberWithCommas } from "@/utils/helpers";
@@ -52,15 +52,15 @@ const PaymentSummary: React.FC<PaymentSummaryProps> = ({
   paymentsMade = 0,
   paymentProgress = 0,
   onPayNextPayment,
-  totalMonthlyPayment,
+  totalMonthlyPayment
 }) => {
   if (!isInstallment) return null;
 
   // Calculate installment progress based on installments made
   const installmentProgress =
-    totalInstallments > 0 ? (paymentsMade / totalInstallments) * 100 : 0;
+  totalInstallments > 0 ? paymentsMade / totalInstallments * 100 : 0;
   // const remainingInstallments = Math.max(totalInstallments - paymentsMade, 0);
-  const payNextAmountDisplay = remainingBalance == 0 ? 0: totalMonthlyPayment
+  const payNextAmountDisplay = remainingBalance == 0 ? 0 : totalMonthlyPayment;
 
   return (
     <div className="flex flex-col p-4 gap-3 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg mb-4">
@@ -68,23 +68,23 @@ const PaymentSummary: React.FC<PaymentSummaryProps> = ({
 
       {/* Progress Bar - Based on payment amount */}
       <div className="w-full bg-gray-200 rounded-full h-1 mb-3">
-        <div 
+        <div
           className={`h-1 rounded-full transition-all duration-300 ${
-            totalPaid > totalAmount 
-              ? "bg-gradient-to-r from-green-500 to-green-600" 
-              : "bg-gradient-to-r from-gold to-primary"
-          }`}
-          style={{ width: `${Math.min(paymentProgress, 100)}%` }}
-        ></div>
+          totalPaid > totalAmount ?
+          "bg-gradient-to-r from-green-500 to-green-600" :
+          "bg-gradient-to-r from-gold to-primary"}`
+          }
+          style={{ width: `${Math.min(paymentProgress, 100)}%` }}>
+        </div>
         {/* Overpayment indicator */}
-        {totalPaid > totalAmount && (
-          <div className="w-full bg-yellow-200 rounded-full h-0.5 mt-1">
-            <div 
-              className="bg-yellow-500 h-0.5 rounded-full"
-              style={{ width: `${Math.min(((totalPaid - totalAmount) / totalAmount) * 100, 100)}%` }}
-            ></div>
+        {totalPaid > totalAmount &&
+        <div className="w-full bg-yellow-200 rounded-full h-0.5 mt-1">
+            <div
+            className="bg-yellow-500 h-0.5 rounded-full"
+            style={{ width: `${Math.min((totalPaid - totalAmount) / totalAmount * 100, 100)}%` }}>
           </div>
-        )}
+          </div>
+        }
       </div>
 
       {/* Installment Progress Display */}
@@ -143,20 +143,20 @@ const PaymentSummary: React.FC<PaymentSummaryProps> = ({
             </span>
           </div>
           {/* Overpayment Warning */}
-          {totalPaid > totalAmount && (
-            <div className="mt-1 px-2 py-1 bg-yellow-100 border border-yellow-300 rounded text-xs text-yellow-800">
+          {totalPaid > totalAmount &&
+          <div className="mt-1 px-2 py-1 bg-yellow-100 border border-yellow-300 rounded text-xs text-yellow-800">
               Overpaid: ₦{formatNumberWithCommas((totalPaid - totalAmount).toString())}
             </div>
-          )}
+          }
           {/* Pay Next Payment Button - Small button directly under balance */}
-          {remainingBalance > 0 && onPayNextPayment && (
-            <button
-              onClick={onPayNextPayment}
-              className="mt-2 px-3 py-1 text-xs bg-primaryGradient text-white rounded-md hover:bg-primary-dark transition-colors font-medium"
-            >
+          {remainingBalance > 0 && onPayNextPayment &&
+          <button
+            onClick={onPayNextPayment}
+            className="mt-2 px-3 py-1 text-xs bg-primaryGradient text-white rounded-md hover:bg-primary-dark transition-colors font-medium">
+
               Pay Next - ₦{formatNumberWithCommas(payNextAmountDisplay.toString())}
             </button>
-          )}
+          }
         </div>
       </div>
 
@@ -166,47 +166,47 @@ const PaymentSummary: React.FC<PaymentSummaryProps> = ({
           {installmentProgress.toFixed(1)}% of Installments Completed
         </span>
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
-const public_key =
-  import.meta.env.VITE_FLW_PUBLIC_KEY ||
-  "FLWPUBK_TEST-720d3bd8434091e9b28a01452ebdd2e0-X";
+const _public_key =
+import.meta.env.VITE_FLW_PUBLIC_KEY ||
+"FLWPUBK_TEST-720d3bd8434091e9b28a01452ebdd2e0-X";
 
 const SaleTransactions = ({
   data,
   saleData,
   refreshTable,
-  refreshSingleSale,
-}: {
-  data: {
-    entries: SaleTransactionsType[];
-    paymentInfo: PaymentInfo[];
-    customer: {
-      name: string;
-      phone_number: any;
-      email: any;
-    };
-  };
-  saleData?: {
-    totalPrice: number;
-    totalPaid: number;
-    paymentMode: string;
-    totalInstallments?: number;
-    remainingInstallments?: number;
-    paymentsMade?: number;
-    paymentProgress?: number;
-    miscellaneousCost?: number;
-    totalMonthlyPayment?: number;
-  };
-  refreshTable?: () => Promise<any>;
-  refreshSingleSale?: () => Promise<any>;
-}) => {
+  refreshSingleSale
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}: {data: {entries: SaleTransactionsType[];paymentInfo: PaymentInfo[];customer: {name: string;phone_number: any;email: any;};};saleData?: {totalPrice: number;totalPaid: number;paymentMode: string;totalInstallments?: number;remainingInstallments?: number;paymentsMade?: number;paymentProgress?: number;miscellaneousCost?: number;totalMonthlyPayment?: number;};refreshTable?: () => Promise<any>;refreshSingleSale?: () => Promise<any>;}) => {
   const { apiCall } = useApiCall();
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [showPaymentSelector, setShowPaymentSelector] =
-    useState<boolean>(false);
+  useState<boolean>(false);
   const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(
     null
   );
@@ -215,7 +215,7 @@ const SaleTransactions = ({
   );
   const [paymentAmount, setPaymentAmount] = useState<number>(0);
   const [isProcessingPayment, setIsProcessingPayment] =
-    useState<boolean>(false);
+  useState<boolean>(false);
   const [showPayNextPayment, setShowPayNextPayment] = useState<boolean>(false);
   const [nextPaymentData, setNextPaymentData] = useState<{
     saleId: string;
@@ -228,10 +228,10 @@ const SaleTransactions = ({
     const totalAmount = saleData?.totalPrice || 0;
 
     // Calculate total paid and payments made from completed payment transactions
-    const completedPayments =
-      data?.paymentInfo?.filter(
-        (payment) => payment.paymentStatus === "COMPLETED"
-      ) || [];
+    const _completedPayments =
+    data?.paymentInfo?.filter(
+      (payment) => payment.paymentStatus === "COMPLETED"
+    ) || [];
     const totalPaid = saleData?.totalPaid || 0;
     // const totalPaid = completedPayments.reduce(
     //   (sum, payment) => sum + payment.amount,
@@ -243,21 +243,21 @@ const SaleTransactions = ({
     const totalInstallments = saleData?.totalInstallments || 0;
     const remainingInstallments = saleData?.remainingInstallments || 0;
 
-    let paymentsMade = totalInstallments - remainingInstallments ;
+    let paymentsMade = totalInstallments - remainingInstallments;
 
 
-    
+
     // For installment payments, the progress should be based on the full amount
     // but we need to handle the display correctly
     const displayTotalAmount = totalAmount;
-    
+
     // If the sale is fully paid (totalPaid >= totalAmount), show all installments as completed
     if (totalPaid >= totalAmount && totalInstallments > 0) {
       paymentsMade = totalInstallments;
     }
-    
+
     const remainingBalance = Math.max(displayTotalAmount - totalPaid, 0);
-    const paymentProgress = displayTotalAmount > 0 ? (totalPaid / displayTotalAmount) * 100 : 0;
+    const paymentProgress = displayTotalAmount > 0 ? totalPaid / displayTotalAmount * 100 : 0;
 
     return {
       totalAmount: displayTotalAmount,
@@ -267,7 +267,7 @@ const SaleTransactions = ({
       totalInstallments: totalInstallments,
       remainingInstallments,
       paymentsMade: paymentsMade,
-      paymentProgress,
+      paymentProgress
     };
   };
 
@@ -284,13 +284,14 @@ const SaleTransactions = ({
       setPaymentAmount(suggestedAmount > 0 ? suggestedAmount : 0);
     }
   }, [
-    selectedPaymentId,
-    paymentSummary.remainingBalance,
-    paymentSummary.isInstallment,
-  ]);
+  selectedPaymentId,
+  paymentSummary.remainingBalance,
+  paymentSummary.isInstallment,
+  paymentSummary.totalAmount]
+  );
 
   // Verify payment with backend
-  const verifyPayment = async (tx_ref: string, transaction_id?: string) => {
+  const _verifyPayment = async (tx_ref: string, transaction_id?: string) => {
     try {
       // Build the endpoint with required parameters
       let endpoint = `/v1/payment/verify/callback?tx_ref=${tx_ref}`;
@@ -301,14 +302,14 @@ const SaleTransactions = ({
       const response = (await apiCall({
         endpoint,
         method: "get",
-        showToast: false,
-      })) as { data: PaymentVerificationResponse };
+        showToast: false
+      })) as {data: PaymentVerificationResponse;};
 
       // Check for successful verification or processing status
       if (
-        response?.data?.status === "successful" ||
-        response?.data?.status === "processing"
-      ) {
+      response?.data?.status === "successful" ||
+      response?.data?.status === "processing")
+      {
         // If payment status is COMPLETED, show success message
         if (response?.data?.paymentStatus === "COMPLETED") {
           toast.success("Payment completed successfully!");
@@ -409,7 +410,7 @@ const SaleTransactions = ({
   //   handleFlutterPayment({
   //     callback: async (response: any) => {
 
-        
+
   //       if (response.status === "successful") {
   //         // Pass both tx_ref and transaction_id for verification
   //         const isVerified = await verifyPayment(response.tx_ref, response.transaction_id);
@@ -473,7 +474,7 @@ const SaleTransactions = ({
 
     setNextPaymentData({
       saleId: selectedPaymentData.saleId,
-      suggestedAmount: suggestedAmount,
+      suggestedAmount: suggestedAmount
     });
 
     setShowPayNextPayment(true);
@@ -524,7 +525,7 @@ const SaleTransactions = ({
           status: "COMPLETED", // Mark this individual payment as completed
           paymentNote: `Cash payment of ₦${formatNumberWithCommas(paymentAmount.toString())}`
         },
-        successMessage: `✅ Payment of ₦${formatNumberWithCommas(paymentAmount.toString())} recorded successfully!`,
+        successMessage: `✅ Payment of ₦${formatNumberWithCommas(paymentAmount.toString())} recorded successfully!`
       });
 
       if (response?.data) {
@@ -543,8 +544,8 @@ const SaleTransactions = ({
     } catch (error: any) {
       console.error("Error processing cash payment:", error);
       const errorMessage =
-        error?.response?.data?.message ||
-        "Failed to process cash payment. Please try again.";
+      error?.response?.data?.message ||
+      "Failed to process cash payment. Please try again.";
       setPaymentError(errorMessage);
       toast.error(errorMessage);
     } finally {
@@ -605,7 +606,7 @@ const SaleTransactions = ({
       }
     },
     defaultStyle: true,
-    showCustomButton: true,
+    showCustomButton: true
   });
 
   // Display error if any
@@ -613,11 +614,11 @@ const SaleTransactions = ({
 
   return (
     <div className="flex flex-col gap-4">
-      {displayError && (
-        <div className="p-3 border border-red-500 rounded-md bg-red-50">
+      {displayError &&
+      <div className="p-3 border border-red-500 rounded-md bg-red-50">
           <p className="text-red-600 text-sm">{displayError}</p>
         </div>
-      )}
+      }
 
       {/* Payment Summary for Installments */}
       <PaymentSummary
@@ -632,20 +633,20 @@ const SaleTransactions = ({
 
           setNextPaymentData({
             saleId: data?.paymentInfo?.[0]?.saleId || "",
-            suggestedAmount: suggestedAmount,
+            suggestedAmount: suggestedAmount
           });
           setShowPayNextPayment(true);
-        }}
-      />
+        }} />
 
-      {showPaymentSelector && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+
+      {showPaymentSelector &&
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
             <h3 className="text-lg font-semibold mb-2">Complete Payment</h3>
 
             {/* Show remaining balance for installments */}
-            {paymentSummary.isInstallment && (
-              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            {paymentSummary.isInstallment &&
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-600">Remaining Balance:</span>
                   <div className="flex items-center gap-1 font-semibold text-dark-700">
@@ -654,47 +655,47 @@ const SaleTransactions = ({
                   </div>
                 </div>
               </div>
-            )}
+          }
 
             <PaymentModeSelector
-              value={paymentMethod}
-              onChange={(value) => setPaymentMethod(value as "ONLINE" | "CASH")}
-              amount={paymentAmount}
-              onAmountChange={setPaymentAmount}
-            />
+            value={paymentMethod}
+            onChange={(value) => setPaymentMethod(value as "ONLINE" | "CASH")}
+            amount={paymentAmount}
+            onAmountChange={setPaymentAmount} />
+
 
             <div className="flex gap-3 mt-6">
               <button
-                onClick={() => {
-                  setShowPaymentSelector(false);
-                  setSelectedPaymentId(null);
-                  setPaymentError(null);
-                }}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
-                disabled={isProcessingPayment}
-              >
+              onClick={() => {
+                setShowPaymentSelector(false);
+                setSelectedPaymentId(null);
+                setPaymentError(null);
+              }}
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+              disabled={isProcessingPayment}>
+
                 Cancel
               </button>
               <button
-                onClick={handlePaymentMethodSubmit}
-                disabled={
-                  isProcessingPayment ||
-                  !paymentAmount ||
-                  (paymentSummary.isInstallment &&
-                    paymentAmount > paymentSummary.remainingBalance)
-                }
-                className="flex-1 px-4 py-2 bg-primaryGradient text-white rounded-md hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isProcessingPayment
-                  ? "Processing..."
-                  : paymentMethod === "CASH"
-                  ? "Record Cash Payment"
-                  : "Pay Online"}
+              onClick={handlePaymentMethodSubmit}
+              disabled={
+              isProcessingPayment ||
+              !paymentAmount ||
+              paymentSummary.isInstallment &&
+              paymentAmount > paymentSummary.remainingBalance
+              }
+              className="flex-1 px-4 py-2 bg-primaryGradient text-white rounded-md hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+
+                {isProcessingPayment ?
+              "Processing..." :
+              paymentMethod === "CASH" ?
+              "Record Cash Payment" :
+              "Pay Online"}
               </button>
             </div>
           </div>
         </div>
-      )}
+      }
 
       {/* Miscellaneous Cost Display - match installation details style */}
       <div className="w-full mt-2">
@@ -714,10 +715,10 @@ const SaleTransactions = ({
       {/* Transaction Cards */}
       <div className="flex flex-wrap items-center gap-4">
         {data?.entries?.map((item, index) => {
-           const paymentInfo = data?.paymentInfo?.find(
-             (payment) => payment.transactionRef === item.transactionRef
-           ) as any;
-        
+          const paymentInfo = data?.paymentInfo?.find(
+            (payment) => payment.transactionRef === item.transactionRef
+          ) as any;
+
           return (
             <CardComponent
               key={index}
@@ -734,15 +735,15 @@ const SaleTransactions = ({
               ogaranyaSmsMessage={paymentInfo?.ogaranyaSmsMessage}
               paymentMethod={paymentInfo?.paymentMethod}
               dropDownList={getDropDownList(item?.paymentStatus)}
-              showDropdown={item?.paymentStatus !== "COMPLETED"}
-            />
-          );
+              showDropdown={item?.paymentStatus !== "COMPLETED"} />);
+
+
         })}
         
         
         {/* Show message when all payments are completed */}
-        {paymentSummary.remainingBalance <= 0 && data?.entries?.length > 0 && (
-          <div className="w-full p-4 bg-green-50 border border-green-200 rounded-lg">
+        {paymentSummary.remainingBalance <= 0 && data?.entries?.length > 0 &&
+        <div className="w-full p-4 bg-green-50 border border-green-200 rounded-lg">
             <div className="flex items-center gap-2">
               <span className="text-2xl">🎉</span>
               <div>
@@ -755,25 +756,25 @@ const SaleTransactions = ({
               </div>
             </div>
           </div>
-        )}
+        }
 
         {/* Pay Next Payment Modal */}
-        {nextPaymentData && (
-          <PayNextPayment
-            isOpen={showPayNextPayment}
-            onClose={() => {
-              setShowPayNextPayment(false);
-              setNextPaymentData(null);
-            }}
-            saleId={nextPaymentData.saleId}
-            remainingBalance={paymentSummary.remainingBalance}
-            suggestedAmount={nextPaymentData.suggestedAmount}
-            onPaymentSuccess={handleNextPaymentSuccess}
-          />
-        )}
+        {nextPaymentData &&
+        <PayNextPayment
+          isOpen={showPayNextPayment}
+          onClose={() => {
+            setShowPayNextPayment(false);
+            setNextPaymentData(null);
+          }}
+          saleId={nextPaymentData.saleId}
+          remainingBalance={paymentSummary.remainingBalance}
+          suggestedAmount={nextPaymentData.suggestedAmount}
+          onPaymentSuccess={handleNextPaymentSuccess} />
+
+        }
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default SaleTransactions;

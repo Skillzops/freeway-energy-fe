@@ -18,18 +18,18 @@ const PaymentModeSelector: React.FC<PaymentModeSelectorProps> = ({
   value,
   onChange,
   errorMessage,
-  saleId,
+  saleId: _saleId,
   amount,
   onAmountChange,
   onNotesChange,
   paymentGateway,
-  onPaymentGatewayChange,
+  onPaymentGatewayChange
 }) => {
   const [paymentAmount, setPaymentAmount] = useState(amount?.toString() || "");
-  const [notes, setNotes] = useState("");
-  const [selectedGateway, setSelectedGateway] = useState<
-    "OGARANYA" | "FLUTTERWAVE"
-  >(paymentGateway || "OGARANYA");
+  const [_notes, setNotes] = useState("");
+  const [_selectedGateway, setSelectedGateway] = useState<
+    "OGARANYA" | "FLUTTERWAVE">(
+    paymentGateway || "OGARANYA");
 
   // Update local state when amount prop changes
   useEffect(() => {
@@ -46,7 +46,7 @@ const PaymentModeSelector: React.FC<PaymentModeSelectorProps> = ({
     }
   };
 
-  const handleNotesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const _handleNotesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newNotes = e.target.value;
     setNotes(newNotes);
     if (onNotesChange) {
@@ -54,7 +54,7 @@ const PaymentModeSelector: React.FC<PaymentModeSelectorProps> = ({
     }
   };
 
-  const handleGatewayChange = (gateway: string) => {
+  const _handleGatewayChange = (gateway: string) => {
     const gatewayValue = gateway as "OGARANYA" | "FLUTTERWAVE";
     setSelectedGateway(gatewayValue);
     if (onPaymentGatewayChange) {
@@ -72,31 +72,31 @@ const PaymentModeSelector: React.FC<PaymentModeSelectorProps> = ({
         value={value}
         onChange={onChange}
         options={[
-          { label: "Online Payment", value: "ONLINE" },
-        ]}
-        errorMessage={errorMessage}
-      />
+        { label: "Online Payment", value: "ONLINE" }]
+        }
+        errorMessage={errorMessage} />
+
 
       {/* Amount input - only show when amount prop is provided (for PayNextPayment) */}
-      {amount !== undefined && onAmountChange && (
-        <div className="flex flex-col gap-2 mt-4">
+      {amount !== undefined && onAmountChange &&
+      <div className="flex flex-col gap-2 mt-4">
           <Input
-            type="number"
-            name="paymentAmount"
-            label="PAYMENT AMOUNT"
-            value={paymentAmount}
-            onChange={handleAmountChange}
-            placeholder="Enter payment amount"
-            required={true}
-          />
+          type="number"
+          name="paymentAmount"
+          label="PAYMENT AMOUNT"
+          value={paymentAmount}
+          onChange={handleAmountChange}
+          placeholder="Enter payment amount"
+          required={true} />
+
         </div>
-      )}
+      }
       
       <p className="text-xs text-textLightGrey">
         Online payment will be processed through the selected gateway.
       </p>
-    </div>
-  );
+    </div>);
+
 };
 
 export default PaymentModeSelector;

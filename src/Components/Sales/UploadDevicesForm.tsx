@@ -159,7 +159,7 @@ const UploadDevicesForm = observer(
       const newParams: Record<string, string> = {};
       if (searchTerm.trim()) {
         // Auto-detect if the search term looks like a serial number
-        const isSerialNumber = /^[A-Z0-9\/\-_]+$/i.test(searchTerm.trim());
+        const isSerialNumber = /^[A-Z0-9/_-]+$/i.test(searchTerm.trim());
         
         if (filterKey === "search" && isSerialNumber) {
           // If using general search but input looks like a serial number, use serialNumber filter

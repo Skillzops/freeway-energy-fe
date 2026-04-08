@@ -48,28 +48,28 @@ const LoginPage = () => {
       userid: userId,
       resetToken: remember_token,
       newPassword,
-      confirmNewPassword: confirmPassword,
+      confirmNewPassword: confirmPassword
     };
 
     const createPayload = {
       password: newPassword,
-      confirmPassword,
+      confirmPassword
     };
 
     try {
       await apiCall({
-        endpoint: isResetPasswordRoute
-          ? "/v1/auth/reset-password"
-          : `/v1/auth/create-user-password/${userId}/${remember_token}`,
+        endpoint: isResetPasswordRoute ?
+        "/v1/auth/reset-password" :
+        `/v1/auth/create-user-password/${userId}/${remember_token}`,
         method: "post",
         data: isResetPasswordRoute ? resetPayload : createPayload,
         headers: {},
-        successMessage: isResetPasswordRoute
-          ? "Password successfully updated!"
-          : "Password succesfully created!",
+        successMessage: isResetPasswordRoute ?
+        "Password successfully updated!" :
+        "Password succesfully created!"
       });
       navigate("/");
-    } catch (error) {
+    } catch (_error) {
       setFormError("Unable to update password. Please try again.");
     }
     setLoading(false);
@@ -86,32 +86,31 @@ const LoginPage = () => {
     setResetStatus("verifying");
     apiCall({
       endpoint: `/v1/auth/verify-reset-token/${userId}/${remember_token}`,
-      method: "post",
-    })
-      .then(() => {
-        if (active) {
-          setResetStatus("valid");
-        }
-      })
-      .catch((error: any) => {
-        if (active) {
-          const message =
-            error?.response?.data?.message || "Reset link is invalid or expired.";
-          setResetStatus("invalid");
-          setResetMessage(message);
-        }
-      });
+      method: "post"
+    }).
+    then(() => {
+      if (active) {
+        setResetStatus("valid");
+      }
+    }).
+    catch((error: any) => {
+      if (active) {
+        const message =
+        error?.response?.data?.message || "Reset link is invalid or expired.";
+        setResetStatus("invalid");
+        setResetMessage(message);
+      }
+    });
     return () => {
       active = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isResetPasswordRoute, userId, remember_token]);
+  }, [isResetPasswordRoute, userId, remember_token, apiCall]);
 
   const canSubmit =
-    Boolean(newPassword) &&
-    Boolean(confirmPassword) &&
-    newPassword === confirmPassword &&
-    (!isResetPasswordRoute || resetStatus === "valid");
+  Boolean(newPassword) &&
+  Boolean(confirmPassword) &&
+  newPassword === confirmPassword && (
+  !isResetPasswordRoute || resetStatus === "valid");
 
   return (
     <main className="relative flex flex-col items-center justify-center gap-[60px] px-4 py-16 min-h-screen">
@@ -119,9 +118,9 @@ const LoginPage = () => {
         src={brandBg}
         alt="background"
         className={`absolute w-full h-full object-cover object-center ${
-          newPassword || confirmPassword ? "opacity-60" : "opacity-40"
-        }`}
-      />
+        newPassword || confirmPassword ? "opacity-60" : "opacity-40"}`
+        } />
+
       <img src={brandLogo} alt="Logo" className="w-[120px] z-10" />
       <section className="flex w-full flex-col items-center justify-center gap-2 z-10 max-w-[500px]">
         <div className="flex flex-col items-center justify-center rounded-[28px] bg-white/40 px-8 py-5 shadow-[0_18px_60px_rgba(24,121,197,0.12)] backdrop-blur-[6px]">
@@ -129,15 +128,15 @@ const LoginPage = () => {
             Welcome
           </h1>
           <em className="text-sm text-[#3A628A] text-center max-w-[280px] not-italic">
-            {isResetPasswordRoute
-              ? "Set a new password to get back into your workspace."
-              : "Since this is your first time here, create your password below."}
+            {isResetPasswordRoute ?
+            "Set a new password to get back into your workspace." :
+            "Since this is your first time here, create your password below."}
           </em>
         </div>
         <form
           className="flex w-full flex-col items-center justify-center pt-[50px] pb-[24px]"
-          onSubmit={handleCreatePassword}
-        >
+          onSubmit={handleCreatePassword}>
+
           <Input
             type={showPassword ? "text" : "password"}
             name="newPassword"
@@ -151,18 +150,18 @@ const LoginPage = () => {
             required={true}
             errorMessage=""
             style={`mb-4 ${
-              newPassword || confirmPassword
-                ? "border-strokeCream"
-                : "border-strokeGrey"
-            }`}
-            iconRight={
-              <img
-                src={showPassword ? eyeopen : eyeclosed}
-                className="w-[16px] cursor-pointer"
-                onClick={() => setShowPassword(!showPassword)}
-              />
+            newPassword || confirmPassword ?
+            "border-strokeCream" :
+            "border-strokeGrey"}`
             }
-          />
+            iconRight={
+            <img
+              src={showPassword ? eyeopen : eyeclosed}
+              className="w-[16px] cursor-pointer"
+              onClick={() => setShowPassword(!showPassword)} />
+
+            } />
+
           <Input
             type={showPassword ? "text" : "password"}
             name="confirmPassword"
@@ -176,38 +175,38 @@ const LoginPage = () => {
             required={true}
             errorMessage=""
             style={`${
-              newPassword || confirmPassword
-                ? "border-strokeCream"
-                : "border-strokeGrey"
-            }`}
-            iconRight={
-              <img
-                src={showPassword ? eyeopen : eyeclosed}
-                className="w-[16px] cursor-pointer"
-                onClick={() => setShowPassword(!showPassword)}
-              />
+            newPassword || confirmPassword ?
+            "border-strokeCream" :
+            "border-strokeGrey"}`
             }
-          />
-          {(formError || resetMessage) && (
-            <p className="mt-3 text-xs text-errorTwo text-center">
+            iconRight={
+            <img
+              src={showPassword ? eyeopen : eyeclosed}
+              className="w-[16px] cursor-pointer"
+              onClick={() => setShowPassword(!showPassword)} />
+
+            } />
+
+          {(formError || resetMessage) &&
+          <p className="mt-3 text-xs text-errorTwo text-center">
               {formError || resetMessage}
             </p>
-          )}
-          {isResetPasswordRoute && resetStatus === "verifying" && (
-            <p className="mt-2 text-xs text-textGrey text-center">Verifying reset link...</p>
-          )}
+          }
+          {isResetPasswordRoute && resetStatus === "verifying" &&
+          <p className="mt-2 text-xs text-textGrey text-center">Verifying reset link...</p>
+          }
           <div className="flex flex-col items-center justify-center gap-8 pt-8">
             <ProceedButton
               type="submit"
               loading={loading}
               variant={canSubmit ? "gradient" : "gray"}
-              disabled={!canSubmit || loading}
-            />
+              disabled={!canSubmit || loading} />
+
           </div>
         </form>
       </section>
-    </main>
-  );
+    </main>);
+
 };
 
 export default LoginPage;

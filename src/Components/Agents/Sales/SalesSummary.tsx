@@ -21,8 +21,8 @@ interface SalePayload {
 }
 
 interface SaleResponse {
-  sale?: { id: string | number };
-  paymentData?: { amount: number };
+  sale?: {id: string | number;};
+  paymentData?: {amount: number;};
 }
 
 interface SalesSummaryProps {
@@ -42,12 +42,13 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
   getIsFormFilled,
   apiErrorMessage,
   payload,
-  refreshTable,
+  refreshTable
 }) => {
   const { apiCall } = useApiCall();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
-  const [paymentNotes, setPaymentNotes] = useState<string>("");
+  const [paymentNotes, _setPaymentNotes] = useState<string>("");
+  const paymentDetails = SaleStore.paymentDetails;
 
   // ---- Helpers (Installment/Misc) ----
   const isInstallmentPayment = useCallback(() => {
@@ -74,7 +75,7 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
 
       const misc = SaleStore.getMiscellaneousByProductId(product.productId)?.costs;
       const entries =
-        typeof misc?.entries === "function" ? Array.from(misc.entries()) : Object.entries((misc as any) || {});
+      typeof misc?.entries === "function" ? Array.from(misc.entries()) : Object.entries(misc as any || {});
       const sum = entries.reduce((s, [, v]) => s + (Number(v) || 0), 0);
 
       return total + sum;
@@ -100,7 +101,7 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
       paymentMethod: SaleStore.paymentMethod,
       // amount the agent will be charged now:
       amount: payableNow,
-      notes: paymentNotes,
+      notes: paymentNotes
     };
 
     const res = await apiCall({
@@ -108,14 +109,14 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
       method: "post",
       data: freshPayload,
       successMessage: "Sale created successfully!",
-      showToast: false,
+      showToast: false
     });
 
     return res?.data as SaleResponse | undefined;
   };
 
   // ---- Handle Wallet Payment ----
-  const handleWalletPayment = useCallback(async () => {
+  const handleWalletPayment = async () => {
     setPaymentError(null);
     setIsSubmitting(true);
     try {
@@ -128,34 +129,34 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
         try {
           await refreshTable();
         } catch {
-          /* ignore refresh failure */
-        }
+
+          /* ignore refresh failure */}
       }
       resetSaleModalState();
     } catch (error: any) {
       const message =
-        error?.response?.data?.message ||
-        (Array.isArray(error?.response?.data?.message)
-          ? error.response.data.message[0]
-          : error.message || "Failed to complete wallet payment. Please try again.");
+      error?.response?.data?.message || (
+      Array.isArray(error?.response?.data?.message) ?
+      error.response.data.message[0] :
+      error.message || "Failed to complete wallet payment. Please try again.");
       setPaymentError(message);
       toast.error(message);
       setIsSubmitting(false);
     }
-  }, [paymentNotes, payableNow, refreshTable, resetSaleModalState]);
+  };
 
   // clear local error when store payment data changes
   useEffect(() => {
-    if (SaleStore.paymentDetails) setPaymentError(null);
-  }, [SaleStore.paymentDetails]);
+    if (paymentDetails) setPaymentError(null);
+  }, [paymentDetails]);
 
   return (
     <>
       <div className="flex w-full">
         <p
           className="flex gap-1 items-center text-xs font-bold text-textDarkGrey cursor-pointer hover:underline"
-          onClick={() => setSummaryState(false)}
-        >
+          onClick={() => setSummaryState(false)}>
+
           <IoReturnUpBack />
           Back to form
         </p>
@@ -182,14 +183,14 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
 
         const miscModel = SaleStore.getMiscellaneousByProductId(item?.productId)?.costs;
         const miscEntries =
-          typeof miscModel?.entries === "function" ? Array.from(miscModel.entries()) : Object.entries((miscModel as any) || {});
+        typeof miscModel?.entries === "function" ? Array.from(miscModel.entries()) : Object.entries(miscModel as any || {});
         const miscCostsExist = miscEntries.length >= 1;
 
         return (
           <div
             key={index}
-            className="flex flex-col w-full p-2.5 gap-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px]"
-          >
+            className="flex flex-col w-full p-2.5 gap-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px]">
+
             <p className="flex gap-1 w-max text-textLightGrey text-xs font-medium pb-2">
               <img src={producticon} alt="Product Icon" /> PRODUCT {index + 1}
             </p>
@@ -202,49 +203,49 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
             <div className="flex flex-col w-full gap-2 bg-[#F9F9F9] p-3 border-[0.6px] border-strokeGreyThree rounded-[20px]">
               <ProductDetailRow
                 label="Payment Mode"
-                value={params?.paymentMode === "ONE_OFF" ? "Single Deposit" : "Installment"}
-              />
-              {params?.paymentMode === "INSTALLMENT" && (
-                <>
+                value={params?.paymentMode === "ONE_OFF" ? "Single Deposit" : "Installment"} />
+
+              {params?.paymentMode === "INSTALLMENT" &&
+              <>
                   <ProductDetailRow
-                    label="Number of Installments"
-                    value={formatNumberWithCommas(params?.installmentDuration)}
-                  />
+                  label="Number of Installments"
+                  value={formatNumberWithCommas(params?.installmentDuration)} />
+
                   <ProductDetailRow
-                    label="Initial Deposit"
-                    value={formatNumberWithCommas(params?.installmentStartingPrice)}
-                    showNaira={true}
-                  />
+                  label="Initial Deposit"
+                  value={formatNumberWithCommas(params?.installmentStartingPrice)}
+                  showNaira={true} />
+
                 </>
-              )}
-              {(params?.discount || 0) > 0 && (
-                <ProductDetailRow label="Discount" value={`${params?.discount}%`} />
-              )}
+              }
+              {(params?.discount || 0) > 0 &&
+              <ProductDetailRow label="Discount" value={`${params?.discount}%`} />
+              }
             </div>
 
-            {miscCostsExist && (
-              <div className="flex flex-col w-full gap-2 bg-[#F9F9F9] p-3 border-[0.6px] border-strokeGreyThree rounded-[20px]">
+            {miscCostsExist &&
+            <div className="flex flex-col w-full gap-2 bg-[#F9F9F9] p-3 border-[0.6px] border-strokeGreyThree rounded-[20px]">
                 <p className="text-[11px] font-semibold text-textDarkGrey">Miscellaneous</p>
-                {miscEntries.map(([name, cost]) => (
-                  <ProductDetailRow
-                    key={`${index}-${name}`}
-                    label={String(name)}
-                    value={formatNumberWithCommas(Number(cost) || 0)}
-                    showNaira={true}
-                  />
-                ))}
+                {miscEntries.map(([name, cost]) =>
+              <ProductDetailRow
+                key={`${index}-${name}`}
+                label={String(name)}
+                value={formatNumberWithCommas(Number(cost) || 0)}
+                showNaira={true} />
+
+              )}
               </div>
-            )}
+            }
 
             <div className="flex flex-col w-full gap-2 bg-[#F9F9F9] p-3 border-[0.6px] border-strokeGreyThree rounded-[20px]">
               <ProductDetailRow
                 label="Recipient Name"
-                value={`${recipient?.firstname || ""} ${recipient?.lastname || ""}`.trim()}
-              />
+                value={`${recipient?.firstname || ""} ${recipient?.lastname || ""}`.trim()} />
+
               <ProductDetailRow label="Recipient Address" value={recipient?.address as string} />
             </div>
-          </div>
-        );
+          </div>);
+
       })}
 
       {/* PAYMENT SUMMARY (Wallet) */}
@@ -258,8 +259,8 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
           <span className="text-sm font-medium text-textBlack">Wallet Payment</span>
         </div>
 
-        {isInstallmentPayment() ? (
-          <>
+        {isInstallmentPayment() ?
+        <>
             <div className="flex items-center justify-between">
               <span className="text-sm text-textDarkGrey">Initial Deposit (Base):</span>
               <span className="text-sm font-bold text-textBlack">
@@ -284,9 +285,9 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
                 </span>
               </div>
             </div>
-          </>
-        ) : (
-          <div className="flex items-center justify-between">
+          </> :
+
+        <div className="flex items-center justify-between">
             <span className="text-sm text-textDarkGrey">Total Amount:</span>
             <div className="flex items-center gap-1">
               <span className="text-sm font-bold text-textBlack">
@@ -294,19 +295,19 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
               </span>
             </div>
           </div>
-        )}
+        }
 
         {/* Optional: show notes field (if you had one in agent flow) */}
         {/* <Textarea ... onChange={(e) => setPaymentNotes(e.target.value)} /> */}
       </div>
 
       {/* ERRORS */}
-      {paymentError && (
-        <div className="flex flex-col w-full p-3 bg-red-50 border border-red-200 rounded-lg">
+      {paymentError &&
+      <div className="flex flex-col w-full p-3 bg-red-50 border border-red-200 rounded-lg">
           <p className="text-red-600 text-sm font-medium">Payment Error</p>
           <p className="text-red-500 text-xs mt-1">{paymentError}</p>
         </div>
-      )}
+      }
       {apiErrorMessage}
 
       {/* CTA */}
@@ -319,11 +320,11 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
           loading={isSubmitting || loading}
           variant={getIsFormFilled() ? "gradient" : "gray"}
           disabled={!getIsFormFilled() || isSubmitting}
-          onClick={handleWalletPayment}
-        />
+          onClick={handleWalletPayment} />
+
       </div>
-    </>
-  );
+    </>);
+
 };
 
 export default SalesSummary;

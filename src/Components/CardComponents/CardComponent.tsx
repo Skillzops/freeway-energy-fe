@@ -242,6 +242,26 @@ export const NairaSymbol = ({ color }: { color?: string }) => {
   );
 };
 
+const ThemeMaskedIcon = ({
+  src,
+  color,
+}: {
+  src: string;
+  color: string;
+}) => {
+  return (
+    <span
+      aria-hidden="true"
+      className="inline-block w-4 h-4 shrink-0"
+      style={{
+        backgroundColor: color,
+        WebkitMask: `url(${src}) center / contain no-repeat`,
+        mask: `url(${src}) center / contain no-repeat`,
+      }}
+    />
+  );
+};
+
 interface QuantitySelectorProps {
   totalRemainingQuantities?: number;
   onValueChange: (value: number) => void;
@@ -459,6 +479,8 @@ export const CardComponent = ({
           ? `${inventoryMobile ? "w-full" : "w-[47%] md:w-[48%]"} ${
               readOnly ? "md:w-[47%]" : "md:w-[31%]"
             }`
+          : variant === "agent"
+          ? "w-full sm:w-[calc((100%_-_0.5rem)_/_2)] lg:w-[calc((100%_-_1rem)_/_3)] min-w-[204px]"
           : "w-[32%] min-w-[204px]"
       } bg-white border-[0.6px] rounded-[20px] ${
         _selected || readOnly ? "border-success" : "border-strokeGreyThree"
@@ -671,7 +693,7 @@ export const CardComponent = ({
                 <>
                   <div className="flex items-center justify-between">
                     <p className="flex items-center gap-1 px-2 py-1 text-xs text-textDarkGrey bg-[#E3FAD6] rounded-full h-[24px]">
-                      <img src={ongoing} alt="Pending Tasks" className="w-4 h-4" />
+                      <ThemeMaskedIcon src={ongoing} color="var(--brand-primary)" />
                       <span className="no-underline">Pending Tasks</span>
                     </p>
                     <span className="text-xs font-bold text-textDarkGrey">
@@ -680,7 +702,7 @@ export const CardComponent = ({
                   </div>
                   <div className="flex items-center justify-between">
                     <p className="flex items-center gap-1 px-2 py-1 text-xs text-textDarkGrey bg-[#F6F8FA] rounded-full h-[24px]">
-                      <img src={inventory} alt="Total Tasks" className="w-4 h-4" />
+                      <ThemeMaskedIcon src={inventory} color="var(--textDarkGrey)" />
                       <span className="no-underline">Total Tasks</span>
                     </p>
                     <span className="text-xs font-bold text-textDarkGrey">
@@ -689,7 +711,7 @@ export const CardComponent = ({
                   </div>
                   <div className="flex items-center justify-between">
                     <p className="flex items-center gap-1 px-2 py-1 text-xs text-textDarkGrey bg-[#F6F8FA] rounded-full h-[24px]">
-                      <img src={inventory} alt="Total Installations" className="w-4 h-4" />
+                      <ThemeMaskedIcon src={inventory} color="var(--gold)" />
                       <span className="no-underline">Total Installations</span>
                     </p>
                     <span className="text-xs font-bold text-textDarkGrey">
@@ -698,7 +720,7 @@ export const CardComponent = ({
                   </div>
                   <div className="flex items-center justify-between">
                     <p className="flex items-center gap-1 px-2 py-1 text-xs text-textDarkGrey bg-[#F6F8FA] rounded-full h-[24px]">
-                      <img src={customer} alt="Location" className="w-4 h-4" />
+                      <ThemeMaskedIcon src={customer} color="var(--inkBlueTwo)" />
                       <span className="no-underline">Location</span>
                     </p>
                     <span className="text-xs font-bold text-textDarkGrey">
@@ -710,7 +732,7 @@ export const CardComponent = ({
                 <>
                   <div className="flex items-center justify-between">
                     <p className="flex items-center gap-1 px-2 py-1 text-xs text-textDarkGrey bg-successTwo rounded-full h-[24px]">
-                      <img src={ongoing} />
+                      <ThemeMaskedIcon src={ongoing} color="var(--brand-primary)" />
                       On-Going Sales
                     </p>
                     <span className="text-xs font-bold text-textDarkGrey">
@@ -719,7 +741,7 @@ export const CardComponent = ({
                   </div>
                   <div className="flex items-center justify-between">
                     <p className="flex items-center gap-1 px-2 py-1 text-xs text-textDarkGrey bg-successTwo rounded-full h-[24px]">
-                      <img src={inventory} />
+                      <ThemeMaskedIcon src={inventory} color="var(--textDarkGrey)" />
                       Inventory in Possession
                     </p>
                     <span className="text-xs font-bold text-textDarkGrey">
@@ -728,7 +750,7 @@ export const CardComponent = ({
                   </div>
                   <div className="flex items-center justify-between">
                     <p className="flex items-center gap-1 px-2 py-1 text-xs text-textDarkGrey bg-[#F6F8FA] rounded-full h-[24px]">
-                      <img src={inventory} />
+                      <ThemeMaskedIcon src={inventory} color="var(--gold)" />
                       Total Sales
                     </p>
                     <span className="text-xs font-bold text-textDarkGrey">
@@ -737,7 +759,7 @@ export const CardComponent = ({
                   </div>
                   <div className="flex items-center justify-between">
                     <p className="flex items-center gap-1 px-2 py-1 text-xs text-textDarkGrey bg-[#F6F8FA] rounded-full h-[24px]">
-                      <img src={customer} />
+                      <ThemeMaskedIcon src={customer} color="var(--inkBlueTwo)" />
                       Registered Customers
                     </p>
                     <span className="text-xs font-bold text-textDarkGrey">

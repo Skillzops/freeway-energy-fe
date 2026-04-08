@@ -21,7 +21,7 @@ const Devices = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isTokensOpen, setIsTokensOpen] = useState<boolean>(false);
-  const [isTokensHistoryOpen, setIsTokensHistoryOpen] = useState<boolean>(false);
+  const [_isTokensHistoryOpen, setIsTokensHistoryOpen] = useState<boolean>(false);
   const [formType, setFormType] = useState<"singleUpload" | "batchUpload">(
     "singleUpload"
   );
@@ -32,34 +32,34 @@ const Devices = () => {
   const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
   const [tableQueryParams, setTableQueryParams] = useState<Record<
     string,
-    any
-  > | null>({});
-  
+    any> |
+  null>({});
+
   // Tokens history state
   const [tokensCurrentPage, setTokensCurrentPage] = useState<number>(1);
   const [tokensEntriesPerPage, setTokensEntriesPerPage] = useState<number>(20);
   const [tokensTableQueryParams, setTokensTableQueryParams] = useState<Record<
     string,
-    any
-  > | null>({});
+    any> |
+  null>({});
 
-  const queryString = Object.entries(tableQueryParams || {})
-    .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
-    .join("&");
+  const queryString = Object.entries(tableQueryParams || {}).
+  map(([key, value]) => `${key}=${encodeURIComponent(value)}`).
+  join("&");
 
-  const tokensQueryString = Object.entries(tokensTableQueryParams || {})
-    .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
-    .join("&");
+  const tokensQueryString = Object.entries(tokensTableQueryParams || {}).
+  map(([key, value]) => `${key}=${encodeURIComponent(value)}`).
+  join("&");
 
   const {
     data: deviceData,
     isLoading: deviceLoading,
     mutate: allDeviceRefresh,
-    errorStates: allDevicesErrorStates,
+    errorStates: allDevicesErrorStates
   } = useGetRequest(
     `/v1/device?page=${currentPage}&limit=${entriesPerPage}${
-      queryString && `&${queryString}`
-    }`,
+    queryString && `&${queryString}`}`,
+
     true,
     60000
   );
@@ -69,11 +69,11 @@ const Devices = () => {
     data: tokensData,
     isLoading: tokensLoading,
     mutate: allTokensRefresh,
-    errorStates: allTokensErrorStates,
+    errorStates: allTokensErrorStates
   } = useGetRequest(
     `/v1/tokens?page=${tokensCurrentPage}&limit=${tokensEntriesPerPage}${
-      tokensQueryString && `&${tokensQueryString}`
-    }`,
+    tokensQueryString && `&${tokensQueryString}`}`,
+
     true, // Enabled - now using real API
     60000
   );
@@ -85,7 +85,7 @@ const Devices = () => {
       currentPage,
       entriesPerPage,
       setCurrentPage,
-      setEntriesPerPage,
+      setEntriesPerPage
     };
   };
 
@@ -97,35 +97,35 @@ const Devices = () => {
       currentPage: tokensCurrentPage,
       entriesPerPage: tokensEntriesPerPage,
       setCurrentPage: setTokensCurrentPage,
-      setEntriesPerPage: setTokensEntriesPerPage,
+      setEntriesPerPage: setTokensEntriesPerPage
     };
   };
 
   const navigationList = [
-    {
-      title: "All Devices",
-      link: "/devices/all",
-      count: deviceData?.total || 0,
-    },
-    {
-      title: "Tokens History",
-      link: "/devices/tokens-history",
-      count: tokensData?.total || 0,
-      onClick: () => setIsTokensHistoryOpen(true),
-    },
-  ];
+  {
+    title: "All Devices",
+    link: "/devices/all",
+    count: deviceData?.total || 0
+  },
+  {
+    title: "Tokens History",
+    link: "/devices/tokens-history",
+    count: tokensData?.total || 0,
+    onClick: () => setIsTokensHistoryOpen(true)
+  }];
+
 
   useEffect(() => {
     setTableQueryParams({});
     switch (location.pathname) {
       case "/devices/all":
         setTableQueryParams((prevParams) => ({
-          ...prevParams,
+          ...prevParams
         }));
         break;
       default:
         setTableQueryParams((prevParams) => ({
-          ...prevParams,
+          ...prevParams
         }));
     }
   }, [location.pathname]);
@@ -148,10 +148,10 @@ const Devices = () => {
           break;
       }
     },
-    showCustomButton: true,
+    showCustomButton: true
   };
 
-  const devicesPaths = ["all"];
+  const _devicesPaths = ["all"];
 
   return (
     <>
@@ -163,15 +163,15 @@ const Devices = () => {
               iconBgColor="bg-[#FDEEC2]"
               topText="All"
               bottomText="DEVICES"
-              value={deviceData?.total || 0}
-            />
+              value={deviceData?.total || 0} />
+
             <TitlePill
               icon={sale}
               iconBgColor="bg-[#E2F7E2]"
               topText="All"
               bottomText="TOKENS"
-              value={tokensData?.total || 0}
-            />
+              value={tokensData?.total || 0} />
+
           </div>
           <div className="flex w-full items-center justify-between gap-2 min-w-max sm:w-max sm:justify-end">
             <ActionButton
@@ -180,8 +180,8 @@ const Devices = () => {
               onClick={() => {
                 setFormType("singleUpload");
                 setIsOpen(true);
-              }}
-            />
+              }} />
+
             <DropDown {...dropDownList} />
           </div>
         </section>
@@ -190,42 +190,42 @@ const Devices = () => {
           <section className="relative items-start justify-center flex min-h-[415px] w-full overflow-hidden">
             <Suspense
               fallback={
-                <LoadingSpinner parentClass="absolute top-[50%] w-full" />
-              }
-            >
+              <LoadingSpinner parentClass="absolute top-[50%] w-full" />
+              }>
+
               <Routes>
                 <Route
                   path="/"
-                  element={<Navigate to="/devices/all" replace />}
-                />
+                  element={<Navigate to="/devices/all" replace />} />
+
                 <Route
                   path="all"
                   element={
-                    <DevicesTable
-                      devicesData={deviceData}
-                      isLoading={deviceLoading}
-                      refreshTable={allDeviceRefresh}
-                      errorData={allDevicesErrorStates}
-                      paginationInfo={paginationInfo}
-                      setTableQueryParams={setTableQueryParams}
-                    />
-                  }
-                />
+                  <DevicesTable
+                    devicesData={deviceData}
+                    isLoading={deviceLoading}
+                    refreshTable={allDeviceRefresh}
+                    errorData={allDevicesErrorStates}
+                    paginationInfo={paginationInfo}
+                    setTableQueryParams={setTableQueryParams} />
+
+                  } />
+
                 <Route
                   path="tokens-history"
                   element={
-                    <Suspense fallback={<div>Loading tokens...</div>}>
+                  <Suspense fallback={<div>Loading tokens...</div>}>
                       <TokensTable
-                        tokensData={tokensData}
-                        errorData={allTokensErrorStates}
-                        isLoading={tokensLoading}
-                        refreshTable={allTokensRefresh}
-                        paginationInfo={tokensPaginationInfo}
-                        setTableQueryParams={setTokensTableQueryParams}
-                      />
+                      tokensData={tokensData}
+                      errorData={allTokensErrorStates}
+                      isLoading={tokensLoading}
+                      refreshTable={allTokensRefresh}
+                      paginationInfo={tokensPaginationInfo}
+                      setTableQueryParams={setTokensTableQueryParams} />
+
                     </Suspense>
-                  }
-                />
+                  } />
+
               </Routes>
             </Suspense>
           </section>
@@ -235,17 +235,17 @@ const Devices = () => {
         isOpen={isOpen}
         setIsOpen={setIsOpen}
         allDevicesRefresh={allDeviceRefresh}
-        formType={formType}
-      />
+        formType={formType} />
+
       <GenerateTokens
         isOpen={isTokensOpen}
         setIsOpen={setIsTokensOpen}
         allDevicesRefresh={allDeviceRefresh}
         formType={tokensFormType}
-        isTokenable={true}
-      />
-    </>
-  );
+        isTokenable={true} />
+
+    </>);
+
 };
 
 export default Devices;

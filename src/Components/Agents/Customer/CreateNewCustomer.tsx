@@ -244,7 +244,7 @@ const CreateNewCustomer = ({
 
     // Restrict latitude/longitude to decimals only
     if (name === "latitude" || name === "longitude") {
-      const cleaned = value.replace(/[^\d.\-]/g, "");
+      const cleaned = value.replace(/[^\d.-]/g, "");
       const decimalPattern = /^-?\d*(\.\d*)?$/;
 
       if (!decimalPattern.test(cleaned)) {

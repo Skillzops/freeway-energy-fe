@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import type { Warehouse } from "../../data/warehouseData";
-import { useWarehouse } from "../../contexts/WarehouseContext";
+import useWarehouse from "../../hooks/useWarehouse";
 import { WarehouseManagerModal } from "./WarehouseManagerModal";
 import { EditWarehouseModal } from "./EditWarehouseModal";
 import { toast } from "react-toastify";

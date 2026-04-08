@@ -9,20 +9,20 @@ interface NewWarehouseModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const UploadIcon = () => (
-  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-    <polyline points="7,10 12,15 17,10"/>
-    <line x1="12" y1="15" x2="12" y2="3"/>
-  </svg>
-);
+const _UploadIcon = () =>
+<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+    <polyline points="7,10 12,15 17,10" />
+    <line x1="12" y1="15" x2="12" y2="3" />
+  </svg>;
 
-const XIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <line x1="18" y1="6" x2="6" y2="18"/>
-    <line x1="6" y1="6" x2="18" y2="18"/>
-  </svg>
-);
+
+const _XIcon = () =>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <line x1="18" y1="6" x2="6" y2="18" />
+    <line x1="6" y1="6" x2="18" y2="18" />
+  </svg>;
+
 
 export function NewWarehouseModal({ open, onOpenChange }: NewWarehouseModalProps) {
   const [name, setName] = useState("");
@@ -48,7 +48,7 @@ export function NewWarehouseModal({ open, onOpenChange }: NewWarehouseModalProps
     }
   };
 
-  const removeImage = () => {
+  const _removeImage = () => {
     setSelectedImage(null);
     setImagePreview("");
     if (fileInputRef.current) {
@@ -58,7 +58,7 @@ export function NewWarehouseModal({ open, onOpenChange }: NewWarehouseModalProps
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!name || !location) {
       toast.error("Please fill in the required fields");
       return;
@@ -106,9 +106,9 @@ export function NewWarehouseModal({ open, onOpenChange }: NewWarehouseModalProps
       size={isMobile ? "large" : "medium"}
       layout={isMobile ? "default" : "right"}
       leftHeaderComponents={
-        <h2 className="text-lg font-semibold text-textBlack">New Warehouse</h2>
-      }
-    >
+      <h2 className="text-lg font-semibold text-textBlack">New Warehouse</h2>
+      }>
+
       <div className="p-4 sm:p-6">
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           <div className="space-y-2">
@@ -121,8 +121,8 @@ export function NewWarehouseModal({ open, onOpenChange }: NewWarehouseModalProps
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter warehouse name"
-              className="w-full px-3 py-2 sm:py-3 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm sm:text-base"
-            />
+              className="w-full px-3 py-2 sm:py-3 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm sm:text-base" />
+
           </div>
 
           <div className="space-y-2">
@@ -135,8 +135,8 @@ export function NewWarehouseModal({ open, onOpenChange }: NewWarehouseModalProps
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               placeholder="Enter location"
-              className="w-full px-3 py-2 sm:py-3 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm sm:text-base"
-            />
+              className="w-full px-3 py-2 sm:py-3 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm sm:text-base" />
+
           </div>
 
           <div className="space-y-2">
@@ -149,8 +149,8 @@ export function NewWarehouseModal({ open, onOpenChange }: NewWarehouseModalProps
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Enter warehouse description..."
               rows={isMobile ? 2 : 3}
-              className="w-full px-3 py-2 sm:py-3 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none text-sm sm:text-base"
-            />
+              className="w-full px-3 py-2 sm:py-3 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none text-sm sm:text-base" />
+
           </div>
 
           <div className="space-y-2">
@@ -158,22 +158,22 @@ export function NewWarehouseModal({ open, onOpenChange }: NewWarehouseModalProps
               Warehouse Image
             </label>
             <div className="space-y-3">
-              {imagePreview && (
-                <div className="w-full h-32 rounded-lg overflow-hidden">
+              {imagePreview &&
+              <div className="w-full h-32 rounded-lg overflow-hidden">
                   <img
-                    src={imagePreview}
-                    alt="Preview"
-                    className="w-full h-full object-cover"
-                  />
+                  src={imagePreview}
+                  alt="Preview"
+                  className="w-full h-full object-cover" />
+
                 </div>
-              )}
+              }
               <input
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
                 onChange={handleImageSelect}
-                className="block w-full text-sm text-textDarkGrey file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary/90"
-              />
+                className="block w-full text-sm text-textDarkGrey file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary/90" />
+
             </div>
           </div>
 
@@ -183,8 +183,8 @@ export function NewWarehouseModal({ open, onOpenChange }: NewWarehouseModalProps
               type="checkbox"
               checked={isMainWarehouse}
               onChange={(e) => setIsMainWarehouse(e.target.checked)}
-              className="w-4 h-4 text-primary bg-gray-100 border-strokeGreyThree rounded focus:ring-primary/20 focus:ring-2"
-            />
+              className="w-4 h-4 text-primary bg-gray-100 border-strokeGreyThree rounded focus:ring-primary/20 focus:ring-2" />
+
             <label htmlFor="main-warehouse" className="text-sm text-textBlack">
               Set as main warehouse
             </label>
@@ -194,20 +194,20 @@ export function NewWarehouseModal({ open, onOpenChange }: NewWarehouseModalProps
             <button
               type="button"
               onClick={() => onOpenChange(false)}
-              className="w-full sm:w-auto px-4 py-2 border border-strokeGreyThree text-textBlack rounded-lg hover:bg-gray-50 transition-colors text-sm sm:text-base"
-            >
+              className="w-full sm:w-auto px-4 py-2 border border-strokeGreyThree text-textBlack rounded-lg hover:bg-gray-50 transition-colors text-sm sm:text-base">
+
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full sm:w-auto bg-primaryGradient text-white px-4 py-2 rounded-lg hover:opacity-90 transition-all text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
-            >
+              className="w-full sm:w-auto bg-primaryGradient text-white px-4 py-2 rounded-lg hover:opacity-90 transition-all text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed">
+
               {isLoading ? "Creating..." : "Create Warehouse"}
             </button>
           </div>
         </form>
       </div>
-    </Modal>
-  );
+    </Modal>);
+
 }

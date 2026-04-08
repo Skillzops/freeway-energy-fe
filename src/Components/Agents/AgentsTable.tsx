@@ -203,7 +203,7 @@ const AgentsTable = ({
           <Table
             tableType="card"
             tableTitle={getTableTitle()}
-            tableClassname="flex flex-wrap items-center gap-4"
+            tableClassname="w-full"
             tableData={getTableData()}
             loading={isLoading}
             filterList={filterList}

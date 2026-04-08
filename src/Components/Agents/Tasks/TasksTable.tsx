@@ -282,8 +282,7 @@ const TasksTable: React.FC<TasksTableProps> = ({
   useEffect(() => {
     if (serverPage && serverPage !== currentPage) setCurrentPage(serverPage);
     if (serverLimit && serverLimit !== entriesPerPage) setEntriesPerPage(serverLimit);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [serverPage, serverLimit]);
+  }, [currentPage, entriesPerPage, serverPage, serverLimit, setCurrentPage, setEntriesPerPage]);
 
   // Server search: debounce -> push q, reset to page 1 (parent fetches)
   useEffect(() => {
@@ -298,8 +297,7 @@ const TasksTable: React.FC<TasksTableProps> = ({
     return () => {
       if (debounceRef.current) window.clearTimeout(debounceRef.current);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchQuery]);
+  }, [searchQuery, setCurrentPage, setTableQueryParams]);
 
   const openTokensModal = (task: RawTask, tokens: ReturnType<typeof collectTokens>) => {
     setModalTokens(tokens);

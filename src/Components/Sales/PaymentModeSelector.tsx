@@ -18,18 +18,18 @@ const PaymentModeSelector: React.FC<PaymentModeSelectorProps> = ({
   value,
   onChange,
   errorMessage,
-  saleId,
+  saleId: _saleId,
   amount,
   onAmountChange,
   onNotesChange,
   paymentGateway,
-  onPaymentGatewayChange,
+  onPaymentGatewayChange
 }) => {
   const [paymentAmount, setPaymentAmount] = useState(amount?.toString() || "");
   const [notes, setNotes] = useState("");
   const [selectedGateway, setSelectedGateway] = useState<
-    "OGARANYA" | "FLUTTERWAVE"
-  >(paymentGateway || "OGARANYA");
+    "OGARANYA" | "FLUTTERWAVE">(
+    paymentGateway || "OGARANYA");
 
   // Update local state when amount prop changes
   useEffect(() => {
@@ -72,50 +72,50 @@ const PaymentModeSelector: React.FC<PaymentModeSelectorProps> = ({
         value={value}
         onChange={onChange}
         options={[
-          { label: "Online Payment", value: "ONLINE" },
-          { label: "Cash Payment", value: "CASH" },
-        ]}
-        errorMessage={errorMessage}
-      />
-      {value === "ONLINE" && (
-        <SelectInput
-          label="Payment Gateway"
-          value={selectedGateway}
-          onChange={handleGatewayChange}
-          options={[
-            { label: "Ogaranya", value: "OGARANYA" },
-            { label: "Flutterwave", value: "FLUTTERWAVE" },
-          ]}
-        />
-      )}
+        { label: "Online Payment", value: "ONLINE" },
+        { label: "Cash Payment", value: "CASH" }]
+        }
+        errorMessage={errorMessage} />
 
-      {value === "CASH" && (
-        <div className="flex flex-col gap-4 mt-4">
+      {value === "ONLINE" &&
+      <SelectInput
+        label="Payment Gateway"
+        value={selectedGateway}
+        onChange={handleGatewayChange}
+        options={[
+        { label: "Ogaranya", value: "OGARANYA" },
+        { label: "Flutterwave", value: "FLUTTERWAVE" }]
+        } />
+
+      }
+
+      {value === "CASH" &&
+      <div className="flex flex-col gap-4 mt-4">
           <Input
-            type="number"
-            name="paymentAmount"
-            label="PAYMENT AMOUNT"
-            value={paymentAmount}
-            onChange={handleAmountChange}
-            placeholder="Enter payment amount"
-            required={true}
-          />
+          type="number"
+          name="paymentAmount"
+          label="PAYMENT AMOUNT"
+          value={paymentAmount}
+          onChange={handleAmountChange}
+          placeholder="Enter payment amount"
+          required={true} />
+
           <Input
-            type="text"
-            name="notes"
-            label="PAYMENT NOTES"
-            value={notes}
-            onChange={handleNotesChange}
-            placeholder="Enter payment notes"
-            required={false}
-          />
+          type="text"
+          name="notes"
+          label="PAYMENT NOTES"
+          value={notes}
+          onChange={handleNotesChange}
+          placeholder="Enter payment notes"
+          required={false} />
+
           <p className="text-xs text-textLightGrey">
             Payment will be processed when you complete the sale.
           </p>
         </div>
-      )}
-    </div>
-  );
+      }
+    </div>);
+
 };
 
 export default PaymentModeSelector;

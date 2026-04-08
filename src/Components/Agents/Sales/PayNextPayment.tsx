@@ -5,11 +5,11 @@ import { Input } from "@/Components/InputComponent/Input";
 import { formatNumberWithCommas } from "@/utils/helpers";
 import { useApiCall } from "@/utils/useApiCall";
 
-interface PaymentVerificationResponse {
+interface _PaymentVerificationResponse {
   status?: string;
   message?: string;
   jobId?: string;
-  paymentStatus?: "PENDING" | "INCOMPLETE" | "COMPLETED"
+  paymentStatus?: "PENDING" | "INCOMPLETE" | "COMPLETED";
 }
 
 interface PayNextPaymentProps {
@@ -27,7 +27,7 @@ const PayNextPayment: React.FC<PayNextPaymentProps> = ({
   saleId,
   remainingBalance,
   suggestedAmount,
-  onPaymentSuccess,
+  onPaymentSuccess
 }) => {
   const { apiCall } = useApiCall();
   const [amountToPay, setAmountToPay] = useState<number>(suggestedAmount);
@@ -42,7 +42,7 @@ const PayNextPayment: React.FC<PayNextPaymentProps> = ({
     }
   });
 
-  const handleCashPayment = async () => {
+  const _handleCashPayment = async () => {
     if (!amountToPay || amountToPay <= 0) {
       setPaymentError("Payment amount must be greater than zero.");
       return;
@@ -67,7 +67,7 @@ const PayNextPayment: React.FC<PayNextPaymentProps> = ({
           status: "COMPLETED",
           paymentNote: `Cash payment of ₦${formatNumberWithCommas(amountToPay)}`
         },
-        successMessage: `Payment of ₦${formatNumberWithCommas(amountToPay)} recorded successfully!`,
+        successMessage: `Payment of ₦${formatNumberWithCommas(amountToPay)} recorded successfully!`
       });
 
       if (response?.data) {
@@ -110,7 +110,7 @@ const PayNextPayment: React.FC<PayNextPaymentProps> = ({
           amount: amountToPay,
           paymentMethod: "ONLINE"
         },
-        successMessage: `Payment of ₦${formatNumberWithCommas(amountToPay)} completed successfully!`,
+        successMessage: `Payment of ₦${formatNumberWithCommas(amountToPay)} completed successfully!`
       });
 
       if (response?.data) {
@@ -144,8 +144,8 @@ const PayNextPayment: React.FC<PayNextPaymentProps> = ({
           <h3 className="text-lg font-semibold">Pay Next Payment</h3>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-          >
+            className="text-gray-400 hover:text-gray-600 transition-colors">
+
             ✕
           </button>
         </div>
@@ -162,11 +162,11 @@ const PayNextPayment: React.FC<PayNextPaymentProps> = ({
         </div>
 
         {/* Payment Error Display */}
-        {paymentError && (
-          <div className="mb-4 p-3 border border-red-500 rounded-md bg-red-50">
+        {paymentError &&
+        <div className="mb-4 p-3 border border-red-500 rounded-md bg-red-50">
             <p className="text-red-600 text-sm">{paymentError}</p>
           </div>
-        )}
+        }
 
         {/* Amount Input */}
         <div className="flex flex-col w-full p-2.5 gap-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px]">
@@ -178,37 +178,37 @@ const PayNextPayment: React.FC<PayNextPaymentProps> = ({
             onChange={(e) => setAmountToPay(Number(e.target.value))}
             placeholder="Enter payment amount"
             required={true}
-            description="Amount will be deducted from your wallet balance."
-          />
+            description="Amount will be deducted from your wallet balance." />
+
         </div>
 
         <div className="flex gap-3 mt-6">
           <button
             onClick={onClose}
             className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
-            disabled={isProcessingPayment}
-          >
+            disabled={isProcessingPayment}>
+
             Cancel
           </button>
           <button
             onClick={handleWalletPayment}
             disabled={
-              isProcessingPayment ||
-              !amountToPay ||
-              amountToPay <= 0 ||
-              amountToPay > remainingBalance
+            isProcessingPayment ||
+            !amountToPay ||
+            amountToPay <= 0 ||
+            amountToPay > remainingBalance
             }
-            className="flex-1 px-4 py-2 bg-primaryGradient text-white rounded-md hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isProcessingPayment
-              ? "Processing..."
-              : "Pay from Wallet"
+            className="flex-1 px-4 py-2 bg-primaryGradient text-white rounded-md hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+
+            {isProcessingPayment ?
+            "Processing..." :
+            "Pay from Wallet"
             }
           </button>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default PayNextPayment;

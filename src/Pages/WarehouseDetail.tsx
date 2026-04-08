@@ -18,79 +18,79 @@ import warehouseBadge from "@/assets/inventory/inventorybadge.png";
 import { formatNumberWithCommas } from "@/utils/helpers";
 
 // Icons
-const ArrowLeftIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="m12 19-7-7 7-7"/>
-    <path d="m19 12H5"/>
-  </svg>
-);
+const ArrowLeftIcon = () =>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="m12 19-7-7 7-7" />
+    <path d="m19 12H5" />
+  </svg>;
 
-const PackageIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M16.5 9.4L7.55 4.24C7.21 4.07 6.79 4.07 6.45 4.24L2.5 6.5v11l4 2.26c.34.17.76.17 1.1 0L16.5 15.5V4.24z"/>
-  </svg>
-);
 
-const TrendingUpIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
-  </svg>
-);
+const PackageIcon = () =>
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M16.5 9.4L7.55 4.24C7.21 4.07 6.79 4.07 6.45 4.24L2.5 6.5v11l4 2.26c.34.17.76.17 1.1 0L16.5 15.5V4.24z" />
+  </svg>;
 
-const AlertTriangleIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
-    <path d="M12 9v4"/>
-    <path d="m12 17.02.01 0"/>
-  </svg>
-);
 
-const ClockIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="12" cy="12" r="10"/>
-    <polyline points="12,6 12,12 16,14"/>
-  </svg>
-);
+const TrendingUpIcon = () =>
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+  </svg>;
 
-const PlusIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <line x1="12" y1="5" x2="12" y2="19"/>
-    <line x1="5" y1="12" x2="19" y2="12"/>
-  </svg>
-);
 
-const RefreshIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <polyline points="23 4 23 10 17 10"/>
-    <path d="m3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
-  </svg>
-);
+const AlertTriangleIcon = () =>
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+    <path d="M12 9v4" />
+    <path d="m12 17.02.01 0" />
+  </svg>;
 
-const LoadingSpinner = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="animate-spin">
-    <path d="M21 12a9 9 0 11-6.219-8.56"/>
-  </svg>
-);
 
-const SendIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="m22 2-7 20-4-9-9-4Z"/>
-  </svg>
-);
+const ClockIcon = () =>
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <circle cx="12" cy="12" r="10" />
+    <polyline points="12,6 12,12 16,14" />
+  </svg>;
 
-const EyeIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-    <circle cx="12" cy="12" r="3"/>
-  </svg>
-);
 
-const CheckCircleIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-    <polyline points="22,4 12,14.01 9,11.01"/>
-  </svg>
-);
+const PlusIcon = () =>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <line x1="12" y1="5" x2="12" y2="19" />
+    <line x1="5" y1="12" x2="19" y2="12" />
+  </svg>;
+
+
+const RefreshIcon = () =>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <polyline points="23 4 23 10 17 10" />
+    <path d="m3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+  </svg>;
+
+
+const LoadingSpinner = () =>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="animate-spin">
+    <path d="M21 12a9 9 0 11-6.219-8.56" />
+  </svg>;
+
+
+const SendIcon = () =>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="m22 2-7 20-4-9-9-4Z" />
+  </svg>;
+
+
+const EyeIcon = () =>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>;
+
+
+const CheckCircleIcon = () =>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+    <polyline points="22,4 12,14.01 9,11.01" />
+  </svg>;
+
 
 export default function WarehouseDetail() {
   const { id } = useParams();
@@ -110,7 +110,7 @@ export default function WarehouseDetail() {
   const [isRefreshingInventory, setIsRefreshingInventory] = useState(false);
   const [isRefreshingRequests, setIsRefreshingRequests] = useState(false);
   const isMobile = useBreakpoint("max", 640);
-  
+
   // Fetch warehouse data using mock API
   const { data: warehouses = [], isLoading: warehouseLoading, error: warehouseError, mutate: mutateWarehouses } = useWarehouses();
   const { data: inventory = [], isLoading: inventoryLoading, mutate: mutateInventory } = useWarehouseInventory(id || null);
@@ -120,9 +120,9 @@ export default function WarehouseDetail() {
   // For main warehouse: show outgoing requests (fromWarehouseId)
   // For branch warehouse: show incoming requests (toWarehouseId)
   const { data: transferRequests = [], isLoading: transfersLoading, mutate: mutateTransferRequests } = useWarehouseTransferRequests(
-    warehouse?.isMainWarehouse
-      ? { fromWarehouseId: id || undefined }
-      : { toWarehouseId: id || undefined }
+    warehouse?.isMainWarehouse ?
+    { fromWarehouseId: id || undefined } :
+    { toWarehouseId: id || undefined }
   );
 
   // Show loading state
@@ -135,8 +135,8 @@ export default function WarehouseDetail() {
             <p className="text-textDarkGrey">Loading warehouse details...</p>
           </div>
         </div>
-      </PageLayout>
-    );
+      </PageLayout>);
+
   }
 
   // Show error state
@@ -148,21 +148,21 @@ export default function WarehouseDetail() {
             <p className="text-errorTwo mb-4">Warehouse not found or failed to load</p>
             <button
               onClick={() => window.location.reload()}
-              className="bg-primary text-white px-4 py-2 rounded-full hover:bg-primary/90 transition-colors"
-            >
+              className="bg-primary text-white px-4 py-2 rounded-full hover:bg-primary/90 transition-colors">
+
               Retry
             </button>
           </div>
         </div>
-      </PageLayout>
-    );
+      </PageLayout>);
+
   }
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-NG', {
       style: 'currency',
       currency: 'NGN',
-      minimumFractionDigits: 0,
+      minimumFractionDigits: 0
     }).format(amount);
   };
 
@@ -170,11 +170,11 @@ export default function WarehouseDetail() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "fulfilled": return "text-success bg-success/10";
-      case "partial": return "text-warning bg-warning/10";
-      case "pending": return "text-primary bg-primary/10";
-      case "rejected": return "text-errorTwo bg-errorTwo/10";
-      default: return "text-textDarkGrey bg-gray-100";
+      case "fulfilled":return "text-success bg-success/10";
+      case "partial":return "text-warning bg-warning/10";
+      case "pending":return "text-primary bg-primary/10";
+      case "rejected":return "text-errorTwo bg-errorTwo/10";
+      default:return "text-textDarkGrey bg-gray-100";
     }
   };
 
@@ -203,31 +203,31 @@ export default function WarehouseDetail() {
   };
 
   const getStockLevel = (product: any) =>
-    toNumber(
-      product?.totalRemainingQuantities ??
-      product?.remainingQuantity ??
-      product?.quantity ??
-      product?.stockLevel
-    );
+  toNumber(
+    product?.totalRemainingQuantities ??
+    product?.remainingQuantity ??
+    product?.quantity ??
+    product?.stockLevel
+  );
 
   const getMaxCapacity = (product: any, stockLevel: number) =>
-    Math.max(
-      1,
-      toNumber(
+  Math.max(
+    1,
+    toNumber(
       product?.totalInitialQuantities ??
       product?.numberOfStock ??
       product?.maxCapacity ??
       stockLevel
-      )
-    );
+    )
+  );
 
   const getSalePrice = (product: any) =>
-    toNumber(
-      product?.salePrice?.minimumInventoryBatchPrice ??
-      product?.salePrice?.maximumInventoryBatchPrice ??
-      product?.salePrice ??
-      product?.price
-    );
+  toNumber(
+    product?.salePrice?.minimumInventoryBatchPrice ??
+    product?.salePrice?.maximumInventoryBatchPrice ??
+    product?.salePrice ??
+    product?.price
+  );
 
   const computedTotalItems = inventoryArray.reduce(
     (sum: number, product: any) => sum + getStockLevel(product),
@@ -243,36 +243,36 @@ export default function WarehouseDetail() {
   const lowStockItems = inventoryArray.filter((product: any) => {
     const stockLevel = getStockLevel(product);
     const maxCapacity = getMaxCapacity(product, stockLevel);
-    return (stockLevel / maxCapacity) < 0.3;
+    return stockLevel / maxCapacity < 0.3;
   });
 
   // Prefer API-provided warehouse totals from /v1/warehouses and fallback to computed values.
   const totalItemsFromApi =
-    warehouse?.totalItems ??
-    warehouse?.inventoryStats?.totalItems ??
-    warehouse?.metrics?.totalItems;
+  warehouse?.totalItems ??
+  warehouse?.inventoryStats?.totalItems ??
+  warehouse?.metrics?.totalItems;
   const totalItems =
-    totalItemsFromApi !== undefined && totalItemsFromApi !== null
-      ? toNumber(totalItemsFromApi)
-      : computedTotalItems;
+  totalItemsFromApi !== undefined && totalItemsFromApi !== null ?
+  toNumber(totalItemsFromApi) :
+  computedTotalItems;
 
   const totalValueFromApi =
-    warehouse?.totalValue ??
-    warehouse?.inventoryStats?.totalValue ??
-    warehouse?.metrics?.totalValue;
+  warehouse?.totalValue ??
+  warehouse?.inventoryStats?.totalValue ??
+  warehouse?.metrics?.totalValue;
   const totalValue =
-    totalValueFromApi !== undefined && totalValueFromApi !== null
-      ? toNumber(totalValueFromApi)
-      : computedTotalValue;
+  totalValueFromApi !== undefined && totalValueFromApi !== null ?
+  toNumber(totalValueFromApi) :
+  computedTotalValue;
 
   const lowStockCountFromApi =
-    warehouse?.lowStockItems ??
-    warehouse?.inventoryStats?.lowStockItems ??
-    warehouse?.metrics?.lowStockItems;
+  warehouse?.lowStockItems ??
+  warehouse?.inventoryStats?.lowStockItems ??
+  warehouse?.metrics?.lowStockItems;
   const lowStockCount =
-    lowStockCountFromApi !== undefined && lowStockCountFromApi !== null
-      ? toNumber(lowStockCountFromApi)
-      : lowStockItems.length;
+  lowStockCountFromApi !== undefined && lowStockCountFromApi !== null ?
+  toNumber(lowStockCountFromApi) :
+  lowStockItems.length;
 
   // Get requests for this warehouse - data is already filtered by API
   const requests = transfersArray; // Already filtered by API based on warehouse type
@@ -307,7 +307,7 @@ export default function WarehouseDetail() {
       // Refresh inventory data
       await mutateInventory();
       toast.success("Inventory refreshed successfully");
-    } catch (error) {
+    } catch (_error) {
       toast.error("Failed to refresh inventory");
     } finally {
       setIsRefreshingInventory(false);
@@ -321,7 +321,7 @@ export default function WarehouseDetail() {
       // Refresh transfer requests data
       await mutateTransferRequests();
       toast.success("Transfer requests refreshed successfully");
-    } catch (error) {
+    } catch (_error) {
       toast.error("Failed to refresh transfer requests");
     } finally {
       setIsRefreshingRequests(false);
@@ -337,12 +337,12 @@ export default function WarehouseDetail() {
     // Refresh all data
     try {
       await Promise.all([
-        mutateWarehouses(),
-        mutateInventory(),
-        mutateTransferRequests()
-      ]);
+      mutateWarehouses(),
+      mutateInventory(),
+      mutateTransferRequests()]
+      );
       toast.success("All data refreshed successfully");
-    } catch (error) {
+    } catch (_error) {
       toast.error("Failed to refresh data");
     } finally {
       setIsRefreshingAll(false);
@@ -350,25 +350,25 @@ export default function WarehouseDetail() {
   };
 
   // Filter inventory based on search query
-  const filteredInventory = searchQuery
-    ? inventoryArray.filter((product: any) =>
-        product.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.status?.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : inventoryArray;
+  const filteredInventory = searchQuery ?
+  inventoryArray.filter((product: any) =>
+  product.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  product.status?.toLowerCase().includes(searchQuery.toLowerCase())
+  ) :
+  inventoryArray;
 
   // Filter requests based on search query
-  const filteredRequests = requestSearchQuery
-    ? requests.filter((request: any) =>
-        request.requestId?.toLowerCase().includes(requestSearchQuery.toLowerCase()) ||
-        request.id?.toLowerCase().includes(requestSearchQuery.toLowerCase()) ||
-        getWarehouseName(warehouse?.isMainWarehouse ? request.toWarehouseId : request.fromWarehouseId)
-          ?.toLowerCase().includes(requestSearchQuery.toLowerCase()) ||
-        getProductName(request.inventoryId, request.inventory)
-          ?.toLowerCase().includes(requestSearchQuery.toLowerCase()) ||
-        request.status?.toLowerCase().includes(requestSearchQuery.toLowerCase())
-      )
-    : requests;
+  const filteredRequests = requestSearchQuery ?
+  requests.filter((request: any) =>
+  request.requestId?.toLowerCase().includes(requestSearchQuery.toLowerCase()) ||
+  request.id?.toLowerCase().includes(requestSearchQuery.toLowerCase()) ||
+  getWarehouseName(warehouse?.isMainWarehouse ? request.toWarehouseId : request.fromWarehouseId)?.
+  toLowerCase().includes(requestSearchQuery.toLowerCase()) ||
+  getProductName(request.inventoryId, request.inventory)?.
+  toLowerCase().includes(requestSearchQuery.toLowerCase()) ||
+  request.status?.toLowerCase().includes(requestSearchQuery.toLowerCase())
+  ) :
+  requests;
 
   return (
     <PageLayout pageName={warehouse.name} badge={warehouseBadge} className="w-full px-2 py-8 md:p-8">
@@ -377,8 +377,8 @@ export default function WarehouseDetail() {
         <div className="flex flex-col gap-4">
           <Link
             to="/warehouses"
-            className="flex items-center gap-2 text-textDarkGrey hover:text-textBlack transition-colors w-fit"
-          >
+            className="flex items-center gap-2 text-textDarkGrey hover:text-textBlack transition-colors w-fit">
+
             <ArrowLeftIcon />
             <span className="text-sm sm:text-base">Back to Warehouses</span>
           </Link>
@@ -387,11 +387,11 @@ export default function WarehouseDetail() {
             <div>
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
                 <h1 className="text-2xl sm:text-3xl font-bold text-textBlack">{warehouse.name}</h1>
-                {warehouse.isMainWarehouse && (
-                  <div className="bg-warning/10 text-warning px-2 py-1 rounded-full text-xs font-medium">
+                {warehouse.isMainWarehouse &&
+                <div className="bg-warning/10 text-warning px-2 py-1 rounded-full text-xs font-medium">
                     Main Warehouse
                   </div>
-                )}
+                }
               </div>
               <p className="text-textDarkGrey text-sm sm:text-base">{warehouse.location}</p>
             </div>
@@ -401,39 +401,39 @@ export default function WarehouseDetail() {
                 onClick={handleRefreshAll}
                 disabled={isRefreshingAll}
                 className={`bg-chalk border border-strokeGreyThree text-textDarkGrey py-2 px-4 rounded-full flex items-center justify-center gap-2 hover:bg-strokeGreyThree transition-colors text-sm ${
-                  isRefreshingAll ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
-              >
+                isRefreshingAll ? 'opacity-50 cursor-not-allowed' : ''}`
+                }>
+
                 {isRefreshingAll ? <LoadingSpinner /> : <RefreshIcon />}
                 {!isMobile && (isRefreshingAll ? "Refreshing..." : "Refresh")}
               </button>
-              {!warehouse.isMainWarehouse && (
-                <button
-                  onClick={() => setNewRequestOpen(true)}
-                  className="bg-primaryGradient text-white py-2 px-4 rounded-full flex items-center justify-center gap-2 hover:opacity-90 transition-all text-sm"
-                >
+              {!warehouse.isMainWarehouse &&
+              <button
+                onClick={() => setNewRequestOpen(true)}
+                className="bg-primaryGradient text-white py-2 px-4 rounded-full flex items-center justify-center gap-2 hover:opacity-90 transition-all text-sm">
+
                   <SendIcon />
                   {isMobile ? "Request" : "Request from Main"}
                 </button>
-              )}
-              {warehouse.isMainWarehouse && (
-                <>
+              }
+              {warehouse.isMainWarehouse &&
+              <>
                   <button
-                    onClick={() => setNewInventoryOpen(true)}
-                    className="bg-primaryGradient text-white py-2 px-4 rounded-full flex items-center justify-center gap-2 hover:opacity-90 transition-all text-sm"
-                  >
+                  onClick={() => setNewInventoryOpen(true)}
+                  className="bg-primaryGradient text-white py-2 px-4 rounded-full flex items-center justify-center gap-2 hover:opacity-90 transition-all text-sm">
+
                     <PlusIcon />
                     {isMobile ? "Add Item" : "New Inventory Item"}
                   </button>
                   <button
-                    onClick={() => setAddStockOpen(true)}
-                    className="bg-success text-chalk py-2 px-4 rounded-full flex items-center justify-center gap-2 hover:bg-success/90 transition-colors text-sm"
-                  >
+                  onClick={() => setAddStockOpen(true)}
+                  className="bg-success text-chalk py-2 px-4 rounded-full flex items-center justify-center gap-2 hover:bg-success/90 transition-colors text-sm">
+
                     <PlusIcon />
                     {isMobile ? "Add Stock" : "Add Stock to Warehouse"}
                   </button>
                 </>
-              )}
+              }
             </div>
           </div>
         </div>
@@ -444,8 +444,8 @@ export default function WarehouseDetail() {
             <img
               src={warehouse.image}
               alt={warehouse.name}
-              className="w-full h-full object-cover"
-            />
+              className="w-full h-full object-cover" />
+
           </div>
         </div>
 
@@ -454,27 +454,27 @@ export default function WarehouseDetail() {
           <MetricCard
             title="Total Items"
             value={inventoryLoading ? "..." : totalItems.toLocaleString()}
-            icon={<PackageIcon />}
-          />
+            icon={<PackageIcon />} />
+
           <MetricCard
             title="Total Value"
             value={inventoryLoading ? "..." : formatCurrency(totalValue)}
-            icon={<TrendingUpIcon />}
-          />
+            icon={<TrendingUpIcon />} />
+
           <MetricCard
             title="Low Stock Items"
             value={inventoryLoading ? "..." : lowStockCount}
             icon={<AlertTriangleIcon />}
-            trend={lowStockCount > 0 ? { value: "Needs attention", isPositive: false } : undefined}
-          />
-          {warehouse.isMainWarehouse && (
-            <MetricCard
-              title="Pending Requests"
-              value={transfersLoading ? "..." : pendingRequests}
-              icon={<ClockIcon />}
-              trend={pendingRequests > 0 ? { value: "Needs fulfillment", isPositive: false } : undefined}
-            />
-          )}
+            trend={lowStockCount > 0 ? { value: "Needs attention", isPositive: false } : undefined} />
+
+          {warehouse.isMainWarehouse &&
+          <MetricCard
+            title="Pending Requests"
+            value={transfersLoading ? "..." : pendingRequests}
+            icon={<ClockIcon />}
+            trend={pendingRequests > 0 ? { value: "Needs fulfillment", isPositive: false } : undefined} />
+
+          }
         </div>
 
         {/* Transfer Requests Section */}
@@ -488,22 +488,22 @@ export default function WarehouseDetail() {
                 onClick={handleRefreshRequests}
                 disabled={isRefreshingRequests || isRefreshingAll}
                 className={`bg-chalk border border-strokeGreyThree text-textDarkGrey py-2 px-4 rounded-full hover:bg-strokeGreyThree transition-colors text-sm ${
-                  (isRefreshingRequests || isRefreshingAll) ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
-              >
-                {(isRefreshingRequests || isRefreshingAll) ? (
-                  <div className="flex items-center gap-2">
+                isRefreshingRequests || isRefreshingAll ? 'opacity-50 cursor-not-allowed' : ''}`
+                }>
+
+                {isRefreshingRequests || isRefreshingAll ?
+                <div className="flex items-center gap-2">
                     <LoadingSpinner />
                     {!isMobile && "Refreshing..."}
-                  </div>
-                ) : (
-                  isMobile ? "Refresh" : "Refresh Requests"
-                )}
+                  </div> :
+
+                isMobile ? "Refresh" : "Refresh Requests"
+                }
               </button>
               <Link
                 to="/transfers"
-                className="bg-chalk border border-strokeGreyThree text-textDarkGrey py-2 px-4 rounded-full hover:bg-strokeGreyThree transition-colors text-sm"
-              >
+                className="bg-chalk border border-strokeGreyThree text-textDarkGrey py-2 px-4 rounded-full hover:bg-strokeGreyThree transition-colors text-sm">
+
                 View All Requests
               </Link>
               <div className="relative w-full sm:w-auto">
@@ -512,14 +512,14 @@ export default function WarehouseDetail() {
                   value={requestSearchQuery}
                   onChange={(e) => setRequestSearchQuery(e.target.value)}
                   placeholder="Search requests..."
-                  className="w-full sm:w-64 px-4 py-2 text-sm border border-strokeGreyThree rounded-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
+                  className="w-full sm:w-64 px-4 py-2 text-sm border border-strokeGreyThree rounded-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" />
+
                 <svg
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-textGrey"
                   fill="none"
                   stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
+                  viewBox="0 0 24 24">
+
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
@@ -527,8 +527,8 @@ export default function WarehouseDetail() {
           </div>
 
           <div className="bg-white border-[0.6px] border-strokeGreyThree rounded-[20px] overflow-hidden relative">
-            {(isRefreshingAll || isRefreshingRequests || transfersLoading) && (
-              <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
+            {(isRefreshingAll || isRefreshingRequests || transfersLoading) &&
+            <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
                 <div className="flex items-center gap-2 text-textDarkGrey">
                   <LoadingSpinner />
                   <span className="text-sm">
@@ -536,7 +536,7 @@ export default function WarehouseDetail() {
                   </span>
                 </div>
               </div>
-            )}
+            }
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-strokeGreyTwo">
@@ -554,28 +554,28 @@ export default function WarehouseDetail() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredRequests.length === 0 ? (
-                    <tr>
+                  {filteredRequests.length === 0 ?
+                  <tr>
                       <td colSpan={8} className="py-8 text-center">
                         <p className="text-textDarkGrey">
-                          {requestSearchQuery
-                            ? "No transfer requests match your search"
-                            : warehouse?.isMainWarehouse
-                              ? "No outgoing transfer requests"
-                              : "No incoming transfer requests"
-                          }
+                          {requestSearchQuery ?
+                        "No transfer requests match your search" :
+                        warehouse?.isMainWarehouse ?
+                        "No outgoing transfer requests" :
+                        "No incoming transfer requests"
+                        }
                         </p>
                       </td>
-                    </tr>
-                  ) : (
-                    filteredRequests.map((request: any) => (
-                      <tr key={request.id} className="border-b border-strokeGreyTwo">
+                    </tr> :
+
+                  filteredRequests.map((request: any) =>
+                  <tr key={request.id} className="border-b border-strokeGreyTwo">
                         <td className="py-3 px-4 font-medium text-textBlack">{request.requestId || request.id}</td>
                         <td className="py-3 px-4 text-textDarkGrey">
-                          {warehouse?.isMainWarehouse
-                            ? (request.toWarehouse?.name || getWarehouseName(request.toWarehouseId))
-                            : (request.fromWarehouse?.name || getWarehouseName(request.fromWarehouseId))
-                          }
+                          {warehouse?.isMainWarehouse ?
+                      request.toWarehouse?.name || getWarehouseName(request.toWarehouseId) :
+                      request.fromWarehouse?.name || getWarehouseName(request.fromWarehouseId)
+                      }
                         </td>
                         <td className="py-3 px-4 text-textDarkGrey">{getProductName(request.inventoryId, request.inventory)}</td>
                         <td className="py-3 px-4 text-textDarkGrey">{request.requestedQuantity}</td>
@@ -589,26 +589,26 @@ export default function WarehouseDetail() {
                         <td className="py-3 px-4">
                           <div className="flex gap-2">
                             <button
-                              onClick={() => handleViewRequest(request)}
-                              className="border border-strokeGreyThree text-textBlack py-1 px-3 rounded-full text-sm flex items-center gap-1 hover:bg-strokeGreyThree transition-colors"
-                            >
+                          onClick={() => handleViewRequest(request)}
+                          className="border border-strokeGreyThree text-textBlack py-1 px-3 rounded-full text-sm flex items-center gap-1 hover:bg-strokeGreyThree transition-colors">
+
                               <EyeIcon />
                               View
                             </button>
-                            {warehouse?.isMainWarehouse && request.status !== 'FULFILLED' && request.status !== 'REJECTED' && (
-                              <button
-                                onClick={() => handleFulfillRequest(request)}
-                                className="bg-primaryGradient text-white py-1 px-3 rounded-full text-sm flex items-center gap-1 hover:opacity-90 transition-all"
-                              >
+                            {warehouse?.isMainWarehouse && request.status !== 'FULFILLED' && request.status !== 'REJECTED' &&
+                        <button
+                          onClick={() => handleFulfillRequest(request)}
+                          className="bg-primaryGradient text-white py-1 px-3 rounded-full text-sm flex items-center gap-1 hover:opacity-90 transition-all">
+
                                 <CheckCircleIcon />
                                 Fulfill
                               </button>
-                            )}
+                        }
                           </div>
                         </td>
                       </tr>
-                    ))
-                  )}
+                  )
+                  }
                 </tbody>
               </table>
             </div>
@@ -616,8 +616,8 @@ export default function WarehouseDetail() {
               currentPage={1}
               totalPages={Math.ceil(filteredRequests.length / 10)}
               itemsPerPage={10}
-              totalItems={filteredRequests.length}
-            />
+              totalItems={filteredRequests.length} />
+
           </div>
         </div>
 
@@ -630,30 +630,30 @@ export default function WarehouseDetail() {
                 onClick={handleRefreshTable}
                 disabled={isRefreshingInventory}
                 className={`flex-1 sm:flex-none bg-chalk border border-strokeGreyThree text-textDarkGrey py-2 px-3 sm:px-4 rounded-full hover:bg-strokeGreyThree transition-colors text-sm ${
-                  isRefreshingInventory ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
-              >
-                {isRefreshingInventory && isMobile ? (
-                  <LoadingSpinner />
-                ) : (
-                  isMobile ? "Reset" : "Reset Filters"
-                )}
+                isRefreshingInventory ? 'opacity-50 cursor-not-allowed' : ''}`
+                }>
+
+                {isRefreshingInventory && isMobile ?
+                <LoadingSpinner /> :
+
+                isMobile ? "Reset" : "Reset Filters"
+                }
               </button>
               <button
                 onClick={handleRefreshTable}
                 disabled={isRefreshingInventory}
                 className={`flex-1 sm:flex-none bg-chalk border border-strokeGreyThree text-textDarkGrey py-2 px-3 sm:px-4 rounded-full hover:bg-strokeGreyThree transition-colors text-sm ${
-                  isRefreshingInventory ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
-              >
-                {isRefreshingInventory ? (
-                  <div className="flex items-center gap-2">
+                isRefreshingInventory ? 'opacity-50 cursor-not-allowed' : ''}`
+                }>
+
+                {isRefreshingInventory ?
+                <div className="flex items-center gap-2">
                     <LoadingSpinner />
                     {!isMobile && "Refreshing..."}
-                  </div>
-                ) : (
-                  isMobile ? "Refresh" : "Refresh Table"
-                )}
+                  </div> :
+
+                isMobile ? "Refresh" : "Refresh Table"
+                }
               </button>
               <div className="relative w-full sm:w-auto">
                 <input
@@ -661,14 +661,14 @@ export default function WarehouseDetail() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search inventory..."
-                  className="w-full sm:w-64 px-4 py-2 text-sm border border-strokeGreyThree rounded-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
+                  className="w-full sm:w-64 px-4 py-2 text-sm border border-strokeGreyThree rounded-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" />
+
                 <svg
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-textGrey"
                   fill="none"
                   stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
+                  viewBox="0 0 24 24">
+
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
@@ -676,14 +676,14 @@ export default function WarehouseDetail() {
           </div>
 
           <div className="bg-white border-[0.4px] border-strokeGreyTwo rounded-[20px] overflow-hidden relative">
-            {(isRefreshingInventory || isRefreshingAll) && (
-              <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
+            {(isRefreshingInventory || isRefreshingAll) &&
+            <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
                 <div className="flex items-center gap-2 text-textDarkGrey">
                   <LoadingSpinner />
                   <span className="text-sm">Refreshing inventory...</span>
                 </div>
               </div>
-            )}
+            }
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 border-b border-strokeGreyTwo">
@@ -699,39 +699,39 @@ export default function WarehouseDetail() {
                   </tr>
                 </thead>
                 <tbody>
-                  {inventoryLoading ? (
-                    <tr>
+                  {inventoryLoading ?
+                  <tr>
                       <td colSpan={8} className="py-8 text-center">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
                         <p className="text-textDarkGrey">Loading inventory...</p>
                       </td>
-                    </tr>
-                  ) : filteredInventory.length === 0 ? (
-                    <tr>
+                    </tr> :
+                  filteredInventory.length === 0 ?
+                  <tr>
                       <td colSpan={8} className="py-8 text-center">
                         <p className="text-textDarkGrey">
                           {searchQuery ? "No inventory items match your search" : "No inventory items found"}
                         </p>
                       </td>
-                    </tr>
-                  ) : (
-                    filteredInventory.map((product: any, index: number) => {
-                      // Map API response fields to display values
-                      const salePrice = product.salePrice?.minimumInventoryBatchPrice || product.salePrice?.maximumInventoryBatchPrice || 0;
-                      const stockLevel = product.totalRemainingQuantities || 0;
-                      const maxCapacity = product.totalInitialQuantities || stockLevel || 1; // Fallback to prevent division by zero
-                      const inventoryValue = product.inventoryValue || 0; // Use API-provided inventory value
+                    </tr> :
 
-                      return (
-                        <tr key={product.id} className="border-b border-strokeGreyTwo">
+                  filteredInventory.map((product: any, index: number) => {
+                    // Map API response fields to display values
+                    const salePrice = product.salePrice?.minimumInventoryBatchPrice || product.salePrice?.maximumInventoryBatchPrice || 0;
+                    const stockLevel = product.totalRemainingQuantities || 0;
+                    const maxCapacity = product.totalInitialQuantities || stockLevel || 1; // Fallback to prevent division by zero
+                    const inventoryValue = product.inventoryValue || 0; // Use API-provided inventory value
+
+                    return (
+                      <tr key={product.id} className="border-b border-strokeGreyTwo">
                           <td className="py-3 px-4 text-textDarkGrey">{index + 1}</td>
                           <td className="py-3 px-4">
                             <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                              {product.image ? (
-                                <img src={product.image} alt={product.name} className="w-full h-full object-cover rounded-lg" />
-                              ) : (
-                                <span className="text-gray-400 text-xs">📷</span>
-                              )}
+                              {product.image ?
+                            <img src={product.image} alt={product.name} className="w-full h-full object-cover rounded-lg" /> :
+
+                            <span className="text-gray-400 text-xs">📷</span>
+                            }
                             </div>
                           </td>
                           <td className="py-3 px-4 font-medium text-textBlack">{product.name}</td>
@@ -756,42 +756,42 @@ export default function WarehouseDetail() {
                               </span>
                               <div className="flex w-[77%] h-[24px] bg-[#FFFFFC] border-[0.6px] border-strokeGreyThree rounded-full">
                                 <span
-                                  className={`${
-                                    (stockLevel / maxCapacity) * 100 > 50
-                                      ? "bg-successThree border-inkBlue"
-                                      : "bg-[#FFEBEC] border-[#FFC7CD]"
-                                  } flex items-center ${
-                                    (stockLevel / maxCapacity) * 100 === 0
-                                      ? "justify-start text-errorTwo px-2"
-                                      : "justify-end text-textBlack pr-1.5"
-                                  } h-full text-[9px] font-bold border-[0.6px] rounded-full`}
-                                  style={{
-                                    width:
-                                      (stockLevel / maxCapacity) * 100 === 0
-                                        ? "100%"
-                                        : (stockLevel / maxCapacity) * 100 <= 35
-                                        ? "35%"
-                                        : `${(stockLevel / maxCapacity) * 100}%`,
-                                  }}
-                                >
-                                  {Math.round((stockLevel / maxCapacity) * 100)}%
+                                className={`${
+                                stockLevel / maxCapacity * 100 > 50 ?
+                                "bg-successThree border-inkBlue" :
+                                "bg-[#FFEBEC] border-[#FFC7CD]"} flex items-center ${
+
+                                stockLevel / maxCapacity * 100 === 0 ?
+                                "justify-start text-errorTwo px-2" :
+                                "justify-end text-textBlack pr-1.5"} h-full text-[9px] font-bold border-[0.6px] rounded-full`
+                                }
+                                style={{
+                                  width:
+                                  stockLevel / maxCapacity * 100 === 0 ?
+                                  "100%" :
+                                  stockLevel / maxCapacity * 100 <= 35 ?
+                                  "35%" :
+                                  `${stockLevel / maxCapacity * 100}%`
+                                }}>
+
+                                  {Math.round(stockLevel / maxCapacity * 100)}%
                                 </span>
                               </div>
                             </div>
                           </td>
                           <td className="py-3 px-4">
                             <button
-                              onClick={() => handleViewProduct(product)}
-                              className="border border-strokeGreyThree text-textBlack py-1 px-3 rounded-full text-sm flex items-center gap-1 hover:bg-strokeGreyThree transition-colors"
-                            >
+                            onClick={() => handleViewProduct(product)}
+                            className="border border-strokeGreyThree text-textBlack py-1 px-3 rounded-full text-sm flex items-center gap-1 hover:bg-strokeGreyThree transition-colors">
+
                               <EyeIcon />
                               View
                             </button>
                           </td>
-                        </tr>
-                      );
-                    })
-                  )}
+                        </tr>);
+
+                  })
+                  }
                 </tbody>
               </table>
             </div>
@@ -799,8 +799,8 @@ export default function WarehouseDetail() {
               currentPage={1}
               totalPages={Math.ceil(filteredInventory.length / 10)}
               itemsPerPage={10}
-              totalItems={filteredInventory.length}
-            />
+              totalItems={filteredInventory.length} />
+
           </div>
         </div>
 
@@ -808,38 +808,38 @@ export default function WarehouseDetail() {
         <NewInventoryModal
           open={newInventoryOpen}
           onOpenChange={setNewInventoryOpen}
-          warehouseId={id}
-        />
+          warehouseId={id} />
+
         <AddStockToWarehouseModal
           open={addStockOpen}
           onOpenChange={setAddStockOpen}
           warehouseId={id}
-          onSuccess={() => mutateInventory()}
-        />
+          onSuccess={() => mutateInventory()} />
+
         <NewRequestModal
           open={newRequestOpen}
           onOpenChange={setNewRequestOpen}
-          currentWarehouseId={id}
-        />
+          currentWarehouseId={id} />
+
         <FulfillRequestModal
           open={fulfillRequestOpen}
           onOpenChange={setFulfillRequestOpen}
           request={selectedRequest}
-          onRequestUpdated={handleRequestUpdated}
-        />
+          onRequestUpdated={handleRequestUpdated} />
+
         <ViewInventoryModal
           open={viewInventoryOpen}
           onOpenChange={setViewInventoryOpen}
-          product={selectedProduct}
-        />
+          product={selectedProduct} />
+
         <ViewRequestModal
           open={viewRequestOpen}
           onOpenChange={setViewRequestOpen}
           request={selectedRequest}
           warehouseName={warehouse?.name}
-          productName={selectedRequest?.productId ? getProductName(selectedRequest.productId, selectedRequest) : undefined}
-        />
+          productName={selectedRequest?.productId ? getProductName(selectedRequest.productId, selectedRequest) : undefined} />
+
       </div>
-    </PageLayout>
-  );
+    </PageLayout>);
+
 }

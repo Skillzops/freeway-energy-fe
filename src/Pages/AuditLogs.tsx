@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useMemo, useState } from "react";
 import PageLayout from "./PageLayout";
 import { Table, PaginationType } from "@/Components/TableComponent/Table";
@@ -23,6 +22,17 @@ type AuditRow = {
   newValues?: any;
   changes?: any;
 };
+
+function useDebouncedValue<T>(value: T, delay = 300) {
+  const [debounced, setDebounced] = useState(value);
+
+  useEffect(() => {
+    const timerId = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(timerId);
+  }, [value, delay]);
+
+  return debounced;
+}
 
 const buildRows = (data: any): AuditRow[] => {
   const list =
@@ -65,6 +75,10 @@ const AuditLogs = () => {
   const [timelineUserName, setTimelineUserName] = useState<string | null>(null);
   const [selectedLog, setSelectedLog] = useState<AuditRow | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [userKeyword, setUserKeyword] = useState("");
+  const [selectedUserLabel, setSelectedUserLabel] = useState("");
+
+  const debouncedUserKeyword = useDebouncedValue(userKeyword, 300);
 
   const queryString = useMemo(
     () =>
@@ -87,6 +101,42 @@ const AuditLogs = () => {
     errorStates,
   } = useGetRequest(endpoint, true, 60000);
 
+  const usersEndpoint = `/v1/users?page=1&limit=200${
+    debouncedUserKeyword.trim()
+      ? `&search=${encodeURIComponent(debouncedUserKeyword.trim())}`
+      : ""
+  }`;
+
+  const { data: usersData, isLoading: usersLoading } = useGetRequest(
+    usersEndpoint,
+    true,
+    60000
+  );
+
+  const users = useMemo(() => {
+    if (Array.isArray(usersData?.users)) return usersData.users;
+    if (Array.isArray(usersData?.data)) return usersData.data;
+    if (Array.isArray(usersData)) return usersData;
+    return [];
+  }, [usersData]);
+
+  const userOptions = useMemo(() => {
+    const unique = new Map<string, string>();
+
+    users.forEach((user: any) => {
+      const id = user?.id || user?.userId;
+      if (!id) return;
+
+      const fullName = `${user?.firstname || ""} ${user?.lastname || ""}`.trim();
+      const fallbackName = user?.email || `User ${String(id).slice(0, 8)}`;
+      unique.set(id, fullName || fallbackName);
+    });
+
+    return Array.from(unique.entries())
+      .map(([id, label]) => ({ id, label }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }, [users]);
+
   useEffect(() => {
     setTableQueryParams((prev) => ({ ...(prev || {}), sortField: "createdAt", sortOrder: "desc" }));
   }, []);
@@ -99,7 +149,7 @@ const AuditLogs = () => {
     setEntriesPerPage,
   });
 
-  const filterList = [
+  const filterList: any[] = [
     {
       name: "Action",
       items: ["All", "GET", "POST", "PATCH", "PUT", "DELETE"],
@@ -121,13 +171,45 @@ const AuditLogs = () => {
       },
     },
     {
-      name: "User ID",
-      onSearch: async (query: string) => {
-        setQueryValue(query);
-        setIsSearchQuery(true);
-        setTableQueryParams((prev) => ({ ...(prev || {}), userId: query }));
+      name: selectedUserLabel || "User ID",
+      items: ["All Users", ...userOptions.map((option) => option.label)],
+      title: "Users",
+      containerClassName: "w-[180px] sm:w-[230px]",
+      buttonClassName:
+        "flex items-center justify-between w-full gap-2 pl-2 pr-1 py-1 bg-[#F9F9F9] border-[0.6px] border-strokeGreyThree rounded-full",
+      buttonLabelClassName: "block max-w-[165px] truncate",
+      dropDownContainerStyle: "w-[260px]",
+      searchable: true,
+      searchPlaceholder: "Type then click 🔍",
+      searchMode: "api",
+      onDropdownSearch: (keyword: string) => setUserKeyword(keyword),
+      isLoading: usersLoading,
+      onClickLink: async (index: number) => {
+        if (index === 0) {
+          setSelectedUserLabel("");
+          setCurrentPage(1);
+          setIsSearchQuery(false);
+          setQueryValue("");
+          setTableQueryParams((prev) => {
+            const next = { ...(prev || {}) };
+            delete (next as any).userId;
+            return next;
+          });
+          return;
+        }
+
+        const selected = userOptions[index - 1];
+        if (!selected) return;
+
+        setSelectedUserLabel(selected.label);
+        setCurrentPage(1);
+        setIsSearchQuery(false);
+        setQueryValue(selected.label);
+        setTableQueryParams((prev) => ({
+          ...(prev || {}),
+          userId: selected.id,
+        }));
       },
-      isSearch: true,
     },
     {
       name: "Date",
@@ -298,6 +380,8 @@ const AuditLogs = () => {
               setQueryValue("");
               setIsSearchQuery(false);
               setCurrentPage(1);
+              setSelectedUserLabel("");
+              setUserKeyword("");
             }}
           />
         </div>

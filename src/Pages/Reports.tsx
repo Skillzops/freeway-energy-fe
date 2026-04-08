@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import PageLayout from "./PageLayout";
 import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";

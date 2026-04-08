@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Input, SelectInput } from "../InputComponent/Input";
+import { Input, SelectInput as _SelectInput } from "../InputComponent/Input";
 import { z } from "zod";
 import { guarantorDetailsSchema } from "./salesSchema";
 import { SaleStore } from "@/stores/SaleStore";
-import { formatDateForInput } from "@/utils/helpers";
+import { formatDateForInput as _formatDateForInput } from "@/utils/helpers";
 import SecondaryButton from "../SecondaryButton/SecondaryButton";
 import { GooglePlacesInput } from "../InputComponent/GooglePlacesInput";
 
@@ -16,15 +16,15 @@ const defaultFormData: FormData = {
   homeAddress: "",
   dateOfBirth: "",
   nationality: "",
-  identificationDetails: undefined,
+  identificationDetails: undefined
 };
 
-const GuarantorForm = ({ handleClose }: { handleClose: () => void }) => {
+const GuarantorForm = ({ handleClose }: {handleClose: () => void;}) => {
   const savedData = SaleStore.guarantorDetails || defaultFormData;
   const [formData, setFormData] = useState<FormData>({
     ...savedData,
     dateOfBirth: savedData.dateOfBirth,
-    identificationDetails: undefined,
+    identificationDetails: undefined
   });
   const [formErrors, setFormErrors] = useState<z.ZodIssue[]>([]);
 
@@ -39,12 +39,12 @@ const GuarantorForm = ({ handleClose }: { handleClose: () => void }) => {
   };
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+  {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: value
     }));
     validateItems();
     setFormErrors((prev) => prev.filter((error) => error.path[0] !== name));
@@ -65,9 +65,9 @@ const GuarantorForm = ({ handleClose }: { handleClose: () => void }) => {
     if (!validateItems()) return;
     SaleStore.addGuarantorDetails({
       ...formData,
-      dateOfBirth: !formData.dateOfBirth
-        ? ""
-        : new Date(formData.dateOfBirth).toISOString(),
+      dateOfBirth: !formData.dateOfBirth ?
+      "" :
+      new Date(formData.dateOfBirth).toISOString(),
       identificationDetails: {
         idType: "",
         idNumber: "",
@@ -75,8 +75,8 @@ const GuarantorForm = ({ handleClose }: { handleClose: () => void }) => {
         issueDate: "",
         expirationDate: "",
         fullNameAsOnID: "",
-        addressAsOnID: "",
-      },
+        addressAsOnID: ""
+      }
     });
     handleClose();
   };
@@ -91,8 +91,8 @@ const GuarantorForm = ({ handleClose }: { handleClose: () => void }) => {
         onChange={handleInputChange}
         placeholder="Enter Full Name"
         required={true}
-        errorMessage={getFieldError("fullName")}
-      />
+        errorMessage={getFieldError("fullName")} />
+
       <Input
         type="text"
         name="phoneNumber"
@@ -101,8 +101,8 @@ const GuarantorForm = ({ handleClose }: { handleClose: () => void }) => {
         onChange={handleInputChange}
         placeholder="Enter Phone Number"
         required={true}
-        errorMessage={getFieldError("phoneNumber")}
-      />
+        errorMessage={getFieldError("phoneNumber")} />
+
       <Input
         type="email"
         name="email"
@@ -111,18 +111,18 @@ const GuarantorForm = ({ handleClose }: { handleClose: () => void }) => {
         onChange={handleInputChange}
         placeholder="Enter Email"
         required={false}
-        errorMessage={getFieldError("email")}
-      />
+        errorMessage={getFieldError("email")} />
+
       {/* <Input
-        type="text"
-        name="homeAddress"
-        label="Home Address"
-        value={formData.homeAddress}
-        onChange={handleInputChange}
-        placeholder="Enter Home Address"
-        required={false}
-        errorMessage={getFieldError("homeAddress")}
-      /> */}
+         type="text"
+         name="homeAddress"
+         label="Home Address"
+         value={formData.homeAddress}
+         onChange={handleInputChange}
+         placeholder="Enter Home Address"
+         required={false}
+         errorMessage={getFieldError("homeAddress")}
+        /> */}
       <GooglePlacesInput
         type="text"
         name="homeAddress"
@@ -136,10 +136,10 @@ const GuarantorForm = ({ handleClose }: { handleClose: () => void }) => {
             ...prev,
             homeAddress: value,
             longitude: coordinates?.lng || "",
-            latitude: coordinates?.lat || "",
+            latitude: coordinates?.lat || ""
           }));
-        }}
-      />
+        }} />
+
 
       <Input
         type="date"
@@ -150,8 +150,8 @@ const GuarantorForm = ({ handleClose }: { handleClose: () => void }) => {
         placeholder="Enter Date of Birth"
         required={true}
         errorMessage={getFieldError("dateOfBirth")}
-        description={"Enter Date of Birth"}
-      />
+        description={"Enter Date of Birth"} />
+
       <Input
         type="text"
         name="nationality"
@@ -160,104 +160,104 @@ const GuarantorForm = ({ handleClose }: { handleClose: () => void }) => {
         onChange={handleInputChange}
         placeholder="Enter Nationality"
         required={false}
-        errorMessage={getFieldError("nationality")}
-      />
+        errorMessage={getFieldError("nationality")} />
+
       {/* <p className="text-sm font-semibold pt-2">
-        Fill Guarantor Identification Details
-      </p>
-      <SelectInput
-        label="ID Type"
-        options={[
-          { label: "NIN", value: "Nin" },
-          { label: "Passport", value: "Passport" },
-          { label: "Driver's License", value: "Driver_License" },
-          { label: "Voter ID", value: "Voter_ID" },
-          { label: "Social Security Number", value: "Social_Security_Number" },
-        ]}
-        value={formData.identificationDetails.idType}
-        onChange={(selectedValue) =>
-          handleNestedSelectChange("idType", selectedValue)
-        }
-        placeholder="Select ID Type"
-        required={true}
-        errorMessage={getFieldError("idType")}
-      />
-      <Input
-        type="text"
-        name="idNumber"
-        label="ID Number"
-        value={formData.identificationDetails.idNumber}
-        onChange={handleNestedInputChange}
-        placeholder="Enter ID Number"
-        required={true}
-        errorMessage={getFieldError("idNumber")}
-      />
-      <Input
-        type="text"
-        name="issuingCountry"
-        label="Issuing Country"
-        value={formData.identificationDetails.issuingCountry}
-        onChange={handleNestedInputChange}
-        placeholder="Enter Issuing Country"
-        required={true}
-        errorMessage={getFieldError("issuingCountry")}
-      />
-      <Input
-        type="date"
-        name="issueDate"
-        label="Issue Date"
-        value={formData.identificationDetails.issueDate}
-        onChange={handleNestedInputChange}
-        placeholder="Enter Issue Date"
-        required={true}
-        errorMessage={getFieldError("issueDate")}
-        description={"Enter Issue Date"}
-      />
-      <Input
-        type="date"
-        name="expirationDate"
-        label="Expiration Date"
-        value={formData.identificationDetails.expirationDate}
-        onChange={handleNestedInputChange}
-        placeholder="Enter Expiration Date"
-        required={true}
-        errorMessage={getFieldError("expirationDate")}
-        description={"Enter Expiration Date"}
-      />
-      <Input
-        type="text"
-        name="fullNameAsOnID"
-        label="Full Name as on ID"
-        value={formData.identificationDetails.fullNameAsOnID}
-        onChange={handleNestedInputChange}
-        placeholder="Enter Full Name as on ID"
-        required={true}
-        errorMessage={getFieldError("fullNameAsOnID")}
-      />
-      <Input
-        type="text"
-        name="addressAsOnID"
-        label="Address as on ID"
-        value={formData.identificationDetails.addressAsOnID}
-        onChange={handleNestedInputChange}
-        placeholder="Enter Address as on ID"
-        required={false}
-        errorMessage={getFieldError("addressAsOnID")}
-      /> */}
+         Fill Guarantor Identification Details
+        </p>
+        <SelectInput
+         label="ID Type"
+         options={[
+           { label: "NIN", value: "Nin" },
+           { label: "Passport", value: "Passport" },
+           { label: "Driver's License", value: "Driver_License" },
+           { label: "Voter ID", value: "Voter_ID" },
+           { label: "Social Security Number", value: "Social_Security_Number" },
+         ]}
+         value={formData.identificationDetails.idType}
+         onChange={(selectedValue) =>
+           handleNestedSelectChange("idType", selectedValue)
+         }
+         placeholder="Select ID Type"
+         required={true}
+         errorMessage={getFieldError("idType")}
+        />
+        <Input
+         type="text"
+         name="idNumber"
+         label="ID Number"
+         value={formData.identificationDetails.idNumber}
+         onChange={handleNestedInputChange}
+         placeholder="Enter ID Number"
+         required={true}
+         errorMessage={getFieldError("idNumber")}
+        />
+        <Input
+         type="text"
+         name="issuingCountry"
+         label="Issuing Country"
+         value={formData.identificationDetails.issuingCountry}
+         onChange={handleNestedInputChange}
+         placeholder="Enter Issuing Country"
+         required={true}
+         errorMessage={getFieldError("issuingCountry")}
+        />
+        <Input
+         type="date"
+         name="issueDate"
+         label="Issue Date"
+         value={formData.identificationDetails.issueDate}
+         onChange={handleNestedInputChange}
+         placeholder="Enter Issue Date"
+         required={true}
+         errorMessage={getFieldError("issueDate")}
+         description={"Enter Issue Date"}
+        />
+        <Input
+         type="date"
+         name="expirationDate"
+         label="Expiration Date"
+         value={formData.identificationDetails.expirationDate}
+         onChange={handleNestedInputChange}
+         placeholder="Enter Expiration Date"
+         required={true}
+         errorMessage={getFieldError("expirationDate")}
+         description={"Enter Expiration Date"}
+        />
+        <Input
+         type="text"
+         name="fullNameAsOnID"
+         label="Full Name as on ID"
+         value={formData.identificationDetails.fullNameAsOnID}
+         onChange={handleNestedInputChange}
+         placeholder="Enter Full Name as on ID"
+         required={true}
+         errorMessage={getFieldError("fullNameAsOnID")}
+        />
+        <Input
+         type="text"
+         name="addressAsOnID"
+         label="Address as on ID"
+         value={formData.identificationDetails.addressAsOnID}
+         onChange={handleNestedInputChange}
+         placeholder="Enter Address as on ID"
+         required={false}
+         errorMessage={getFieldError("addressAsOnID")}
+        /> */}
       <div className="flex items-center justify-between gap-1 mt-4">
         <SecondaryButton
           variant="secondary"
           children="Cancel"
-          onClick={handleClose}
-        />
+          onClick={handleClose} />
+
         <SecondaryButton
           disabled={!isFormFilled}
           children="Save"
-          onClick={saveForm}
-        />
+          onClick={saveForm} />
+
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default GuarantorForm;
