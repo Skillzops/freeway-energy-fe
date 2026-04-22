@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import smile from "../../assets/table/smile.svg";
-import ongoing from "../../assets/table/ongoing.svg";
-import inventory from "../../assets/table/inventory.svg";
-import customer from "../../assets/table/customer.svg";
-import product from "../../assets/table/product.svg";
-import checkers from "../../assets/table/checkers.svg";
+import smile from "../../assets/table/smile.svg?url";
+import ongoing from "../../assets/table/ongoing.svg?url";
+import inventory from "../../assets/table/inventory.svg?url";
+import customer from "../../assets/table/customer.svg?url";
+import product from "../../assets/table/product.svg?url";
+import checkers from "../../assets/table/checkers.svg?url";
 // import call from "../../assets/settings/call.svg";
 // import message from "../../assets/settings/message.svg";
 import { GoDotFill } from "react-icons/go";
@@ -249,14 +249,21 @@ const ThemeMaskedIcon = ({
   src: string;
   color: string;
 }) => {
+  const maskUrl = `url("${src}")`;
   return (
     <span
       aria-hidden="true"
       className="inline-block w-4 h-4 shrink-0"
       style={{
         backgroundColor: color,
-        WebkitMask: `url(${src}) center / contain no-repeat`,
-        mask: `url(${src}) center / contain no-repeat`,
+        WebkitMaskImage: maskUrl,
+        WebkitMaskRepeat: "no-repeat",
+        WebkitMaskPosition: "center",
+        WebkitMaskSize: "contain",
+        maskImage: maskUrl,
+        maskRepeat: "no-repeat",
+        maskPosition: "center",
+        maskSize: "contain",
       }}
     />
   );
