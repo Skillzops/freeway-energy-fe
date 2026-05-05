@@ -7,10 +7,10 @@ import { ApiErrorStatesType } from "@/utils/useApiCall";
 import Table from "@/Components/TableComponent/Table";
 
 const normalizeStatus = (value?: string) => {
-  return String(value || "unknown")
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, "_");
+  return String(value || "unknown").
+  trim().
+  toLowerCase().
+  replace(/\s+/g, "_");
 };
 
 const getStatusBadgeClasses = (status: string) => {
@@ -50,92 +50,92 @@ const WalletTable = ({
   error,
   errorData,
   paginationInfo,
-  setTableQueryParams,
-}: {
-  walletData: any;
-  isLoading: boolean;
-  refreshTable: any;
-  error: any;
-  errorData: ApiErrorStatesType;
-  paginationInfo: () => {
-    total: number;
-    currentPage: number;
-    entriesPerPage: number;
-    setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
-    setEntriesPerPage: React.Dispatch<React.SetStateAction<number>>;
-  };
-  setTableQueryParams: React.Dispatch<
-    React.SetStateAction<Record<string, any> | null>
-  >;
-}) => {
+  setTableQueryParams
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}: {walletData: any;isLoading: boolean;refreshTable: any;error: any;errorData: ApiErrorStatesType;paginationInfo: () => {total: number;currentPage: number;entriesPerPage: number;setCurrentPage: React.Dispatch<React.SetStateAction<number>>;setEntriesPerPage: React.Dispatch<React.SetStateAction<number>>;};setTableQueryParams: React.Dispatch<React.SetStateAction<Record<string, any> | null>>;}) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [walletID, setWalletID] = useState("");
+  const [walletID, _setWalletID] = useState("");
 
   const tableData =
-    walletData?.transactions?.map((entry: any, index: number) => ({
-      no: index + 1,
-      dateTime: new Date(entry.createdAt).toLocaleString(),
-      type: entry.type || "Transaction",
-      description: entry.description || entry.type || "Transaction",
-      amount: `₦${parseFloat(entry.amount || 0).toLocaleString()}`,
-      referenceId: entry.id,
-      status: entry.status || "completed",
-    })) ?? [];
+  walletData?.transactions?.map((entry: any, index: number) => ({
+    no: index + 1,
+    dateTime: new Date(entry.createdAt).toLocaleString(),
+    type: entry.type || "Transaction",
+    description: entry.description || entry.type || "Transaction",
+    amount: `₦${parseFloat(entry.amount || 0).toLocaleString()}`,
+    referenceId: entry.id,
+    status: entry.status || "completed"
+  })) ?? [];
 
   const columnList = [
-    { title: "S/N", key: "no" },
-    { title: "DATE/TIME", key: "dateTime" },
-    { title: "TYPE", key: "type" },
-    { title: "DESCRIPTION", key: "description" },
-    { title: "AMOUNT", key: "amount" },
-    { title: "REFERENCE ID", key: "referenceId" },
-    {
-      title: "STATUS",
-      key: "status",
-      valueIsAComponent: true,
-      customValue: (value: string) => {
-        const badgeClasses = getStatusBadgeClasses(value);
-        return (
-          <span
-            className={`${badgeClasses} flex items-center gap-1 w-max px-2.5 py-1 border rounded-full text-[11px] font-semibold`}
-          >
+  { title: "S/N", key: "no" },
+  { title: "DATE/TIME", key: "dateTime" },
+  { title: "TYPE", key: "type" },
+  { title: "DESCRIPTION", key: "description" },
+  { title: "AMOUNT", key: "amount" },
+  { title: "REFERENCE ID", key: "referenceId" },
+  {
+    title: "STATUS",
+    key: "status",
+    valueIsAComponent: true,
+    customValue: (value: string) => {
+      const badgeClasses = getStatusBadgeClasses(value);
+      return (
+        <span
+          className={`${badgeClasses} flex items-center gap-1 w-max px-2.5 py-1 border rounded-full text-[11px] font-semibold`}>
+
             <GoDotFill className="text-[10px]" />
             {formatStatusLabel(value)}
-          </span>
-        );
-      },
-    },
-  ];
+          </span>);
 
-  return !error ? (
-    <>
+    }
+  }];
+
+
+  return !error ?
+  <>
       <Table
-        tableTitle="WALLETS"
-        columnList={columnList}
-        tableData={tableData}
-        loading={isLoading}
-        refreshTable={refreshTable}
-        paginationInfo={paginationInfo}
-        queryValue=""
-        clearFilters={() => setTableQueryParams({})}
-      />
-      {walletID && (
-        <WalletModal
-          isOpen={isOpen}
-          setIsOpen={setIsOpen}
-          walletID={walletID}
-          refreshTable={refreshTable}
-        />
-      )}
-    </>
-  ) : (
-    <ErrorComponent
-      message="Failed to fetch wallet data."
-      className="rounded-[20px]"
-      refreshData={refreshTable}
-      errorData={errorData}
-    />
-  );
+      tableTitle="WALLETS"
+      columnList={columnList}
+      tableData={tableData}
+      loading={isLoading}
+      refreshTable={refreshTable}
+      paginationInfo={paginationInfo}
+      queryValue=""
+      clearFilters={() => setTableQueryParams({})} />
+
+      {walletID &&
+    <WalletModal
+      isOpen={isOpen}
+      setIsOpen={setIsOpen}
+      walletID={walletID}
+      refreshTable={refreshTable} />
+
+    }
+    </> :
+
+  <ErrorComponent
+    message="Failed to fetch wallet data."
+    className="rounded-[20px]"
+    refreshData={refreshTable}
+    errorData={errorData} />;
+
+
 };
 
 export default WalletTable;

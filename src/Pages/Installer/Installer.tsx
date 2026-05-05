@@ -26,31 +26,31 @@ const Installer = () => {
   const [entriesPerPage, setEntriesPerPage] = useState<number>(10);
   const [tableQueryParams, setTableQueryParams] = useState<Record<
     string,
-    any
-  > | null>({});
+    any> |
+  null>({});
   const location = useLocation();
   const navigate = useNavigate();
 
   const isTaskHistory = location.pathname.includes("/tasks");
 
   // Build query string from params
-  const queryString = Object.entries(tableQueryParams || {})
-    .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
-    .join("&");
+  const queryString = Object.entries(tableQueryParams || {}).
+  map(([key, value]) => `${key}=${encodeURIComponent(value)}`).
+  join("&");
 
   // Fetch tasks data for Task History tab
   const {
     data: tasksData,
-    isLoading: tasksLoading,
-    error: tasksError,
-    errorStates: tasksErrorStates,
-    mutate: refreshTasks,
+    isLoading: _tasksLoading,
+    error: _tasksError,
+    errorStates: _tasksErrorStates,
+    mutate: _refreshTasks
   } = useGetRequest(
-    isTaskHistory
-      ? `/v1/agents/tasks?page=${currentPage}&limit=${entriesPerPage}${
-          queryString && `&${queryString}`
-        }`
-      : null,
+    isTaskHistory ?
+    `/v1/agents/tasks?page=${currentPage}&limit=${entriesPerPage}${
+    queryString && `&${queryString}`}` :
+
+    null,
     isTaskHistory,
     60000
   );
@@ -61,30 +61,30 @@ const Installer = () => {
     isLoading: installationLoading,
     error: installationError,
     errorStates: installationErrorStates,
-    mutate: refreshInstallations,
+    mutate: refreshInstallations
   } = useGetRequest(
-    !isTaskHistory
-      ? `/v1/agents/tasks?sortField=createdAt&page=${currentPage}&limit=${entriesPerPage}${
-          queryString && `&${queryString}`
-        }`
-      : null,
+    !isTaskHistory ?
+    `/v1/agents/tasks?sortField=createdAt&page=${currentPage}&limit=${entriesPerPage}${
+    queryString && `&${queryString}`}` :
+
+    null,
     !isTaskHistory,
     60000
   );
 
   // Convert navigation list to tabs format
   const tabs = [
-    {
-      name: "Installation History",
-      key: "/installer/installer/history",
-      count: installationData?.total || 0,
-    },
-    {
-      name: "Task History",
-      key: "/installer/installer/tasks",
-      count: tasksData?.total || 0,
-    },
-  ];
+  {
+    name: "Installation History",
+    key: "/installer/installer/history",
+    count: installationData?.total || 0
+  },
+  {
+    name: "Task History",
+    key: "/installer/installer/tasks",
+    count: tasksData?.total || 0
+  }];
+
 
   useEffect(() => {
     setTableQueryParams({});
@@ -94,22 +94,22 @@ const Installer = () => {
   const taskStats = {
     total: tasksData?.total || 0,
     pending: tasksData?.pending || 0,
-    cancelled: tasksData?.cancelled || 0,
+    cancelled: tasksData?.cancelled || 0
   };
 
   // Stats for Installation History
   const installationStats = {
     total: installationData?.total || 0,
     pending: installationData?.pending || 0,
-    cancelled: installationData?.cancelled || 0,
+    cancelled: installationData?.cancelled || 0
   };
 
   return (
     <>
       <PageLayout
         pageName={isTaskHistory ? "Task History" : "Installation History"}
-        badge={productbadge}
-      >
+        badge={productbadge}>
+
         <section className="flex flex-col-reverse sm:flex-row items-center justify-between w-full bg-paleGrayGradient px-2 md:px-8 py-4 gap-2 min-h-[64px]">
           <div className="flex flex-wrap w-full items-center gap-2 gap-y-3">
             <TitlePill
@@ -117,43 +117,43 @@ const Installer = () => {
               // iconBgColor="bg-[#FDEEC2]"
               topText="Total"
               bottomText={isTaskHistory ? "TASK" : "INSTALLATIONS"}
-              value={isTaskHistory ? taskStats.total : installationStats.total}
-            />
+              value={isTaskHistory ? taskStats.total : installationStats.total} />
+
             <TitlePill
               icon={cancelIcon}
               // iconBgColor="bg-[#FFDBDE]"
               topText="Pending"
               bottomText={isTaskHistory ? "TASK" : "INSTALLATIONS"}
               value={
-                isTaskHistory ? taskStats.pending : installationStats.pending
-              }
-            />
+              isTaskHistory ? taskStats.pending : installationStats.pending
+              } />
+
             <TitlePill
               icon={cancelIcon}
               // iconBgColor="bg-[#FFDBDE]"
               topText="Cancelled"
               bottomText={isTaskHistory ? "TASK" : "INSTALLATIONS"}
               value={
-                isTaskHistory
-                  ? taskStats.cancelled
-                  : installationStats.cancelled
-              }
-            />
+              isTaskHistory ?
+              taskStats.cancelled :
+              installationStats.cancelled
+              } />
+
           </div>
-          {!isTaskHistory && (
-            <div className="flex w-full items-center justify-between gap-2 min-w-max sm:w-max sm:justify-end">
+          {!isTaskHistory &&
+          <div className="flex w-full items-center justify-between gap-2 min-w-max sm:w-max sm:justify-end">
               <ActionButton
-                label="Request Token"
-                icon={
-                  <img
-                    src={circleAction}
-                    className="w-4 h-4 filter brightness-0 invert"
-                  />
-                }
-                onClick={() => setIsOpen(true)}
-              />
+              label="Request Token"
+              icon={
+              <img
+                src={circleAction}
+                className="w-4 h-4 filter brightness-0 invert" />
+
+              }
+              onClick={() => setIsOpen(true)} />
+
             </div>
-          )}
+          }
         </section>
 
         <div className="flex flex-col w-full px-2 py-8 gap-4 lg:flex-row md:p-8">
@@ -162,50 +162,50 @@ const Installer = () => {
               tabs={tabs}
               onTabSelect={(key) => navigate(key)}
               activeTabName={
-                isTaskHistory ? "Task History" : "Installation History"
+              isTaskHistory ? "Task History" : "Installation History"
               }
               variant="stacked"
-              tabsContainerClass="w-full"
-            />
+              tabsContainerClass="w-full" />
+
           </div>
 
           <div className="flex-1">
-            {isTaskHistory ? (
-              <TaskHistoryTable
-                currentPage={currentPage}
-                entriesPerPage={entriesPerPage}
-                setCurrentPage={setCurrentPage}
-                setEntriesPerPage={setEntriesPerPage}
-                setTableQueryParams={setTableQueryParams}
-                tableQueryParams={tableQueryParams}
-              />
-            ) : (
-              <InstallerTable
-                agentData={installationData || { installations: [] }}
-                isLoading={installationLoading}
-                error={installationError}
-                errorData={installationErrorStates}
-                refreshTable={refreshInstallations}
-                paginationInfo={() => ({
-                  total: installationData?.total || 0,
-                  currentPage,
-                  entriesPerPage,
-                  setCurrentPage,
-                  setEntriesPerPage,
-                })}
-                setTableQueryParams={setTableQueryParams}
-              />
-            )}
+            {isTaskHistory ?
+            <TaskHistoryTable
+              currentPage={currentPage}
+              entriesPerPage={entriesPerPage}
+              setCurrentPage={setCurrentPage}
+              setEntriesPerPage={setEntriesPerPage}
+              setTableQueryParams={setTableQueryParams}
+              tableQueryParams={tableQueryParams} /> :
+
+
+            <InstallerTable
+              agentData={installationData || { installations: [] }}
+              isLoading={installationLoading}
+              error={installationError}
+              errorData={installationErrorStates}
+              refreshTable={refreshInstallations}
+              paginationInfo={() => ({
+                total: installationData?.total || 0,
+                currentPage,
+                entriesPerPage,
+                setCurrentPage,
+                setEntriesPerPage
+              })}
+              setTableQueryParams={setTableQueryParams} />
+
+            }
           </div>
         </div>
       </PageLayout>
       <RequestToken
         isOpen={isOpen}
         setIsOpen={setIsOpen}
-        refreshTable={async () => {}}
-      />
-    </>
-  );
+        refreshTable={async () => {}} />
+
+    </>);
+
 };
 
 export default Installer;

@@ -128,7 +128,9 @@ const LocationUpdateCard: React.FC<LocationUpdateCardProps> = ({
         acCleanupRef.current = () => {
           try {
             googleObj.maps.event.clearInstanceListeners(ac);
-          } catch {}
+          } catch {
+            // no-op
+          }
         };
       } catch (e) {
         // fallback: user can type manually

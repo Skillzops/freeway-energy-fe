@@ -7,13 +7,13 @@ const WalletModal = ({
   isOpen,
   setIsOpen,
   walletID,
-  refreshTable,
-}: {
-  isOpen: boolean;
-  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  walletID: string;
-  refreshTable: KeyedMutator<any>;
-}) => {
+  refreshTable: _refreshTable
+
+
+
+
+
+}: {isOpen: boolean;setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;walletID: string;refreshTable: KeyedMutator<any>;}) => {
   const [receiptData, setReceiptData] = useState<null | {
     status: string;
     referenceId: string;
@@ -42,7 +42,7 @@ const WalletModal = ({
         time: "12:23 pm",
         topUpMode: "Flutterwave – Card",
         transactionStatus: "Successful",
-        type: "Sale Deduction",
+        type: "Sale Deduction"
       });
       setLoading(false);
     }, 500);
@@ -62,48 +62,48 @@ const WalletModal = ({
       onClose={handleClose}
       size="large"
       leftHeaderComponents={
-        receiptData ? (
-          <span
-            className={`${
-              receiptData.status.toLowerCase() === "completed"
-                ? "bg-green-100 text-green-700"
-                : "bg-yellow-100 text-yellow-700"
-            } px-3 py-1 rounded-full text-xs font-bold`}
-          >
+      receiptData ?
+      <span
+        className={`${
+        receiptData.status.toLowerCase() === "completed" ?
+        "bg-green-100 text-green-700" :
+        "bg-yellow-100 text-yellow-700"} px-3 py-1 rounded-full text-xs font-bold`
+        }>
+
             {receiptData.status.toUpperCase()}
-          </span>
-        ) : null
-      }
-    >
+          </span> :
+      null
+      }>
+
       <div className="flex items-center justify-between mb-4">
         <span
           className={`${
-            status.toLowerCase() === "completed"
-              ? "bg-green-100 text-green-700"
-              : "bg-yellow-100 text-yellow-700"
-          } px-3 py-1 rounded-full text-xs font-bold`}
-        >
+          status.toLowerCase() === "completed" ?
+          "bg-green-100 text-green-700" :
+          "bg-yellow-100 text-yellow-700"} px-3 py-1 rounded-full text-xs font-bold`
+          }>
+
           {status.toUpperCase()}
         </span>
       </div>
       <div className="bg-white  ">
-        {loading ? (
-          <div className="text-center py-10 text-gray-500 text-sm">
+        {loading ?
+        <div className="text-center py-10 text-gray-500 text-sm">
             Loading...
-          </div>
-        ) : receiptData ? (
-          <WalletViewReceipt
-            {...receiptData}
-            onClose={() => setIsOpen(false)}
-          />
-        ) : (
-          <div className="text-center py-10 text-gray-500 text-sm">
+          </div> :
+        receiptData ?
+        <WalletViewReceipt
+          {...receiptData}
+          onClose={() => setIsOpen(false)} /> :
+
+
+        <div className="text-center py-10 text-gray-500 text-sm">
             No wallet data found.
           </div>
-        )}
+        }
       </div>
-    </Modal>
-  );
+    </Modal>);
+
 };
 
 export default WalletModal;

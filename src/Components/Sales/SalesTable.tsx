@@ -362,7 +362,7 @@ const SalesTable = ({
             columnList={columnList}
             loading={isLoading}
             tableData={tableData}
-            refreshTable={async () => refreshTable()}
+            refreshTable={async () => refreshTable(undefined, { revalidate: true })}
             queryValue={isSearchQuery ? queryValue : ""}
             paginationInfo={paginationInfo}
             clearFilters={handleClearFilters}

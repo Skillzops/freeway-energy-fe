@@ -94,9 +94,8 @@ const Dashboard: React.FC = () => {
   const totalCustomers = data?.overview?.totalCustomers ?? 0;
   const walletBalance = data?.overview?.walletBalance ?? 0;
 
-  const salesGraph: ExtendedSalesPoint[] = (data as any)?.charts?.salesGraph ?? [];
-
   const filteredSales = useMemo(() => {
+    const salesGraph: ExtendedSalesPoint[] = (data as any)?.charts?.salesGraph ?? [];
     let rows = salesGraph;
     if (monthFilter !== "ALL") rows = rows.filter((r) => r.month === monthFilter);
     if (status !== "ALL") {
@@ -106,7 +105,7 @@ const Dashboard: React.FC = () => {
       });
     }
     return rows;
-  }, [salesGraph, monthFilter, status]);
+  }, [data, monthFilter, status]);
 
   const badgeLabel =
     monthFilter === "ALL" ? "YEARLY SALES COUNT" : `${monthFilter.toUpperCase()} SALES COUNT`;
@@ -152,7 +151,7 @@ const Dashboard: React.FC = () => {
         setTaskIndex(0);
         setSelectedTaskId(null);
       } finally {
-        mounted && setTasksLoading(false);
+        if (mounted) setTasksLoading(false);
       }
     })();
     return () => {
@@ -220,7 +219,7 @@ const Dashboard: React.FC = () => {
         setInstallers([]);
         setInstallersTotal(0);
       } finally {
-        mounted && setInstallersLoading(false);
+        if (mounted) setInstallersLoading(false);
       }
     })();
     return () => {

@@ -214,10 +214,10 @@ export const Table = (props: TableType) => {
         </header>
       ) : null}
 
-      <section className={`${tableClassname ?? ""}`}>
+      <section className={`w-full ${tableClassname ?? ""}`}>
         <div
           ref={scrollRef}
-          className="overflow-x-auto overflow-y-hidden cursor-grab active:cursor-grabbing select-none"
+          className="w-full overflow-x-auto overflow-y-hidden cursor-grab active:cursor-grabbing select-none"
           style={{ touchAction: "pan-y" }}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
@@ -226,7 +226,7 @@ export const Table = (props: TableType) => {
           onWheel={onWheel}
         >
           <div className="w-full">
-           <div className="flex flex-wrap gap-2">
+           <div className="w-full flex flex-wrap gap-2">
            {tableType === "default" ? (
               <div className="w-[100%] p-2">
                 <table className="w-full bg-white table-auto whitespace-nowrap border-separate border-spacing-y-2">

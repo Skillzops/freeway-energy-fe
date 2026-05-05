@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect as _useEffect } from 'react';
 import { useInventoryApi, useInventoryCategories } from '../../services/inventoryApi';
 import { useWarehouses } from '../../services/warehouseApi';
 import { toast } from 'react-toastify';
@@ -10,18 +10,18 @@ interface AddInventoryToWarehouseModalProps {
   onSuccess?: () => void;
 }
 
-const PlusIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <line x1="12" y1="5" x2="12" y2="19"/>
-    <line x1="5" y1="12" x2="19" y2="12"/>
-  </svg>
-);
+const PlusIcon = () =>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <line x1="12" y1="5" x2="12" y2="19" />
+    <line x1="5" y1="12" x2="19" y2="12" />
+  </svg>;
+
 
 export const AddInventoryToWarehouseModal: React.FC<AddInventoryToWarehouseModalProps> = ({
   open,
   onOpenChange,
   warehouseId,
-  onSuccess,
+  onSuccess
 }) => {
   const [formData, setFormData] = useState({
     name: '',
@@ -36,7 +36,7 @@ export const AddInventoryToWarehouseModal: React.FC<AddInventoryToWarehouseModal
     sku: '',
     barcode: '',
     supplier: '',
-    location: '',
+    location: ''
   });
   const [availableSubCategories, setAvailableSubCategories] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -46,7 +46,7 @@ export const AddInventoryToWarehouseModal: React.FC<AddInventoryToWarehouseModal
   const { createInventoryItem } = useInventoryApi();
 
   const handleInputChange = (field: string, value: any) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [field]: value
     }));
@@ -56,7 +56,7 @@ export const AddInventoryToWarehouseModal: React.FC<AddInventoryToWarehouseModal
       const selectedCategory = categories.find((cat: any) => cat.id === value);
       setAvailableSubCategories(selectedCategory?.children || []); // Use children array
       // Reset subcategory when category changes
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         subCategory: ''
       }));
@@ -65,7 +65,7 @@ export const AddInventoryToWarehouseModal: React.FC<AddInventoryToWarehouseModal
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.name || !formData.warehouseId || formData.quantity <= 0) {
       toast.error('Please fill in all required fields');
       return;
@@ -87,7 +87,7 @@ export const AddInventoryToWarehouseModal: React.FC<AddInventoryToWarehouseModal
         sku: formData.sku,
         barcode: formData.barcode,
         supplier: formData.supplier,
-        location: formData.location,
+        location: formData.location
       };
 
       console.log('Adding inventory to warehouse:', inventoryPayload);
@@ -95,7 +95,7 @@ export const AddInventoryToWarehouseModal: React.FC<AddInventoryToWarehouseModal
       await createInventoryItem(inventoryPayload);
 
       toast.success('Inventory item added to warehouse successfully');
-      
+
       // Reset form
       setFormData({
         name: '',
@@ -110,10 +110,10 @@ export const AddInventoryToWarehouseModal: React.FC<AddInventoryToWarehouseModal
         sku: '',
         barcode: '',
         supplier: '',
-        location: '',
+        location: ''
       });
       setAvailableSubCategories([]);
-      
+
       onSuccess?.();
       onOpenChange(false);
     } catch (error) {
@@ -133,11 +133,11 @@ export const AddInventoryToWarehouseModal: React.FC<AddInventoryToWarehouseModal
           <h2 className="text-xl font-semibold text-textBlack">Add Inventory to Warehouse</h2>
           <button
             onClick={() => onOpenChange(false)}
-            className="text-textDarkGrey hover:text-textBlack"
-          >
+            className="text-textDarkGrey hover:text-textBlack">
+
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
         </div>
@@ -152,14 +152,14 @@ export const AddInventoryToWarehouseModal: React.FC<AddInventoryToWarehouseModal
               value={formData.warehouseId}
               onChange={(e) => handleInputChange('warehouseId', e.target.value)}
               className="w-full px-3 py-2 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-              required
-            >
+              required>
+
               <option value="">Select a warehouse</option>
-              {warehouses.map((warehouse: any) => (
-                <option key={warehouse.id} value={warehouse.id}>
+              {warehouses.map((warehouse: any) =>
+              <option key={warehouse.id} value={warehouse.id}>
                   {warehouse.name} - {warehouse.location}
                 </option>
-              ))}
+              )}
             </select>
           </div>
 
@@ -175,8 +175,8 @@ export const AddInventoryToWarehouseModal: React.FC<AddInventoryToWarehouseModal
                 onChange={(e) => handleInputChange('name', e.target.value)}
                 className="w-full px-3 py-2 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 placeholder="Enter item name"
-                required
-              />
+                required />
+
             </div>
 
             <div>
@@ -186,38 +186,38 @@ export const AddInventoryToWarehouseModal: React.FC<AddInventoryToWarehouseModal
               <select
                 value={formData.category}
                 onChange={(e) => handleInputChange('category', e.target.value)}
-                className="w-full px-3 py-2 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-              >
+                className="w-full px-3 py-2 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+
                 <option value="">Select category</option>
-                {categories.map((category: any) => (
-                  <option key={category.id} value={category.id}>
+                {categories.map((category: any) =>
+                <option key={category.id} value={category.id}>
                     {category.name}
                   </option>
-                ))}
+                )}
               </select>
             </div>
           </div>
 
           {/* Sub Category */}
-          {formData.category && availableSubCategories.length > 0 && (
-            <div>
+          {formData.category && availableSubCategories.length > 0 &&
+          <div>
               <label className="block text-sm font-medium text-textBlack mb-1">
                 Sub Category
               </label>
               <select
-                value={formData.subCategory}
-                onChange={(e) => handleInputChange('subCategory', e.target.value)}
-                className="w-full px-3 py-2 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-              >
+              value={formData.subCategory}
+              onChange={(e) => handleInputChange('subCategory', e.target.value)}
+              className="w-full px-3 py-2 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+
                 <option value="">Select sub category</option>
-                {availableSubCategories.map((subCategory: any) => (
-                  <option key={subCategory.id} value={subCategory.id}>
+                {availableSubCategories.map((subCategory: any) =>
+              <option key={subCategory.id} value={subCategory.id}>
                     {subCategory.name}
                   </option>
-                ))}
+              )}
               </select>
             </div>
-          )}
+          }
 
           {/* SKU and Barcode */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -230,8 +230,8 @@ export const AddInventoryToWarehouseModal: React.FC<AddInventoryToWarehouseModal
                 value={formData.sku}
                 onChange={(e) => handleInputChange('sku', e.target.value)}
                 className="w-full px-3 py-2 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                placeholder="Enter SKU"
-              />
+                placeholder="Enter SKU" />
+
             </div>
 
             <div>
@@ -243,8 +243,8 @@ export const AddInventoryToWarehouseModal: React.FC<AddInventoryToWarehouseModal
                 value={formData.barcode}
                 onChange={(e) => handleInputChange('barcode', e.target.value)}
                 className="w-full px-3 py-2 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                placeholder="Enter barcode"
-              />
+                placeholder="Enter barcode" />
+
             </div>
           </div>
 
@@ -261,8 +261,8 @@ export const AddInventoryToWarehouseModal: React.FC<AddInventoryToWarehouseModal
                 onChange={(e) => handleInputChange('quantity', Number(e.target.value))}
                 className="w-full px-3 py-2 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 placeholder="Enter quantity"
-                required
-              />
+                required />
+
             </div>
 
             <div>
@@ -276,8 +276,8 @@ export const AddInventoryToWarehouseModal: React.FC<AddInventoryToWarehouseModal
                 value={formData.unitPrice}
                 onChange={(e) => handleInputChange('unitPrice', Number(e.target.value))}
                 className="w-full px-3 py-2 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                placeholder="Enter unit price"
-              />
+                placeholder="Enter unit price" />
+
             </div>
           </div>
 
@@ -293,8 +293,8 @@ export const AddInventoryToWarehouseModal: React.FC<AddInventoryToWarehouseModal
                 value={formData.minStockLevel}
                 onChange={(e) => handleInputChange('minStockLevel', Number(e.target.value))}
                 className="w-full px-3 py-2 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                placeholder="Minimum stock level"
-              />
+                placeholder="Minimum stock level" />
+
             </div>
 
             <div>
@@ -307,8 +307,8 @@ export const AddInventoryToWarehouseModal: React.FC<AddInventoryToWarehouseModal
                 value={formData.maxStockLevel}
                 onChange={(e) => handleInputChange('maxStockLevel', Number(e.target.value))}
                 className="w-full px-3 py-2 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                placeholder="Maximum stock level"
-              />
+                placeholder="Maximum stock level" />
+
             </div>
           </div>
 
@@ -323,8 +323,8 @@ export const AddInventoryToWarehouseModal: React.FC<AddInventoryToWarehouseModal
                 value={formData.supplier}
                 onChange={(e) => handleInputChange('supplier', e.target.value)}
                 className="w-full px-3 py-2 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                placeholder="Enter supplier name"
-              />
+                placeholder="Enter supplier name" />
+
             </div>
 
             <div>
@@ -336,8 +336,8 @@ export const AddInventoryToWarehouseModal: React.FC<AddInventoryToWarehouseModal
                 value={formData.location}
                 onChange={(e) => handleInputChange('location', e.target.value)}
                 className="w-full px-3 py-2 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                placeholder="e.g., Aisle A, Shelf 3"
-              />
+                placeholder="e.g., Aisle A, Shelf 3" />
+
             </div>
           </div>
 
@@ -351,40 +351,40 @@ export const AddInventoryToWarehouseModal: React.FC<AddInventoryToWarehouseModal
               onChange={(e) => handleInputChange('description', e.target.value)}
               rows={3}
               className="w-full px-3 py-2 border border-strokeGreyThree rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-              placeholder="Enter item description"
-            />
+              placeholder="Enter item description" />
+
           </div>
 
           {/* Total Value Display */}
-          {formData.quantity > 0 && formData.unitPrice > 0 && (
-            <div className="bg-gray-50 p-3 rounded-lg">
+          {formData.quantity > 0 && formData.unitPrice > 0 &&
+          <div className="bg-gray-50 p-3 rounded-lg">
               <div className="text-sm text-textDarkGrey">Total Value</div>
               <div className="text-lg font-semibold text-textBlack">
                 ₦{(formData.quantity * formData.unitPrice).toLocaleString()}
               </div>
             </div>
-          )}
+          }
 
           {/* Submit Buttons */}
           <div className="flex justify-end gap-3 pt-4 border-t border-strokeGreyThree">
             <button
               type="button"
               onClick={() => onOpenChange(false)}
-              className="px-4 py-2 border border-strokeGreyThree text-textBlack rounded-lg hover:bg-gray-50 transition-colors"
-            >
+              className="px-4 py-2 border border-strokeGreyThree text-textBlack rounded-lg hover:bg-gray-50 transition-colors">
+
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center gap-2"
-            >
+              className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center gap-2">
+
               <PlusIcon />
               {isLoading ? 'Adding...' : 'Add to Warehouse'}
             </button>
           </div>
         </form>
       </div>
-    </div>
-  );
+    </div>);
+
 };

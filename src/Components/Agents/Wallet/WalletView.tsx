@@ -15,14 +15,14 @@ type ReceiptProps = {
 };
 
 const WalletViewReceipt: React.FC<ReceiptProps> = ({
-  status,
+  status: _status,
   referenceId,
   amount,
   date,
   time,
   topUpMode,
   transactionStatus,
-  type,
+  type
 }) => {
   const dropDownList = {
     items: ["Purchase Credit", "Top Up Wallet", "View Transaction History"],
@@ -38,7 +38,7 @@ const WalletViewReceipt: React.FC<ReceiptProps> = ({
           break;
       }
     },
-    showCustomButton: true,
+    showCustomButton: true
   };
 
   return (
@@ -100,8 +100,8 @@ const WalletViewReceipt: React.FC<ReceiptProps> = ({
           <span className="text-gray-800">{type}</span>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default WalletViewReceipt;

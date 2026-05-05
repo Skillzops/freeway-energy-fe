@@ -11,16 +11,19 @@ import DeviceDetails from "./DeviceDetails";
 import { DropDown } from "../DropDownComponent/DropDown";
 import { toast } from "react-toastify";
 import DeviceTokenDetails from "./DeviceTokenDetails";
+import inventoryIcon from "../../assets/inventory/inventoryIcon.svg";
 
 const DeviceDetailModal = ({
   isOpen,
   setIsOpen,
   deviceID,
+  initialDeviceData,
   refreshTable,
 }: {
   isOpen: boolean;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   deviceID: string;
+  initialDeviceData?: DeviceEntries | null;
   refreshTable: KeyedMutator<any>;
 }) => {
   const { apiCall } = useApiCall();
@@ -32,15 +35,30 @@ const DeviceDetailModal = ({
   const tabNames: TabNamesType[] = [
     { name: "Details", key: "details", count: null },
     { name: "Tokens", key: "tokens", count: null },
+    { name: "Assigned Agent", key: "assignedAgent", count: null },
   ];
 
-  const getDeviceDetailsData = (data: DeviceEntries) => {
-    return { ...data };
-  };
+  const getDeviceDetailsData = (data?: DeviceEntries) => ({ ...data });
 
   const deviceData = useMemo(() => {
-    return getDeviceDetailsData(fetchSingleDevice?.data);
-  }, [fetchSingleDevice]);
+    const singleDeviceData = getDeviceDetailsData(fetchSingleDevice?.data);
+    const selectedDeviceData = getDeviceDetailsData(initialDeviceData || undefined);
+    const mergedAssignedAgent =
+      singleDeviceData?.assignedAgent ?? selectedDeviceData?.assignedAgent ?? null;
+    const mergedIsAssigned =
+      typeof singleDeviceData?.isAssigned === "boolean"
+        ? singleDeviceData.isAssigned
+        : typeof selectedDeviceData?.isAssigned === "boolean"
+        ? selectedDeviceData.isAssigned
+        : Boolean(mergedAssignedAgent);
+
+    return {
+      ...selectedDeviceData,
+      ...singleDeviceData,
+      assignedAgent: mergedAssignedAgent,
+      isAssigned: mergedIsAssigned,
+    };
+  }, [fetchSingleDevice?.data, initialDeviceData]);
 
   const handleCancelClick = () => setDisplayInput(false);
 
@@ -68,10 +86,14 @@ const DeviceDetailModal = ({
   };
 
   const dropDownList = {
-    items: ["Delete Device"],
+    items: ["Assigned Agent Details", "Delete Device"],
+    disabled: [!deviceData?.assignedAgent, false],
     onClickLink: (index: number) => {
       switch (index) {
         case 0:
+          setTabContent("assignedAgent");
+          break;
+        case 1:
           deleteDeviceById();
           break;
         default:
@@ -134,6 +156,7 @@ const DeviceDetailModal = ({
               count,
             }))}
             onTabSelect={(key) => setTabContent(key)}
+            activeTabName={tabNames.find((tab) => tab.key === tabContent)?.name}
           />
           {tabContent === "details" ? (
             <DataStateWrapper
@@ -165,6 +188,76 @@ const DeviceDetailModal = ({
                 refreshTable={fetchSingleDevice?.mutate}
                 refreshListView={fetchSingleDevice.mutate}
               />
+            </DataStateWrapper>
+          ) : null}
+          {tabContent === "assignedAgent" ? (
+            <DataStateWrapper
+              isLoading={fetchSingleDevice?.isLoading}
+              error={fetchSingleDevice?.error}
+              errorStates={fetchSingleDevice?.errorStates}
+              refreshData={fetchSingleDevice?.mutate}
+              errorMessage="Failed to fetch device details"
+            >
+              <div className="flex flex-col w-full p-2.5 gap-2 bg-white border-[0.6px] border-strokeGreyThree rounded-[20px]">
+                <p className="flex gap-1 w-max text-textLightGrey text-xs font-medium pb-2">
+                  <img src={inventoryIcon} alt="Agent Icon" /> ASSIGNED AGENT DETAILS
+                </p>
+
+                <div className="flex items-center justify-between bg-white w-full text-textDarkGrey text-xs rounded-full border-[0.6px] border-strokeGreyThree p-2.5">
+                  <span className="flex items-center justify-center bg-[#F6F8FA] text-textBlack text-xs p-2 h-[24px] rounded-full">
+                    Assignment Status
+                  </span>
+                  <span className="text-xs font-bold text-textDarkGrey">
+                    {deviceData?.isAssigned ? "Assigned" : "Not Assigned"}
+                  </span>
+                </div>
+
+                {deviceData?.assignedAgent ? (
+                  <>
+                    <div className="flex items-center justify-between bg-white w-full text-textDarkGrey text-xs rounded-full border-[0.6px] border-strokeGreyThree p-2.5 gap-2">
+                      <span className="flex items-center justify-center bg-[#F6F8FA] text-textBlack text-xs p-2 h-[24px] rounded-full">
+                        Agent Name
+                      </span>
+                      <span className="text-xs font-bold text-textDarkGrey max-w-[60%] truncate text-right">
+                        {deviceData?.assignedAgent?.name || "N/A"}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between bg-white w-full text-textDarkGrey text-xs rounded-full border-[0.6px] border-strokeGreyThree p-2.5 gap-2">
+                      <span className="flex items-center justify-center bg-[#F6F8FA] text-textBlack text-xs p-2 h-[24px] rounded-full">
+                        Phone
+                      </span>
+                      <span className="text-xs font-bold text-textDarkGrey max-w-[60%] truncate text-right">
+                        {deviceData?.assignedAgent?.phone || "N/A"}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between bg-white w-full text-textDarkGrey text-xs rounded-full border-[0.6px] border-strokeGreyThree p-2.5 gap-2">
+                      <span className="flex items-center justify-center bg-[#F6F8FA] text-textBlack text-xs p-2 h-[24px] rounded-full">
+                        Email
+                      </span>
+                      <span className="text-xs font-bold text-textDarkGrey max-w-[60%] break-all text-right">
+                        {deviceData?.assignedAgent?.email || "N/A"}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between bg-white w-full text-textDarkGrey text-xs rounded-full border-[0.6px] border-strokeGreyThree p-2.5 gap-2">
+                      <span className="flex items-center justify-center bg-[#F6F8FA] text-textBlack text-xs p-2 h-[24px] rounded-full">
+                        Assigned At
+                      </span>
+                      <span className="text-xs font-bold text-textDarkGrey max-w-[60%] truncate text-right">
+                        {deviceData?.assignedAgent?.assignedAt
+                          ? new Date(deviceData.assignedAgent.assignedAt).toLocaleString()
+                          : "N/A"}
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex items-center justify-center w-full py-8 border-[0.6px] border-strokeGreyThree rounded-[16px] bg-[#FAFBFD]">
+                    <p className="text-xs text-textGrey">No assigned agent for this device.</p>
+                  </div>
+                )}
+              </div>
             </DataStateWrapper>
           ) : null}
         </div>

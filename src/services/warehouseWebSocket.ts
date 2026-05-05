@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 
 // WebSocket event types
@@ -21,7 +21,47 @@ export const useWarehouseWebSocket = () => {
   const reconnectAttempts = useRef(0);
   const maxReconnectAttempts = 5;
 
-  const connect = () => {
+  // Handle incoming WebSocket messages
+  const handleWebSocketMessage = useCallback((message: WarehouseWebSocketEvent) => {
+    switch (message.type) {
+      case 'warehouse_created':
+        toast.success(`New warehouse "${message.data.name}" has been created`);
+        break;
+      
+      case 'warehouse_updated':
+        toast.info(`Warehouse "${message.data.name}" has been updated`);
+        break;
+      
+      case 'warehouse_deleted':
+        toast.warning(`Warehouse "${message.data.name}" has been deleted`);
+        break;
+      
+      case 'inventory_updated':
+        toast.info(`Inventory updated in ${message.data.warehouseName}`);
+        break;
+      
+      case 'transfer_created':
+        toast.info(`New transfer request created: ${message.data.id}`);
+        break;
+      
+      case 'transfer_fulfilled':
+        toast.success(`Transfer request ${message.data.id} has been fulfilled`);
+        break;
+      
+      case 'stock_alert':
+        toast.warning(`Low stock alert: ${message.data.productName} in ${message.data.warehouseName}`);
+        break;
+      
+      case 'system_notification':
+        toast.info(message.data.message);
+        break;
+      
+      default:
+        console.log('Unknown WebSocket message type:', message.type);
+    }
+  }, []);
+
+  const connect = useCallback(() => {
     try {
       const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:3001/ws';
       const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
@@ -74,9 +114,9 @@ export const useWarehouseWebSocket = () => {
       console.error('Failed to create WebSocket connection:', error);
       setConnectionError('Failed to establish connection');
     }
-  };
+  }, [handleWebSocketMessage, maxReconnectAttempts]);
 
-  const disconnect = () => {
+  const disconnect = useCallback(() => {
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current);
     }
@@ -88,51 +128,11 @@ export const useWarehouseWebSocket = () => {
     
     setIsConnected(false);
     setLastMessage(null);
-  };
+  }, []);
 
   const sendMessage = (message: any) => {
     if (wsRef.current && isConnected) {
       wsRef.current.send(JSON.stringify(message));
-    }
-  };
-
-  // Handle incoming WebSocket messages
-  const handleWebSocketMessage = (message: WarehouseWebSocketEvent) => {
-    switch (message.type) {
-      case 'warehouse_created':
-        toast.success(`New warehouse "${message.data.name}" has been created`);
-        break;
-      
-      case 'warehouse_updated':
-        toast.info(`Warehouse "${message.data.name}" has been updated`);
-        break;
-      
-      case 'warehouse_deleted':
-        toast.warning(`Warehouse "${message.data.name}" has been deleted`);
-        break;
-      
-      case 'inventory_updated':
-        toast.info(`Inventory updated in ${message.data.warehouseName}`);
-        break;
-      
-      case 'transfer_created':
-        toast.info(`New transfer request created: ${message.data.id}`);
-        break;
-      
-      case 'transfer_fulfilled':
-        toast.success(`Transfer request ${message.data.id} has been fulfilled`);
-        break;
-      
-      case 'stock_alert':
-        toast.warning(`Low stock alert: ${message.data.productName} in ${message.data.warehouseName}`);
-        break;
-      
-      case 'system_notification':
-        toast.info(message.data.message);
-        break;
-      
-      default:
-        console.log('Unknown WebSocket message type:', message.type);
     }
   };
 
@@ -142,7 +142,7 @@ export const useWarehouseWebSocket = () => {
     return () => {
       disconnect();
     };
-  }, []);
+  }, [connect, disconnect]);
 
   return {
     isConnected,

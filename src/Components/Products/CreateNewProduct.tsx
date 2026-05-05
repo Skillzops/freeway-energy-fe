@@ -141,7 +141,7 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
         console.error("Failed to fetch product categories:", error);
         setProductCategories([]);
       }
-    }, [isOpen]);
+    }, [apiCall]);
 
     // Load categories when modal opens
     useEffect(() => {

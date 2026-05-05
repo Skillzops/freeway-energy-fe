@@ -198,7 +198,7 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
       console.error("Failed to fetch inventory categories:", error);
       setInventoryCategories([]);
     }
-  }, []);
+  }, [apiCall]);
 
   // Load categories when modal opens
   useEffect(() => {

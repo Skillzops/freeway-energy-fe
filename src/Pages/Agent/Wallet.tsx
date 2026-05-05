@@ -20,14 +20,14 @@ const WalletTable = lazy(() => import("@/Components/Agents/Wallet/WalletTable"))
 
 /** Normalizer for /api/v1/wallet/stats */
 function normalizeWalletStats(input: any) {
-  const src =  input ?? {};
+  const src = input ?? {};
   return {
     walletBalance: Number(src.balance) || 0,
     totalCredit: Number(src.totalCredits) || 0,
     totalDebit: Number(src.totalDebits) || 0,
     transactionCount: Number(src.transactionCount) || 0,
     pendingTopUps: Number(src.pendingTopUps) || 0,
-    lastTransactionDate: src.lastTransactionDate || null,
+    lastTransactionDate: src.lastTransactionDate || null
   };
 }
 
@@ -37,9 +37,9 @@ const Wallets = () => {
   const [entriesPerPage, setEntriesPerPage] = useState(20);
   const [tableQueryParams, setTableQueryParams] = useState<Record<string, any> | null>({});
 
-  const queryString = Object.entries(tableQueryParams || {})
-    .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
-    .join("&");
+  const _queryString = Object.entries(tableQueryParams || {}).
+  map(([key, value]) => `${key}=${encodeURIComponent(value)}`).
+  join("&");
 
   // Fetch wallets list
   const {
@@ -47,7 +47,7 @@ const Wallets = () => {
     isLoading,
     mutate: refreshWallets,
     error,
-    errorStates,
+    errorStates
   } = useGetRequest(
     `/v1/wallet/transactions?page=${currentPage}&limit=${entriesPerPage}`,
     true,
@@ -58,28 +58,28 @@ const Wallets = () => {
   const walletStatsResp = useGetRequest(`/v1/wallet/stats`, true, 60000);
   const stats = normalizeWalletStats(walletStatsResp?.data);
 
-  console.log(walletStatsResp?.data, 'slsskss', stats)
+  console.log(walletStatsResp?.data, 'slsskss', stats);
 
   const getPaginationInfo = () => ({
     total: walletData?.total || 0,
     currentPage,
     entriesPerPage,
     setCurrentPage,
-    setEntriesPerPage,
+    setEntriesPerPage
   });
 
   const navigationList = [
-    {
-      title: "Wallets",
-      link: "/agent/wallets/all",
-      count: stats.transactionCount, // show transaction count from stats
-    },
-  ];
+  {
+    title: "Wallets",
+    link: "/agent/wallets/all",
+    count: stats.transactionCount // show transaction count from stats
+  }];
+
 
   const dropDownList = {
     items: ["Purchase Credit", "Top Up Wallet", "View Transaction History"],
     onClickLink: () => {},
-    showCustomButton: true,
+    showCustomButton: true
   };
 
   return (
@@ -92,38 +92,38 @@ const Wallets = () => {
               // iconBgColor="bg-[#D6EEFA]"
               topText="Wallet"
               bottomText="BALANCE"
-              value={stats.walletBalance}
-            />
+              value={stats.walletBalance} />
+
             <TitlePill
               icon={greencustomer}
               // iconBgColor="bg-[#E3FAD6]"
               topText="Total"
               bottomText="CREDITS"
-              value={stats.totalCredit}
-            />
+              value={stats.totalCredit} />
+
             <TitlePill
               icon={redcustomerbag}
               // iconBgColor="bg-[#FFDBDE]"
               topText="Total"
               bottomText="DEBITS"
-              value={stats.totalDebit}
-            />
+              value={stats.totalDebit} />
+
             {/* Optional extra pills if you want */}
             {/* <TitlePill
-              icon={wallet}
-              iconBgColor="bg-[#F6E7FF]"
-              topText="Pending"
-              bottomText="TOP-UPS"
-              value={stats.pendingTopUps}
-            /> */}
+               icon={wallet}
+               iconBgColor="bg-[#F6E7FF]"
+               topText="Pending"
+               bottomText="TOP-UPS"
+               value={stats.pendingTopUps}
+              /> */}
           </div>
 
           <div className="flex w-full items-center justify-between gap-2 min-w-max sm:w-max sm:justify-end">
             <ActionButton
               label="Top Up"
               icon={<span className="text-xs font-primary">₦</span>}
-              onClick={() => setIsTopUpModalOpen(true)}
-            />
+              onClick={() => setIsTopUpModalOpen(true)} />
+
             <div className="h-[32px] flex items-center justify-center">
               <DropDown {...dropDownList} />
             </div>
@@ -141,8 +141,8 @@ const Wallets = () => {
                 error={error}
                 errorData={errorStates}
                 paginationInfo={getPaginationInfo}
-                setTableQueryParams={setTableQueryParams}
-              />
+                setTableQueryParams={setTableQueryParams} />
+
             </Suspense>
           </section>
         </div>
@@ -153,15 +153,15 @@ const Wallets = () => {
         onClose={() => setIsTopUpModalOpen(false)}
         width="w-98"
         height="min-h-[300px]"
-        headerIcon={<img src={wallet} alt="Wallet" className="w-10 h-10" />}
-      >
+        headerIcon={<img src={wallet} alt="Wallet" className="w-10 h-10" />}>
+
         <TopUpWalletForm
           handleClose={() => setIsTopUpModalOpen(false)}
-          refreshTable={refreshWallets}
-        />
+          refreshTable={refreshWallets} />
+
       </SecondaryModal>
-    </>
-  );
+    </>);
+
 };
 
 export default Wallets;

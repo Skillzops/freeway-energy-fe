@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Modal } from "../ModalComponent/Modal";
 import useBreakpoint from "../../hooks/useBreakpoint";
-import type { Product } from "../../data/warehouseData";
+import type { Product as _Product } from "../../data/warehouseData";
 
 interface ViewInventoryModalProps {
   open: boolean;
@@ -11,7 +11,7 @@ interface ViewInventoryModalProps {
 
 export function ViewInventoryModal({ open, onOpenChange, product }: ViewInventoryModalProps) {
   const [activeTab, setActiveTab] = useState("details");
-  const isMobile = useBreakpoint("max", 640);
+  const _isMobile = useBreakpoint("max", 640);
 
   if (!product) return null;
 
@@ -19,79 +19,79 @@ export function ViewInventoryModal({ open, onOpenChange, product }: ViewInventor
     return new Intl.NumberFormat('en-NG', {
       style: 'currency',
       currency: 'NGN',
-      minimumFractionDigits: 0,
+      minimumFractionDigits: 0
     }).format(amount);
   };
 
   const batchHistory = [
-    { sn: 1, dateTime: "2024-01-15 10:30 AM", stockNumber: 50, stockValue: formatCurrency(3400000) },
-    { sn: 2, dateTime: "2024-01-10 02:15 PM", stockNumber: 75, stockValue: formatCurrency(5100000) },
-    { sn: 3, dateTime: "2024-01-05 09:45 AM", stockNumber: 100, stockValue: formatCurrency(6800000) },
-    { sn: 4, dateTime: "2024-01-01 11:20 AM", stockNumber: 125, stockValue: formatCurrency(8500000) },
-  ];
+  { sn: 1, dateTime: "2024-01-15 10:30 AM", stockNumber: 50, stockValue: formatCurrency(3400000) },
+  { sn: 2, dateTime: "2024-01-10 02:15 PM", stockNumber: 75, stockValue: formatCurrency(5100000) },
+  { sn: 3, dateTime: "2024-01-05 09:45 AM", stockNumber: 100, stockValue: formatCurrency(6800000) },
+  { sn: 4, dateTime: "2024-01-01 11:20 AM", stockNumber: 125, stockValue: formatCurrency(8500000) }];
+
 
   const tabs = [
-    { id: "details", label: "Details" },
-    { id: "stats", label: "Stats" },
-    { id: "batch-history", label: "Batch History" },
-  ];
+  { id: "details", label: "Details" },
+  { id: "stats", label: "Stats" },
+  { id: "batch-history", label: "Batch History" }];
+
 
   return (
-    <Modal 
-      isOpen={open} 
+    <Modal
+      isOpen={open}
       onClose={() => onOpenChange(false)}
       size="large"
       layout="right"
       leftHeaderComponents={
-        <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2">
           <span className={`px-2 py-1 rounded-full text-xs border border-strokeGreyThree`}>
             {(product.status || 'active').toUpperCase()}
           </span>
           <h2 className="text-lg font-semibold text-textBlack">{product.name}</h2>
         </div>
-      }
-    >
+      }>
+
       <div className="p-4 sm:p-6 h-full overflow-y-auto">
         <div className="space-y-4 sm:space-y-6">
           {/* Tab Navigation */}
           <div className="flex border-b border-strokeGreyTwo">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === tab.id
-                    ? "border-primary text-primary bg-yellow-50"
-                    : "border-transparent text-textDarkGrey hover:text-textBlack"
-                }`}
-              >
+            {tabs.map((tab) =>
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === tab.id ?
+              "border-primary text-primary bg-yellow-50" :
+              "border-transparent text-textDarkGrey hover:text-textBlack"}`
+              }>
+
                 {tab.label}
-                {tab.id === "batch-history" && (
-                  <span className="ml-2 px-2 py-1 bg-gray-200 text-xs rounded-full">14</span>
-                )}
+                {tab.id === "batch-history" &&
+              <span className="ml-2 px-2 py-1 bg-gray-200 text-xs rounded-full">14</span>
+              }
               </button>
-            ))}
+            )}
           </div>
 
           {/* Tab Content */}
-          {activeTab === "details" && (
-            <div className="space-y-6">
+          {activeTab === "details" &&
+          <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Product Image */}
                 <div>
                   <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center mb-4 overflow-hidden">
-                    {product.image ? (
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          console.error('Error loading product image:', product.image);
-                          e.currentTarget.style.display = 'none';
-                          e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                        }}
-                      />
-                    ) : null}
+                    {product.image ?
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      console.error('Error loading product image:', product.image);
+                      e.currentTarget.style.display = 'none';
+                      e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                    }} /> :
+
+                  null}
                     <div className={`text-center ${product.image ? 'hidden' : ''}`}>
                       <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-2 flex items-center justify-center text-2xl">
                         📷
@@ -125,13 +125,13 @@ export function ViewInventoryModal({ open, onOpenChange, product }: ViewInventor
                         <span className="text-textDarkGrey">Category</span>
                         <span className="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">
                           {(
-                            product.category?.name || 
-                            product.categoryName || 
-                            product.inventoryCategory?.name ||
-                            product.inventoryCategoryName ||
-                            product.category ||
-                            'UNCATEGORIZED'
-                          ).toUpperCase()}
+                        product.category?.name ||
+                        product.categoryName ||
+                        product.inventoryCategory?.name ||
+                        product.inventoryCategoryName ||
+                        product.category ||
+                        'UNCATEGORIZED').
+                        toUpperCase()}
                         </span>
                       </div>
                       <div className="flex justify-between">
@@ -151,10 +151,10 @@ export function ViewInventoryModal({ open, onOpenChange, product }: ViewInventor
                 </div>
               </div>
             </div>
-          )}
+          }
 
-          {activeTab === "stats" && (
-            <div className="space-y-4">
+          {activeTab === "stats" &&
+          <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="bg-white border border-strokeGreyTwo rounded-lg p-4">
                   <div className="flex items-center">
@@ -202,17 +202,17 @@ export function ViewInventoryModal({ open, onOpenChange, product }: ViewInventor
                     <div>
                       <p className="text-sm text-textDarkGrey">Stock Percentage</p>
                       <p className="text-2xl font-bold text-textBlack">
-                        {Math.round(((product.totalRemainingQuantities || 0) / (product.totalInitialQuantities || product.totalRemainingQuantities || 1)) * 100)}%
+                        {Math.round((product.totalRemainingQuantities || 0) / (product.totalInitialQuantities || product.totalRemainingQuantities || 1) * 100)}%
                       </p>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          )}
+          }
 
-          {activeTab === "batch-history" && (
-            <div className="space-y-4">
+          {activeTab === "batch-history" &&
+          <div className="space-y-4">
               <h3 className="text-lg font-semibold text-textBlack">Batch History</h3>
               <div className="bg-white border border-strokeGreyTwo rounded-lg overflow-hidden">
                 <div className="overflow-x-auto">
@@ -226,22 +226,22 @@ export function ViewInventoryModal({ open, onOpenChange, product }: ViewInventor
                       </tr>
                     </thead>
                     <tbody>
-                      {batchHistory.map((batch) => (
-                        <tr key={batch.sn} className="border-b border-strokeGreyTwo">
+                      {batchHistory.map((batch) =>
+                    <tr key={batch.sn} className="border-b border-strokeGreyTwo">
                           <td className="py-3 px-4 text-textDarkGrey">{batch.sn}</td>
                           <td className="py-3 px-4 text-textDarkGrey">{batch.dateTime}</td>
                           <td className="py-3 px-4 text-textDarkGrey">{batch.stockNumber}</td>
                           <td className="py-3 px-4 text-success font-medium">{batch.stockValue}</td>
                         </tr>
-                      ))}
+                    )}
                     </tbody>
                   </table>
                 </div>
               </div>
             </div>
-          )}
+          }
         </div>
       </div>
-    </Modal>
-  );
+    </Modal>);
+
 }

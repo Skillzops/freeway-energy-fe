@@ -1,7 +1,7 @@
 import React from "react";
 import { SelectInput } from "./Input";
 
-export const ID_TYPE_OPTIONS = [
+const ID_TYPE_OPTIONS = [
   { label: "--", value: "" },
   { label: "NIN", value: "Nin" },
   { label: "Passport", value: "Passport" },

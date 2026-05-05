@@ -14,28 +14,28 @@ import { brandAssets } from "@/config/brandConfig";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
-  password: z.string().min(1, "Password is required"),
+  password: z.string().min(1, "Password is required")
 });
 
-const emailOrPhoneSchema = z
-  .string()
-  .trim()
-  .refine(
-    (val) =>
-      /.+@.+\..+/.test(val) ||
-      /^\+?[0-9\s().-]{7,20}$/.test(val.replace(/\s+/g, "")),
-    { message: "Enter a valid email or phone number" }
-  );
+const emailOrPhoneSchema = z.
+string().
+trim().
+refine(
+  (val) =>
+  /.+@.+\..+/.test(val) ||
+  /^\+?[0-9\s().-]{7,20}$/.test(val.replace(/\s+/g, "")),
+  { message: "Enter a valid email or phone number" }
+);
 
 const forgotPasswordSchema = z.object({
-  email: emailOrPhoneSchema,
+  email: emailOrPhoneSchema
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
 const defaultLoginFormData: LoginFormData = {
   email: "",
-  password: "",
+  password: ""
 };
 
 const LoginPage = () => {
@@ -76,14 +76,14 @@ const LoginPage = () => {
         endpoint: "/v1/auth/login",
         method: "post",
         data: validatedData,
-        successMessage: "",
+        successMessage: ""
       });
 
       const optimizedPermissions =
-        response.data.role?.permissions?.map((permission: any) => ({
-          action: permission.action,
-          subject: permission.subject,
-        })) || [];
+      response.data.role?.permissions?.map((permission: any) => ({
+        action: permission.action,
+        subject: permission.subject
+      })) || [];
 
       // Create optimized user data with minimal permission data
       const userData = {
@@ -117,8 +117,8 @@ const LoginPage = () => {
           created_at: response.data.role?.created_at,
           updated_at: response.data.role?.updated_at,
           deleted_at: response.data.role?.deleted_at,
-          permissions: optimizedPermissions, // Only action and subject
-        },
+          permissions: optimizedPermissions // Only action and subject
+        }
       };
 
       // if (userData?.role?.role !== "admin") {
@@ -131,7 +131,7 @@ const LoginPage = () => {
         Cookies.set("userData", cookiebar, {
           expires: 7,
           path: "/",
-          sameSite: "Lax",
+          sameSite: "Lax"
         }); // Token expires in 7 days
 
         let url = "";
@@ -146,10 +146,10 @@ const LoginPage = () => {
           toast.error("Unauthorized login attempt");
         }
         navigate(redirectPath ?? url);
-      } catch (error) {
+      } catch (_error) {
+
         // Error handling without logging sensitive data
-      }
-    } catch (error: any) {
+      }} catch (error: any) {
       if (error instanceof z.ZodError) {
         setFormErrors(error.issues);
       } else {
@@ -174,14 +174,14 @@ const LoginPage = () => {
         endpoint: "/v1/auth/forgot-password",
         method: "post",
         data: payload,
-        successMessage: "Password reset email sent!",
+        successMessage: "Password reset email sent!"
       });
     } catch (error: any) {
       if (error instanceof z.ZodError) {
         setFormErrors(error.issues);
       } else {
         const message =
-          error?.response?.data?.message || "Failed to send reset email";
+        error?.response?.data?.message || "Failed to send reset email";
         setApiError(`Forgot password failed: ${message}`);
       }
     } finally {
@@ -193,24 +193,24 @@ const LoginPage = () => {
     return formErrors.find((error) => error.path[0] === fieldName)?.message;
   };
 
-  const isFormFilled = isForgotPassword
-    ? forgotPasswordSchema.safeParse(formData).success
-    : loginSchema.safeParse(formData).success;
+  const isFormFilled = isForgotPassword ?
+  forgotPasswordSchema.safeParse(formData).success :
+  loginSchema.safeParse(formData).success;
 
   return (
     <Suspense
       fallback={
-        <LoadingSpinner parentClass="flex items-center justify-center w-full h-full" />
-      }
-    >
+      <LoadingSpinner parentClass="flex items-center justify-center w-full h-full" />
+      }>
+
       <main className="relative flex flex-col items-center justify-center gap-[60px] px-4 py-16 w-full min-h-screen">
         <img
           src={brandBg}
           alt="background"
           className={`absolute w-full h-full object-cover object-center ${
-            formData.email || formData.password ? "opacity-60" : "opacity-40"
-          }`}
-        />
+          formData.email || formData.password ? "opacity-60" : "opacity-40"}`
+          } />
+
 
         <img src={brandLogo} alt="Logo" className="w-[120px] z-10" />
         <section className="flex w-full flex-col items-center justify-center gap-2 z-10 max-w-[500px]">
@@ -219,16 +219,16 @@ const LoginPage = () => {
               {isForgotPassword ? "See who forgot something" : "Welcome Back"}
             </h1>
             <em className="text-sm text-[#3A628A] text-center max-w-[280px] not-italic">
-              {isForgotPassword
-                ? "Enter your email or phone and we'll send a reset link or code."
-                : "Sign In to Access your Workplace"}
+              {isForgotPassword ?
+              "Enter your email or phone and we'll send a reset link or code." :
+              "Sign In to Access your Workplace"}
             </em>
           </div>
           <form
             className="flex w-full flex-col items-center justify-center pt-[50px] gap-4 pb-[24px]"
             onSubmit={isForgotPassword ? handleForgotPassword : handleLogin}
-            noValidate
-          >
+            noValidate>
+
             <Input
               type="email"
               name="email"
@@ -240,80 +240,80 @@ const LoginPage = () => {
               style="max-w-[400px]"
               className="flex flex-col items-center justify-center"
               errorMessage={getFieldError("email")}
+              errorClass="max-w-[400px]" />
+
+            {!isForgotPassword &&
+            <Input
+              type={showPassword ? "text" : "password"}
+              name="password"
+              label="PASSWORD"
+              value={formData.password}
+              onChange={handleInputChange}
+              placeholder="Password"
+              required={true}
+              style="max-w-[400px]"
+              className="flex flex-col items-center justify-center"
+              errorMessage={getFieldError("password")}
               errorClass="max-w-[400px]"
-            />
-            {!isForgotPassword && (
-              <Input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                label="PASSWORD"
-                value={formData.password}
-                onChange={handleInputChange}
-                placeholder="Password"
-                required={true}
-                style="max-w-[400px]"
-                className="flex flex-col items-center justify-center"
-                errorMessage={getFieldError("password")}
-                errorClass="max-w-[400px]"
-                iconRight={
-                  <img
-                    src={showPassword ? eyeopen : eyeclosed}
-                    className="w-[16px] cursor-pointer"
-                    onClick={() => setShowPassword(!showPassword)}
-                    alt="Toggle password visibility"
-                  />
-                }
-              />
-            )}
-            {apiError && (
-              <p className="text-errorTwo text-sm mt-2 text-center font-semibold w-max bg-white px-3 py-1 rounded-full">
+              iconRight={
+              <img
+                src={showPassword ? eyeopen : eyeclosed}
+                className="w-[16px] cursor-pointer"
+                onClick={() => setShowPassword(!showPassword)}
+                alt="Toggle password visibility" />
+
+              } />
+
+            }
+            {apiError &&
+            <p className="text-errorTwo text-sm mt-2 text-center font-semibold w-max bg-white px-3 py-1 rounded-full">
                 {apiError}
               </p>
-            )}
+            }
             <div className="flex flex-col items-center justify-center gap-8 pt-8">
               <ProceedButton
                 type="submit"
                 loading={loading}
                 variant={isFormFilled ? "gradient" : "gray"}
-                disabled={!isFormFilled}
-              />
-              {isForgotPassword ? (
-                <em
-                  className={`${
-                    formData.email ? "text-textDarkGrey" : "text-white"
-                  } text-sm font-medium underline cursor-pointer`}
-                  onClick={() => {
-                    setIsForgotPassword(false);
-                    setFormData(defaultLoginFormData);
-                    setFormErrors([]);
-                    setApiError(null);
-                  }}
-                >
+                disabled={!isFormFilled} />
+
+              {isForgotPassword ?
+              <em
+                className={`${
+                formData.email ? "text-textDarkGrey" : "text-white"} text-sm font-medium underline cursor-pointer`
+                }
+                onClick={() => {
+                  setIsForgotPassword(false);
+                  setFormData(defaultLoginFormData);
+                  setFormErrors([]);
+                  setApiError(null);
+                }}>
+
                   Back to Login
-                </em>
-              ) : (
-                <em
-                  className={`${
-                    formData.email || formData.password
-                      ? "text-textDarkGrey"
-                      : "text-white"
-                  } text-sm font-medium underline cursor-pointer`}
-                  onClick={() => {
-                    setIsForgotPassword(true);
-                    setFormData(defaultLoginFormData);
-                    setFormErrors([]);
-                    setApiError(null);
-                  }}
-                >
+                </em> :
+
+              <em
+                className={`${
+                formData.email || formData.password ?
+                "text-textDarkGrey" :
+                "text-white"} text-sm font-medium underline cursor-pointer`
+                }
+                onClick={() => {
+                  setIsForgotPassword(true);
+                  setFormData(defaultLoginFormData);
+                  setFormErrors([]);
+                  setApiError(null);
+                }}>
+
                   Forgot password?
                 </em>
-              )}
+              }
             </div>
           </form>
         </section>
       </main>
-    </Suspense>
-  );
+    </Suspense>);
+
 };
 
 export default LoginPage;

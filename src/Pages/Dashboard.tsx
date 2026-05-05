@@ -28,7 +28,7 @@ import InventaryTable from "@/Components/DashBoardCard/InventaryTable";
 
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const;
-const monthFromISO = (iso: string) => {
+const _monthFromISO = (iso: string) => {
   const d = new Date(iso);
   return isNaN(d.getTime()) ? "—" : MONTHS[d.getMonth()];
 };
@@ -38,16 +38,16 @@ type ExtendedSalesPoint = SalesGraphPoint & {
 };
 
 const STATUS_OPTIONS: Array<"ALL" | "COMPLETED" | "IN_INSTALLMENT" | "UNPAID" | "CANCELLED"> = [
-  "ALL",
-  "COMPLETED",
-  "IN_INSTALLMENT",
-  "UNPAID",
-  "CANCELLED",
-];
+"ALL",
+"COMPLETED",
+"IN_INSTALLMENT",
+"UNPAID",
+"CANCELLED"];
+
 
 const MONTH_OPTIONS = [
-  "ALL", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-] as const;
+"ALL", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as
+const;
 
 // Transaction Trends local type for the second chart
 type TxPoint = {
@@ -66,9 +66,9 @@ const Dashboard: React.FC = () => {
 
   const overviewFilters = useMemo(() => {
     return {
-      status: status === "ALL" ? undefined : (status as TxPoint["status"]),
+      status: status === "ALL" ? undefined : status as TxPoint["status"],
       month: monthFilter === "ALL" ? undefined : monthFilter,
-      productType: undefined,
+      productType: undefined
     };
   }, [status, monthFilter]);
 
@@ -87,14 +87,14 @@ const Dashboard: React.FC = () => {
       const iso = String(it?.date ?? "");
       const d = new Date(iso);
       const valid = !isNaN(d.getTime());
-      const m = valid ? MONTHS[d.getMonth()] : ("—" as const);
+      const m = valid ? MONTHS[d.getMonth()] : "—" as const;
       const dd = valid ? String(d.getDate()).padStart(2, "0") : "—";
-      const label = valid ? `${m} ${dd}` : (iso || "—");
+      const label = valid ? `${m} ${dd}` : iso || "—";
       return {
         month: label,
         sales: Number(it?.count ?? 0),
         value: Number(it?.value ?? 0),
-        derivedMonth: m,
+        derivedMonth: m
       };
     });
   }, [data]);
@@ -107,7 +107,7 @@ const Dashboard: React.FC = () => {
   }, [salesDaily, monthFilter]);
 
   const badgeLabel =
-    monthFilter === "ALL" ? "YEARLY SALES COUNT" : `${monthFilter.toUpperCase()} SALES COUNT`;
+  monthFilter === "ALL" ? "YEARLY SALES COUNT" : `${monthFilter.toUpperCase()} SALES COUNT`;
 
   // ======= Tasks (right column card) =======
   const { apiCall } = useApiCall();
@@ -117,11 +117,11 @@ const Dashboard: React.FC = () => {
   }, [apiCall]);
 
   // ======= Product Categories Pie =======
-  type ProductCategorySlice = { name: string; count: number; value: number; percentage: string };
+  type ProductCategorySlice = {name: string;count: number;value: number;percentage: string;};
   const productCategoriesPie: ProductCategorySlice[] =
-    (data as any)?.charts?.productCategoriesPieChart ??
-    (data as any)?.charts?.productCategoriesChart ??
-    [];
+  (data as any)?.charts?.productCategoriesPieChart ??
+  (data as any)?.charts?.productCategoriesChart ??
+  [];
 
   // ======= TRANSACTIONS GRAPH: use charts.monthlyTrends (monthly points) =======
   const monthlyTrends: TxPoint[] = useMemo(() => {
@@ -132,18 +132,18 @@ const Dashboard: React.FC = () => {
       salesValue: Number(m.salesValue ?? 0),
       payments: Number(m.payments ?? 0),
       paymentsValue: Number(m.paymentsValue ?? 0),
-      status: "COMPLETED",
+      status: "COMPLETED"
     }));
   }, [data]);
 
-  const filteredTransactions: TxPoint[] = useMemo(() => {
+  const _filteredTransactions: TxPoint[] = useMemo(() => {
     let rows = monthlyTrends;
     if (monthFilter !== "ALL") rows = rows.filter((r) => r.month === monthFilter);
     if (status !== "ALL") rows = rows.filter((r) => r.status === status);
     return rows;
   }, [monthlyTrends, monthFilter, status]);
 
-  
+
 
   return (
     <PageLayout pageName="Dashboard" badge={dashboardbadge}>
@@ -156,29 +156,29 @@ const Dashboard: React.FC = () => {
             bgColor="bg-[#FFFFFF]"
             value={isFetching ? "—" : totalRevenue.toLocaleString()}
             prefix="₦"
-            description="Value of Total "
-          />
+            description="Value of Total " />
+
           <DashboardCard
             title="Sales"
             icon={Icon1}
             bgColor="bg-[#FFFFFF]"
             value={isFetching ? "—" : totalSales}
-            description="Total Count For "
-          />
+            description="Total Count For " />
+
           <DashboardCard
             title="Customers"
             icon={Icon2}
             description="Total Assigned "
             value={isFetching ? "—" : totalCustomers}
-            bgColor="bg-[#FFFFFF]"
-          />
+            bgColor="bg-[#FFFFFF]" />
+
           <DashboardCard
             title="Agents"
             icon={Icon3}
             bgColor="bg-[#FFFFFF]"
             value={isFetching ? "—" : totalAgent}
-            description="Total Count For "
-          />
+            description="Total Count For " />
+
         </div>
 
         {/* ===== Main Graph + Wallet ===== */}
@@ -199,13 +199,13 @@ const Dashboard: React.FC = () => {
                       value={status}
                       onChange={(e) => setStatus(e.target.value)}
                       className="text-xs font-medium text-textGrey pl-2 pr-6 py-1 bg-[#F9F9F9] border-[0.6px] border-strokeGreyThree rounded-full appearance-none"
-                      title="Filter by status"
-                    >
-                      {STATUS_OPTIONS.map((opt) => (
-                        <option key={opt} value={opt}>
+                      title="Filter by status">
+
+                      {STATUS_OPTIONS.map((opt) =>
+                      <option key={opt} value={opt}>
                           {opt === "ALL" ? "All Status" : opt}
                         </option>
-                      ))}
+                      )}
                     </select>
                     <img src={dropdown} alt="" className="w-4 h-4 -ml-5 pointer-events-none" />
                   </div>
@@ -216,11 +216,11 @@ const Dashboard: React.FC = () => {
                       value={monthFilter}
                       onChange={(e) => setMonthFilter(e.target.value)}
                       className="text-xs font-medium text-textGrey pl-2 pr-6 py-1 bg-[#F9F9F9] border-[0.6px] border-strokeGreyThree rounded-full appearance-none"
-                      title="Filter by month"
-                    >
-                      {MONTH_OPTIONS.map((m) => (
-                        <option key={m} value={m}>{m === "ALL" ? "All Months" : m}</option>
-                      ))}
+                      title="Filter by month">
+
+                      {MONTH_OPTIONS.map((m) =>
+                      <option key={m} value={m}>{m === "ALL" ? "All Months" : m}</option>
+                      )}
                     </select>
                     <img src={dateIcon} alt="" className="w-4 h-4 -ml-5 pointer-events-none" />
                   </div>
@@ -237,7 +237,7 @@ const Dashboard: React.FC = () => {
               </div>
 
               {/* Feed the normalized & filtered daily points to the chart */}
-              <div className="w-full h-[300px]" >
+              <div className="w-full h-[300px]">
                 <SalesChart data={filteredSales} />
               </div>
 
@@ -249,15 +249,15 @@ const Dashboard: React.FC = () => {
                   bgColor="bg-paleGrayGradient"
                   value={isFetching ? "—" : totalRevenue.toLocaleString()}
                   prefix="₦"
-                  description="Value of Total "
-                />
+                  description="Value of Total " />
+
                 <DashboardCard
                   title="Sales"
                   icon={Icon1}
                   bgColor="bg-paleGrayGradient"
                   value={isFetching ? "—" : totalSales}
-                  description="Count For Sales"
-                />
+                  description="Count For Sales" />
+
                 <SalesCategoryPie data={productCategoriesPie} isLoading={isFetching} />
               </div>
             </div>
@@ -268,8 +268,8 @@ const Dashboard: React.FC = () => {
               inventoryData={data}
               isLoading={isFetching}
               refreshTable={refetch}
-              setTableQueryParams={() => { }}
-            />
+              setTableQueryParams={() => {}} />
+
           </div>
         </div>
 
@@ -280,20 +280,20 @@ const Dashboard: React.FC = () => {
               <h2 className="font-bold text-[14px] tracking-[0.7px] text-textDarkGrey font-primary">MONTHLY TRENDS</h2>
 
               {/* SAME FILTERS AS SALES */}
-              <div className="flex items-center gap-2" >
+              <div className="flex items-center gap-2">
                 {/* Status */}
                 <div className="relative flex w-max">
                   <select
                     value={status}
                     onChange={(e) => setStatus(e.target.value)}
                     className="text-xs font-medium text-textGrey pl-2 pr-6 py-1 bg-[#F9F9F9] border-[0.6px] border-strokeGreyThree rounded-full appearance-none"
-                    title="Filter by status"
-                  >
-                    {STATUS_OPTIONS.map((opt) => (
-                      <option key={opt} value={opt}>
+                    title="Filter by status">
+
+                    {STATUS_OPTIONS.map((opt) =>
+                    <option key={opt} value={opt}>
                         {opt === "ALL" ? "All Status" : opt}
                       </option>
-                    ))}
+                    )}
                   </select>
                   <img src={dropdown} alt="" className="w-4 h-4 -ml-5 pointer-events-none" />
                 </div>
@@ -304,11 +304,11 @@ const Dashboard: React.FC = () => {
                     value={monthFilter}
                     onChange={(e) => setMonthFilter(e.target.value)}
                     className="text-xs font-medium text-textGrey pl-2 pr-6 py-1 bg-[#F9F9F9] border-[0.6px] border-strokeGreyThree rounded-full appearance-none"
-                    title="Filter transactions by month"
-                  >
-                    {MONTH_OPTIONS.map((m) => (
-                      <option key={m} value={m}>{m === "ALL" ? "All Months" : m}</option>
-                    ))}
+                    title="Filter transactions by month">
+
+                    {MONTH_OPTIONS.map((m) =>
+                    <option key={m} value={m}>{m === "ALL" ? "All Months" : m}</option>
+                    )}
                   </select>
                   <img src={dateIcon} alt="icon" className="w-4 h-4 -ml-5 pointer-events-none" />
                 </div>
@@ -326,9 +326,9 @@ const Dashboard: React.FC = () => {
 
             <div className="w-full h-[300px]">
               <TransactionsInsights
-                status={status === "ALL" ? undefined : (status as TxPoint["status"])}
-                month={monthFilter === "ALL" ? undefined : monthFilter}
-              />
+                status={status === "ALL" ? undefined : status as TxPoint["status"]}
+                month={monthFilter === "ALL" ? undefined : monthFilter} />
+
             </div>
           </div>
 
@@ -337,8 +337,8 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
       </section>
-    </PageLayout>
-  );
+    </PageLayout>);
+
 };
 
 export default Dashboard;

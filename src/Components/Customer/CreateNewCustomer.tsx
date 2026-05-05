@@ -153,7 +153,7 @@ const CreateNewCustomer = ({
     const { name, value } = e.target;
 
     if (name === "latitude" || name === "longitude") {
-      const cleaned = value.replace(/[^\d.\-]/g, "");
+      const cleaned = value.replace(/[^\d.-]/g, "");
       const decimalPattern = /^-?\d*(\.\d*)?$/;
 
       if (!decimalPattern.test(cleaned)) {

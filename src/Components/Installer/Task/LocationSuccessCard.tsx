@@ -12,7 +12,7 @@ interface LocationSuccessCardProps {
 
 const LocationSuccessCard: React.FC<LocationSuccessCardProps> = ({
   isOpen,
-  onClose,
+  onClose: _onClose,
   onReturnHome,
   onRequestToken
 }) => {
@@ -20,15 +20,15 @@ const LocationSuccessCard: React.FC<LocationSuccessCardProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div 
+      <div
         className="bg-white rounded-[20px] w-[90vw] max-w-[450px] p-6"
         style={{
           backgroundImage: `url(${curvedlines})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat"
-        }}
-      >
+        }}>
+
         <div className="flex flex-col justify-between h-full min-h-[600px] gap-2">
           <div className="flex flex-col items-center justify-center text-center space-y-3 flex-1 -mt-8">
             {/* Success Icon */}
@@ -48,18 +48,18 @@ const LocationSuccessCard: React.FC<LocationSuccessCardProps> = ({
             <SecondaryButton
               variant="secondary"
               children="Return Home"
-              onClick={onReturnHome}
-            />
+              onClick={onReturnHome} />
+
             <SecondaryButton
               children="Request Token"
               onClick={onRequestToken}
-              className="bg-gradient-to-r from-orange-600 to-orange-400 text-white"
-            />
+              className="bg-gradient-to-r from-orange-600 to-orange-400 text-white" />
+
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
-export default LocationSuccessCard; 
+export default LocationSuccessCard;

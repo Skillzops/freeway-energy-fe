@@ -71,7 +71,7 @@ const UserModal = ({
         });
         setIsOpen(false);
         refreshTable();
-      } catch (error) {
+      } catch {
         void 0;
       }
     } else {
@@ -134,8 +134,14 @@ const ActivityHistoryList = ({
   }
 
   const formatValues = (val: any) => {
-    if (!val || typeof val !== "object" || Object.keys(val).length === 0) return "none";
-    return JSON.stringify(val);
+    if (!val) return "none";
+    if (typeof val !== "object") return String(val);
+    if (Object.keys(val).length === 0) return "none";
+    try {
+      return JSON.stringify(val, null, 2);
+    } catch {
+      return String(val);
+    }
   };
 
   return (
@@ -143,9 +149,9 @@ const ActivityHistoryList = ({
       {logs.map((log, idx) => (
         <div
           key={log.id || log._id || idx}
-          className="border border-strokeGreyThree rounded-[12px] p-3 bg-white shadow-[0_1px_4px_rgba(0,0,0,0.03)] flex flex-col gap-2"
+          className="border border-strokeGreyThree rounded-[12px] p-3 bg-white shadow-[0_1px_4px_rgba(0,0,0,0.03)] flex flex-col gap-2 overflow-hidden"
         >
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center justify-between gap-2 flex-wrap min-w-0">
             <SimpleTag
               text={log.action || log.method || "N/A"}
               dotColour="#9BA4BA"
@@ -153,15 +159,31 @@ const ActivityHistoryList = ({
             />
             {log.createdAt ? <DateTimeTag datetime={log.createdAt} showAll={false} /> : null}
           </div>
-          <p className="text-xs text-textDarkGrey">
+          <p className="text-xs text-textDarkGrey break-all whitespace-pre-wrap min-w-0">
             {log.entity || log.route || log.endpoint || log.metadata?.url || "Unknown resource"}
           </p>
-          <p className="text-[11px] leading-snug text-textGrey">
-            Old Values: {formatValues(log.oldValues)} | New Values: {formatValues(log.newValues)} | Changes:{" "}
-            {formatValues(log.changes)}
-          </p>
+          <div className="grid gap-2 min-w-0">
+            <div className="rounded-[10px] border border-strokeGreyThree bg-[#F8FAFC] p-2 min-w-0">
+              <p className="text-[11px] font-semibold text-textDarkGrey mb-1">Old Values</p>
+              <pre className="text-[11px] leading-snug text-textGrey whitespace-pre-wrap break-all max-h-[90px] overflow-auto">
+                {formatValues(log.oldValues)}
+              </pre>
+            </div>
+            <div className="rounded-[10px] border border-strokeGreyThree bg-[#F8FAFC] p-2 min-w-0">
+              <p className="text-[11px] font-semibold text-textDarkGrey mb-1">New Values</p>
+              <pre className="text-[11px] leading-snug text-textGrey whitespace-pre-wrap break-all max-h-[90px] overflow-auto">
+                {formatValues(log.newValues)}
+              </pre>
+            </div>
+            <div className="rounded-[10px] border border-strokeGreyThree bg-[#F8FAFC] p-2 min-w-0">
+              <p className="text-[11px] font-semibold text-textDarkGrey mb-1">Changes</p>
+              <pre className="text-[11px] leading-snug text-textGrey whitespace-pre-wrap break-all max-h-[90px] overflow-auto">
+                {formatValues(log.changes)}
+              </pre>
+            </div>
+          </div>
           {log.requestUrl ? (
-            <p className="text-[11px] text-textGrey">URL: {log.requestUrl}</p>
+            <p className="text-[11px] text-textGrey break-all whitespace-pre-wrap min-w-0">URL: {log.requestUrl}</p>
           ) : null}
           {log.statusCode ? (
             <p className="text-[11px] text-textGrey">Status: {log.statusCode}</p>

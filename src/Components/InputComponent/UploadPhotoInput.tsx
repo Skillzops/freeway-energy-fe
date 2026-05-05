@@ -18,9 +18,9 @@ export const UploadPhotoInput: React.FC<UploadPhotoInputProps> = ({
   onChange,
   onValidationError,
   errorMessage,
-  required = false,
+  required: _required = false,
   accept = ".jpeg,.jpg,.png",
-  maxSizeInMB = 1,
+  maxSizeInMB = 1
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [localError, setLocalError] = useState<string>("");
@@ -40,7 +40,7 @@ export const UploadPhotoInput: React.FC<UploadPhotoInputProps> = ({
       sizeBytes: file.size,
       sizeMB: sizeMB.toFixed(3),
       maxMB: max,
-      maxBytes,
+      maxBytes
     });
 
     // Check file size in MB before accepting
@@ -74,15 +74,15 @@ export const UploadPhotoInput: React.FC<UploadPhotoInputProps> = ({
     <div className="w-full">
       <div
         className="flex items-center justify-between w-full h-[48px] px-[1.1em] bg-white border border-strokeGreyThree rounded-3xl cursor-pointer transition-colors hover:border-gold"
-        onClick={() => fileInputRef.current?.click()}
-      >
+        onClick={() => fileInputRef.current?.click()}>
+
         <span className="text-sm text-textLightGrey font-normal italic">
           {label}
         </span>
         <div className="flex items-center gap-2">
-          {value && !localError ? (
-            <span className="text-sm text-textGrey truncate max-w-[120px]">{value.name}</span>
-          ) : null}
+          {value && !localError ?
+          <span className="text-sm text-textGrey truncate max-w-[120px]">{value.name}</span> :
+          null}
           <LuImagePlus className="w-6 h-6 text-textLightGrey" />
         </div>
         <input
@@ -90,12 +90,12 @@ export const UploadPhotoInput: React.FC<UploadPhotoInputProps> = ({
           ref={fileInputRef}
           className="hidden"
           accept={accept}
-          onChange={handleFileChange}
-        />
+          onChange={handleFileChange} />
+
       </div>
-      {(errorMessage || localError) && (
-        <p className="text-xs text-red-500 mt-1">{errorMessage || localError}</p>
-      )}
-    </div>
-  );
+      {(errorMessage || localError) &&
+      <p className="text-xs text-red-500 mt-1">{errorMessage || localError}</p>
+      }
+    </div>);
+
 };

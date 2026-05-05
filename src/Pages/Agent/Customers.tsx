@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy as _lazy, Suspense, useEffect, useState } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import PageLayout from "./PageLayout";
 import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
@@ -24,23 +24,23 @@ const Customers = () => {
   const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
   const [tableQueryParams, setTableQueryParams] = useState<Record<
     string,
-    any
-  > | null>({});
+    any> |
+  null>({});
 
-  const queryString = Object.entries(tableQueryParams || {})
-    .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
-    .join("&");
+  const queryString = Object.entries(tableQueryParams || {}).
+  map(([key, value]) => `${key}=${encodeURIComponent(value)}`).
+  join("&");
 
   const {
     data: customerData,
     isLoading: customerLoading,
     mutate: allCustomerRefresh,
     error: allCustomerError,
-    errorStates: allCustomerErrorStates,
+    errorStates: allCustomerErrorStates
   } = useGetRequest(
     `/v1/agents/customers?page=${currentPage}&limit=${entriesPerPage}${
-      queryString && `&${queryString}`
-    }`,
+    queryString && `&${queryString}`}`,
+
     true,
     60000
   );
@@ -53,7 +53,7 @@ const Customers = () => {
       currentPage,
       entriesPerPage,
       setCurrentPage,
-      setEntriesPerPage,
+      setEntriesPerPage
     };
   };
 
@@ -62,29 +62,29 @@ const Customers = () => {
     switch (location.pathname) {
       case "/agent/customers/your":
         setTableQueryParams((prevParams) => ({
-          ...prevParams,
+          ...prevParams
         }));
         break;
       case "/agent/customers/defaulting":
         setTableQueryParams((prevParams) => ({
           ...prevParams,
-          status: "active",
+          status: "active"
         }));
         break;
       default:
         setTableQueryParams((prevParams) => ({
-          ...prevParams,
+          ...prevParams
         }));
     }
   }, [location.pathname]);
 
   const navigationList = [
-    {
-      title: "Your Customers",
-      link: "/agent/customers/your",
-      count: customerData?.total || 0,
-    },
-  ];
+  {
+    title: "Your Customers",
+    link: "/agent/customers/your",
+    count: customerData?.total || 0
+  }];
+
 
 
   const customerPaths = ["your", "defaulting"];
@@ -99,8 +99,8 @@ const Customers = () => {
               iconBgColor="bg-[#E3FAD6]"
               topText="YOUR"
               bottomText="CUSTOMERS"
-              value={customerData?.total || 0}
-            />
+              value={customerData?.total || 0} />
+
           </div>
           <div className="flex w-full items-center justify-between gap-2 min-w-max sm:w-max sm:justify-end">
             <ActionButton
@@ -108,8 +108,8 @@ const Customers = () => {
               icon={<img src={circleAction} />}
               onClick={() => {
                 setIsOpen(true);
-              }}
-            />
+              }} />
+
             {/* <DropDown {...dropDownList} /> */}
           </div>
         
@@ -119,31 +119,31 @@ const Customers = () => {
           <section className="relative items-start justify-center flex min-h-[415px] w-full overflow-hidden">
             <Suspense
               fallback={
-                <LoadingSpinner parentClass="absolute top-[50%] w-full" />
-              }
-            >
+              <LoadingSpinner parentClass="absolute top-[50%] w-full" />
+              }>
+
               <Routes>
                 <Route
                   path="/"
-                  element={<Navigate to="/agent/customers/all" replace />}
-                />
-                {customerPaths.map((path) => (
-                  <Route
-                    key={path}
-                    path={path}
-                    element={
-                      <CustomerTable
-                        customerData={customerData}
-                        isLoading={customerLoading}
-                        refreshTable={allCustomerRefresh}
-                        error={allCustomerError}
-                        errorData={allCustomerErrorStates}
-                        paginationInfo={paginationInfo}
-                        setTableQueryParams={setTableQueryParams}
-                      />
-                    }
-                  />
-                ))}
+                  element={<Navigate to="/agent/customers/all" replace />} />
+
+                {customerPaths.map((path) =>
+                <Route
+                  key={path}
+                  path={path}
+                  element={
+                  <CustomerTable
+                    customerData={customerData}
+                    isLoading={customerLoading}
+                    refreshTable={allCustomerRefresh}
+                    error={allCustomerError}
+                    errorData={allCustomerErrorStates}
+                    paginationInfo={paginationInfo}
+                    setTableQueryParams={setTableQueryParams} />
+
+                  } />
+
+                )}
               </Routes>
             </Suspense>
           </section>
@@ -152,10 +152,10 @@ const Customers = () => {
       <CreateNewCustomer
         isOpen={isOpen}
         setIsOpen={setIsOpen}
-        allCustomerRefresh={allCustomerRefresh}
-      />
-    </>
-  );
+        allCustomerRefresh={allCustomerRefresh} />
+
+    </>);
+
 };
 
 export default Customers;

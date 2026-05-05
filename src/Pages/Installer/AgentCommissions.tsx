@@ -10,7 +10,7 @@ import PageLayout from "./PageLayout";
 import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
 
 // ==== Types (match API) ====
-type CommissionCustomer = { name?: string; phone?: string };
+type CommissionCustomer = {name?: string;phone?: string;};
 type CommissionRow = {
   id: string;
   transactionRef: string;
@@ -37,24 +37,24 @@ type AgentCommissionsResponse = {
 
 // ==== Helpers ====
 const toISODateStart = (d: string) =>
-  d ? new Date(`${d}T00:00:00.000Z`).toISOString() : undefined;
+d ? new Date(`${d}T00:00:00.000Z`).toISOString() : undefined;
 const toISODateEnd = (d: string) =>
-  d ? new Date(`${d}T23:59:59.999Z`).toISOString() : undefined;
+d ? new Date(`${d}T23:59:59.999Z`).toISOString() : undefined;
 const money = (n: number | string) =>
-  `₦${Number(n || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
-const when = (iso?: string) => (iso ? new Date(iso).toLocaleString() : "");
+`₦${Number(n || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+const when = (iso?: string) => iso ? new Date(iso).toLocaleString() : "";
 const LIMITS = [10, 20, 50, 100];
 
 // Small stat chip (matches your capsule style)
-const Chip: React.FC<{ label: string; value: React.ReactNode }> = ({
+const Chip: React.FC<{label: string;value: React.ReactNode;}> = ({
   label,
-  value,
-}) => (
-  <div className="flex items-center gap-2 pl-3 pr-3 py-1.5 rounded-full bg-[#F9F9F9] border-[0.6px] border-strokeGreyThree">
+  value
+}) =>
+<div className="flex items-center gap-2 pl-3 pr-3 py-1.5 rounded-full bg-[#F9F9F9] border-[0.6px] border-strokeGreyThree">
     <span className="text-[11px] font-medium text-textGrey">{label}</span>
     <span className="text-[11px] font-semibold text-textBlack">{value}</span>
-  </div>
-);
+  </div>;
+
 
 const AgentCommissions: React.FC = () => {
   const { apiCall } = useApiCall();
@@ -73,7 +73,7 @@ const AgentCommissions: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [rows, setRows] = useState<CommissionRow[]>([]);
   const [total, setTotal] = useState<number>(0);
-  const [totalPages, setTotalPages] = useState<number>(1);
+  const [_totalPages, setTotalPages] = useState<number>(1);
   const [summary, setSummary] = useState<CommissionSummary | null>(null);
   const [error, setError] = useState<any>(null);
 
@@ -98,8 +98,8 @@ const AgentCommissions: React.FC = () => {
       try {
         const res = (await apiRef.current({
           endpoint,
-          method: "get",
-        })) as { data?: AgentCommissionsResponse };
+          method: "get"
+        })) as {data?: AgentCommissionsResponse;};
 
         if (!mounted) return;
         const payload = res?.data as AgentCommissionsResponse | undefined;
@@ -118,13 +118,13 @@ const AgentCommissions: React.FC = () => {
         setTotalPages(1);
         setSummary(null);
       } finally {
-        mounted && setLoading(false);
+        if (mounted) setLoading(false);
       }
     })();
     return () => {
       mounted = false;
     };
-  }, [endpoint]);
+  }, [endpoint, page]);
 
   const clearFilters = () => {
     setStart("");
@@ -144,8 +144,8 @@ const AgentCommissions: React.FC = () => {
                 // iconBgColor="bg-[#E3FAD6]"
                 topText="Your"
                 bottomText="COMMISSION"
-                value={summary?.totalCommission || 0}
-              />
+                value={summary?.totalCommission || 0} />
+
             </div>
             <div className="flex w-full items-center justify-between gap-2 min-w-max sm:w-max sm:justify-end" />
           </section>
@@ -159,8 +159,8 @@ const AgentCommissions: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <label
                     htmlFor="start-date"
-                    className="text-xs font-medium text-textGrey"
-                  >
+                    className="text-xs font-medium text-textGrey">
+
                     Start
                   </label>
                   <input
@@ -172,16 +172,16 @@ const AgentCommissions: React.FC = () => {
                       setPage(1);
                     }}
                     className="text-xs font-medium text-textGrey pl-2 pr-2 py-1 bg-[#F9F9F9] border-[0.6px] border-strokeGreyThree rounded-full"
-                    title="Start date"
-                  />
+                    title="Start date" />
+
                 </div>
 
                 {/* End date (explicit label, no extra icon) */}
                 <div className="flex items-center gap-2">
                   <label
                     htmlFor="end-date"
-                    className="text-xs font-medium text-textGrey"
-                  >
+                    className="text-xs font-medium text-textGrey">
+
                     End
                   </label>
                   <input
@@ -193,8 +193,8 @@ const AgentCommissions: React.FC = () => {
                       setPage(1);
                     }}
                     className="text-xs font-medium text-textGrey pl-2 pr-2 py-1 bg-[#F9F9F9] border-[0.6px] border-strokeGreyThree rounded-full"
-                    title="End date"
-                  />
+                    title="End date" />
+
                 </div>
 
                 {/* Limit */}
@@ -206,19 +206,19 @@ const AgentCommissions: React.FC = () => {
                       setPage(1);
                     }}
                     className="text-xs font-medium text-textGrey pl-2 pr-6 py-1 bg-[#F9F9F9] border-[0.6px] border-strokeGreyThree rounded-full appearance-none"
-                    title="Items per page"
-                  >
-                    {LIMITS.map((n) => (
-                      <option key={n} value={n}>
+                    title="Items per page">
+
+                    {LIMITS.map((n) =>
+                    <option key={n} value={n}>
                         {n} / page
                       </option>
-                    ))}
+                    )}
                   </select>
                   <img
                     src={dropdown}
                     alt=""
-                    className="w-4 h-4 -ml-5 pointer-events-none"
-                  />
+                    className="w-4 h-4 -ml-5 pointer-events-none" />
+
                 </div>
 
                 {/* Clear Filters */}
@@ -226,8 +226,8 @@ const AgentCommissions: React.FC = () => {
                   type="button"
                   onClick={clearFilters}
                   className="text-xs font-medium h-[28px] px-3 rounded-full border-[0.6px] border-strokeGreyThree bg-[#F6F8FA] text-textDarkGrey hover:bg-[#EEF1F4] transition"
-                  title="Clear start and end dates"
-                >
+                  title="Clear start and end dates">
+
                   Clear Filters
                 </button>
               </div>
@@ -235,25 +235,25 @@ const AgentCommissions: React.FC = () => {
 
             {/* Sub header badge (total commission) */}
             {/* <div className="flex items-center justify-between px-4 py-2 mb-2 w-full md:w-[920px]">
-              <div />
-              <div className="flex items-center gap-2 pl-2 pr-1 bg-primaryGradient border-[0.6px] border-strokeGreyThree rounded-full">
-                <span className="text-xs font-medium text-white">
-                  TOTAL COMMISSION: {money(summary?.totalCommission ?? 0)}
-                </span>
-              </div>
-            </div> */}
+               <div />
+               <div className="flex items-center gap-2 pl-2 pr-1 bg-primaryGradient border-[0.6px] border-strokeGreyThree rounded-full">
+                 <span className="text-xs font-medium text-white">
+                   TOTAL COMMISSION: {money(summary?.totalCommission ?? 0)}
+                 </span>
+               </div>
+              </div> */}
           </div>
 
           {/* Quick stats row (chips) */}
           <div className="flex flex-wrap gap-2 mb-4">
             <Chip
               label="Total Payments"
-              value={summary?.totalCompletedTasks ?? 0}
-            />
+              value={summary?.totalCompletedTasks ?? 0} />
+
             <Chip
               label="Commission Rate"
-              value={`${Number(summary?.commissionPerTask ?? 0)}`}
-            />
+              value={`${Number(summary?.commissionPerTask ?? 0)}`} />
+
           </div>
 
           {/* ===== Table & states ===== */}
@@ -262,14 +262,14 @@ const AgentCommissions: React.FC = () => {
             error={error}
             errorMessage="Failed to fetch commissions"
             refreshData={() => setPage((p) => p)}
-            errorStates={null}
-          >
-            {rows.length === 0 ? (
-              <div className="flex items-center justify-center py-10 text-sm text-gray-500">
+            errorStates={null}>
+
+            {rows.length === 0 ?
+            <div className="flex items-center justify-center py-10 text-sm text-gray-500">
                 No commissions found for the selected range.
-              </div>
-            ) : (
-              <div className="overflow-x-auto border border-gray-200 rounded-xl">
+              </div> :
+
+            <div className="overflow-x-auto border border-gray-200 rounded-xl">
                 <table className="min-w-full text-sm">
                   <thead className="bg-[#F9FAFB] text-gray-600">
                     <tr>
@@ -285,8 +285,8 @@ const AgentCommissions: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    {rows.map((r) => (
-                      <tr key={r.id} className="hover:bg-[#FAFAFA]">
+                    {rows.map((r) =>
+                  <tr key={r.id} className="hover:bg-[#FAFAFA]">
                         <td className="px-4 py-3 whitespace-nowrap">
                           {when(r.completedDate)}
                         </td>
@@ -304,24 +304,24 @@ const AgentCommissions: React.FC = () => {
                         </td>
                         <td className="px-4 py-3 text-right">
                           {money(
-                            typeof r.commissionAmount === "string"
-                              ? parseFloat(r.commissionAmount)
-                              : r.commissionAmount
-                          )}
+                        typeof r.commissionAmount === "string" ?
+                        parseFloat(r.commissionAmount) :
+                        r.commissionAmount
+                      )}
                         </td>
                         <td className="px-4 py-3">{r.description ?? "—"}</td>
                       </tr>
-                    ))}
+                  )}
                   </tbody>
                 </table>
               </div>
-            )}
+            }
           </DataStateWrapper>
 
           {/* ===== Pagination footer ===== */}
           <div className="mt-4 flex items-center justify-between">
             <div className="text-xs text-gray-500">
-              Showing {(rows.length && (page - 1) * limit + 1) || 0}–
+              Showing {rows.length && (page - 1) * limit + 1 || 0}–
               {(page - 1) * limit + rows.length} of {total.toLocaleString()}
             </div>
             <ListPagination
@@ -329,13 +329,13 @@ const AgentCommissions: React.FC = () => {
               itemsPerPage={limit}
               currentPage={page}
               onPageChange={setPage}
-              label="Commissions"
-            />
+              label="Commissions" />
+
           </div>
         </div>
       </PageLayout>
-    </>
-  );
+    </>);
+
 };
 
 export default AgentCommissions;

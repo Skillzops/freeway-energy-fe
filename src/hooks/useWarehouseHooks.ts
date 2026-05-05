@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useWarehouseApi, useWarehouses, useProducts, useTransferRequests, useWarehouseStats, useWarehouseManagers, useWarehouseTransferRequests } from '../services/warehouseApi';
+import { useWarehouseApi, useWarehouses, useProducts as _useProducts, useTransferRequests, useWarehouseStats, useWarehouseManagers as _useWarehouseManagers, useWarehouseTransferRequests } from '../services/warehouseApi';
 import { useInventory } from '../services/inventoryApi';
 import { toast } from 'react-toastify';
 import type { Warehouse, Product, TransferRequest } from '../data/warehouseData';
@@ -24,22 +24,22 @@ export const useWarehouseManagement = () => {
   const filteredWarehouses = warehouses.filter((warehouse: Warehouse) => {
     // Search filter
     const matchesSearch = !searchTerm ||
-      warehouse.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      warehouse.location.toLowerCase().includes(searchTerm.toLowerCase());
+    warehouse.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    warehouse.location.toLowerCase().includes(searchTerm.toLowerCase());
 
     // Status filter
     const matchesStatus = !statusFilter ||
-      (statusFilter === 'active' && warehouse.isActive) ||
-      (statusFilter === 'inactive' && !warehouse.isActive);
+    statusFilter === 'active' && warehouse.isActive ||
+    statusFilter === 'inactive' && !warehouse.isActive;
 
     // Type filter
     const matchesType = !typeFilter ||
-      (typeFilter === 'main' && warehouse.isMainWarehouse) ||
-      (typeFilter === 'regular' && !warehouse.isMainWarehouse);
+    typeFilter === 'main' && warehouse.isMainWarehouse ||
+    typeFilter === 'regular' && !warehouse.isMainWarehouse;
 
     // Location filter
     const matchesLocation = !locationFilter ||
-      warehouse.location.toLowerCase().includes(locationFilter.toLowerCase());
+    warehouse.location.toLowerCase().includes(locationFilter.toLowerCase());
 
     return matchesSearch && matchesStatus && matchesType && matchesLocation;
   });
@@ -179,7 +179,7 @@ export const useWarehouseManagement = () => {
     toggleWarehouseStatus,
     activateWarehouse,
     deactivateWarehouse,
-    refreshData: mutateWarehouses,
+    refreshData: mutateWarehouses
   };
 };
 
@@ -205,8 +205,8 @@ export const useInventoryManagement = (warehouseId?: string) => {
   const inventoryMetrics = {
     totalItems: products.reduce((sum: number, product: Product) => sum + product.stockLevel, 0),
     totalValue: products.reduce((sum: number, product: Product) => sum + product.inventoryValue, 0),
-    lowStockItems: products.filter((product: Product) => (product.stockLevel / product.maxCapacity) < 0.3).length,
-    categories: [...new Set(products.map((product: Product) => product.category))],
+    lowStockItems: products.filter((product: Product) => product.stockLevel / product.maxCapacity < 0.3).length,
+    categories: [...new Set(products.map((product: Product) => product.category))]
   };
 
   const addInventoryItem = async (inventoryData: any) => {
@@ -280,7 +280,7 @@ export const useInventoryManagement = (warehouseId?: string) => {
     addInventoryItem,
     updateInventoryItem,
     deleteInventoryItem,
-    refreshData: mutateProducts,
+    refreshData: mutateProducts
   };
 };
 
@@ -297,7 +297,7 @@ export const useTransferManagement = () => {
     data: transfersResponse = {},
     mutate: mutateTransfers,
     isLoading: isLoadingTransfers,
-    error: transfersError
+    error: _transfersError
   } = useWarehouseTransferRequests({
     // Remove status filtering from API - we'll do it on frontend
     page: currentPage,
@@ -309,9 +309,9 @@ export const useTransferManagement = () => {
   const warehouseApi = useWarehouseApi();
 
   // Extract transfers and pagination data from API response
-  const transfers = Array.isArray(transfersResponse)
-    ? transfersResponse
-    : (transfersResponse as any)?.transferRequests || [];
+  const transfers = Array.isArray(transfersResponse) ?
+  transfersResponse :
+  (transfersResponse as any)?.transferRequests || [];
 
   // Frontend filtering for both status and warehouse filters
   const filteredTransfers = transfers.filter((transfer: any) => {
@@ -320,11 +320,11 @@ export const useTransferManagement = () => {
 
     // Warehouse filter - check if the selected warehouse is either source or destination
     const matchesWarehouse = !warehouseFilter ||
-      transfer.fromWarehouseId === warehouseFilter ||
-      transfer.toWarehouseId === warehouseFilter ||
-      // Also check nested warehouse objects in case API returns full objects
-      transfer.fromWarehouse?.id === warehouseFilter ||
-      transfer.toWarehouse?.id === warehouseFilter;
+    transfer.fromWarehouseId === warehouseFilter ||
+    transfer.toWarehouseId === warehouseFilter ||
+    // Also check nested warehouse objects in case API returns full objects
+    transfer.fromWarehouse?.id === warehouseFilter ||
+    transfer.toWarehouse?.id === warehouseFilter;
 
     return matchesStatus && matchesWarehouse;
   });
@@ -352,7 +352,7 @@ export const useTransferManagement = () => {
     pending: transfers.filter((t: any) => t.status.toLowerCase() === 'pending').length,
     partial: transfers.filter((t: any) => t.status.toLowerCase() === 'partial').length,
     fulfilled: transfers.filter((t: any) => t.status.toLowerCase() === 'fulfilled').length,
-    rejected: transfers.filter((t: any) => t.status.toLowerCase() === 'rejected').length,
+    rejected: transfers.filter((t: any) => t.status.toLowerCase() === 'rejected').length
   };
 
   const createTransferRequest = async (transferData: Omit<TransferRequest, 'id' | 'requestDate' | 'fulfilledQuantity' | 'status'>) => {
@@ -447,7 +447,7 @@ export const useTransferManagement = () => {
     setCurrentPage,
     setPageSize,
     totalPages: paginationData.totalPages,
-    totalItems: paginationData.total,
+    totalItems: paginationData.total
   };
 };
 
@@ -466,21 +466,21 @@ export const useDashboardMetrics = () => {
       total: warehouses.length,
       active: warehouses.filter((w: Warehouse) => w.isActive).length,
       inactive: warehouses.filter((w: Warehouse) => !w.isActive).length,
-      mainWarehouses: warehouses.filter((w: Warehouse) => w.isMainWarehouse).length,
+      mainWarehouses: warehouses.filter((w: Warehouse) => w.isMainWarehouse).length
     },
     inventory: {
       totalItems: products.reduce((sum: number, product: Product) => sum + product.stockLevel, 0),
       totalValue: products.reduce((sum: number, product: Product) => sum + product.inventoryValue, 0),
-      lowStockItems: products.filter((product: Product) => (product.stockLevel / product.maxCapacity) < 0.3).length,
-      categories: [...new Set(products.map((product: Product) => product.category))].length,
+      lowStockItems: products.filter((product: Product) => product.stockLevel / product.maxCapacity < 0.3).length,
+      categories: [...new Set(products.map((product: Product) => product.category))].length
     },
     transfers: {
       total: transfers.length,
       pending: transfers.filter((t: TransferRequest) => t.status === 'pending').length,
       partial: transfers.filter((t: TransferRequest) => t.status === 'partial').length,
       fulfilled: transfers.filter((t: TransferRequest) => t.status === 'fulfilled').length,
-      rejected: transfers.filter((t: TransferRequest) => t.status === 'rejected').length,
-    },
+      rejected: transfers.filter((t: TransferRequest) => t.status === 'rejected').length
+    }
   };
 
   // Calculate trends (this would typically come from historical data)
@@ -488,7 +488,7 @@ export const useDashboardMetrics = () => {
     warehousesGrowth: '+5%',
     inventoryGrowth: '+12%',
     transfersGrowth: '+8%',
-    valueGrowth: '+15%',
+    valueGrowth: '+15%'
   };
 
   return {
@@ -496,7 +496,7 @@ export const useDashboardMetrics = () => {
     trends,
     isLoading,
     warehouses: warehouses.slice(0, 6), // Show only first 6 for dashboard
-    recentTransfers: transfers.slice(0, 5), // Show only recent 5 transfers
+    recentTransfers: transfers.slice(0, 5) // Show only recent 5 transfers
   };
 };
 
@@ -517,19 +517,19 @@ export const useWarehouseNotifications = () => {
         type: 'warning',
         title: 'Pending Transfer Requests',
         message: `You have ${pendingTransfers.length} pending transfer requests`,
-        action: '/transfers',
+        action: '/transfers'
       });
     }
 
     // Check for low stock items
-    const lowStockItems = products.filter((product: Product) => (product.stockLevel / product.maxCapacity) < 0.3);
+    const lowStockItems = products.filter((product: Product) => product.stockLevel / product.maxCapacity < 0.3);
     if (lowStockItems.length > 0) {
       newNotifications.push({
         id: 'low-stock',
         type: 'error',
         title: 'Low Stock Alert',
         message: `${lowStockItems.length} items are running low on stock`,
-        action: '/inventory',
+        action: '/inventory'
       });
     }
 
@@ -541,7 +541,7 @@ export const useWarehouseNotifications = () => {
         type: 'info',
         title: 'Partial Fulfillments',
         message: `${partialTransfers.length} transfer requests are partially fulfilled`,
-        action: '/transfers',
+        action: '/transfers'
       });
     }
 
@@ -549,13 +549,13 @@ export const useWarehouseNotifications = () => {
   }, [transfers, products]);
 
   const dismissNotification = (id: string) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
   };
 
   return {
     notifications,
     dismissNotification,
-    hasNotifications: notifications.length > 0,
+    hasNotifications: notifications.length > 0
   };
 };
 
@@ -566,15 +566,15 @@ export const useBulkOperations = () => {
   const warehouseApi = useWarehouseApi();
 
   const selectItem = (id: string) => {
-    setSelectedItems(prev => 
-      prev.includes(id) 
-        ? prev.filter(item => item !== id)
-        : [...prev, id]
+    setSelectedItems((prev) =>
+    prev.includes(id) ?
+    prev.filter((item) => item !== id) :
+    [...prev, id]
     );
   };
 
   const selectAll = (items: any[]) => {
-    setSelectedItems(items.map(item => item.id));
+    setSelectedItems(items.map((item) => item.id));
   };
 
   const clearSelection = () => {
@@ -585,7 +585,7 @@ export const useBulkOperations = () => {
     setIsLoading(true);
     try {
       await Promise.all(
-        warehouseIds.map(id => warehouseApi.toggleWarehouseStatus(id, isActive))
+        warehouseIds.map((id) => warehouseApi.toggleWarehouseStatus(id, isActive))
       );
       toast.success(`${warehouseIds.length} warehouses updated successfully`);
       clearSelection();
@@ -601,7 +601,7 @@ export const useBulkOperations = () => {
     setIsLoading(true);
     try {
       await Promise.all(
-        warehouseIds.map(id => warehouseApi.deleteWarehouse(id))
+        warehouseIds.map((id) => warehouseApi.deleteWarehouse(id))
       );
       toast.success(`${warehouseIds.length} warehouses deleted successfully`);
       clearSelection();
@@ -621,7 +621,7 @@ export const useBulkOperations = () => {
     clearSelection,
     bulkUpdateWarehouseStatus,
     bulkDeleteWarehouses,
-    hasSelection: selectedItems.length > 0,
+    hasSelection: selectedItems.length > 0
   };
 };
 
@@ -660,7 +660,7 @@ export const useWarehouseManagerOperations = () => {
   return {
     isLoading,
     assignManagers,
-    unassignManager,
+    unassignManager
   };
 };
 
@@ -674,8 +674,8 @@ export const useWarehouseExport = () => {
       const response = await fetch(`/v1/warehouses/export?format=${format}`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-        },
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        }
       });
 
       if (response.ok) {
@@ -706,8 +706,8 @@ export const useWarehouseExport = () => {
       const response = await fetch(`/v1/warehouses/${warehouseId}/inventory/export?format=${format}`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-        },
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        }
       });
 
       if (response.ok) {
@@ -735,6 +735,6 @@ export const useWarehouseExport = () => {
   return {
     isExporting,
     exportWarehouses,
-    exportInventory,
+    exportInventory
   };
 };

@@ -17,13 +17,13 @@ type Props = {
   month?: string; 
 };
 
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const;
+
 const TransactionsInsights: React.FC<Props> = ({ status, month }) => {
   const { data, isFetching, isError } = useGetAdminOverviewQuery({
     status,
     month,
   });
-
-  const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const;
 
   const lineData: TxPoint[] = useMemo(() => {
     const rows = (data as any)?.charts?.monthlyTrends ?? [];

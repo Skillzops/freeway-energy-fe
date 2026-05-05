@@ -8,8 +8,8 @@ import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
 import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import CreateNewProduct, {
-  ProductFormType,
-} from "@/Components/Products/CreateNewProduct";
+  ProductFormType } from
+"@/Components/Products/CreateNewProduct";
 import { useGetRequest } from "@/utils/useApiCall";
 
 const ProductsTable = lazy(
@@ -24,28 +24,28 @@ const Products = () => {
   const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
   const [tableQueryParams, setTableQueryParams] = useState<Record<
     string,
-    any
-  > | null>({});
+    any> |
+  null>({});
 
-  const queryString = Object.entries(tableQueryParams || {})
-    .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
-    .join("&");
+  const queryString = Object.entries(tableQueryParams || {}).
+  map(([key, value]) => `${key}=${encodeURIComponent(value)}`).
+  join("&");
 
   const {
     data: productData,
     isLoading: productLoading,
     mutate: allProductsRefresh,
     error: allProductsError,
-    errorStates: allProductsErrorStates,
+    errorStates: allProductsErrorStates
   } = useGetRequest(
     `/v1/agents/products?page=${currentPage}&limit=${entriesPerPage}${
-      queryString && `&${queryString}`
-    }`,
+    queryString && `&${queryString}`}`,
+
     true,
     60000
   );
 
-  const fetchAllProductStats = useGetRequest(
+  const _fetchAllProductStats = useGetRequest(
     "/v1/agents/product/statistics/view",
     true,
     60000
@@ -58,36 +58,36 @@ const Products = () => {
       currentPage,
       entriesPerPage,
       setCurrentPage,
-      setEntriesPerPage,
+      setEntriesPerPage
     };
   };
 
   const navigationList = [
-    {
-      title: "All Product",
-      link: "/agent/products/all",
-      count: productData?.total || 0,
-    },
-  ];
+  {
+    title: "All Product",
+    link: "/agent/products/all",
+    count: productData?.total || 0
+  }];
 
-  
+
+
 
   useEffect(() => {
     setTableQueryParams({});
     switch (location.pathname) {
       case "/agent/products/all":
         setTableQueryParams((prevParams) => ({
-          ...prevParams,
+          ...prevParams
         }));
         break;
       default:
         setTableQueryParams((prevParams) => ({
-          ...prevParams,
+          ...prevParams
         }));
     }
   }, [location.pathname]);
 
-  const dropDownList = {
+  const _dropDownList = {
     items: ["Create New Category"],
     onClickLink: (index: number) => {
       switch (index) {
@@ -99,7 +99,7 @@ const Products = () => {
           break;
       }
     },
-    showCustomButton: true,
+    showCustomButton: true
   };
 
   const productPaths = ["all"];
@@ -114,47 +114,47 @@ const Products = () => {
               // iconBgColor="bg-[#FDEEC2]"
               topText="All"
               bottomText="PRODUCTS"
-              value={productData?.total || 0}
-            />
+              value={productData?.total || 0} />
+
             {/* <TitlePill
-              icon={productgreen}
-              iconBgColor="bg-[#E3FAD6]"
-              topText="Installment"
-              bottomText="PRODUCTS"
-              value={0}
-            />
-            <TitlePill
-              icon={productgreen}
-              iconBgColor="bg-[#E3FAD6]"
-              topText="Single Deposit"
-              bottomText="PRODUCTS"
-              value={0}
-            />
-            <TitlePill
-              icon={productgreen}
-              iconBgColor="bg-[#E3FAD6]"
-              topText="Recharge"
-              bottomText="PRODUCTS"
-              value={0}
-            /> */}
+               icon={productgreen}
+               iconBgColor="bg-[#E3FAD6]"
+               topText="Installment"
+               bottomText="PRODUCTS"
+               value={0}
+              />
+              <TitlePill
+               icon={productgreen}
+               iconBgColor="bg-[#E3FAD6]"
+               topText="Single Deposit"
+               bottomText="PRODUCTS"
+               value={0}
+              />
+              <TitlePill
+               icon={productgreen}
+               iconBgColor="bg-[#E3FAD6]"
+               topText="Recharge"
+               bottomText="PRODUCTS"
+               value={0}
+              /> */}
             {/* <TitlePill
-              icon={cancelled}
-              iconBgColor="bg-[#FFDBDE]"
-              topText="Cancelled"
-              bottomText="PRODUCTS"
-              value={0}
-            /> */}
+               icon={cancelled}
+               iconBgColor="bg-[#FFDBDE]"
+               topText="Cancelled"
+               bottomText="PRODUCTS"
+               value={0}
+              /> */}
           </div>
           <div className="flex w-full items-center justify-between gap-2 min-w-max sm:w-max sm:justify-end">
             {/* <ActionButton
-              label="New Product"
-              icon={<img src={circleAction} />}
-              onClick={() => {
-                setFormType("newProduct");
-                setIsOpen(true);
-              }}
-            />
-            <DropDown {...dropDownList} /> */}
+               label="New Product"
+               icon={<img src={circleAction} />}
+               onClick={() => {
+                 setFormType("newProduct");
+                 setIsOpen(true);
+               }}
+              />
+              <DropDown {...dropDownList} /> */}
           </div>
         </section>
         <div className="flex flex-col w-full px-2 py-8 gap-4 lg:flex-row md:p-8">
@@ -162,31 +162,31 @@ const Products = () => {
           <section className="relative items-start justify-center flex min-h-[415px] w-full overflow-hidden">
             <Suspense
               fallback={
-                <LoadingSpinner parentClass="absolute top-[50%] w-full" />
-              }
-            >
+              <LoadingSpinner parentClass="absolute top-[50%] w-full" />
+              }>
+
               <Routes>
                 <Route
                   path="/"
-                  element={<Navigate to="/agent/products/all" replace />}
-                />
-                {productPaths.map((path) => (
-                  <Route
-                    key={path}
-                    path={path}
-                    element={
-                      <ProductsTable
-                        productData={productData}
-                        isLoading={productLoading}
-                        refreshTable={allProductsRefresh}
-                        error={allProductsError}
-                        errorData={allProductsErrorStates}
-                        paginationInfo={paginationInfo}
-                        setTableQueryParams={setTableQueryParams}
-                      />
-                    }
-                  />
-                ))}
+                  element={<Navigate to="/agent/products/all" replace />} />
+
+                {productPaths.map((path) =>
+                <Route
+                  key={path}
+                  path={path}
+                  element={
+                  <ProductsTable
+                    productData={productData}
+                    isLoading={productLoading}
+                    refreshTable={allProductsRefresh}
+                    error={allProductsError}
+                    errorData={allProductsErrorStates}
+                    paginationInfo={paginationInfo}
+                    setTableQueryParams={setTableQueryParams} />
+
+                  } />
+
+                )}
               </Routes>
             </Suspense>
           </section>
@@ -196,10 +196,10 @@ const Products = () => {
         isOpen={isOpen}
         setIsOpen={setIsOpen}
         refreshTable={allProductsRefresh}
-        formType={formType}
-      />
-    </>
-  );
+        formType={formType} />
+
+    </>);
+
 };
 
 export default Products;

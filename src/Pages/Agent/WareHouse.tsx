@@ -18,27 +18,27 @@ const WarehouseTable = lazy(
 
 const WareHouses = () => {
   const location = useLocation();
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [_isOpen, setIsOpen] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [entriesPerPage, setEntriesPerPage] = useState<number>(20);
   const [tableQueryParams, setTableQueryParams] = useState<Record<
     string,
-    any
-  > | null>({});
+    any> |
+  null>({});
 
-  const queryString = Object.entries(tableQueryParams || {})
-    .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
-    .join("&");
+  const queryString = Object.entries(tableQueryParams || {}).
+  map(([key, value]) => `${key}=${encodeURIComponent(value)}`).
+  join("&");
 
   const {
     data: warehouseData,
     isLoading: warehouseLoading,
     mutate: allWarehouseRefresh,
-    errorStates: allWarehouseErrorStates,
+    errorStates: allWarehouseErrorStates
   } = useGetRequest(
     `/v1/?page=${currentPage}&limit=${entriesPerPage}${
-      queryString && `&${queryString}`
-    }`,
+    queryString && `&${queryString}`}`,
+
     true,
     60000
   );
@@ -55,7 +55,7 @@ const WareHouses = () => {
       currentPage,
       entriesPerPage,
       setCurrentPage,
-      setEntriesPerPage,
+      setEntriesPerPage
     };
   };
 
@@ -64,7 +64,7 @@ const WareHouses = () => {
     switch (location.pathname) {
       case "/agent/warehouses/all":
         setTableQueryParams((prevParams) => ({
-          ...prevParams,
+          ...prevParams
         }));
         break;
     }
@@ -83,7 +83,7 @@ const WareHouses = () => {
         default:
       }
     },
-    showCustomButton: true,
+    showCustomButton: true
   };
 
   const warehousePaths = ["all", "active", "inactive"];
@@ -99,18 +99,18 @@ const WareHouses = () => {
               topText="All"
               bottomText="WAREHOUSES"
               value={
-                fetchWarehouseStats?.data?.totalWarehouses ||
-                warehouseData?.total ||
-                0
-              }
-            />
+              fetchWarehouseStats?.data?.totalWarehouses ||
+              warehouseData?.total ||
+              0
+              } />
+
           </div>
           <div className="flex w-full items-center justify-between gap-2 min-w-max sm:w-max sm:justify-end">
             <ActionButton
               label="New Warehouse"
               icon={<img src={circleAction} className="w-4 h-4 filter brightness-0 invert" />}
-              onClick={() => setIsOpen(true)}
-            />
+              onClick={() => setIsOpen(true)} />
+
             <DropDown {...dropDownList} />
           </div>
         </section>
@@ -118,38 +118,38 @@ const WareHouses = () => {
           <section className="relative items-start justify-center flex min-h-[415px] w-full overflow-hidden">
             <Suspense
               fallback={
-                <LoadingSpinner parentClass="absolute top-[50%] w-full" />
-              }
-            >
+              <LoadingSpinner parentClass="absolute top-[50%] w-full" />
+              }>
+
               <Routes>
                 <Route
                   path="/"
-                  element={<Navigate to="/agent/warehouses/all" replace />}
-                />
-                {warehousePaths.map((path) => (
-                  <Route
-                    key={path}
-                    path={path}
-                    element={
-                      <WarehouseTable
-                        warehouseData={warehouseData}
-                        isLoading={warehouseLoading}
-                        refreshTable={allWarehouseRefresh}
-                        error={null}
-                        errorData={allWarehouseErrorStates}
-                        paginationInfo={paginationInfo}
-                        setTableQueryParams={setTableQueryParams}
-                      />
-                    }
-                  />
-                ))}
+                  element={<Navigate to="/agent/warehouses/all" replace />} />
+
+                {warehousePaths.map((path) =>
+                <Route
+                  key={path}
+                  path={path}
+                  element={
+                  <WarehouseTable
+                    warehouseData={warehouseData}
+                    isLoading={warehouseLoading}
+                    refreshTable={allWarehouseRefresh}
+                    error={null}
+                    errorData={allWarehouseErrorStates}
+                    paginationInfo={paginationInfo}
+                    setTableQueryParams={setTableQueryParams} />
+
+                  } />
+
+                )}
               </Routes>
             </Suspense>
           </section>
         </div>
       </PageLayout>
-    </>
-  );
+    </>);
+
 };
 
 export default WareHouses;

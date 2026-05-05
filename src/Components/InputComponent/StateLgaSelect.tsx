@@ -42,9 +42,9 @@ const STATE_LGA_MAP: Record<string, string[]> = {
   Zamfara: ["Anka", "Bakura", "Birnin Magaji/Kiyaw", "Bukkuyum", "Bungudu", "Gummi", "Gusau", "Kaura Namoda", "Maradun", "Maru", "Shinkafi", "Talata Mafara", "Chafe", "Zurmi"],
 };
 
-export const NIGERIAN_STATES = Object.keys(STATE_LGA_MAP);
+const NIGERIAN_STATES = Object.keys(STATE_LGA_MAP);
 
-export type StateLgaSelectProps = {
+type StateLgaSelectProps = {
   state: string;
   lga: string;
   onStateChange: (state: string) => void;

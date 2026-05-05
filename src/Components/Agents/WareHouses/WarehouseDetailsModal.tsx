@@ -16,7 +16,7 @@ const WarehouseDetailModal: React.FC<WarehouseDetailModalProps> = ({
   isOpen,
   setIsOpen,
   warehouseID,
-  refreshTable,
+  refreshTable: _refreshTable
 }) => {
   const { data: warehouseDetail, isLoading: warehouseLoading } = useGetRequest(
     `/v1/warehouses/${warehouseID}`,
@@ -33,13 +33,13 @@ const WarehouseDetailModal: React.FC<WarehouseDetailModalProps> = ({
 
   // Calculate the total inventory value
   const totalInventoryValue =
-    stats?.totalInventoryValue ||
-    stats?.totalValue ||
-    warehouse?.totalInventoryValue ||
-    warehouse?.inventoryValue ||
-    warehouse?.totalValue ||
-    warehouse?.value ||
-    0;
+  stats?.totalInventoryValue ||
+  stats?.totalValue ||
+  warehouse?.totalInventoryValue ||
+  warehouse?.inventoryValue ||
+  warehouse?.totalValue ||
+  warehouse?.value ||
+  0;
 
   const isLoading = warehouseLoading || statsLoading;
 
@@ -48,10 +48,10 @@ const WarehouseDetailModal: React.FC<WarehouseDetailModalProps> = ({
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
         <h2 className="text-xl font-bold mb-4">Warehouse Details</h2>
 
-        {isLoading ? (
-          <LoadingSpinner parentClass="py-8" />
-        ) : warehouse ? (
-          <ul className="space-y-2">
+        {isLoading ?
+        <LoadingSpinner parentClass="py-8" /> :
+        warehouse ?
+        <ul className="space-y-2">
             <li>
               <strong>Name:</strong> {warehouse.name}
             </li>
@@ -66,9 +66,9 @@ const WarehouseDetailModal: React.FC<WarehouseDetailModalProps> = ({
             </li>
             <li>
               <strong>Inventory Classes:</strong>{" "}
-              {Array.isArray(warehouse.inventoryClasses)
-                ? warehouse.inventoryClasses.join(", ")
-                : warehouse.inventoryClasses || "N/A"}
+              {Array.isArray(warehouse.inventoryClasses) ?
+            warehouse.inventoryClasses.join(", ") :
+            warehouse.inventoryClasses || "N/A"}
             </li>
             <li>
               <strong>Total Inventory Count:</strong>{" "}
@@ -81,20 +81,20 @@ const WarehouseDetailModal: React.FC<WarehouseDetailModalProps> = ({
                 {formatNumberWithCommas(totalInventoryValue)}
               </span>
             </li>
-          </ul>
-        ) : (
-          <p className="text-gray-500">No warehouse details found.</p>
-        )}
+          </ul> :
+
+        <p className="text-gray-500">No warehouse details found.</p>
+        }
 
         <button
           className="mt-4 px-4 py-2 bg-primary text-white rounded-full hover:bg-primary-dark"
-          onClick={() => setIsOpen(false)}
-        >
+          onClick={() => setIsOpen(false)}>
+
           Close
         </button>
       </div>
-    </Modal>
-  );
+    </Modal>);
+
 };
 
 export default WarehouseDetailModal;
