@@ -45,27 +45,35 @@ const TopUpWalletForm = ({
         method: "post",
         data: {
           amount: Number(parsedAmount),
-          gateway: PaymentGateway.FLUTTERWAVE,
+          gateway: PaymentGateway.PAYSTACK,
         },
       });
 
       console.log(res, "res___");
 
-      if (!res?.status) return;
-
-      toast.success(res?.data?.message, { autoClose: 80000000 });
-
-      // Get the payment link from the response
-      const paymentLink = res?.data?.paymentLink;
-
-      if (paymentLink && typeof window !== "undefined") {
-        window.open(paymentLink, "_blank", "noopener,noreferrer");
+      if (!res?.status) {
+        throw new Error("Unable to initialize Paystack top-up");
       }
 
+      const paystackUrl =
+        res?.data?.paymentData?.data?.authorization_url ||
+        res?.data?.paymentData?.authorization_url;
+
+      if (!paystackUrl) {
+        throw new Error("Paystack authorization URL not returned");
+      }
+
+      if (typeof window !== "undefined") {
+        window.open(paystackUrl, "_blank", "noopener,noreferrer");
+      }
+
+      toast.info(
+        "Paystack top-up initialized. Complete payment in the opened tab.",
+      );
       refreshTable();
       handleClose(); // Close the modal
     } catch (err) {
-      toast.error("Failed to top up wallet. Please try again.");
+      toast.error("Failed to initialize Paystack top-up. Please try again.");
     } finally {
       setLoading(false);
     }

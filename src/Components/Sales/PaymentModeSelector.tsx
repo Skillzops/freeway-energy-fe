@@ -10,8 +10,8 @@ interface PaymentModeSelectorProps {
   amount?: number;
   onAmountChange?: (amount: number) => void;
   onNotesChange?: (notes: string) => void;
-  paymentGateway?: "OGARANYA" | "FLUTTERWAVE";
-  onPaymentGatewayChange?: (gateway: "OGARANYA" | "FLUTTERWAVE") => void;
+  paymentGateway?: "PAYSTACK";
+  onPaymentGatewayChange?: (gateway: "PAYSTACK") => void;
 }
 
 const PaymentModeSelector: React.FC<PaymentModeSelectorProps> = ({
@@ -27,9 +27,9 @@ const PaymentModeSelector: React.FC<PaymentModeSelectorProps> = ({
 }) => {
   const [paymentAmount, setPaymentAmount] = useState(amount?.toString() || "");
   const [notes, setNotes] = useState("");
-  const [selectedGateway, setSelectedGateway] = useState<
-    "OGARANYA" | "FLUTTERWAVE"
-  >(paymentGateway || "OGARANYA");
+  const [selectedGateway, setSelectedGateway] = useState<"PAYSTACK">(
+    paymentGateway || "PAYSTACK",
+  );
 
   // Update local state when amount prop changes
   useEffect(() => {
@@ -55,7 +55,7 @@ const PaymentModeSelector: React.FC<PaymentModeSelectorProps> = ({
   };
 
   const handleGatewayChange = (gateway: string) => {
-    const gatewayValue = gateway as "OGARANYA" | "FLUTTERWAVE";
+    const gatewayValue = gateway as "PAYSTACK";
     setSelectedGateway(gatewayValue);
     if (onPaymentGatewayChange) {
       onPaymentGatewayChange(gatewayValue);
@@ -83,8 +83,7 @@ const PaymentModeSelector: React.FC<PaymentModeSelectorProps> = ({
           value={selectedGateway}
           onChange={handleGatewayChange}
           options={[
-            { label: "Ogaranya", value: "OGARANYA" },
-            { label: "Flutterwave", value: "FLUTTERWAVE" },
+            { label: "Paystack", value: "PAYSTACK" },
           ]}
         />
       )}

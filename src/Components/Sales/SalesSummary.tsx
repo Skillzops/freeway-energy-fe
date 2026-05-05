@@ -11,13 +11,9 @@ import { formatNumberWithCommas } from "@/utils/helpers";
 import { toast } from "react-toastify";
 import { useApiCall } from "@/utils/useApiCall";
 import PaymentModeSelector from "./PaymentModeSelector";
-import { useFlutterwave } from "flutterwave-react-v3";
-import { FlutterwaveConfig } from "flutterwave-react-v3/dist/types";
+import { startPaystackPayment } from "@/utils/paystack";
 
-// Flutterwave configuration
-const public_key =
-  import.meta.env.VITE_FLW_PUBLIC_KEY ||
-  "FLWPUBK_TEST-720d3bd8434091e9b28a01452ebdd2e0-X";
+const paystackPublicKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || "";
 const base_url = import.meta.env.VITE_API_BASE_URL;
 
 // Payment types
@@ -34,7 +30,10 @@ interface SaleResponse {
   paymentData?: {
   amount: number;
   tx_ref: string;
-  transaction_id: string;
+  gateway?: string;
+  data?: {
+    reference?: string;
+  };
   };
 }
 
@@ -112,10 +111,8 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
   }, []);
 
   const [paymentGateway, setPaymentGateway] = useState<
-    "OGARANYA" | "FLUTTERWAVE"
-  >("OGARANYA");
-  const [showOgaranyaModal, setShowOgaranyaModal] = useState(false);
-  const [ogaranyaPaymentData, setOgaranyaPaymentData] = useState<any>(null);
+    "PAYSTACK"
+  >("PAYSTACK");
 
   // Create sale for both cash and online payments
   const createSale = async (): Promise<{
@@ -259,71 +256,36 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
         
         const paymentAmount = totalAmount;
         
-        console.log('Initiating Flutterwave payment:', { saleId, paymentAmount, tx_ref });
+        console.log("Initiating Paystack payment:", { saleId, paymentAmount, tx_ref });
 
-        if (paymentGateway == "FLUTTERWAVE") {
-          // Use Flutterwave hook with configuration
-          const flutterwaveConfig: FlutterwaveConfig = {
-            public_key,
-            tx_ref,
-            amount: paymentAmount,
-            currency: "NGN",
-            redirect_url: `${window.location.origin}/sales`,
-            payment_options: "banktransfer, card, ussd, account",
-            customer: {
-              email: SaleStore.customer.email,
-              name: SaleStore.customer.customerName || "",
-              phone_number: SaleStore.customer.phone || "",
-            },
-            customizations: {
-              title: "Product Purchase",
-              description: `Payment for sale ${saleId}`,
-              logo: "https://res.cloudinary.com/bluebberies/image/upload/v1726242207/Screenshot_2024-09-04_at_2.43.01_PM_fcjlf3.png",
-            },
-            meta: {
-              saleId: saleId,
-            },
-          };
-
-          const handleFlutterPayment = useFlutterwave(flutterwaveConfig);
-
-          handleFlutterPayment({
-            callback: async (response: any) => {
-              console.log("Flutterwave payment response:", response);
-              console.log("Calling verifyPayment with:", {
-                tx_ref: response.tx_ref,
-                transaction_id: response.transaction_id,
-              });
-              if (response.status === "successful") {
-                // Pass both tx_ref and transaction_id for verification
-                const isVerified = await verifyPayment(
-                  String(response.tx_ref),
-                  response.transaction_id
-                );
-                if (!isVerified) {
-                  setPaymentError(
-                    "Payment completed but verification failed. Please contact support with reference: " +
-                      String(response.tx_ref)
-                  );
-                }
-              } else {
-                toast.error("Payment failed. Please try again.");
-                setPaymentError(
-                  "Payment was not successful. Please try again."
-                );
-              }
-            },
-            onClose: () => {
-              toast.info("Payment was cancelled");
-            },
-          });
-        } else if (paymentGateway == "OGARANYA") {
-          if (paymentData && paymentData.gateway === "OGARANYA") {
-            setOgaranyaPaymentData(paymentData);
-            setShowOgaranyaModal(true);
-            setIsSubmitting(false);
-          }          
+        if (!paystackPublicKey) {
+          throw new Error("Missing Paystack public key. Set VITE_PAYSTACK_PUBLIC_KEY.");
         }
+
+        const paystackReference =
+          paymentData?.data?.reference || tx_ref || paymentData?.tx_ref;
+
+        await startPaystackPayment({
+          key: paystackPublicKey,
+          email: SaleStore.customer.email,
+          amount: paymentAmount,
+          reference: paystackReference,
+          metadata: {
+            saleId,
+          },
+          onSuccess: async (response: any) => {
+            const isVerified = await verifyPayment(String(response.reference));
+            if (!isVerified) {
+              setPaymentError(
+                `Payment completed but verification failed. Reference: ${String(response.reference)}`,
+              );
+            }
+          },
+          onClose: () => {
+            toast.info("Payment was cancelled");
+            setIsSubmitting(false);
+          },
+        });
       }
     } catch (error: any) {
       console.error("Error processing payment:", error);
@@ -339,10 +301,6 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
   }, [createSale, recordCashPayment, refreshTable, resetSaleModalState, paymentNotes]);
 
 
-  function handleOgaranayaSuccessModalClose() { 
-    setShowOgaranyaModal(false);
-    resetSaleModalState();
-  }
   // Clear errors when payment info changes
   useEffect(() => {
     if (paymentInfo) {
@@ -351,13 +309,10 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
   }, [paymentInfo]);
 
   // Verify payment with backend (EXACTLY like SaleTransactions)
-  const verifyPayment = async (tx_ref: string, transaction_id?: string) => {
+  const verifyPayment = async (tx_ref: string) => {
     try {
-      console.log('Verifying payment with tx_ref:', tx_ref, 'transaction_id:', transaction_id);
-      let endpoint = `/v1/payment/verify/callback?tx_ref=${tx_ref}`;
-      if (transaction_id) {
-        endpoint += `&transaction_id=${transaction_id}`;
-      }
+      console.log("Verifying payment with tx_ref:", tx_ref);
+      const endpoint = `/v1/payment/verify/callback?tx_ref=${tx_ref}`;
       console.log("Verification endpoint:", endpoint);
       const response = await apiCall({
         endpoint,
@@ -560,7 +515,7 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
           <span className="text-sm text-textDarkGrey">Payment Method:</span>
           <span className="text-sm font-medium text-textBlack">
             {SaleStore.paymentMethod === "ONLINE"
-              ? "Online Payment (Flutterwave)"
+              ? "Online Payment (Paystack)"
               : "Cash Payment"}
           </span>
         </div>
@@ -603,59 +558,8 @@ const SalesSummary: React.FC<SalesSummaryProps> = ({
           onClick={handlePayment}
         />
       </div>
-      {showOgaranyaModal && ogaranyaPaymentData && (
-        <OgaranyaPaymentModal
-          ogaranyaPaymentData={ogaranyaPaymentData}
-          handleOgaranayaSuccessModalClose={handleOgaranayaSuccessModalClose}
-        />
-      )}
     </>
   );
 };
 
 export default SalesSummary;
-
-
-const OgaranyaPaymentModal = ({
-  ogaranyaPaymentData,
-  handleOgaranayaSuccessModalClose,
-}: {
-  ogaranyaPaymentData: any;
-  handleOgaranayaSuccessModalClose: () => void;
-}) => (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
-      <h3 className="text-lg font-bold mb-4">Ogaranya Payment Details</h3>
-      <div className="space-y-3">
-        <div>
-          <p className="text-sm text-gray-600">Amount:</p>
-          <p className="font-bold">
-            ₦{formatNumberWithCommas(ogaranyaPaymentData?.amount)}
-          </p>
-        </div>
-        <div>
-          <p className="text-sm text-gray-600">Order Reference:</p>
-          <p className="font-bold">
-            {ogaranyaPaymentData?.data?.order_reference}
-          </p>
-        </div>
-        <div>
-          <p className="text-sm text-gray-600">Dialing Code:</p>
-          <p className="font-bold text-primaryGradient">
-            {ogaranyaPaymentData?.data?.dialing_code}
-          </p>
-        </div>
-        <div>
-          <p className="text-sm text-gray-600">Instructions:</p>
-          <p className="text-sm">{ogaranyaPaymentData?.data?.message}</p>
-        </div>
-      </div>
-      <button
-        onClick={handleOgaranayaSuccessModalClose}
-        className="mt-4 w-full bg-primaryGradient text-white py-2 rounded"
-      >
-        Close
-      </button>
-    </div>
-  </div>
-);

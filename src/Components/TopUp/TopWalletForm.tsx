@@ -3,6 +3,7 @@ import SecondaryButton from "../SecondaryButton/SecondaryButton";
 import { Input } from "../InputComponent/Input";
 import { useApiCall } from "@/utils/useApiCall";
 import { toast } from "react-toastify";
+import { PaymentGateway } from "@/enums/enum";
 
 const TopUpWalletForm = ({
     handleClose,
@@ -34,20 +35,34 @@ const TopUpWalletForm = ({
 
         setLoading(true);
         try {
-            await apiCall({
+            const response = await apiCall({
                 endpoint: "/v1/wallet/topup",
                 method: "post",
-                data: { amount: parseFloat(amount) },
-                successMessage: "Wallet topped up successfully",
+                data: {
+                    amount: parseFloat(amount),
+                    gateway: PaymentGateway.PAYSTACK,
+                },
             });
-            
-            // Show success toast with amount
-            toast.success(`Wallet topped up successfully with ₦${parseFloat(amount).toLocaleString()}`);
-            
+
+            const paystackUrl =
+                response?.data?.paymentData?.data?.authorization_url ||
+                response?.data?.paymentData?.authorization_url;
+
+            if (!paystackUrl) {
+                throw new Error("Paystack authorization URL not returned");
+            }
+
+            if (typeof window !== "undefined") {
+                window.open(paystackUrl, "_blank", "noopener,noreferrer");
+            }
+
+            toast.info(
+                `Paystack top-up initialized for ₦${parseFloat(amount).toLocaleString()}. Complete payment in the opened tab.`,
+            );
             refreshTable();
             handleClose(); // Close the modal
         } catch (err) {
-            toast.error("Failed to top up wallet. Please try again.");
+            toast.error("Failed to initialize Paystack top-up. Please try again.");
         } finally {
             setLoading(false);
         }
