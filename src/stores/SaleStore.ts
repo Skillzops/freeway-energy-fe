@@ -411,7 +411,7 @@ const saleStore = types
           toPositiveNumber(product?.monthlyPayment),
       };
 
-      if (import.meta.env.DEV) {
+      // if (import.meta.env.DEV) {
         console.log("[AGENT_SALES][STORE_ADD_PRODUCT] incoming->normalized", {
           incoming: {
             productId: product?.productId,
@@ -434,7 +434,7 @@ const saleStore = types
             defaultMonthlyPayment: normalizedProduct?.defaultMonthlyPayment,
           },
         });
-      }
+      // }
 
       const existingIndex = self.products.findIndex(
         (p) => p.productId === normalizedProduct.productId

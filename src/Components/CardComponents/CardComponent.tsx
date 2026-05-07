@@ -482,7 +482,7 @@ export const CardComponent = ({
     if (totalRemainingQuantities === 0) return;
     if (!_selected) {
       if (updatedProductInfo) {
-        if (import.meta.env.DEV && isSale) {
+        // if (import.meta.env.DEV && isSale) {
           console.log("[AGENT_SALES][CARD_SELECT] productInfo", {
             productId: updatedProductInfo.productId,
             installmentDuration: (updatedProductInfo as any).installmentDuration,
@@ -492,7 +492,7 @@ export const CardComponent = ({
             monthlyPayment: (updatedProductInfo as any).monthlyPayment,
             defaultMonthlyPayment: (updatedProductInfo as any).defaultMonthlyPayment,
           });
-        }
+        // }
         // Check if onSelectProduct is defined before calling it
         if (updatedProductInfo && onSelectProduct)
           onSelectProduct(updatedProductInfo);

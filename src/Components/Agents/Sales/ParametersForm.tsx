@@ -251,16 +251,22 @@ const ParametersForm = ({
 
   const saveForm = () => {
     if (!validateItems()) return;
+    const resolvedInitialPayment = resolveInitialPayment();
+    const normalizedInitialPayment =
+      formData.paymentMode === "INSTALLMENT" ?
+      resolvedInitialPayment :
+      Number(formData.installmentStartingPrice) || 0;
     if (import.meta.env.DEV) {
       console.log("[AGENT_SALES][PARAMS_SAVE]", {
         currentProductId,
         formData,
+        normalizedInitialPayment,
       });
     }
     SaleStore.addParameters(currentProductId, {
       ...formData,
       installmentDuration: Number(formData.installmentDuration),
-      installmentStartingPrice: Number(formData.installmentStartingPrice),
+      installmentStartingPrice: Number(normalizedInitialPayment),
       discount: Number(formData.discount),
       monthlyPayment: Number(formData.monthlyPayment ?? 0)
     });
@@ -402,6 +408,11 @@ const ParametersForm = ({
     product,
   ]);
 
+  const normalizedInitialPayment =
+    formData.paymentMode === "INSTALLMENT" ?
+    resolveInitialPayment() :
+    Number(formData.installmentStartingPrice) || 0;
+
   const showCalculationBreakdown =
   formData.paymentMode === "INSTALLMENT" &&
   formData.installmentDuration &&
@@ -438,7 +449,7 @@ const ParametersForm = ({
             type="number"
             name="installmentStartingPrice"
             label="INITIAL PAYMENT AMOUNT"
-            value={formData.installmentStartingPrice as number}
+            value={normalizedInitialPayment as number}
             onChange={handleInputChange}
             placeholder="Initial Payment Amount"
             required={true}
