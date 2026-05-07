@@ -36,6 +36,17 @@ interface Customer {
 }
 
 const generateListDataEntries = (data: any): ListDataType[] => {
+  const toPositiveNumber = (value: unknown): number | undefined => {
+    if (typeof value === "number" && Number.isFinite(value) && value > 0) {
+      return value;
+    }
+    if (typeof value === "string") {
+      const parsed = Number(value);
+      if (Number.isFinite(parsed) && parsed > 0) return parsed;
+    }
+    return undefined;
+  };
+
   return data?.updatedResults.map((product: any) => ({
     productId: product?.id,
     productImage: product?.image || "",
@@ -55,13 +66,29 @@ const generateListDataEntries = (data: any): ListDataType[] => {
     totalRemainingQuantities: product?.inventories[0]?.totalRemainingQuantities,
     productPaymentModes: product?.paymentModes,
     installmentDuration:
-      product?.defaultInstallmentDuration ?? product?.installmentDuration,
+      toPositiveNumber(product?.defaultInstallmentDuration) ??
+      toPositiveNumber(product?.installmentDuration) ??
+      0,
     installmentStartingPrice:
-      product?.defaultInstallmentStartPrice ?? product?.installmentStartingPrice,
-    defaultInstallmentDuration: product?.defaultInstallmentDuration,
-    defaultInstallmentStartPrice: product?.defaultInstallmentStartPrice,
-    monthlyPayment: product?.defaultMonthlyPayment ?? product?.monthlyPayment,
-    defaultMonthlyPayment: product?.defaultMonthlyPayment,
+      toPositiveNumber(product?.defaultInstallmentStartPrice) ??
+      toPositiveNumber(product?.installmentStartingPrice) ??
+      0,
+    defaultInstallmentDuration:
+      toPositiveNumber(product?.defaultInstallmentDuration) ??
+      toPositiveNumber(product?.installmentDuration) ??
+      0,
+    defaultInstallmentStartPrice:
+      toPositiveNumber(product?.defaultInstallmentStartPrice) ??
+      toPositiveNumber(product?.installmentStartingPrice) ??
+      0,
+    monthlyPayment:
+      toPositiveNumber(product?.defaultMonthlyPayment) ??
+      toPositiveNumber(product?.monthlyPayment) ??
+      0,
+    defaultMonthlyPayment:
+      toPositiveNumber(product?.defaultMonthlyPayment) ??
+      toPositiveNumber(product?.monthlyPayment) ??
+      0,
   }));
 };
 

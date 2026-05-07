@@ -7,6 +7,17 @@ import {
   SnapshotIn,
 } from "mobx-state-tree";
 
+const toPositiveNumber = (value: unknown): number | undefined => {
+  if (typeof value === "number" && Number.isFinite(value) && value > 0) {
+    return value;
+  }
+  if (typeof value === "string") {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed) && parsed > 0) return parsed;
+  }
+  return undefined;
+};
+
 const defaultValues: SnapshotIn<typeof saleStore> = {
   category: "PRODUCT",
   customer: null,
@@ -378,19 +389,41 @@ const saleStore = types
       self.doesCustomerExist = value;
     },
     addProduct(product: any) {
+      const normalizedProduct = {
+        ...product,
+        defaultInstallmentDuration:
+          toPositiveNumber(product?.defaultInstallmentDuration) ??
+          toPositiveNumber(product?.installmentDuration),
+        defaultInstallmentStartPrice:
+          toPositiveNumber(product?.defaultInstallmentStartPrice) ??
+          toPositiveNumber(product?.installmentStartingPrice),
+        defaultMonthlyPayment:
+          toPositiveNumber(product?.defaultMonthlyPayment) ??
+          toPositiveNumber(product?.monthlyPayment),
+        installmentDuration:
+          toPositiveNumber(product?.defaultInstallmentDuration) ??
+          toPositiveNumber(product?.installmentDuration),
+        installmentStartingPrice:
+          toPositiveNumber(product?.defaultInstallmentStartPrice) ??
+          toPositiveNumber(product?.installmentStartingPrice),
+        monthlyPayment:
+          toPositiveNumber(product?.defaultMonthlyPayment) ??
+          toPositiveNumber(product?.monthlyPayment),
+      };
+
       const existingIndex = self.products.findIndex(
-        (p) => p.productId === product.productId
+        (p) => p.productId === normalizedProduct.productId
       );
 
       if (existingIndex !== -1) {
         // Update existing product
         self.products[existingIndex] = {
           ...self.products[existingIndex],
-          ...product,
+          ...normalizedProduct,
         };
       } else {
         // Add new product
-        self.products.push(product);
+        self.products.push(normalizedProduct);
       }
     },
     removeProduct(productId: string) {
