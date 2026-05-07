@@ -244,6 +244,14 @@ const ParametersForm = ({
     return 0;
   };
 
+  const resolveMonthlyPayment = () => {
+    const fromProduct =
+      toPositiveNumber(product?.defaultMonthlyPayment) ??
+      toPositiveNumber(product?.monthlyPayment);
+    if (fromProduct && fromProduct > 0) return fromProduct;
+    return undefined;
+  };
+
   useEffect(() => {
     const existingParams = SaleStore.getParametersByProductId(currentProductId);
     const duration = resolveInstallmentDuration();
@@ -285,6 +293,7 @@ const ParametersForm = ({
   }, [currentProductId, product]);
 
   const derivedMonthlyPayment =
+  resolveMonthlyPayment() ??
   INSTALLMENT_PLANS[formData.installmentDuration || 0]?.monthlyPayment ?? (
   formData.installmentDuration && formData.installmentDuration > 0 ?
   Math.round(

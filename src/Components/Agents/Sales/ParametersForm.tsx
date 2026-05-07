@@ -129,6 +129,8 @@ const ParametersForm = ({
     if (formData.installmentDuration && formData.installmentDuration > 0) {
       const plan = INSTALLMENT_PLANS[formData.installmentDuration];
       const monthly =
+      toPositiveNumber(product?.defaultMonthlyPayment) ??
+      toPositiveNumber(product?.monthlyPayment) ??
       plan?.monthlyPayment ??
       calculateInstallmentAmount(
         productPrice,
