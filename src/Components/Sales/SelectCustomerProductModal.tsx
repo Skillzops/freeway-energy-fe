@@ -58,7 +58,10 @@ const generateListDataEntries = (data: any): ListDataType[] => {
       product?.defaultInstallmentDuration ?? product?.installmentDuration,
     installmentStartingPrice:
       product?.defaultInstallmentStartPrice ?? product?.installmentStartingPrice,
+    defaultInstallmentDuration: product?.defaultInstallmentDuration,
+    defaultInstallmentStartPrice: product?.defaultInstallmentStartPrice,
     monthlyPayment: product?.defaultMonthlyPayment ?? product?.monthlyPayment,
+    defaultMonthlyPayment: product?.defaultMonthlyPayment,
   }));
 };
 
@@ -331,6 +334,12 @@ const SelectCustomerProductModal = observer(
                           data.productId
                         )}
                         productPaymentModes={data.productPaymentModes}
+                        installmentDuration={data.installmentDuration}
+                        installmentStartingPrice={data.installmentStartingPrice}
+                        defaultInstallmentDuration={data.defaultInstallmentDuration}
+                        defaultInstallmentStartPrice={data.defaultInstallmentStartPrice}
+                        monthlyPayment={data.monthlyPayment}
+                        defaultMonthlyPayment={data.defaultMonthlyPayment}
                         totalRemainingQuantities={data.totalRemainingQuantities}
                         onSelectProduct={(productInfo) => {
                           if (productInfo) SaleStore.addProduct(productInfo);

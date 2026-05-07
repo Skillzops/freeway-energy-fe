@@ -24,7 +24,10 @@ export type ListDataType = {
   productPaymentModes?: string;
   installmentDuration?: number;
   installmentStartingPrice?: number;
+  defaultInstallmentDuration?: number;
+  defaultInstallmentStartPrice?: number;
   monthlyPayment?: number;
+  defaultMonthlyPayment?: number;
 };
 
 type ProductInventoryType = {

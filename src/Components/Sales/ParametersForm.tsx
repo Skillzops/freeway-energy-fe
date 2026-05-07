@@ -18,12 +18,11 @@ type FormData = z.infer<typeof formSchema>;
 const defaultFormData: FormData = {
   paymentMode: "ONE_OFF",
   installmentDuration: 0,
-  installmentStartingPrice: 6000, // Standard initial payment amount
+  installmentStartingPrice: 0,
   discount: 0
 };
 
 const DEFAULT_INSTALLMENT_DURATION = 6;
-const DEFAULT_INITIAL_PAYMENT = 6000;
 
 // Calculate installment amount based on your specified logic
 const _calculateInstallmentAmount = (
@@ -49,9 +48,9 @@ const INSTALLMENT_PLANS: Record<
   number,
   {installmentStartingPrice: number;monthlyPayment?: number;}> =
 {
-  3: { installmentStartingPrice: 8000, monthlyPayment: 32300 },
-  6: { installmentStartingPrice: 5000, monthlyPayment: 17500 },
-  9: { installmentStartingPrice: 5000, monthlyPayment: 12500 }
+  3: { installmentStartingPrice: 0 },
+  6: { installmentStartingPrice: 0 },
+  9: { installmentStartingPrice: 0 }
 };
 
 const ParametersForm = ({
@@ -144,7 +143,9 @@ const ParametersForm = ({
         const duration = resolveInstallmentDuration();
         const plan = INSTALLMENT_PLANS[duration];
         const initialPayment =
-        plan?.installmentStartingPrice ?? resolveInitialPayment();
+        plan?.installmentStartingPrice && plan.installmentStartingPrice > 0 ?
+        plan.installmentStartingPrice :
+        resolveInitialPayment();
         setFormData((prev) => ({
           ...prev,
           paymentMode: "INSTALLMENT",
@@ -229,13 +230,13 @@ const ParametersForm = ({
 
   const resolveInitialPayment = () => {
     const fromProduct =
-    typeof product?.installmentStartingPrice === "number" ?
-    product.installmentStartingPrice :
     typeof product?.defaultInstallmentStartPrice === "number" ?
     product.defaultInstallmentStartPrice :
+    typeof product?.installmentStartingPrice === "number" ?
+    product.installmentStartingPrice :
     undefined;
     if (fromProduct && fromProduct > 0) return fromProduct;
-    return DEFAULT_INITIAL_PAYMENT;
+    return 0;
   };
 
   useEffect(() => {
