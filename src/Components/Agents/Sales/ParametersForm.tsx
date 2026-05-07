@@ -32,6 +32,17 @@ const defaultFormData: FormData = {
 
 const DEFAULT_INSTALLMENT_DURATION = 6;
 
+const toPositiveNumber = (value: unknown): number | undefined => {
+  if (typeof value === "number" && Number.isFinite(value) && value > 0) {
+    return value;
+  }
+  if (typeof value === "string") {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed) && parsed > 0) return parsed;
+  }
+  return undefined;
+};
+
 const calculateInstallmentAmount = (
 productPrice: number,
 discount: number,
@@ -259,11 +270,8 @@ const ParametersForm = ({
 
   const resolveInstallmentDuration = () => {
     const fromProduct =
-    typeof product?.installmentDuration === "number" ?
-    product.installmentDuration :
-    typeof product?.defaultInstallmentDuration === "number" ?
-    product.defaultInstallmentDuration :
-    undefined;
+    toPositiveNumber(product?.defaultInstallmentDuration) ??
+    toPositiveNumber(product?.installmentDuration);
     if (fromProduct && fromProduct > 0) return fromProduct;
 
     const label = `${product?.productName ?? ""} ${product?.productTag ?? ""}`;
@@ -274,21 +282,62 @@ const ParametersForm = ({
 
   const resolveInitialPayment = () => {
     const fromProduct =
-    typeof product?.defaultInstallmentStartPrice === "number" ?
-    product.defaultInstallmentStartPrice :
-    typeof product?.installmentStartingPrice === "number" ?
-    product.installmentStartingPrice :
-    undefined;
+    toPositiveNumber(product?.defaultInstallmentStartPrice) ??
+    toPositiveNumber(product?.installmentStartingPrice);
     if (fromProduct && fromProduct > 0) return fromProduct;
     return 0;
   };
 
   useEffect(() => {
     const existingParams = SaleStore.getParametersByProductId(currentProductId);
+    const duration = resolveInstallmentDuration();
+    const initialPayment = resolveInitialPayment();
+    const monthlyFromProduct =
+      toPositiveNumber(product?.defaultMonthlyPayment) ??
+      toPositiveNumber(product?.monthlyPayment) ??
+      (duration > 0 ?
+      Math.round((productPrice - initialPayment) / duration) :
+      0);
+    const supportsInstallment = (product?.productPaymentModes || "").includes(
+      "INSTALLMENT"
+    );
+
     if (existingParams) {
+      const shouldPatchInitialPayment =
+        supportsInstallment &&
+        (Number(existingParams.installmentStartingPrice) || 0) <= 0 &&
+        initialPayment > 0;
+
+      if (shouldPatchInitialPayment) {
+        setFormData({
+          ...existingParams,
+          installmentStartingPrice: initialPayment,
+          installmentDuration:
+            Number(existingParams.installmentDuration) > 0 ?
+            Number(existingParams.installmentDuration) :
+            duration,
+          monthlyPayment:
+            Number(existingParams.monthlyPayment) > 0 ?
+            Number(existingParams.monthlyPayment) :
+            monthlyFromProduct,
+        });
+        return;
+      }
+
       setFormData(existingParams);
+      return;
     }
-  }, [currentProductId]);
+
+    if (supportsInstallment) {
+      setFormData((prev) => ({
+        ...prev,
+        paymentMode: "INSTALLMENT",
+        installmentDuration: duration,
+        installmentStartingPrice: initialPayment,
+        monthlyPayment: monthlyFromProduct,
+      }));
+    }
+  }, [currentProductId, product, productPrice]);
 
   const showCalculationBreakdown =
   formData.paymentMode === "INSTALLMENT" &&
