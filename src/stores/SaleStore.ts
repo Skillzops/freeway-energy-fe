@@ -127,7 +127,9 @@ const ProductModel = types.model({
   productPaymentModes: types.string,
   installmentDuration: types.maybe(types.number),
   installmentStartingPrice: types.maybe(types.number),
+  defaultInstallmentDuration: types.maybe(types.number),
   defaultInstallmentStartPrice: types.maybe(types.number),
+  defaultMonthlyPayment: types.maybe(types.number),
   monthlyPayment: types.maybe(types.number),
 });
 
@@ -293,7 +295,7 @@ const saleStore = types
         existingSaleItem.installmentDuration =
           params?.params?.installmentDuration || 0;
         existingSaleItem.installmentStartingPrice =
-          params?.params?.installmentStartingPrice || params?.params?.defaultInstallmentStartPrice || 0;
+          params?.params?.installmentStartingPrice || 0;
         existingSaleItem.devices = cast(devices);
         existingSaleItem.miscellaneousPrices = {
           costs: cast(miscellaneousCosts),
@@ -308,7 +310,7 @@ const saleStore = types
           discount: params?.params?.discount || 0,
           installmentDuration: params?.params?.installmentDuration || 0,
           installmentStartingPrice:
-            params?.params?.defaultInstallmentStartPrice  || params?.params?.installmentStartingPrice || 0,
+            params?.params?.installmentStartingPrice || 0,
           devices: cast(devices),
           miscellaneousPrices: { costs: cast(miscellaneousCosts) },
           saleRecipient: { ...saleRecipient },

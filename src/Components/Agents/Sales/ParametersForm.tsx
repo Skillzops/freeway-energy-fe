@@ -257,6 +257,8 @@ const ParametersForm = ({
     const fromProduct =
     typeof product?.installmentDuration === "number" ?
     product.installmentDuration :
+    typeof product?.defaultInstallmentDuration === "number" ?
+    product.defaultInstallmentDuration :
     undefined;
     if (fromProduct && fromProduct > 0) return fromProduct;
 
@@ -270,6 +272,8 @@ const ParametersForm = ({
     const fromProduct =
     typeof product?.installmentStartingPrice === "number" ?
     product.installmentStartingPrice :
+    typeof product?.defaultInstallmentStartPrice === "number" ?
+    product.defaultInstallmentStartPrice :
     undefined;
     if (fromProduct && fromProduct > 0) return fromProduct;
     return DEFAULT_INITIAL_PAYMENT;

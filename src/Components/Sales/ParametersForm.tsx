@@ -200,7 +200,8 @@ const ParametersForm = ({
       ...formData,
       installmentDuration: Number(formData.installmentDuration),
       installmentStartingPrice: Number(formData.installmentStartingPrice),
-      discount: Number(formData.discount)
+      discount: Number(formData.discount),
+      monthlyPayment: Number(derivedMonthlyPayment || 0)
     });
     SaleStore.addSaleItem(currentProductId);
     handleClose();
@@ -215,6 +216,8 @@ const ParametersForm = ({
     const fromProduct =
     typeof product?.installmentDuration === "number" ?
     product.installmentDuration :
+    typeof product?.defaultInstallmentDuration === "number" ?
+    product.defaultInstallmentDuration :
     undefined;
     if (fromProduct && fromProduct > 0) return fromProduct;
 
@@ -228,6 +231,8 @@ const ParametersForm = ({
     const fromProduct =
     typeof product?.installmentStartingPrice === "number" ?
     product.installmentStartingPrice :
+    typeof product?.defaultInstallmentStartPrice === "number" ?
+    product.defaultInstallmentStartPrice :
     undefined;
     if (fromProduct && fromProduct > 0) return fromProduct;
     return DEFAULT_INITIAL_PAYMENT;
