@@ -376,6 +376,32 @@ const ParametersForm = ({
     }
   }, [currentProductId, product, productPrice]);
 
+  useEffect(() => {
+    if (formData.paymentMode !== "INSTALLMENT") return;
+
+    const resolvedInitialPayment = resolveInitialPayment();
+    if ((Number(formData.installmentStartingPrice) || 0) > 0) return;
+    if (resolvedInitialPayment <= 0) return;
+
+    // if (import.meta.env.DEV) {
+      console.log("[AGENT_SALES][FORCE_FIX_INITIAL_PAYMENT]", {
+        currentProductId,
+        previousInitialPayment: formData.installmentStartingPrice,
+        resolvedInitialPayment,
+      });
+    // }
+
+    setFormData((prev) => ({
+      ...prev,
+      installmentStartingPrice: resolvedInitialPayment,
+    }));
+  }, [
+    currentProductId,
+    formData.paymentMode,
+    formData.installmentStartingPrice,
+    product,
+  ]);
+
   const showCalculationBreakdown =
   formData.paymentMode === "INSTALLMENT" &&
   formData.installmentDuration &&
