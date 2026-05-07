@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { useApiCall } from "../../utils/useApiCall";
 import { KeyedMutator } from "swr";
 import {
@@ -129,7 +129,7 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
     const [productCategories, setProductCategories] = useState<Category[]>([]);
 
     // Fetch product categories using apiCall
-    const fetchProductCategories = useCallback(async () => {
+    const fetchProductCategories = async () => {
       try {
         const response = await apiCall({
           endpoint: "/v1/products/categories/all",
@@ -141,14 +141,17 @@ const CreateNewProduct: React.FC<CreatNewProductProps> = observer(
         console.error("Failed to fetch product categories:", error);
         setProductCategories([]);
       }
-    }, [apiCall]);
+    };
 
     // Load categories when modal opens
     useEffect(() => {
       if (isOpen) {
         fetchProductCategories();
       }
-    }, [isOpen, fetchProductCategories]);
+      // Intentionally fetch once per open cycle to avoid request loops
+      // caused by unstable function identities from hooks.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen]);
 
     const handleInputChange = (e: {
       target: { name: any; value: any; files: any };
