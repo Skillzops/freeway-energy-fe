@@ -236,8 +236,6 @@ const CustomerTable = ({
 
   const [rejectionReason, setRejectionReason] = useState<string>("");
 
-  const API_BASE = (import.meta.env?.VITE_API_BASE ?? "").replace(/\/$/, "");
-
   const handleApproveReject = async (
     id: string,
     approve: boolean,
@@ -248,7 +246,7 @@ const CustomerTable = ({
       setActionType(approve ? "approve" : "reject");
 
       await apiCall({
-        endpoint: `${API_BASE}/v1/customers/${id}/approve`,
+        endpoint: `/v1/customers/${id}/approve`,
         method: "post",
         data: approve
           ? { approve: true }
