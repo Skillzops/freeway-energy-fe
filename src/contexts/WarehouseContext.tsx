@@ -1,21 +1,12 @@
 /* eslint-disable react-refresh/only-export-components */
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { useContext, ReactNode } from 'react';
 import type { Warehouse } from '../data/warehouseData';
 import { useWarehouses, useWarehouseApi } from '../services/warehouseApi';
 import { toast as _toast } from 'react-toastify';
-
-interface WarehouseContextType {
-  warehouses: Warehouse[];
-  isLoading: boolean;
-  error: any;
-  mutate: () => void;
-  addWarehouse: (warehouse: Omit<Warehouse, 'id'>) => Promise<void>;
-  updateWarehouse: (id: string, updates: Partial<Warehouse>) => Promise<void>;
-  deleteWarehouse: (id: string) => Promise<void>;
-  toggleWarehouseStatus: (id: string) => Promise<void>;
-}
-
-const WarehouseContext = createContext<WarehouseContextType | undefined>(undefined);
+import {
+  WarehouseContext,
+  WarehouseContextType,
+} from './WarehouseContextValue';
 
 export function WarehouseProvider({ children }: {children: ReactNode;}) {
   // Use real API endpoints

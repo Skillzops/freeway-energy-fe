@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { KeyedMutator } from "swr";
 import {
   FileInput,
@@ -186,7 +186,7 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
   );
 
   // Fetch inventory categories using apiCall
-  const fetchInventoryCategories = useCallback(async () => {
+  const fetchInventoryCategories = async () => {
     try {
       const response = await apiCall({
         endpoint: "/v1/inventory/categories/all",
@@ -198,14 +198,17 @@ const CreateNewInventory: React.FC<CreatNewInventoryProps> = ({
       console.error("Failed to fetch inventory categories:", error);
       setInventoryCategories([]);
     }
-  }, [apiCall]);
+  };
 
   // Load categories when modal opens
   useEffect(() => {
     if (isOpen) {
       fetchInventoryCategories();
     }
-  }, [isOpen, fetchInventoryCategories]);
+    // Intentionally fetch once per open cycle to avoid request loops
+    // caused by unstable function identities from hooks.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   const isFormFilled =
     formType === "newInventory"

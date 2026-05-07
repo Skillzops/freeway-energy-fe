@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { toast } from "react-toastify";
-import useWarehouse from "../../hooks/useWarehouse";
+import { useWarehouse } from "../../contexts/WarehouseContext";
 import type { Warehouse } from "../../data/warehouseData";
 
 interface EditWarehouseModalProps {
