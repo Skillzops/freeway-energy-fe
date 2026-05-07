@@ -93,7 +93,7 @@ const generateListDataEntries = (data: any): ListDataType[] => {
       0,
   }));
 
-  if (import.meta.env.DEV) {
+  // if (import.meta.env.DEV) {
     console.log("[AGENT_SALES][PRODUCT_MAP] raw->mapped", {
       rawCount: results.length,
       sampleRaw: results[0] && {
@@ -114,7 +114,7 @@ const generateListDataEntries = (data: any): ListDataType[] => {
         defaultMonthlyPayment: mapped[0]?.defaultMonthlyPayment,
       },
     });
-  }
+  // }
 
   return mapped;
 };
