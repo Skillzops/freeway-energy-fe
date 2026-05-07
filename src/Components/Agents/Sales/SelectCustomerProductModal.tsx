@@ -395,15 +395,24 @@ const SelectCustomerProductModal = observer(
                           data.productId
                         )}
                         productPaymentModes={data.productPaymentModes}
-                        installmentDuration={data.installmentDuration}
-                        installmentStartingPrice={data.installmentStartingPrice}
-                        defaultInstallmentDuration={data.defaultInstallmentDuration}
-                        defaultInstallmentStartPrice={data.defaultInstallmentStartPrice}
-                        monthlyPayment={data.monthlyPayment}
-                        defaultMonthlyPayment={data.defaultMonthlyPayment}
                         totalRemainingQuantities={data.totalRemainingQuantities}
                         onSelectProduct={(productInfo) => {
-                          if (productInfo) SaleStore.addProduct(productInfo);
+                          if (productInfo) {
+                            // Always preserve mapped installment defaults from list data.
+                            // Card callbacks may omit these fields in some interactions.
+                            SaleStore.addProduct({
+                              ...productInfo,
+                              installmentDuration: data.installmentDuration,
+                              installmentStartingPrice:
+                                data.installmentStartingPrice,
+                              defaultInstallmentDuration:
+                                data.defaultInstallmentDuration,
+                              defaultInstallmentStartPrice:
+                                data.defaultInstallmentStartPrice,
+                              monthlyPayment: data.monthlyPayment,
+                              defaultMonthlyPayment: data.defaultMonthlyPayment,
+                            });
+                          }
                           SaleStore.addSaleItem(
                             productInfo.productId as string
                           );

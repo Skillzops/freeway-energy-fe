@@ -59,6 +59,12 @@ export type CardComponentProps = {
   productUnits?: number;
   totalRemainingQuantities?: number;
   productPaymentModes?: string;
+  installmentDuration?: number;
+  installmentStartingPrice?: number;
+  defaultInstallmentDuration?: number;
+  defaultInstallmentStartPrice?: number;
+  monthlyPayment?: number;
+  defaultMonthlyPayment?: number;
   onSelectProduct?: (productInfo: {
     productPrice: any;
     productUnits: any;
@@ -66,6 +72,12 @@ export type CardComponentProps = {
     productImage: string | undefined;
     productTag: string | undefined;
     productName: string | undefined;
+    installmentDuration?: number;
+    installmentStartingPrice?: number;
+    defaultInstallmentDuration?: number;
+    defaultInstallmentStartPrice?: number;
+    monthlyPayment?: number;
+    defaultMonthlyPayment?: number;
   }) => void;
   onRemoveProduct?: (productId?: string) => void;
   isProductSelected?: boolean;
@@ -369,6 +381,12 @@ export const CardComponent = ({
   productUnits,
   totalRemainingQuantities,
   productPaymentModes,
+  installmentDuration,
+  installmentStartingPrice,
+  defaultInstallmentDuration,
+  defaultInstallmentStartPrice,
+  monthlyPayment,
+  defaultMonthlyPayment,
   onSelectProduct,
   onRemoveProduct,
   isProductSelected,
@@ -394,6 +412,12 @@ export const CardComponent = ({
     productName,
     productPrice,
     productPaymentModes,
+    installmentDuration,
+    installmentStartingPrice,
+    defaultInstallmentDuration,
+    defaultInstallmentStartPrice,
+    monthlyPayment,
+    defaultMonthlyPayment,
   };
 
   useEffect(() => {
