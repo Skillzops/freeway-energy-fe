@@ -49,7 +49,7 @@ const generateListDataEntries = (data: any): ListDataType[] => {
   };
 
   const results = data?.updatedResults || data?.results || data?.data || [];
-  return results.map((product: any) => ({
+  const mapped = results.map((product: any) => ({
     productId: product?.id,
     productImage: product?.image || "",
     productTag: product?.category?.name,
@@ -92,6 +92,31 @@ const generateListDataEntries = (data: any): ListDataType[] => {
       toPositiveNumber(product?.monthlyPayment) ??
       0,
   }));
+
+  if (import.meta.env.DEV) {
+    console.log("[AGENT_SALES][PRODUCT_MAP] raw->mapped", {
+      rawCount: results.length,
+      sampleRaw: results[0] && {
+        id: results[0]?.id,
+        defaultInstallmentDuration: results[0]?.defaultInstallmentDuration,
+        installmentDuration: results[0]?.installmentDuration,
+        defaultInstallmentStartPrice: results[0]?.defaultInstallmentStartPrice,
+        installmentStartingPrice: results[0]?.installmentStartingPrice,
+        defaultMonthlyPayment: results[0]?.defaultMonthlyPayment,
+        monthlyPayment: results[0]?.monthlyPayment,
+      },
+      sampleMapped: mapped[0] && {
+        productId: mapped[0]?.productId,
+        installmentDuration: mapped[0]?.installmentDuration,
+        installmentStartingPrice: mapped[0]?.installmentStartingPrice,
+        defaultInstallmentStartPrice: mapped[0]?.defaultInstallmentStartPrice,
+        monthlyPayment: mapped[0]?.monthlyPayment,
+        defaultMonthlyPayment: mapped[0]?.defaultMonthlyPayment,
+      },
+    });
+  }
+
+  return mapped;
 };
 
 const generateCustomerListDataEntries = (data: any): any[] => {
