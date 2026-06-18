@@ -258,13 +258,6 @@ const ParametersForm = ({
       formData.paymentMode === "INSTALLMENT" ?
       resolvedInitialPayment :
       Number(formData.installmentStartingPrice) || 0;
-    if (import.meta.env.DEV) {
-      console.log("[AGENT_SALES][PARAMS_SAVE]", {
-        currentProductId,
-        formData,
-        normalizedInitialPayment,
-      });
-    }
     SaleStore.addParameters(currentProductId, {
       ...formData,
       installmentDuration: Number(formData.installmentDuration),
@@ -297,14 +290,6 @@ const ParametersForm = ({
     const fromProduct =
     toPositiveNumber(product?.defaultInstallmentStartPrice) ??
     toPositiveNumber(product?.installmentStartingPrice);
-    if (import.meta.env.DEV) {
-      console.log("[AGENT_SALES][PARAMS_RESOLVE_INITIAL]", {
-        currentProductId,
-        fromDefaultInstallmentStartPrice: product?.defaultInstallmentStartPrice,
-        fromInstallmentStartingPrice: product?.installmentStartingPrice,
-        resolvedInitialPayment: fromProduct ?? 0,
-      });
-    }
     if (fromProduct && fromProduct > 0) return fromProduct;
     return 0;
   };
@@ -322,30 +307,6 @@ const ParametersForm = ({
     const supportsInstallment = (product?.productPaymentModes || "").includes(
       "INSTALLMENT"
     );
-
-    if (import.meta.env.DEV) {
-      console.log("[AGENT_SALES][PARAMS_HYDRATE]", {
-        currentProductId,
-        product: product && {
-          productId: (product as any).productId,
-          paymentModes: (product as any).productPaymentModes,
-          defaultInstallmentDuration: (product as any).defaultInstallmentDuration,
-          installmentDuration: (product as any).installmentDuration,
-          defaultInstallmentStartPrice:
-            (product as any).defaultInstallmentStartPrice,
-          installmentStartingPrice: (product as any).installmentStartingPrice,
-          defaultMonthlyPayment: (product as any).defaultMonthlyPayment,
-          monthlyPayment: (product as any).monthlyPayment,
-        },
-        existingParams,
-        resolved: {
-          supportsInstallment,
-          duration,
-          initialPayment,
-          monthlyFromProduct,
-        },
-      });
-    }
 
     if (existingParams) {
       const shouldPatchInitialPayment =
@@ -390,14 +351,6 @@ const ParametersForm = ({
     const resolvedInitialPayment = resolveInitialPayment();
     if ((Number(formData.installmentStartingPrice) || 0) > 0) return;
     if (resolvedInitialPayment <= 0) return;
-
-    // if (import.meta.env.DEV) {
-      console.log("[AGENT_SALES][FORCE_FIX_INITIAL_PAYMENT]", {
-        currentProductId,
-        previousInitialPayment: formData.installmentStartingPrice,
-        resolvedInitialPayment,
-      });
-    // }
 
     setFormData((prev) => ({
       ...prev,

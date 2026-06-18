@@ -411,31 +411,6 @@ const saleStore = types
           toPositiveNumber(product?.monthlyPayment),
       };
 
-      // if (import.meta.env.DEV) {
-        console.log("[AGENT_SALES][STORE_ADD_PRODUCT] incoming->normalized", {
-          incoming: {
-            productId: product?.productId,
-            installmentDuration: product?.installmentDuration,
-            installmentStartingPrice: product?.installmentStartingPrice,
-            defaultInstallmentDuration: product?.defaultInstallmentDuration,
-            defaultInstallmentStartPrice: product?.defaultInstallmentStartPrice,
-            monthlyPayment: product?.monthlyPayment,
-            defaultMonthlyPayment: product?.defaultMonthlyPayment,
-          },
-          normalized: {
-            productId: normalizedProduct?.productId,
-            installmentDuration: normalizedProduct?.installmentDuration,
-            installmentStartingPrice: normalizedProduct?.installmentStartingPrice,
-            defaultInstallmentDuration:
-              normalizedProduct?.defaultInstallmentDuration,
-            defaultInstallmentStartPrice:
-              normalizedProduct?.defaultInstallmentStartPrice,
-            monthlyPayment: normalizedProduct?.monthlyPayment,
-            defaultMonthlyPayment: normalizedProduct?.defaultMonthlyPayment,
-          },
-        });
-      // }
-
       const existingIndex = self.products.findIndex(
         (p) => p.productId === normalizedProduct.productId
       );
