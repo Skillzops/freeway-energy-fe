@@ -9,6 +9,12 @@ import { KeyedMutator } from "swr";
 import { Modal } from "../ModalComponent/Modal";
 import ProceedButton from "../ProceedButtonComponent/ProceedButtonComponent";
 import ApiErrorMessage from "../ApiErrorMessage";
+import {
+  CUSTOMER_BUSINESS_OPTIONS,
+  CUSTOMER_CATEGORY_OPTIONS,
+  DAILY_RUNTIME_OPTIONS,
+  GENERATOR_SIZE_OPTIONS,
+} from "./customer-dropdown-options";
 
 interface CreatNewCustomerProps {
   isOpen: boolean;
@@ -34,6 +40,12 @@ const customerSchema = z.object({
   firstname: z.string().min(1, "First name is required"),
   lastname: z.string().min(1, "Last name is required"),
   email: z.string().email("Invalid email address").or(z.literal("")),
+  bvn: z
+    .string()
+    .optional()
+    .refine((val) => !val || /^\d{11}$/.test(val), {
+      message: "BVN must be exactly 11 digits",
+    }),
   phone: z
     .string()
     .trim()
@@ -99,6 +111,12 @@ const customerSchema = z.object({
   idType: z.string().optional(),
   idNumber: z.string().optional(),
   type: z.string().optional(),
+  customerCategory: z.string().optional(),
+  customerBusiness: z.string().optional(),
+  monthlyFuelSpend: z.string().optional(),
+  generatorSize: z.string().optional(),
+  dailyRuntime: z.string().optional(),
+  electricityPainPoints: z.string().optional(),
   passportPhoto: z.instanceof(File).optional().superRefine((file, ctx) => validateFileSize(file, ctx, "passportPhoto")),
   idImage: z.instanceof(File).optional().superRefine((file, ctx) => validateFileSize(file, ctx, "idImage")),
   contractFormImage: z.instanceof(File).optional().superRefine((file, ctx) => validateFileSize(file, ctx, "contractFormImage")),
@@ -110,6 +128,7 @@ const defaultFormData: CustomerFormData = {
   firstname: "",
   lastname: "",
   email: "",
+  bvn: "",
   phone: "",
   alternatePhone: "",
   gender: "",
@@ -123,6 +142,12 @@ const defaultFormData: CustomerFormData = {
   idType: "",
   idNumber: "",
   type: "",
+  customerCategory: "",
+  customerBusiness: "",
+  monthlyFuelSpend: "",
+  generatorSize: "",
+  dailyRuntime: "",
+  electricityPainPoints: "",
   passportPhoto: undefined,
   idImage: undefined,
   contractFormImage: undefined,
@@ -237,7 +262,9 @@ const CreateNewCustomer = ({
       // Create FormData for multipart/form-data
       const formDataToSend = new FormData();
       Object.entries(validatedData).forEach(([key, value]) => {
-        if (value !== undefined && value !== "") {
+        if (value !== undefined && value !== "" && !(value instanceof File)) {
+          formDataToSend.append(key, String(value));
+        } else if (value instanceof File) {
           formDataToSend.append(key, value);
         }
       });
@@ -338,6 +365,16 @@ const CreateNewCustomer = ({
             placeholder="Email"
             required={false}
             errorMessage={getFieldError("email")}
+          />
+          <Input
+            type="text"
+            name="bvn"
+            label="BVN (11 digits)"
+            value={formData.bvn ?? ""}
+            onChange={handleInputChange}
+            placeholder="Optional — bvn"
+            required={false}
+            errorMessage={getFieldError("bvn")}
           />
           <Input
             type="text"
@@ -479,6 +516,96 @@ const CreateNewCustomer = ({
             placeholder="Customer type"
             errorMessage={getFieldError("type")}
           />
+          <SelectInput
+            label="Customer Category"
+            options={CUSTOMER_CATEGORY_OPTIONS}
+            value={formData.customerCategory || ""}
+            onChange={(selectedValue) =>
+              handleSelectChange("customerCategory", selectedValue)
+            }
+            required={false}
+            placeholder="Customer category"
+            searchable={true}
+            searchPlaceholder="Search category..."
+            errorMessage={getFieldError("customerCategory")}
+          />
+          <SelectInput
+            label="Business Type"
+            options={CUSTOMER_BUSINESS_OPTIONS}
+            value={formData.customerBusiness || ""}
+            onChange={(selectedValue) =>
+              handleSelectChange("customerBusiness", selectedValue)
+            }
+            required={false}
+            placeholder="Business type"
+            searchable={true}
+            searchPlaceholder="Search business..."
+            errorMessage={getFieldError("customerBusiness")}
+          />
+
+          <p className="w-full text-sm font-semibold text-textBlack border-t border-strokeGreyThree pt-4 mt-2">
+            Energy profile (optional)
+          </p>
+
+          <Input
+            type="text"
+            name="monthlyFuelSpend"
+            label="Monthly fuel spend"
+            value={formData.monthlyFuelSpend || ""}
+            onChange={handleInputChange}
+            placeholder="e.g. ₦150,000/month"
+            required={false}
+            errorMessage={getFieldError("monthlyFuelSpend")}
+          />
+          <SelectInput
+            label="Generator size"
+            options={GENERATOR_SIZE_OPTIONS}
+            value={formData.generatorSize || ""}
+            onChange={(selectedValue) =>
+              handleSelectChange("generatorSize", selectedValue)
+            }
+            required={false}
+            placeholder="Generator capacity"
+            searchable={true}
+            errorMessage={getFieldError("generatorSize")}
+          />
+          <SelectInput
+            label="Daily runtime"
+            options={DAILY_RUNTIME_OPTIONS}
+            value={formData.dailyRuntime || ""}
+            onChange={(selectedValue) =>
+              handleSelectChange("dailyRuntime", selectedValue)
+            }
+            required={false}
+            placeholder="Typical daily runtime"
+            searchable={true}
+            errorMessage={getFieldError("dailyRuntime")}
+          />
+          <div className="w-full">
+            <label className="block text-sm font-medium text-textBlack mb-1">
+              Electricity pain points
+            </label>
+            <textarea
+              name="electricityPainPoints"
+              value={formData.electricityPainPoints || ""}
+              onChange={(e) => {
+                setFormData((prev) => ({
+                  ...prev,
+                  electricityPainPoints: e.target.value,
+                }));
+                resetFormErrors("electricityPainPoints");
+              }}
+              placeholder="e.g. Frequent outages, high diesel cost, unstable voltage"
+              rows={3}
+              className="w-full rounded-lg border border-strokeGreyThree px-3 py-2 text-sm resize-y min-h-[80px]"
+            />
+            {getFieldError("electricityPainPoints") && (
+              <p className="text-xs text-red-600 mt-1">
+                {getFieldError("electricityPainPoints")}
+              </p>
+            )}
+          </div>
+
           <ApiErrorMessage apiError={apiError} />
           <ProceedButton
             type="submit"
