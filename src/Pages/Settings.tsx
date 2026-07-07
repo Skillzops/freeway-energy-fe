@@ -1,8 +1,15 @@
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, Navigate } from "react-router-dom";
+import { useMemo } from "react";
 import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
 import Profile from "@/Components/Settings/Profile";
 import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
 import { Suspense, lazy, useState } from "react";
+import useTokens from "@/hooks/useTokens";
+import {
+  canAccessInvoiceSettings,
+  getSettingsProfilePath,
+  isAssignedAgentUser,
+} from "@/utils/authSession";
 import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
 import settings from "@/assets/settings/settings.svg";
 import ActionButton from "@/Components/ActionButtonComponent/ActionButton";
@@ -21,8 +28,13 @@ const ChangePassword = lazy(
   () => import("@/Components/Settings/ChangePassword")
 );
 const Users = lazy(() => import("@/Components/Settings/Users"));
-
+const InvoiceSettings = lazy(
+  () => import("@/Components/Settings/InvoiceSettings"),
+);
 const Settings = () => {
+  const userData = useTokens();
+  const showInvoiceSettings = canAccessInvoiceSettings(userData);
+
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isAgentModalOpen, setIsAgentModalOpen] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -57,28 +69,42 @@ const Settings = () => {
   };
 
   const userlocation = useLocation();
-  const navigationList = [
-    {
-      title: "Profile",
-      link: "/settings/profile",
-      count: null,
-    },
-    {
-      title: "Role and Permissions",
-      link: "/settings/role-permissions",
-      count: null,
-    },
-    {
-      title: "Change Password",
-      link: "/settings/change-password",
-      count: null,
-    },
-    {
-      title: "Users",
-      link: "/settings/users",
-      count: fetchAllUsers?.data?.total || 0,
-    },
-  ];
+  const navigationList = useMemo(
+    () =>
+      [
+        {
+          title: "Profile",
+          link: "/settings/profile",
+          count: null,
+        },
+        {
+          title: "Role and Permissions",
+          link: "/settings/role-permissions",
+          count: null,
+        },
+        {
+          title: "Change Password",
+          link: "/settings/change-password",
+          count: null,
+        },
+        {
+          title: "Users",
+          link: "/settings/users",
+          count: fetchAllUsers?.data?.total || 0,
+        },
+        showInvoiceSettings && {
+          title: "Invoicing",
+          link: "/settings/invoicing",
+          count: null,
+        },
+        {
+          title: "Failed Jobs",
+          link: "/failed-jobs",
+          count: null,
+        },
+      ].filter(Boolean) as { title: string; link: string; count: number | null }[],
+    [fetchAllUsers?.data?.total, showInvoiceSettings],
+  );
 
   const dropDownList = {
     items: ["Add new user", "Add New Agent"],
@@ -104,6 +130,10 @@ const Settings = () => {
     value: item.id,
   }));
 
+  if (isAssignedAgentUser(userData)) {
+    return <Navigate to={getSettingsProfilePath(userData)} replace />;
+  }
+
   return (
     <>
       <PageLayout pageName="Settings" badge={settingsbadge}>
@@ -128,7 +158,7 @@ const Settings = () => {
         ) : null}
         <div className="flex flex-col w-full px-2 py-8 gap-4 lg:flex-row md:p-8">
           <SideMenu navigationList={navigationList} />
-          <section className="relative items-start justify-center flex min-h-[415px] w-full overflow-hidden">
+          <section className="relative flex min-h-[415px] w-full min-w-0 flex-1 items-start justify-start overflow-x-auto">
             <Suspense
               fallback={
                 <LoadingSpinner parentClass="absolute top-[50%] w-full" />
@@ -151,6 +181,16 @@ const Settings = () => {
                   }
                 />
                 <Route path="change-password" element={<ChangePassword />} />
+                <Route
+                  path="invoicing"
+                  element={
+                    showInvoiceSettings ? (
+                      <InvoiceSettings />
+                    ) : (
+                      <Navigate to="/settings/profile" replace />
+                    )
+                  }
+                />
                 <Route
                   path="users"
                   element={

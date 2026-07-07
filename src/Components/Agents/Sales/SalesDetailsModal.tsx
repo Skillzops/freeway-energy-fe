@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ProductTag, SimpleTag } from "../CardComponents/CardComponent";
 
 import SaleDetails from "./SaleDetails";
 import SaleTransactions from "./SaleTransactions";
 import SaleDevices from "./SaleDevices";
 import SaleInventory from "./SaleInventory";
+import SaleInvoices from "@/Components/Sales/SaleInvoices";
+import { useSaleInvoicesTabVisible } from "@/hooks/useSaleInvoicesTabVisible";
 import { TabNamesType } from "@/Components/Inventory/InventoryDetailModal";
 import { DataStateWrapper } from "@/Components/Loaders/DataStateWrapper";
 import { Modal } from "@/Components/ModalComponent/Modal";
@@ -61,6 +63,16 @@ const SalesDetailsModal = ({
   const [tabContent, setTabContent] = useState<string>("details");
 
   const fetchSingleSale = useGetRequest(`/v1/agents/sales/${salesItemId}`, true);
+  const showInvoicesTab = useSaleInvoicesTabVisible(
+    isOpen,
+    fetchSingleSale?.data?.sale,
+  );
+
+  useEffect(() => {
+    if (!showInvoicesTab && tabContent === "invoices") {
+      setTabContent("details");
+    }
+  }, [showInvoicesTab, tabContent]);
 
   const fetchProductCategories = useGetRequest(
     `/v1/products/categories/all`,
@@ -179,6 +191,9 @@ const SalesDetailsModal = ({
       key: "transactions",
       count: fetchSingleSale?.data?.sale?.payment?.length || 0,
     },
+    ...(showInvoicesTab
+      ? [{ name: "Invoices", key: "invoices", count: null }]
+      : []),
   ];
 
   return (
@@ -250,6 +265,12 @@ const SalesDetailsModal = ({
               />
             ) : tabContent === "devices" ? (
               <SaleDevices data={fetchSingleSale?.data?.devices} />
+            ) : tabContent === "invoices" ? (
+              <SaleInvoices
+                saleId={fetchSingleSale?.data?.sale?.id || fetchSingleSale?.data?.saleId || ""}
+                saleData={fetchSingleSale?.data?.sale}
+                refreshSale={fetchSingleSale?.mutate}
+              />
             ) : (
               <SaleTransactions
                 data={generateSaleTransactionEntries()}

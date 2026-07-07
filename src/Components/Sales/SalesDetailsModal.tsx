@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Modal } from "../ModalComponent/Modal";
 import { ProductTag, SimpleTag } from "../CardComponents/CardComponent";
 import TabComponent from "../TabComponent/TabComponent";
@@ -6,6 +6,8 @@ import { TabNamesType } from "../Inventory/InventoryDetailModal";
 import { DataStateWrapper } from "../Loaders/DataStateWrapper";
 import SaleDetails from "./SaleDetails";
 import SaleTransactions from "./SaleTransactions";
+import SaleInvoices from "./SaleInvoices";
+import { useSaleInvoicesTabVisible } from "@/hooks/useSaleInvoicesTabVisible";
 import { useGetRequest } from "@/utils/useApiCall";
 import SaleDevices from "./SaleDevices";
 import SaleInventory from "./SaleInventory";
@@ -66,6 +68,16 @@ const SalesDetailsModal = ({
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const fetchSingleSale = useGetRequest(`/v1/sales/${salesID}`, true);
+  const showInvoicesTab = useSaleInvoicesTabVisible(
+    isOpen,
+    fetchSingleSale?.data?.sale,
+  );
+
+  useEffect(() => {
+    if (!showInvoicesTab && tabContent === "invoices") {
+      setTabContent("details");
+    }
+  }, [showInvoicesTab, tabContent]);
 
   const fetchProductCategories = useGetRequest(
     `/v1/products/categories/all`,
@@ -192,6 +204,9 @@ const SalesDetailsModal = ({
       key: "transactions",
       count: fetchSingleSale?.data?.sale?.payment?.length || 0,
     },
+    ...(showInvoicesTab
+      ? [{ name: "Invoices", key: "invoices", count: null }]
+      : []),
     {
       name: "Sale Log",
       key: "log",
@@ -305,6 +320,12 @@ const SalesDetailsModal = ({
               />
             ) : tabContent === "devices" ? (
               <SaleDevices data={fetchSingleSale?.data?.devices} />
+            ) : tabContent === "invoices" ? (
+              <SaleInvoices
+                saleId={fetchSingleSale?.data?.sale?.id || salesID}
+                saleData={fetchSingleSale?.data?.sale}
+                refreshSale={fetchSingleSale?.mutate}
+              />
             ) : tabContent === "log" ? (
               <SaleLog logs={saleLogs} />
             ) : (

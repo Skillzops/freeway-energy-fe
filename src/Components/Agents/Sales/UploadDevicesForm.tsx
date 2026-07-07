@@ -24,6 +24,8 @@ interface DeviceResponse {
   hardwareModel: string;
   firmwareVersion: string;
   isTokenable: boolean;
+  isUsed?: boolean;
+  saleItemIDs?: string[];
   saleItemId: string | null;
   createdAt: string;
   updatedAt: string;
@@ -73,7 +75,10 @@ const UploadDevicesForm = observer(
 
     const [linkedDevicesCount, setLinkedDevicesCount] = useState<number>(0);
 
-    const { data: assignedDevicesData, mutate: _mutate } = useGetRequest("/v1/agents/devices", true);
+    const { data: assignedDevicesData, mutate: _mutate } = useGetRequest(
+      "/v1/agents/devices?fetchFormat=unused&limit=500",
+      true
+    );
     const {
       data: productData,
       isLoading: productLoading,
@@ -129,8 +134,13 @@ const UploadDevicesForm = observer(
       setLoading(true);
       const newParams = await filterDevices();
       try {
+        const params = new URLSearchParams({
+          ...newParams,
+          fetchFormat: "unused",
+          limit: "500",
+        });
         const response = await apiCall({
-          endpoint: `/v1/agents/devices?${new URLSearchParams(newParams).toString()}`,
+          endpoint: `/v1/agents/devices?${params.toString()}`,
           method: "get",
           successMessage: "",
           showToast: false
@@ -455,7 +465,7 @@ const UploadDevicesForm = observer(
                       </span>
                     </div>
                   </div>
-                  <p className="text-xs text-textGrey text-left">{"Assigned devices to this agent: " + assignedDevices.length}</p>
+                  <p className="text-xs text-textGrey text-left">{"Available devices assigned to you: " + assignedDevices.length}</p>
                   {loading &&
             <p className="text-xs text-textBlack text-center font-medium">
                       Searching...

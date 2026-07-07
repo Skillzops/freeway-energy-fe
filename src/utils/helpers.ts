@@ -66,6 +66,26 @@ export function formatNumberWithCommas(number: number | string): string {
   return numStr.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
+export const resolveApiAssetUrl = (assetPath?: string | null): string => {
+  const rawPath = String(assetPath || "").trim();
+  if (!rawPath) return "";
+
+  if (/^https?:\/\//i.test(rawPath)) {
+    return rawPath;
+  }
+
+  const apiUrl = String(import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
+  const normalizedPath = rawPath.startsWith("/") ? rawPath : `/${rawPath}`;
+  if (!apiUrl) return normalizedPath;
+
+  const apiBaseWithPrefix = apiUrl.endsWith("/api") ? apiUrl : `${apiUrl}/api`;
+  if (normalizedPath.startsWith("/api/")) {
+    return `${apiUrl}${normalizedPath}`;
+  }
+
+  return `${apiBaseWithPrefix}${normalizedPath}`;
+};
+
 export function useIsLoggedIn(route: string) {
   const { token } = useTokens();
   const navigate = useNavigate();
@@ -151,4 +171,26 @@ export function truncateTextByWord(text: string, maxLength: number): string {
   if (lastSpaceIndex === -1) return truncated + "...";
 
   return truncated.substring(0, lastSpaceIndex) + "...";
+}
+
+export function getApiErrorMessage(
+  err: unknown,
+  fallback = "Something went wrong. Please try again.",
+): string {
+  const axiosErr = err as {
+    response?: { data?: { message?: string | string[] } };
+    message?: string;
+  };
+
+  const msg = axiosErr?.response?.data?.message;
+  if (Array.isArray(msg)) {
+    return msg.filter(Boolean).join(". ");
+  }
+  if (typeof msg === "string" && msg.trim()) {
+    return msg;
+  }
+  if (axiosErr?.message && !axiosErr.message.startsWith("Request failed")) {
+    return axiosErr.message;
+  }
+  return fallback;
 }

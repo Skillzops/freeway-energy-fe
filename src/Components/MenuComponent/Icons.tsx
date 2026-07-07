@@ -570,20 +570,284 @@ export const WarehouseIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 export const AuditIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
+    width={props.width || "16"}
+    height={props.height || "16"}
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <circle
+      cx="8"
+      cy="8"
+      r="6"
+      stroke={props.stroke || "#828DA9"}
+      strokeWidth="1.5"
+    />
+    <path
+      d="M8 5.33398V8.00065L10 10.0007"
+      stroke={props.stroke || "#828DA9"}
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+export const AnalyticsIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    width={props.width || "16"}
+    height={props.height || "16"}
+    viewBox="0 0 16 16"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
     {...props}
   >
     <path
-      d="M12 3a9 9 0 100 18 9 9 0 000-18zm0 1.5a7.5 7.5 0 110 15 7.5 7.5 0 010-15z"
-      fill="currentColor"
+      d="M2 13.334H14"
+      stroke={props.stroke || "#828DA9"}
+      strokeWidth="1.5"
+      strokeLinecap="round"
     />
     <path
-      d="M12 7.25a.75.75 0 01.75.75v3.19l2.02 2.02a.75.75 0 11-1.06 1.06l-2.21-2.21A.75.75 0 0111.25 12V8a.75.75 0 01.75-.75z"
-      fill="currentColor"
+      d="M4.33325 13.334V8.66732"
+      stroke={props.stroke || "#828DA9"}
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+    <path
+      d="M7.99992 13.334V5.33398"
+      stroke={props.stroke || "#828DA9"}
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+    <path
+      d="M11.6667 13.334V2.66732"
+      stroke={props.stroke || "#828DA9"}
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
+export const InvoiceIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    width={props.width || "16"}
+    height={props.height || "16"}
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <path
+      d="M9.33325 1.33398H4.66659C3.93013 1.33398 3.33325 1.93086 3.33325 2.66732V13.334C3.33325 14.0705 3.93013 14.6673 4.66659 14.6673H11.3333C12.0697 14.6673 12.6666 14.0705 12.6666 13.334V5.33398L9.33325 1.33398Z"
+      stroke={props.stroke || "#828DA9"}
+      strokeWidth="1.5"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M9.33325 1.33398V5.33398H12.6666"
+      stroke={props.stroke || "#828DA9"}
+      strokeWidth="1.5"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M5.66659 8H10.3333"
+      stroke={props.stroke || "#828DA9"}
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+    <path
+      d="M5.66659 10.667H10.3333"
+      stroke={props.stroke || "#828DA9"}
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
+export const ReceiptIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    width={props.width || "16"}
+    height={props.height || "16"}
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <path
+      d="M4 2H12V14L10 13L8 14L6 13L4 14V2Z"
+      stroke={props.stroke || "#828DA9"}
+      strokeWidth="1.5"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M6 6H10"
+      stroke={props.stroke || "#828DA9"}
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+    <path
+      d="M6 8.5H10"
+      stroke={props.stroke || "#828DA9"}
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+    <path
+      d="M6.5 11L7.5 12L9.5 10"
+      stroke={props.stroke || "#828DA9"}
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+export const ReportsIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    width={props.width || "16"}
+    height={props.height || "16"}
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <circle
+      cx="8"
+      cy="8"
+      r="5.5"
+      stroke={props.stroke || "#828DA9"}
+      strokeWidth="1.5"
+    />
+    <path
+      d="M8 8V2.5C10.7614 2.5 13 4.73858 13 7.5C13 8.60502 12.5523 9.60502 11.8284 10.3284H8V8Z"
+      stroke={props.stroke || "#828DA9"}
+      strokeWidth="1.5"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+export const TaskIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    width={props.width || "16"}
+    height={props.height || "16"}
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <rect
+      x="2.66659"
+      y="2.66602"
+      width="10.6667"
+      height="10.6667"
+      rx="1.5"
+      stroke={props.stroke || "#828DA9"}
+      strokeWidth="1.5"
+    />
+    <path
+      d="M5.33325 5.66602L6.33325 6.66602L8.66659 4.66602"
+      stroke={props.stroke || "#828DA9"}
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M5.33325 9.33398H10.6666"
+      stroke={props.stroke || "#828DA9"}
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+    <path
+      d="M5.33325 11.334H10.6666"
+      stroke={props.stroke || "#828DA9"}
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
+export const DevicesIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    width={props.width || "16"}
+    height={props.height || "16"}
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <rect
+      x="3"
+      y="3"
+      width="10"
+      height="10"
+      rx="1.5"
+      stroke={props.stroke || "#828DA9"}
+      strokeWidth="1.5"
+    />
+    <path
+      d="M5.33325 6H10.6666"
+      stroke={props.stroke || "#828DA9"}
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+    <path
+      d="M5.33325 8H10.6666"
+      stroke={props.stroke || "#828DA9"}
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+    <path
+      d="M5.33325 10H8"
+      stroke={props.stroke || "#828DA9"}
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+    <circle
+      cx="11.3333"
+      cy="10"
+      r="0.75"
+      fill={props.stroke || "#828DA9"}
+    />
+  </svg>
+);
+
+export const CommissionIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    width={props.width || "16"}
+    height={props.height || "16"}
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <circle
+      cx="8"
+      cy="8"
+      r="5.5"
+      stroke={props.stroke || "#828DA9"}
+      strokeWidth="1.5"
+    />
+    <path
+      d="M6 6L10 10"
+      stroke={props.stroke || "#828DA9"}
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+    <circle
+      cx="6.25"
+      cy="6.25"
+      r="1"
+      stroke={props.stroke || "#828DA9"}
+      strokeWidth="1.2"
+    />
+    <circle
+      cx="9.75"
+      cy="9.75"
+      r="1"
+      stroke={props.stroke || "#828DA9"}
+      strokeWidth="1.2"
     />
   </svg>
 );

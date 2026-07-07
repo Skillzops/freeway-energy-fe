@@ -38,6 +38,8 @@ import { ErrorBoundary } from "react-error-boundary";
 import ErrorPage from "./Pages/ErrorPage";
 import { WarehouseProvider } from "./contexts/WarehouseContext";
 import Dashboard from "./Pages/Dashboard";
+import Analytics from "./Pages/Analytics";
+import Invoices from "./Pages/Invoices";
 import Reports from "./Pages/Reports";
 import Installer from "./Pages/Installer/Installer";
 import AgentInstaller from "./Pages/Agent/Installer";
@@ -87,6 +89,9 @@ function App() {
           <Route element={<ProtectedRouteWrapper />}>
             <Route path="/home" element={<Home />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/analytics" element={<Analytics />} />
+            <Route path="/invoices/*" element={<Invoices />} />
+            <Route path="/receipts/*" element={<Invoices />} />
             <Route path="/sales/*" element={<Sales />} />
             {/* <Route path="/transactions/*" element={<Transactions />} /> */}
             <Route path="/customers/*" element={<Customers />} />
