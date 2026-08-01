@@ -22,12 +22,22 @@ export default defineConfig({
       usePolling: true,
       followSymlinks: false,
     },
-    allowedHosts: ["freewave-energy-cmvgn.ondigitalocean.app", "freewavecrm.com"],
+    allowedHosts: [
+      "freewaveenergy.ng",
+      "www.freewaveenergy.ng",
+      "freewave-energy-cmvgn.ondigitalocean.app",
+      "freewavecrm.com",
+    ],
   },
   preview: {
     host: "0.0.0.0",
     port: 5173,
-    allowedHosts: ["freewave-energy-cmvgn.ondigitalocean.app", "freewavecrm.com"],
+    allowedHosts: [
+      "freewaveenergy.ng",
+      "www.freewaveenergy.ng",
+      "freewave-energy-cmvgn.ondigitalocean.app",
+      "freewavecrm.com",
+    ],
   },
   plugins: [react(), tsconfigPaths()], 
   resolve: {

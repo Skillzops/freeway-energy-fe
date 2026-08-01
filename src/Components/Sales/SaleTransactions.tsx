@@ -400,7 +400,7 @@ const SaleTransactions = ({
   //     customizations: {
   //       title: "Product Purchase",
   //       description: `Payment for sale ${selectedPaymentData.saleId}`,
-  //       logo: "https://res.cloudinary.com/bluebberies/image/upload/v1726242207/Screenshot_2024-09-04_at_2.43.01_PM_fcjlf3.png",
+  //       logo: "https://res.cloudinary.com/djckxdqzw/image/upload/v1784202096/freewave-logo_bcmqpr.png",
   //     },
   //     meta: {
   //       saleId: selectedPaymentData.saleId,

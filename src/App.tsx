@@ -53,6 +53,7 @@ import Transactions from "./Pages/Agent/Transactions";
 import AgentTasks from "./Pages/Agent/Tasks";
 import Tasks from "./Pages/Tasks";
 import Wallets from "./Pages/Agent/Wallet";
+import WalletTopUpResult from "./Pages/Agent/WalletTopUpResult";
 import WareHouses from "./Pages/Agent/WareHouse";
 import InstallerLoginPage from "./Pages/Installer/LoginPage";
 import AgentLoginPage from "./Pages/Agent/LoginPage";
@@ -130,6 +131,7 @@ function App() {
             <Route path="/agent/installers/*" element={<AgentInstaller />} />
             <Route path="/agent/products/*" element={<AgentProducts />} />
             <Route path="/agent/wallets/*" element={<Wallets />} />
+            <Route path="/agent/wallet/topup/result" element={<WalletTopUpResult />} />
             <Route path="/agent/devices/*" element={<AgentDevices />} />
             <Route path="/agent/settings/*" element={<AgentSettings />} />
             <Route path="/agent/warehouses/*" element={<WareHouses />} />
