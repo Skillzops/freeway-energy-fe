@@ -140,10 +140,10 @@ const LoginPage = () => {
           url = "/agent/dashboard";
         } else if (userData?.agentDetails?.category == "INSTALLER") {
           url = "/installer/dashboard";
-        } else if (userData?.role?.role == "admin") {
-          url = "/dashboard";
         } else {
-          toast.error("Unauthorized login attempt");
+          // The API has authenticated this user. All non-agent roles use the
+          // main workspace; route-level permissions still control access.
+          url = "/dashboard";
         }
         navigate(redirectPath ?? url);
       } catch (_error) {
