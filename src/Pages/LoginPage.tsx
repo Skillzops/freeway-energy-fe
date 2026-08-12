@@ -87,8 +87,7 @@ const LoginPage = () => {
 
       // Create optimized user data with minimal permission data
       const userData = {
-        ...response.data,
-        token: response.headers.access_token,
+        token: response.headers.access_token ?? response.data.accessToken,
         id: response.data.id,
         firstname: response.data.firstname,
         lastname: response.data.lastname,
@@ -104,19 +103,10 @@ const LoginPage = () => {
         isBlocked: response.data.isBlocked,
         status: response.data.status,
         roleId: response.data.roleId,
-        createdAt: response.data.createdAt,
-        updatedAt: response.data.updatedAt,
-        deletedAt: response.data.deletedAt,
-        lastLogin: response.data.lastLogin,
         role: {
           id: response.data.role?.id,
           role: response.data.role?.role,
           active: response.data.role?.active,
-          permissionIds: response.data.role?.permissionIds,
-          created_by: response.data.role?.created_by,
-          created_at: response.data.role?.created_at,
-          updated_at: response.data.role?.updated_at,
-          deleted_at: response.data.role?.deleted_at,
           permissions: optimizedPermissions // Only action and subject
         }
       };
@@ -128,6 +118,7 @@ const LoginPage = () => {
 
       try {
         const cookiebar = JSON.stringify(userData);
+        if (encodeURIComponent(cookiebar).length > 3800) throw new Error("Login session is too large to store safely");
         Cookies.set("userData", cookiebar, {
           expires: 7,
           path: "/",

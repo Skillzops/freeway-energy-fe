@@ -4,6 +4,9 @@ import { brandAssets } from "@/config/brandConfig";
 
 import useBreakpoint from "@/hooks/useBreakpoint";
 import ProceedButton from "@/Components/ProceedButtonComponent/ProceedButtonComponent";
+import useTokens from "@/hooks/useTokens";
+
+const HOME_PERMISSION_SUBJECTS: Record<string, string[]> = { Sales: ["Sales"], Customers: ["Customers"], Agents: ["Agents"], Products: ["Products"], Inventory: ["Inventory"], Devices: ["Inventory"], Contracts: ["Contracts"], Reports: ["AuditLog"], Settings: ["User"] };
 
 type SectionData = {
   sectionName: string;
@@ -15,6 +18,7 @@ type SectionData = {
 const Home = () => {
   const navigate = useNavigate();
   const isMobile = useBreakpoint("max", 640);
+  const userData = useTokens();
 
   const notificationCounts = {
     Sales: 3,
@@ -86,7 +90,9 @@ const Home = () => {
     },
   ];
 
-  const newHomeData: SectionData[] = homeData.map((data: SectionData) => ({
+  const canManageEverything = userData.role.permissions?.some((permission) => permission.action === "manage" && permission.subject === "all");
+  const allowedSubjects = new Set(userData.role.permissions?.map((permission) => permission.subject) ?? []);
+  const newHomeData: SectionData[] = homeData.filter(({ sectionName }) => sectionName === "Dashboard" ? userData.role.role === "admin" || canManageEverything : canManageEverything || HOME_PERMISSION_SUBJECTS[sectionName]?.some((subject) => allowedSubjects.has(subject))).map((data: SectionData) => ({
     ...data,
     notificationCount:
       notificationCounts[data.sectionName as keyof typeof notificationCounts],

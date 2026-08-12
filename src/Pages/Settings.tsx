@@ -34,6 +34,7 @@ const InvoiceSettings = lazy(
 const Settings = () => {
   const userData = useTokens();
   const showInvoiceSettings = canAccessInvoiceSettings(userData);
+  const canAccessUserManagement = userData.role.permissions?.some((permission) => permission.subject === "User" && ["read", "write", "manage", "delete"].includes(permission.action));
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isAgentModalOpen, setIsAgentModalOpen] = useState<boolean>(false);
@@ -48,11 +49,11 @@ const Settings = () => {
     .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
     .join("&");
 
-  const fetchAllRoles = useGetRequest("/v1/roles", true, 60000);
+  const fetchAllRoles = useGetRequest(canAccessUserManagement ? "/v1/roles" : null, true, 60000);
   const fetchAllUsers = useGetRequest(
-    `/v1/users?page=${currentPage}&limit=${entriesPerPage}${
+    canAccessUserManagement ? `/v1/users?page=${currentPage}&limit=${entriesPerPage}${
       queryString && `&${queryString}`
-    }`,
+    }` : null,
     true,
     60000
   );
@@ -72,12 +73,12 @@ const Settings = () => {
   const navigationList = useMemo(
     () =>
       [
-        {
+        canAccessUserManagement && {
           title: "Profile",
           link: "/settings/profile",
           count: null,
         },
-        {
+        canAccessUserManagement && {
           title: "Role and Permissions",
           link: "/settings/role-permissions",
           count: null,
@@ -103,7 +104,7 @@ const Settings = () => {
           count: null,
         },
       ].filter(Boolean) as { title: string; link: string; count: number | null }[],
-    [fetchAllUsers?.data?.total, showInvoiceSettings],
+    [canAccessUserManagement, fetchAllUsers?.data?.total, showInvoiceSettings],
   );
 
   const dropDownList = {
