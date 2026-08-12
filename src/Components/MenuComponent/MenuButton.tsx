@@ -5,6 +5,10 @@ import buttonIcon from "../../assets/menu/menu.svg";
 import { navData, AgentNavData, InstallerNavData } from "./navInfo";
 import useTokens from "@/hooks/useTokens";
 
+const NAV_PERMISSION_SUBJECTS: Record<string, string[]> = {
+  Sales: ["Sales"], Invoices: ["Invoices"], Receipts: ["Invoices"], Customers: ["Customers"], Agents: ["Agents"], Task: ["Assignments"], Products: ["Products"], Inventory: ["Inventory"], Warehouses: ["Warehouse"], Devices: ["Inventory"], Contracts: ["Contracts"], "Audit Logs": ["AuditLog"], "Failed Jobs": ["AuditLog"], Settings: ["User"],
+};
+
 export type MenuButtonType = {
   buttonStyle?: string;
   sections?: {title: string;icon: any;link: string;}[];
@@ -22,8 +26,11 @@ export const MenuButton = ({ buttonStyle, sections: _sections }: MenuButtonType)
     if (cate === "INSTALLER") return InstallerNavData;
     if (role === "AssignedAgent") return AgentNavData;
     if (role === "admin") return navData;
-    return [];
-  }, [cate, role]);
+    const permissions = userData?.role?.permissions ?? [];
+    const canManageEverything = permissions.some((permission) => permission.action === "manage" && permission.subject === "all");
+    const allowedSubjects = new Set(permissions.map((permission) => permission.subject));
+    return navData.filter(({ title }) => canManageEverything || NAV_PERMISSION_SUBJECTS[title]?.some((subject) => allowedSubjects.has(subject)));
+  }, [cate, role, userData?.role?.permissions]);
 
   const [sideMenuArray, setSideMenuArray] = useState(value);
   const [dialog, setDialog] = useState<boolean>(false);
