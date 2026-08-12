@@ -11,9 +11,7 @@ import { DropDown } from "@/Components/DropDownComponent/DropDown";
 
 import { useGetRequest } from "@/utils/useApiCall";
 
-const WarehouseTable = lazy(
-  () => import("@/Components/Agents/WareHouses/WarehouseTable")
-);
+import WarehouseTable from "@/Components/Agents/WareHouses/WarehouseTable";
 
 
 const WareHouses = () => {

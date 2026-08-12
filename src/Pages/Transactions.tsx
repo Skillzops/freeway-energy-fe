@@ -12,11 +12,8 @@ import redwallet from "@/assets/transactions/redwallet.svg";
 import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
 import ReverseTransactions from "@/Components/Transactions/ReverseTransactions";
 import { generateRandomTransactionEntries } from "@/Components/TableComponent/sampleData";
+import TransactionTable from "@/Components/Transactions/TransactionTable";
 // import { useGetRequest } from "@/utils/useApiCall";
-
-const TransactionTable = lazy(
-  () => import("@/Components/Transactions/TransactionTable")
-);
 
 const Transactions = () => {
   const location = useLocation();

@@ -13,9 +13,8 @@ import { useGetRequest } from "@/utils/useApiCall";
 import CreateNewDevice from "@/Components/Devices/CreateNewDevice";
 import GenerateTokens from "@/Components/Tokens/GenerateTokens";
 import sale from "@/assets/titlepill/sale.svg";
-
-const DevicesTable = lazy(() => import("@/Components/Devices/DevicesTable"));
-const TokensTable = lazy(() => import("@/Components/Tokens/TokensTable"));
+import DevicesTable from "@/Components/Devices/DevicesTable";
+import TokensTable from "@/Components/Tokens/TokensTable";
 
 const Devices = () => {
   const location = useLocation();

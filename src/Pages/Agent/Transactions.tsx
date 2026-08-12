@@ -10,9 +10,7 @@ import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
 import { useGetRequest } from "@/utils/useApiCall";
 import ReverseTransactions from "@/Components/Agents/Transactions/ReverseTransactions";
 
-const TransactionTable = lazy(
-  () => import("@/Components/Agents/Transactions/TransactionTable")
-);
+import TransactionTable from "@/Components/Agents/Transactions/TransactionTable";
 
 const Transactions = () => {
   const location = useLocation();

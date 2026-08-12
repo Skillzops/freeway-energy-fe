@@ -14,8 +14,7 @@ import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
 import CreateNewAgents from "@/Components/Agents/CreateNewAgents";
 import { useGetRequest } from "@/utils/useApiCall";
 import { NairaSymbol } from "@/Components/CardComponents/CardComponent";
-
-const AgentsTable = lazy(() => import("@/Components/Agents/AgentsTable"));
+import AgentsTable from "@/Components/Agents/AgentsTable";
 
 const Agent = () => {
   const location = useLocation();

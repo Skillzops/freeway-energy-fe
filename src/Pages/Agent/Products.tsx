@@ -12,9 +12,7 @@ import CreateNewProduct, {
 "@/Components/Products/CreateNewProduct";
 import { useGetRequest } from "@/utils/useApiCall";
 
-const ProductsTable = lazy(
-  () => import("@/Components/Agents/Products/ProductsTable")
-);
+import ProductsTable from "@/Components/Agents/Products/ProductsTable";
 
 const Products = () => {
   const location = useLocation();

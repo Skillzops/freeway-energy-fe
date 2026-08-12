@@ -15,10 +15,7 @@ import CreateNewProduct, {
   ProductFormType,
 } from "@/Components/Products/CreateNewProduct";
 import { useGetRequest } from "@/utils/useApiCall";
-
-const ProductsTable = lazy(
-  () => import("@/Components/Products/ProductsTable")
-);
+import ProductsTable from "@/Components/Products/ProductsTable";
 
 const Products = () => {
   const location = useLocation();

@@ -7,8 +7,7 @@ import { useGetRequest } from "@/utils/useApiCall";
 import invoiceBadge from "@/assets/RedIconsSvg/Sales.svg";
 import greensales from "@/assets/sales/greensales.svg";
 import pendingIcon from "@/assets/table/clock.svg";
-
-const InvoicesTable = lazy(() => import("@/Components/Invoices/InvoicesTable"));
+import InvoicesTable from "@/Components/Invoices/InvoicesTable";
 
 const Invoices = () => {
   const location = useLocation();

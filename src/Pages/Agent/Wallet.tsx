@@ -16,7 +16,7 @@ import SecondaryModal from "@/Components/ModalSecondary/SecondaryModal";
 import TopUpWalletForm from "@/Components/Agents/DashBoardCard/TopWalletForm";
 // import TopUpWalletForm from "@/Components/DashBoardCard/TopWalletForm";
 
-const WalletTable = lazy(() => import("@/Components/Agents/Wallet/WalletTable"));
+import WalletTable from "@/Components/Agents/Wallet/WalletTable";
 
 /** Normalizer for /api/v1/wallet/stats */
 function normalizeWalletStats(input: any) {

@@ -13,8 +13,7 @@ import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
 import { useGetRequest } from "@/utils/useApiCall";
 import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
 import CreateNewCustomer from "@/Components/Customer/CreateNewCustomer";
-
-const CustomerTable = lazy(() => import("@/Components/Customer/CustomerTable"));
+import CustomerTable from "@/Components/Customer/CustomerTable";
 
 const Customers = () => {
   const location = useLocation();

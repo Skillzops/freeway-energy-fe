@@ -8,10 +8,7 @@ import contractsbadge from "@/assets/RedIconsSvg/Contract.svg";
 import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
 import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
 import { useGetRequest } from "@/utils/useApiCall";
-
-const ContractsTable = lazy(
-  () => import("@/Components/Contracts/ContractsTable")
-);
+import ContractsTable from "@/Components/Contracts/ContractsTable";
 
 const Contracts = () => {
   const location = useLocation();

@@ -14,10 +14,7 @@ import CreateNewInventory, {
   InventoryFormType,
 } from "@/Components/Inventory/CreateNewInventory";
 import { useGetRequest } from "@/utils/useApiCall";
-
-const InventoryTable = lazy(
-  () => import("@/Components/Inventory/InventoryTable")
-);
+import InventoryTable from "@/Components/Inventory/InventoryTable";
 
 type InventoryClass = "REGULAR" | "RETURNED" | "REFURBISHED";
 

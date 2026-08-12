@@ -11,7 +11,7 @@ import { useGetRequest } from "@/utils/useApiCall";
 import CreateNewDevice from "@/Components/Agents/Devices/CreateNewDevice";
 import GenerateTokens from "@/Components/Agents/Tokens/GenerateTokens";
 
-const DevicesTable = lazy(() => import("@/Components/Agents/Devices/DevicesTable"));
+import DevicesTable from "@/Components/Agents/Devices/DevicesTable";
 
 const Devices = () => {
   const getTotalCount = (payload: any): number => {

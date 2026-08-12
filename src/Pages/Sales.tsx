@@ -22,8 +22,7 @@ import { observer } from "mobx-react-lite";
 import { SaleStore } from "@/stores/SaleStore";
 import BatchUploadSales from "@/Components/Sales/BatchUploadSales";
 import { DropDown } from "@/Components/DropDownComponent/DropDown";
-
-const SalesTable = lazy(() => import("@/Components/Sales/SalesTable"));
+import SalesTable from "@/Components/Sales/SalesTable";
 
 const Sales = observer(() => {
   const location = useLocation();
