@@ -1,6 +1,7 @@
 import { Routes, Route, useLocation } from "react-router-dom";
 import { SideMenu } from "@/Components/SideMenuComponent/SideMenu";
 import Profile from "@/Components/Settings/Profile";
+import ChangePassword from "@/Components/Settings/ChangePassword";
 import LoadingSpinner from "@/Components/Loaders/LoadingSpinner";
 import { Suspense, lazy, useState } from "react";
 import { TitlePill } from "@/Components/TitlePillComponent/TitlePill";
@@ -15,9 +16,6 @@ import CreateNewUserModal from "@/Components/Settings/CreateNewUserModal";
 
 const RoleAndPermissions = lazy(
   () => import("@/Components/Settings/RoleAndPermissions")
-);
-const ChangePassword = lazy(
-  () => import("@/Components/Settings/ChangePassword")
 );
 const Users = lazy(() => import("@/Components/Settings/Users"));
 
