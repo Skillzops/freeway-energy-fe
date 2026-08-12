@@ -141,9 +141,9 @@ const LoginPage = () => {
         } else if (userData?.agentDetails?.category == "INSTALLER") {
           url = "/installer/dashboard";
         } else {
-          // The API has authenticated this user. All non-agent roles use the
-          // main workspace; route-level permissions still control access.
-          url = "/dashboard";
+          // The dashboard is an admin analytics page. Other authenticated
+          // non-agent roles should enter the workspace home instead.
+          url = "/home";
         }
         navigate(redirectPath ?? url);
       } catch (_error) {
