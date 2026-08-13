@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import PageLayout from "./PageLayout";
 import { brandAssets } from "@/config/brandConfig";
@@ -29,6 +30,15 @@ const Home = () => {
   const navigate = useNavigate();
   const isMobile = useBreakpoint("max", 640);
   const userData = useTokens();
+  const roleName = userData.role.role?.toLowerCase();
+  const agentCategory = userData.agentDetails?.category?.toUpperCase();
+  const isSalesAgent = agentCategory === "SALES" || ["assignedagent", "sales", "salesagent"].includes(roleName || "");
+  const isInstaller = agentCategory === "INSTALLER";
+
+  useEffect(() => {
+    if (isSalesAgent) navigate("/agent/dashboard", { replace: true });
+    if (isInstaller) navigate("/installer/dashboard", { replace: true });
+  }, [isSalesAgent, isInstaller, navigate]);
 
   const notificationCounts = {
     Sales: 3,

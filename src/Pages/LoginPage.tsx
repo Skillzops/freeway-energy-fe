@@ -108,7 +108,10 @@ const LoginPage = () => {
           role: response.data.role?.role,
           active: response.data.role?.active,
           permissions: optimizedPermissions // Only action and subject
-        }
+        },
+        agentDetails: response.data.agentDetails
+          ? { id: response.data.agentDetails.id, category: response.data.agentDetails.category }
+          : undefined,
       };
 
       // if (userData?.role?.role !== "admin") {
@@ -127,7 +130,10 @@ const LoginPage = () => {
 
         let url = "";
 
-        if (userData?.agentDetails?.category == "SALES") {
+        const roleName = userData.role?.role?.toLowerCase();
+        const isSalesAgent = userData?.agentDetails?.category === "SALES" ||
+          ["assignedagent", "sales", "salesagent"].includes(roleName || "");
+        if (isSalesAgent) {
           url = "/agent/dashboard";
         } else if (userData?.agentDetails?.category == "INSTALLER") {
           url = "/installer/dashboard";
