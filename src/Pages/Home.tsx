@@ -6,7 +6,17 @@ import useBreakpoint from "@/hooks/useBreakpoint";
 import ProceedButton from "@/Components/ProceedButtonComponent/ProceedButtonComponent";
 import useTokens from "@/hooks/useTokens";
 
-const HOME_PERMISSION_SUBJECTS: Record<string, string[]> = { Sales: ["Sales"], Customers: ["Customers"], Agents: ["Agents"], Products: ["Products"], Inventory: ["Inventory"], Devices: ["Inventory"], Contracts: ["Contracts"], Reports: ["AuditLog"], Settings: ["User"] };
+const HOME_PERMISSION_SUBJECTS: Record<string, string[]> = {
+  Sales: ["Sales"],
+  Customers: ["Customers"],
+  Agents: ["Agents"],
+  Products: ["Products"],
+  Inventory: ["Inventory"],
+  Devices: ["Inventory"],
+  Contracts: ["Contracts"],
+  Reports: ["AuditLog"],
+  Settings: ["User"],
+};
 
 type SectionData = {
   sectionName: string;
@@ -90,13 +100,27 @@ const Home = () => {
     },
   ];
 
-  const canManageEverything = userData.role.permissions?.some((permission) => permission.action === "manage" && permission.subject === "all");
-  const allowedSubjects = new Set(userData.role.permissions?.map((permission) => permission.subject) ?? []);
-  const newHomeData: SectionData[] = homeData.filter(({ sectionName }) => sectionName === "Dashboard" ? userData.role.role === "admin" || canManageEverything : canManageEverything || HOME_PERMISSION_SUBJECTS[sectionName]?.some((subject) => allowedSubjects.has(subject))).map((data: SectionData) => ({
-    ...data,
-    notificationCount:
-      notificationCounts[data.sectionName as keyof typeof notificationCounts],
-  }));
+  const isAdmin = userData.role.role?.toLowerCase() === "admin";
+  const canManageEverything = userData.role.permissions?.some(
+    (permission) => permission.action === "manage" && permission.subject === "all"
+  );
+  const allowedSubjects = new Set(
+    userData.role.permissions?.map((permission) => permission.subject.toLowerCase()) ?? []
+  );
+  const newHomeData: SectionData[] = homeData
+    .filter(({ sectionName }) =>
+      sectionName === "Dashboard"
+        ? isAdmin || canManageEverything
+        : isAdmin || canManageEverything ||
+          HOME_PERMISSION_SUBJECTS[sectionName]?.some((subject) =>
+            allowedSubjects.has(subject.toLowerCase())
+          )
+    )
+    .map((data: SectionData) => ({
+      ...data,
+      notificationCount:
+        notificationCounts[data.sectionName as keyof typeof notificationCounts],
+    }));
 
   return (
     <PageLayout showheaderBadge={false} className="w-full px-2 py-8 md:p-8">

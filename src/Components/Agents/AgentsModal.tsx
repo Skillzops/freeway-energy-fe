@@ -1852,6 +1852,7 @@ const AgentModal = ({
 }) => {
   // const [displayInput, setDisplayInput] = useState<boolean>(false);
   const [tabContent, setTabContent] = useState<string>("agentDetails");
+  const [isEditingAgent, setIsEditingAgent] = useState<boolean>(false);
   const [isAssignCustomersModalOpen, setIsAssignCustomersModalOpen] = useState<boolean>(false);
   const [isAssignProductsModalOpen, setIsAssignProductsModalOpen] = useState<boolean>(false);
   const [isAssignInstallersModalOpen, setIsAssignInstallersModalOpen] = useState<boolean>(false);
@@ -1874,6 +1875,18 @@ const AgentModal = ({
   const [productQueryParams, setProductQueryParams] = useState<Record<string, any> | null>({});
   const { role } = useTokens();
   const roleName = role?.role?.toLowerCase() || "";
+  const permissions = role?.permissions ?? [];
+  const canEditAgent =
+    roleName === "admin" ||
+    permissions.some(
+      (permission: any) =>
+        permission.action === "manage" && permission.subject === "all"
+    ) ||
+    permissions.some(
+      (permission: any) =>
+        permission.subject === "Agents" &&
+        ["write", "manage"].includes(permission.action)
+    );
   const canAssignDevices = roleName.includes("admin") || roleName.includes("inventory");
   const { apiCall } = useApiCall();
 
@@ -1973,9 +1986,19 @@ const AgentModal = ({
   // Get dropdown items based on agent category
   const getDropdownItems = () => {
     if (agentCategory === "INSTALLER") {
-      return ["Assign to Agent", "Block", "Cancel"];
+      return [
+        ...(canEditAgent ? ["Edit Agent"] : []),
+        "Assign to Agent",
+        "Block",
+        "Cancel",
+      ];
     } else {
-      const items = ["Assign Customer", "Assign Product", "Assign Installer"];
+      const items = [
+        ...(canEditAgent ? ["Edit Agent"] : []),
+        "Assign Customer",
+        "Assign Product",
+        "Assign Installer",
+      ];
       if (canAssignDevices) {
         items.push("Assign Device");
       }
@@ -1993,6 +2016,10 @@ const AgentModal = ({
       if (agentCategory === "INSTALLER") {
         // Installer agent dropdown actions
         switch (selectedItem) {
+          case "Edit Agent":
+            setTabContent("agentDetails");
+            setIsEditingAgent(true);
+            break;
           case "Assign to Agent":
             void 0;
             setIsWalletTopUpModalOpen(true);
@@ -2011,6 +2038,10 @@ const AgentModal = ({
       } else {
         // Sales agent dropdown actions
         switch (selectedItem) {
+          case "Edit Agent":
+            setTabContent("agentDetails");
+            setIsEditingAgent(true);
+            break;
           case "Assign Customer":
             void 0;
             setIsAssignCustomersModalOpen(true);
@@ -2063,8 +2094,10 @@ const AgentModal = ({
     errorStates: installationErrorStates,
     mutate: refreshInstallations
   } = useGetRequest(
-    agentCategory === "INSTALLER" ? `/v1/installer/installation-history/` : null,
-    agentCategory === "INSTALLER",
+    agentCategory === "INSTALLER" && isOpen
+      ? `/v1/agents/${agentID}/installation-history`
+      : null,
+    agentCategory === "INSTALLER" && isOpen,
     60000
   );
 
@@ -2076,8 +2109,10 @@ const AgentModal = ({
     errorStates: taskErrorStates,
     mutate: refreshTasks
   } = useGetRequest(
-    agentCategory === "INSTALLER" ? `/v1/installer/task-history/` : null,
-    agentCategory === "INSTALLER",
+    agentCategory === "INSTALLER" && isOpen
+      ? `/v1/agents/${agentID}/task-history`
+      : null,
+    agentCategory === "INSTALLER" && isOpen,
     60000
   );
 
@@ -2198,6 +2233,7 @@ const AgentModal = ({
         onClose={() => {
           setIsOpen(false);
           setTabContent("agentDetails");
+          setIsEditingAgent(false);
           setIsResetPasswordModalOpen(false);
           setAdminPassword("");
           setResetPasswordError("");
@@ -2258,7 +2294,11 @@ const AgentModal = ({
                 <AgentDetails
                   {...generateAgentEntries(fetchSingleAgent.data)}
                   refreshTable={refreshTable}
-                  displayInput={false}
+                  displayInput={isEditingAgent}
+                  onEditComplete={() => {
+                    setIsEditingAgent(false);
+                    fetchSingleAgent.mutate();
+                  }}
                   onClose={() => setIsOpen(false)}
                 />
               </DataStateWrapper>
