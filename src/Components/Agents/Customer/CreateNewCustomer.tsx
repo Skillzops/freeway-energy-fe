@@ -69,7 +69,7 @@ const customerSchema = z.object({
       errorMap: () => ({ message: "Please select an address type" }),
     })
     .default("HOME"),
-  installationAddress: z.string().min(1, "Installation address is required"),
+  installationAddress: z.string().optional(),
   lga: z.string().min(1, "LGA is required"),
   state: z.string().min(1, "State is required"),
   location: z.string().trim().min(1, "Location is required"),
@@ -562,8 +562,8 @@ const CreateNewCustomer = ({
           <Input
             type="text"
             name="installationAddress"
-            label="* Address"
-            value={formData.installationAddress}
+            label="Address"
+            value={formData.installationAddress || ""}
             onChange={handleInputChange}
             placeholder="Installation address"
             required={false}
