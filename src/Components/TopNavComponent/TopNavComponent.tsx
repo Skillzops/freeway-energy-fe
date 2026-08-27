@@ -7,18 +7,60 @@ import support from "../../assets/support.svg";
 import { DropDown } from "../DropDownComponent/DropDown";
 import Cookies from "js-cookie";
 import useTokens from "../../hooks/useTokens";
+import { useApiCall } from "@/utils/useApiCall";
 import { formatNumberWithSuffix } from "../../hooks/useFormatNumberWithSuffix";
 import { Modal } from "@/Components/ModalComponent/Modal";
 import { brandAssets } from "@/config/brandConfig";
 
 const TopNavComponent = () => {
-  const { role, agentDetails } = useTokens();
+  const { role, agentDetails, otherAgentInstances } = useTokens();
+  const { apiCall } = useApiCall();
 
   const navigate = useNavigate();
   const currentDate = useFormattedCurrentDate();
 
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isSwitchingProfile, setIsSwitchingProfile] = useState(false);
+
+  // A user can hold both a Sales and an Installer profile. If they do,
+  // otherAgentInstances (returned at login) lists the profile(s) that
+  // aren't currently active - offer a one-click switch to it.
+  const switchTarget = otherAgentInstances?.[0];
+
+  const handleSwitchProfile = async () => {
+    if (!switchTarget || isSwitchingProfile) return;
+    setIsSwitchingProfile(true);
+    try {
+      const response = await apiCall({
+        endpoint: "/v1/auth/switch-profile",
+        method: "post",
+        showToast: false,
+      });
+
+      const existingCookie = Cookies.get("userData");
+      const existingData = existingCookie ? JSON.parse(existingCookie) : {};
+
+      Cookies.set(
+        "userData",
+        JSON.stringify({
+          ...existingData,
+          ...response.data,
+          token: response.headers.access_token,
+        }),
+        { expires: 7, path: "/", sameSite: "Lax" }
+      );
+
+      const destination =
+        switchTarget.category === "INSTALLER"
+          ? "/installer/dashboard"
+          : "/agent/dashboard";
+      window.location.replace(destination);
+    } catch (error) {
+      console.error("Failed to switch profile", error);
+      setIsSwitchingProfile(false);
+    }
+  };
 
   // Handle scroll
   useEffect(() => {
@@ -83,6 +125,25 @@ const TopNavComponent = () => {
                   : role?.role
               }
             />
+            {switchTarget && (
+              <button
+                type="button"
+                onClick={handleSwitchProfile}
+                disabled={isSwitchingProfile}
+                className="flex items-center justify-center px-3 py-1.5 text-xs font-medium text-white bg-[#32290E] rounded-full hover:opacity-90 disabled:opacity-50 transition-all whitespace-nowrap"
+                title={`Switch to your ${
+                  switchTarget.category === "INSTALLER" ? "Installer" : "Sales"
+                } profile`}
+              >
+                {isSwitchingProfile
+                  ? "Switching…"
+                  : `Switch to ${
+                      switchTarget.category === "INSTALLER"
+                        ? "Installer"
+                        : "Sales"
+                    }`}
+              </button>
+            )}
           </div>
           <div className="flex items-center w-max max-w-[350px] gap-1 sm:gap-4">
             <span className="hidden sm:flex items-center justify-center bg-[#F6F8FA] h-[32px] px-2 py-1 text-xs text-textDarkGrey border-[0.6px] border-strokeGreyThree rounded-full">
