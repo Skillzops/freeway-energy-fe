@@ -146,6 +146,13 @@ const TopNavComponent = () => {
             )}
           </div>
           <div className="flex items-center w-max max-w-[350px] gap-1 sm:gap-4">
+            {/* TEMP DEPLOY-CHECK FLAG - remove once the profile-switch build
+                is confirmed live. If this red badge isn't visible on
+                freewaveenergy.ng after deploying, the live site is still
+                running an old build. */}
+            <span className="flex items-center justify-center px-2 py-1 text-[10px] font-mono font-bold text-white bg-red-600 rounded-full">
+              BUILD-CHECK-AGENTSWITCH
+            </span>
             <span className="hidden sm:flex items-center justify-center bg-[#F6F8FA] h-[32px] px-2 py-1 text-xs text-textDarkGrey border-[0.6px] border-strokeGreyThree rounded-full">
               {currentDate}
             </span>
