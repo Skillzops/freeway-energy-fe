@@ -130,13 +130,25 @@ const LoginPage = () => {
 
         let url = "";
 
+        // agentDetails.category is the authoritative signal - it's set per
+        // agent record. role.role is just a display label and, on this
+        // tenant, installers can also carry the generic "AssignedAgent"
+        // role name, which used to match the sales-role-name fallback below
+        // and send installers to /agent/dashboard instead of
+        // /installer/dashboard. Check category first; only fall back to the
+        // role-name heuristic when there's no agentDetails at all (e.g.
+        // admin-created accounts without an agent record).
+        const category = userData?.agentDetails?.category;
         const roleName = userData.role?.role?.toLowerCase();
-        const isSalesAgent = userData?.agentDetails?.category === "SALES" ||
-          ["assignedagent", "sales", "salesagent"].includes(roleName || "");
-        if (isSalesAgent) {
-          url = "/agent/dashboard";
-        } else if (userData?.agentDetails?.category == "INSTALLER") {
+        const isInstaller = category === "INSTALLER";
+        const isSalesAgent = !isInstaller && (
+          category === "SALES" ||
+          (!category && ["assignedagent", "sales", "salesagent"].includes(roleName || ""))
+        );
+        if (isInstaller) {
           url = "/installer/dashboard";
+        } else if (isSalesAgent) {
+          url = "/agent/dashboard";
         } else {
           // The dashboard is an admin analytics page. Other authenticated
           // non-agent roles should enter the workspace home instead.
