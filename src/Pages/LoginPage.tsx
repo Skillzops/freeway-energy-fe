@@ -112,6 +112,12 @@ const LoginPage = () => {
         agentDetails: response.data.agentDetails
           ? { id: response.data.agentDetails.id, category: response.data.agentDetails.category }
           : undefined,
+        otherAgentInstances: Array.isArray(response.data.otherAgentInstances)
+          ? response.data.otherAgentInstances.map((agent: any) => ({
+              id: agent.id,
+              category: agent.category,
+            }))
+          : undefined,
       };
 
       // if (userData?.role?.role !== "admin") {

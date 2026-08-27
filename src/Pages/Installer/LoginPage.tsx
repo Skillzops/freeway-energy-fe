@@ -119,7 +119,8 @@ const InstallerLoginPage = () => {
           deleted_at: response.data.role?.deleted_at,
           permissions: optimizedPermissions // Only action and subject
         },
-        agentDetails: response.data?.agentDetails
+        agentDetails: response.data?.agentDetails,
+        otherAgentInstances: response.data?.otherAgentInstances
       };
 
       console.log(userData, 'response___Installer');
