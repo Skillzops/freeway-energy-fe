@@ -28,6 +28,14 @@ const TopNavComponent = () => {
   // aren't currently active - offer a one-click switch to it.
   const switchTarget = otherAgentInstances?.[0];
 
+  // TEMP DEBUG - remove once the switch button is confirmed working.
+  // eslint-disable-next-line no-console
+  console.log("[TopNav DEBUG] raw userData cookie:", Cookies.get("userData"));
+  // eslint-disable-next-line no-console
+  console.log("[TopNav DEBUG] otherAgentInstances:", otherAgentInstances);
+  // eslint-disable-next-line no-console
+  console.log("[TopNav DEBUG] switchTarget:", switchTarget);
+
   const handleSwitchProfile = async () => {
     if (!switchTarget || isSwitchingProfile) return;
     setIsSwitchingProfile(true);
