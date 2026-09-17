@@ -338,6 +338,19 @@ const handleApiError = (
           setErrorState(true);
           break;
         default:
+          // Previously silent for every status besides 400/401 - a 409
+          // conflict, 404, 422, 500, etc. would set an internal error flag
+          // and show the user nothing at all, so a failed action (like
+          // reassigning an already-assigned device) looked like it just
+          // did nothing.
+          if (!errorStates.find((e) => e.endpoint === endpoint)?.toastShown) {
+            toast.error(
+              error?.response?.data?.message ||
+                error?.message ||
+                `Request failed (${status}). Please try again.`
+            );
+            setToastShown(endpoint);
+          }
           setErrorState(true);
           break;
       }
