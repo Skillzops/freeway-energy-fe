@@ -41,6 +41,8 @@ const EditSaleModal = ({
   const [selectedDeviceSerials, setSelectedDeviceSerials] = useState<string[]>(
     []
   );
+  const [deviceSearch, setDeviceSearch] = useState("");
+  const [debouncedDeviceSearch, setDebouncedDeviceSearch] = useState("");
   const [isDevicesOpen, setIsDevicesOpen] = useState(false);
   const [reason, setReason] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -52,7 +54,17 @@ const EditSaleModal = ({
     setIsDevicesOpen(false);
     setReason("");
     setCustomerSearch("");
+    setDeviceSearch("");
+    setDebouncedDeviceSearch("");
   }, [isOpen, initialCustomerId, initialDeviceSerials]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(
+      () => setDebouncedDeviceSearch(deviceSearch.trim()),
+      300
+    );
+    return () => window.clearTimeout(timer);
+  }, [deviceSearch]);
 
   const customerQuery = (customerSearch || "").trim();
   const customerUrl = isOpen
@@ -92,10 +104,26 @@ const EditSaleModal = ({
     return Array.from(unique.entries()).map(([id, label]) => ({ id, label }));
   }, [customers, initialCustomerId, initialCustomerName]);
 
-  const availableDeviceSerials = useMemo<string[]>(
-    () => initialDeviceSerials,
-    [initialDeviceSerials]
-  );
+  const availableDevicesUrl = isOpen
+    ? `/v1/device?fetchFormat=unused&installationStatus=not_installed&availableForSale=true&limit=6000&sortField=serialNumber&sortOrder=asc&search=${encodeURIComponent(debouncedDeviceSearch)}`
+    : null;
+  const { data: availableDevicesResponse, isLoading: availableDevicesLoading } =
+    useGetRequest(availableDevicesUrl, true, 60000);
+
+  const availableDeviceSerials = useMemo<string[]>(() => {
+    const available = Array.isArray(availableDevicesResponse?.devices)
+      ? availableDevicesResponse.devices
+      : Array.isArray(availableDevicesResponse)
+        ? availableDevicesResponse
+        : [];
+    const serials = available
+      .map((device: any) => String(device?.serialNumber || "").trim())
+      .filter(Boolean);
+
+    return Array.from(
+      new Set([...initialDeviceSerials, ...selectedDeviceSerials, ...serials])
+    );
+  }, [availableDevicesResponse, initialDeviceSerials, selectedDeviceSerials]);
 
   const toggleDeviceSerial = (serial: string) => {
     setSelectedDeviceSerials((prev) =>
@@ -229,8 +257,15 @@ const EditSaleModal = ({
 
             {isDevicesOpen && (
               <div className="rounded-[20px] border border-[#DEE3EE] bg-white p-4 max-h-[220px] overflow-auto space-y-2">
+                <div className="sticky top-0 z-10 bg-white pb-3">
+                  <div className="relative">
+                    <input type="search" value={deviceSearch} onChange={(event) => setDeviceSearch(event.target.value)} placeholder="Search available serial numbers" className="w-full h-10 rounded-xl border border-[#DEE3EE] bg-[#F8F9FC] px-3 pr-9 text-[13px] text-[#111111] placeholder:text-[#7482A5] focus:outline-none focus:border-[#DDC996]" />
+                    {availableDevicesLoading && <span aria-label="Loading device serials" className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin rounded-full border-2 border-[#DDC996] border-t-[#901420]" />}
+                  </div>
+                  {availableDevicesLoading && <p className="mt-2 text-[12px] text-[#7482A5]">Loading available device serials...</p>}
+                </div>
                 {availableDeviceSerials.length === 0 ? (
-                  <p className="text-[13px] text-[#7482A5]">No device serials available</p>
+                  <p className="text-[13px] text-[#7482A5]">{availableDevicesLoading ? "Loading available device serials..." : "No available device serials found"}</p>
                 ) : (
                   availableDeviceSerials.map((serial) => (
                     <label key={serial} className="flex items-center gap-3 text-[13px] text-[#111111]">
