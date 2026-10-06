@@ -34,7 +34,15 @@ const InvoiceSettings = lazy(
 const Settings = () => {
   const userData = useTokens();
   const showInvoiceSettings = canAccessInvoiceSettings(userData);
-  const canAccessUserManagement = userData.role.permissions?.some((permission) => permission.subject === "User" && ["read", "write", "manage", "delete"].includes(permission.action));
+  const roleName = userData?.role?.role?.toLowerCase();
+  const canAccessUserManagement =
+    roleName === "admin" ||
+    roleName === "super-admin" ||
+    userData?.role?.permissions?.some(
+      (permission) =>
+        permission.subject === "User" &&
+        ["read", "write", "manage", "delete"].includes(permission.action),
+    );
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isAgentModalOpen, setIsAgentModalOpen] = useState<boolean>(false);
