@@ -414,6 +414,7 @@ const CustomerTable = ({
         const approval = (row.approvalStatus || "").toUpperCase();
         const isApproved = approval === "APPROVED";
         const isRejected = approval === "REJECTED";
+        const needsApproval = approval === "PENDING" || approval === "RESUBMITTED";
         const isInactive = (row.status || "").toLowerCase() === "inactive";
 
         // Rejected: hide Accept/Reject, show only View
@@ -450,8 +451,8 @@ const CustomerTable = ({
           );
         }
 
-        // Pending + inactive: show Accept + Reject + View
-        if (isInactive) {
+        // Approval workflow is independent of the account's active status.
+        if (needsApproval || isInactive) {
           return (
             <div className="flex items-center gap-2">
               <button
