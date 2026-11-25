@@ -1,496 +1,178 @@
-
-
-import { BRAND_CONFIG } from "@/config/brandConfig";
 import { useEffect, useState } from "react";
-
-const shadeWithPrimary = (hex: string, percent: number) => {
-    const num = parseInt(hex.replace("#", ""), 16);
-    const clamp = (v: number) => Math.min(255, Math.max(0, v));
-    const delta = Math.round((percent / 100) * 255);
-    const r = clamp((num >> 16) + delta);
-    const g = clamp(((num >> 8) & 0xff) + delta);
-    const b = clamp((num & 0xff) + delta);
-    const toHex = (v: number) => v.toString(16).padStart(2, "0");
-    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
-};
-
-const inputBase =
-    "w-full border rounded-md px-3 py-2 text-sm placeholder:text-xs placeholder:text-gray-400/80 placeholder:font-normal focus:outline-none focus:ring-1 focus:ring-gray-300";
-const numberInput =
-    `${inputBase} [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`;
-const selectBase =
-    "w-full border rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-gray-300";
-const labelBase = "text-[11px] uppercase tracking-wide text-gray-600";
-
+import { useGetRequest } from "@/utils/useApiCall";
+import { DropDown } from "../DropDownComponent/DropDown";
 type BoolAny = "any" | "true" | "false";
 
 export type Filters = {
-    // Date windows (ISO via datetime-local)
-    startDate?: string;
-    endDate?: string;
-    createdStartDate?: string;
-    createdEndDate?: string;
+  // Date windows
+  startDate?: string;
+  endDate?: string;
+  createdStartDate?: string;
+  createdEndDate?: string;
 
-    // Sales
-    salesStatus?: "COMPLETED" | "IN_INSTALLMENT" | "UNPAID" | "CANCELLED";
+  // Sales
+  salesStatus?: "COMPLETED" | "IN_INSTALLMENT" | "UNPAID" | "CANCELLED";
+  paymentMode?: "ONE_OFF" | "INSTALLMENT";
 
-    // Agent
-    agentId?: string;
-    agentCategory?: "SALES" | "INSTALLER" | "BUSINESS";
+  // Agent
+  agentId?: string;
+  agentCategory?: "SALES" | "INSTALLER" | "BUSINESS";
 
-    // Customer
-    customerId?: string;
-    customerStatus?: "active" | "inactive" | "barred";
-    customerType?: string;
-    customerState?: string;
-    customerLga?: string;
+  // Customer
+  customerId?: string;
+  customerStatus?: "active" | "inactive" | "barred";
+  customerCategory?: string;
+  customerType?: string;
 
-    // Payment
-    paymentStatus?: "PENDING" | "COMPLETED" | "FAILED" | "REFUNDED";
-    paymentMethod?: "ONLINE" | "CASH" | "USSD" | "BANK_TRANSFER" | "POS" | "WALLET";
-    minAmount?: number;
-    maxAmount?: number;
+  // Canonical geography
+  state?: string;
+  lga?: string;
 
-    // Product / Device
-    productId?: string;
-    productName?: string;
-    serialNumber?: string;
-    state?: string; // generic
-    lga?: string;   // generic
-    installerName?: string;
+  // UI aliases
+  customerState?: string;
+  customerLga?: string;
 
-    // Flags / counts
-    hasMultiplePayments?: BoolAny;
-    hasMadeRepayments?: BoolAny;
-    fullyPaid?: BoolAny;
-    hasOutstandingBalance?: BoolAny;
-    paymentOverdue?: BoolAny;
+  // Payments
+  paymentStatus?: "PENDING" | "COMPLETED" | "FAILED" | "REFUNDED";
+  paymentMethod?: "ONLINE" | "CASH" | "USSD" | "BANK_TRANSFER" | "POS" | "WALLET";
+  minAmount?: number;
+  maxAmount?: number;
 
-    minPaymentCount?: number;
-    maxPaymentCount?: number;
+  // Devices / product
+  productId?: string;
+  productName?: string;
+  serialNumber?: string;
+  installationStatus?: string;
+  installerName?: string;
+
+  // Flags / derived
+  hasMultiplePayments?: BoolAny;
+  hasMadeRepayments?: BoolAny;
+  hasOutstandingBalance?: BoolAny; // legacy alias
+  hasOutstandingDebt?: BoolAny;    // canonical
+  paymentOverdue?: BoolAny;
+  fullyPaid?: BoolAny;
+  isNewSale?: BoolAny;
+  isRenewal?: BoolAny;
+
+  minPaymentCount?: number;
+  maxPaymentCount?: number;
+
+    overdueDays?: number;
+
+  isOverdue?: BoolAny;
 };
+
+type ExportType =
+  | "sales"
+  | "customers"
+  | "payments"
+  | "devices"
+  | "debt_report"
+  | "renewal_report"
+  | "weekly_summary"
+  | "monthly_summary"
+  | "total_outstanding_receivables"; 
 
 type FiltersModalProps = {
-    open: boolean;
-    onClose: () => void;
-
-    // The *applied* filters coming from Reports.tsx
-    filters: Filters;
-
-    // Called with the *new* filters when the user clicks Apply
-    onApply: (next: Filters) => void;
-
-    // Clear both local draft and applied filters
-    onClear: () => void;
+  open: boolean;
+  onClose: () => void;
+  filters: Filters;
+  exportType: ExportType;
+  onApply: (next: Filters) => void;
+  onClear: () => void;
 };
 
-const applyButtonGradient = (() => {
-    const { brandPrimary } = BRAND_CONFIG.colors.legacy;
-    const darkerPrimary = shadeWithPrimary(brandPrimary, -20);
-    return `linear-gradient(90deg, ${brandPrimary}, ${darkerPrimary})`;
-})();
 
-const dateInput = (v?: string) => (v ? v : "");
-
-// Helper to trim empty values before apply
-function trim<T extends Record<string, any>>(obj: T): T {
-    const out: any = {};
-    for (const [k, v] of Object.entries(obj)) {
-        if (v === undefined || v === null || v === "" || v === "any") continue;
-        out[k] = v;
+const inputBase = "w-full border rounded-md px-3 py-2 text-sm bg-white";
+const fieldsFor = (type: ExportType): (keyof Filters)[] => [
+  "startDate", "endDate", "agentId", "agentCategory",
+  ...(!["weekly_summary", "monthly_summary", "total_outstanding_receivables"].includes(type) ? ["customerId" as const] : []),
+  ...(type === "sales" ? ["salesStatus" as const] : []),
+  ...(type === "payments" ? ["paymentStatus", "paymentMethod", "minAmount", "maxAmount"] as const : []),
+  ...(["customers", "debt_report", "renewal_report"].includes(type) ? ["state", "lga"] as const : []),
+  ...(type === "customers" ? ["hasOutstandingDebt" as const] : []),
+  ...(type === "devices" ? ["serialNumber", "installationStatus"] as const : []),
+  ...(type === "debt_report" ? ["isOverdue" as const] : []),
+  ...(type === "renewal_report" ? ["overdueDays" as const] : []),
+];
+const labels: Partial<Record<keyof Filters, string>> = {
+  startDate: "From date", endDate: "Through date", agentId: "Agent ID",
+  agentCategory: "Agent category", customerId: "Customer ID", salesStatus: "Sale status",
+  paymentStatus: "Payment status", paymentMethod: "Payment method", minAmount: "Minimum amount",
+  maxAmount: "Maximum amount", state: "State", lga: "LGA", hasOutstandingDebt: "Outstanding debt",
+  serialNumber: "Serial number", installationStatus: "Installation status", isOverdue: "Overdue",
+  overdueDays: "Minimum overdue days",
+};
+const options: Partial<Record<keyof Filters, string[]>> = {
+  agentCategory: ["SALES", "INSTALLER", "BUSINESS"],
+  salesStatus: ["COMPLETED", "IN_INSTALLMENT", "UNPAID", "CANCELLED"],
+  paymentStatus: ["PENDING", "COMPLETED", "FAILED", "REFUNDED"],
+  paymentMethod: ["ONLINE", "CASH", "USSD", "BANK_TRANSFER", "POS", "WALLET"],
+  hasOutstandingDebt: ["true", "false"], isOverdue: ["true", "false"],
+  installationStatus: ["not_installed", "ready_for_installation", "installed"],
+};
+export default function FiltersModal({ open, onClose, filters, exportType, onApply, onClear }: FiltersModalProps) {
+  const [local, setLocal] = useState<Filters>(filters);
+  const [error, setError] = useState("");
+  useEffect(() => { if (open) { setLocal(filters); setError(""); } }, [open, filters, exportType]);
+  const { data: agentData } = useGetRequest(open ? "/v1/agents" : null, false);
+  const { data: customerData } = useGetRequest(open ? "/v1/customers" : null, false);
+  const records = (data: any): any[] => {
+    const rows = Array.isArray(data) ? data : data?.updatedResults || data?.data || data?.results;
+    return Array.isArray(rows) ? rows : [];
+  };
+  const agents = records(agentData);
+  const customers = records(customerData);
+  if (!open) return null;
+  const fields = fieldsFor(exportType);
+  const apply = () => {
+    if (local.startDate && local.endDate && local.startDate > local.endDate) {
+      setError("From date must be before through date."); return;
     }
-    return out as T;
-}
-
-export default function FiltersModal({
-    open,
-    onClose,
-    filters,
-    onApply,
-    onClear,
-}: FiltersModalProps) {
-    const [local, setLocal] = useState<Filters>(filters);
-
-
-    useEffect(() => {
-        if (open) setLocal(filters);
-    }, [open, filters]);
-
-    const setField = <K extends keyof Filters>(key: K, val: Filters[K]) =>
-        setLocal((prev) => ({ ...prev, [key]: val }));
-
-    if (!open) return null;
-
-    return (
-        <div
-            className="fixed inset-0 z-[60] flex items-center justify-center"
-            role="dialog"
-            aria-modal="true"
-            onKeyDown={(e) => e.key === "Escape" && onClose()}
-        >
-            <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-            <div className="relative z-[61] w-full max-w-6xl max-h-[90vh] bg-white rounded-xl shadow-xl flex flex-col">
-                <div className="px-5 py-4 border-b flex items-center justify-between">
-                    <h3 className="text-base font-semibold">Filters</h3>
-                    <button
-                        onClick={onClose}
-                        aria-label="Close filters"
-                        className="rounded-md px-2 py-1 text-sm hover:bg-gray-100"
-                    >
-                        ✕
-                    </button>
-                </div>
-
-                <div className="px-5 py-4 overflow-auto">
-                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                        <div>
-                            <label className={labelBase}>Start date</label>
-                            <input
-                                type="datetime-local"
-                                value={dateInput(local.startDate)}
-                                onChange={(e) => setField("startDate", e.target.value || undefined)}
-                                className={inputBase}
-                            />
-                        </div>
-                        <div>
-                            <label className={labelBase}>End date</label>
-                            <input
-                                type="datetime-local"
-                                value={dateInput(local.endDate)}
-                                onChange={(e) => setField("endDate", e.target.value || undefined)}
-                                className={inputBase}
-                            />
-                        </div>
-                        <div>
-                            <label className={labelBase}>Created start date</label>
-                            <input
-                                type="datetime-local"
-                                value={dateInput(local.createdStartDate)}
-                                onChange={(e) => setField("createdStartDate", e.target.value || undefined)}
-                                className={inputBase}
-                            />
-                        </div>
-                        <div>
-                            <label className={labelBase}>Created end date</label>
-                            <input
-                                type="datetime-local"
-                                value={dateInput(local.createdEndDate)}
-                                onChange={(e) => setField("createdEndDate", e.target.value || undefined)}
-                                className={inputBase}
-                            />
-                        </div>
-
-                        {/* Sales */}
-                        <div>
-                            <label className={labelBase}>Sales status</label>
-                            <select
-                                value={local.salesStatus ?? ""}
-                                onChange={(e) => setField("salesStatus", (e.target.value || undefined) as Filters["salesStatus"])}
-                                className={selectBase}
-                            >
-                                <option value="">Any</option>
-                                <option>COMPLETED</option>
-                                <option>IN_INSTALLMENT</option>
-                                <option>UNPAID</option>
-                                <option>CANCELLED</option>
-                            </select>
-                        </div>
-
-                        {/* Agent */}
-                        <div>
-                            <label className={labelBase}>Agent ID</label>
-                            <input
-                                value={local.agentId ?? ""}
-                                onChange={(e) => setField("agentId", e.target.value || undefined)}
-                                className={inputBase}
-                                placeholder="507f1f77bcf86cd799439011"
-                            />
-                        </div>
-                        <div>
-                            <label className={labelBase}>Agent category</label>
-                            <select
-                                value={local.agentCategory ?? ""}
-                                onChange={(e) => setField("agentCategory", (e.target.value || undefined) as Filters["agentCategory"])}
-                                className={selectBase}
-                            >
-                                <option value="">Any</option>
-                                <option>SALES</option>
-                                <option>INSTALLER</option>
-                                <option>BUSINESS</option>
-                            </select>
-                        </div>
-
-                        {/* Customer */}
-                        <div>
-                            <label className={labelBase}>Customer ID</label>
-                            <input
-                                value={local.customerId ?? ""}
-                                onChange={(e) => setField("customerId", e.target.value || undefined)}
-                                className={inputBase}
-                                placeholder="507f1f77bcf86cd799439011"
-                            />
-                        </div>
-                        <div>
-                            <label className={labelBase}>Customer status</label>
-                            <select
-                                value={local.customerStatus ?? ""}
-                                onChange={(e) => setField("customerStatus", (e.target.value || undefined) as Filters["customerStatus"])}
-                                className={selectBase}
-                            >
-                                <option value="">Any</option>
-                                <option value="active">active</option>
-                                <option value="inactive">inactive</option>
-                                <option value="barred">barred</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label className={labelBase}>Customer type</label>
-                            <input
-                                value={local.customerType ?? ""}
-                                onChange={(e) => setField("customerType", e.target.value || undefined)}
-                                className={inputBase}
-                                placeholder="residential"
-                            />
-                        </div>
-                        <div>
-                            <label className={labelBase}>Customer state</label>
-                            <input
-                                value={local.customerState ?? ""}
-                                onChange={(e) => setField("customerState", e.target.value || undefined)}
-                                className={inputBase}
-                                placeholder="Lagos"
-                            />
-                        </div>
-                        <div>
-                            <label className={labelBase}>Customer LGA</label>
-                            <input
-                                value={local.customerLga ?? ""}
-                                onChange={(e) => setField("customerLga", e.target.value || undefined)}
-                                className={inputBase}
-                                placeholder="Ikeja"
-                            />
-                        </div>
-
-                        {/* Payment */}
-                        <div>
-                            <label className={labelBase}>Payment status</label>
-                            <select
-                                value={local.paymentStatus ?? ""}
-                                onChange={(e) => setField("paymentStatus", (e.target.value || undefined) as Filters["paymentStatus"])}
-                                className={selectBase}
-                            >
-                                <option value="">Any</option>
-                                <option>PENDING</option>
-                                <option>COMPLETED</option>
-                                <option>FAILED</option>
-                                <option>REFUNDED</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label className={labelBase}>Payment method</label>
-                            <select
-                                value={local.paymentMethod ?? ""}
-                                onChange={(e) => setField("paymentMethod", (e.target.value || undefined) as Filters["paymentMethod"])}
-                                className={selectBase}
-                            >
-                                <option value="">Any</option>
-                                <option>ONLINE</option>
-                                <option>CASH</option>
-                                <option>USSD</option>
-                                <option>BANK_TRANSFER</option>
-                                <option>POS</option>
-                                <option>WALLET</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label className={labelBase}>Min amount</label>
-                            <input
-                                type="number"
-                                value={local.minAmount ?? ""}
-                                onChange={(e) => setField("minAmount", e.target.value ? Number(e.target.value) : undefined)}
-                                className={numberInput}
-                                placeholder="1000"
-                            />
-                        </div>
-                        <div>
-                            <label className={labelBase}>Max amount</label>
-                            <input
-                                type="number"
-                                value={local.maxAmount ?? ""}
-                                onChange={(e) => setField("maxAmount", e.target.value ? Number(e.target.value) : undefined)}
-                                className={numberInput}
-                                placeholder="100000"
-                            />
-                        </div>
-
-                        {/* Product / Device */}
-                        <div>
-                            <label className={labelBase}>Product ID</label>
-                            <input
-                                value={local.productId ?? ""}
-                                onChange={(e) => setField("productId", e.target.value || undefined)}
-                                className={inputBase}
-                                placeholder="507f1f77bcf86cd799439011"
-                            />
-                        </div>
-                        <div>
-                            <label className={labelBase}>Product name</label>
-                            <input
-                                value={local.productName ?? ""}
-                                onChange={(e) => setField("productName", e.target.value || undefined)}
-                                className={inputBase}
-                                placeholder="Solar Panel 100W"
-                            />
-                        </div>
-                        <div>
-                            <label className={labelBase}>Serial number</label>
-                            <input
-                                value={local.serialNumber ?? ""}
-                                onChange={(e) => setField("serialNumber", e.target.value || undefined)}
-                                className={inputBase}
-                                placeholder="SN123456789"
-                            />
-                        </div>
-                        <div>
-                            <label className={labelBase}>State</label>
-                            <input
-                                value={local.state ?? ""}
-                                onChange={(e) => setField("state", e.target.value || undefined)}
-                                className={inputBase}
-                                placeholder="Lagos"
-                            />
-                        </div>
-                        <div>
-                            <label className={labelBase}>LGA</label>
-                            <input
-                                value={local.lga ?? ""}
-                                onChange={(e) => setField("lga", e.target.value || undefined)}
-                                className={inputBase}
-                                placeholder="Ikeja"
-                            />
-                        </div>
-                        <div>
-                            <label className={labelBase}>Installer name</label>
-                            <input
-                                value={local.installerName ?? ""}
-                                onChange={(e) => setField("installerName", e.target.value || undefined)}
-                                className={inputBase}
-                                placeholder="John Doe"
-                            />
-                        </div>
-
-                        {/* Flags / counts */}
-                        <div>
-                            <label className={labelBase}>Has multiple payments</label>
-                            <select
-                                value={local.hasMultiplePayments ?? "any"}
-                                onChange={(e) => setField("hasMultiplePayments", (e.target.value as BoolAny) || "any")}
-                                className={selectBase}
-                            >
-                                <option value="any">Any</option>
-                                <option value="true">Yes</option>
-                                <option value="false">No</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label className={labelBase}>Has made repayments</label>
-                            <select
-                                value={local.hasMadeRepayments ?? "any"}
-                                onChange={(e) => setField("hasMadeRepayments", (e.target.value as BoolAny) || "any")}
-                                className={selectBase}
-                            >
-                                <option value="any">Any</option>
-                                <option value="true">Yes</option>
-                                <option value="false">No</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label className={labelBase}>Payment overdue</label>
-                            <select
-                                value={local.paymentOverdue ?? "any"}
-                                onChange={(e) => setField("paymentOverdue", (e.target.value as BoolAny) || "any")}
-                                className={selectBase}
-                            >
-                                <option value="any">Any</option>
-                                <option value="true">Yes</option>
-                                <option value="false">No</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label className={labelBase}>Fully paid</label>
-                            <select
-                                value={local.fullyPaid ?? "any"}
-                                onChange={(e) => setField("fullyPaid", (e.target.value as BoolAny) || "any")}
-                                className={selectBase}
-                            >
-                                <option value="any">Any</option>
-                                <option value="true">Yes</option>
-                                <option value="false">No</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label className={labelBase}>Has outstanding balance</label>
-                            <select
-                                value={local.hasOutstandingBalance ?? "any"}
-                                onChange={(e) => setField("hasOutstandingBalance", (e.target.value as BoolAny) || "any")}
-                                className={selectBase}
-                            >
-                                <option value="any">Any</option>
-                                <option value="true">Yes</option>
-                                <option value="false">No</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label className={labelBase}>Min payment count</label>
-                            <input
-                                type="number"
-                                value={local.minPaymentCount ?? ""}
-                                onChange={(e) => setField("minPaymentCount", e.target.value ? Number(e.target.value) : undefined)}
-                                className={numberInput}
-                                placeholder="2"
-                            />
-                        </div>
-                        <div>
-                            <label className={labelBase}>Max payment count</label>
-                            <input
-                                type="number"
-                                value={local.maxPaymentCount ?? ""}
-                                onChange={(e) => setField("maxPaymentCount", e.target.value ? Number(e.target.value) : undefined)}
-                                className={numberInput}
-                                placeholder="10"
-                            />
-                        </div>
-                    </div>
-                </div>
-
-                <div className="px-5 py-3 border-t flex items-center justify-end gap-3 sticky bottom-0 bg-white">
-                    <button
-                        className="text-sm border rounded-md px-3 py-2 hover:bg-gray-50"
-                        onClick={() => {
-                            setLocal({}); // clear the draft
-                            onClear();    // clear applied filters in parent (will refetch)
-                        }}
-                    >
-                        Clear filters
-                    </button>
-
-                    <button
-                        className="text-sm text-white rounded-md px-3 py-2 border border-transparent hover:opacity-95"
-                        style={{
-                            backgroundImage: applyButtonGradient,
-                            borderColor: BRAND_CONFIG.colors.legacy.brandPrimary,
-                        }}
-                        onClick={() => {
-                            const next = trim(local); 
-                            onApply(next);            
-                        }}
-                        title="Apply filters"
-                    >
-                        Apply
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
+    if (local.minAmount !== undefined && local.maxAmount !== undefined && local.minAmount > local.maxAmount) {
+      setError("Minimum amount must not exceed maximum amount."); return;
+    }
+    const next: Filters = {};
+    for (const key of fields) {
+      const value = local[key];
+      if (value !== undefined && value !== "" && value !== "any") (next as any)[key] = value;
+    }
+    onApply(next);
+  };
+  return <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true" aria-label="Report filters">
+    <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-auto p-6">
+      <div className="flex items-center justify-between mb-5"><h2 className="text-xl font-semibold">Report filters</h2>
+        <button type="button" onClick={onClose} aria-label="Close filters">✕</button></div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">{fields.map(key => {
+        const choices = options[key];
+        if (key === "agentId" || key === "customerId") {
+          const list = key === "agentId" ? agents : customers;
+          const name = (record: any) => {
+            const person = record.user || record;
+            return [person.firstname, person.lastname].filter(Boolean).join(" ") || record.name || record.id;
+          };
+          const selected = list.find(record => record.id === local[key]);
+          return <div key={key} className="text-sm text-gray-600">{key === "agentId" ? "Agent" : "Customer"}<DropDown
+            name={selected ? name(selected) : "Any"} title={key === "agentId" ? "Select agent" : "Select customer"}
+            items={["Any", ...list.map(name)]} searchable searchMode="local" searchPlaceholder="Search..."
+            containerClassName="w-full" buttonClassName={`${inputBase} text-left`} menuAlign="left"
+            onClickLink={(index: number) => setLocal(prev => ({ ...prev, [key]: index === 0 ? undefined : list[index - 1]?.id }))}
+          /></div>;
+        }
+        const numeric = ["minAmount", "maxAmount", "overdueDays"].includes(key);
+        return <label key={key} className="text-sm text-gray-600">{labels[key]}
+          {choices ? <select className={inputBase} value={local[key] ?? ""} onChange={e => setLocal(prev => ({ ...prev, [key]: e.target.value || undefined }))}>
+            <option value="">Any</option>{choices.map(value => <option key={value} value={value}>{value === "true" ? "Yes" : value === "false" ? "No" : value.toLowerCase().replace(/_/g, " ")}</option>)}
+          </select> : <input className={inputBase} type={numeric ? "number" : key.endsWith("Date") ? "date" : "text"}
+            min={key === "overdueDays" ? 1 : numeric ? 0 : undefined} value={local[key] ?? ""}
+            onChange={e => setLocal(prev => ({ ...prev, [key]: e.target.value ? numeric ? Number(e.target.value) : e.target.value.trim() : undefined }))} />}
+        </label>;
+      })}</div>
+      {error && <p className="text-red-600 mt-4" role="alert">{error}</p>}
+      <div className="flex justify-end gap-3 mt-6"><button type="button" className="border rounded-lg px-4 py-2" onClick={() => { setLocal({}); setError(""); onClear(); }}>Reset filters</button>
+        <button type="button" className="border rounded-lg px-4 py-2" onClick={onClose}>Cancel</button>
+        <button type="button" className="bg-red-800 text-white rounded-lg px-4 py-2" onClick={apply}>Apply filters</button></div>
+    </div>
+  </div>;
 }

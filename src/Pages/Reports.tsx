@@ -385,38 +385,6 @@ const Reports = () => {
     setCurrentPage(1);
   }, [exportType]);
 
-  const summaryParams = useMemo(() => {
-    const allowKeys = new Set([
-      "startDate", "endDate", "createdStartDate", "createdEndDate",
-      "agentId", "customerId", "state", "lga", "paymentMethod", "salesStatus", "paymentMode", "overdueDays",
-      "isOverdue",
-    ]);
-    const cleaned: Record<string, any> = {};
-    for (const [k, v] of Object.entries(baseParams)) {
-      if (allowKeys.has(k) && v !== undefined && v !== "") cleaned[k] = v;
-    }
-    return cleaned;
-  }, [baseParams]);
-
-  const overdueUrl =
-    exportType === "renewal_report"
-      ? `/v1/export/summary/overdue-payments?${new URLSearchParams({
-        ...(summaryParams as any),
-        format: "json",
-      }).toString()}`
-      : null;
-
-  // const totalDebtUrl =
-  //   exportType === "debt_report"
-  //     ? `/v1/export/summary/total-debt?${new URLSearchParams({
-  //       ...(summaryParams as any),
-  //       format: "json",
-  //     }).toString()}`
-  //     : null;
-
-  const { data: overdueSummary, isLoading: overdueLoading } = useGetRequest(overdueUrl || "", !!overdueUrl, 60000);
-  // const { data: totalDebtSummary } = useGetRequest(totalDebtUrl || "", !!totalDebtUrl, 60000);
-
   const summary = useMemo(() => {
     if (exportType !== "weekly_summary" && exportType !== "monthly_summary") return null;
     const r = (reportsJsonData as any) || {};
@@ -446,19 +414,6 @@ const Reports = () => {
               value={isLoading ? loadingPlaceholder : totalFromApi}
             />
           )}
-          {exportType === "renewal_report" && (
-            <TitlePill
-              icon={inventorybadge}
-              iconBgColor="bg-[#FFDBDE]"
-              topText="OVERDUE"
-              bottomText="PAYMENTS"
-              value={
-                overdueLoading
-                  ? loadingPlaceholder
-                  : (overdueSummary as any)?.totalOverduePayments ?? (overdueSummary as any)?.count ?? 0
-              }
-            />
-          )}
           {/* {exportType === "debt_report" && (
             <TitlePill
               icon={inventorybadge}
@@ -480,7 +435,7 @@ const Reports = () => {
           <select
             id="exportType"
             value={exportType}
-            onChange={(e) => setExportType(e.target.value as ExportType)}
+            onChange={(e) => { setFilters({}); setExportType(e.target.value as ExportType); }}
             className="border rounded-md px-3 py-2 text-sm"
           >
             {EXPORT_TYPES.map((t) => (
