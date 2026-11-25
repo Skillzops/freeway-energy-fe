@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useGetRequest } from "@/utils/useApiCall";
 import { DropDown } from "../DropDownComponent/DropDown";
+import { NIGERIAN_STATES, STATE_LGA_MAP } from "../InputComponent/StateLgaSelect";
 type BoolAny = "any" | "true" | "false";
 
 export type Filters = {
@@ -145,6 +146,20 @@ export default function FiltersModal({ open, onClose, filters, exportType, onApp
       <div className="flex items-center justify-between mb-5"><h2 className="text-xl font-semibold">Report filters</h2>
         <button type="button" onClick={onClose} aria-label="Close filters">✕</button></div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">{fields.map(key => {
+        if (key === "state" || key === "lga") {
+          const values = key === "state" ? NIGERIAN_STATES : local.state
+            ? STATE_LGA_MAP[local.state] || []
+            : Array.from(new Set(Object.values(STATE_LGA_MAP).flat())).sort();
+          return <div key={key} className="text-sm text-gray-600">{labels[key]}<DropDown
+            name={local[key] || "Any"} title={key === "state" ? "Select state" : "Select LGA"}
+            items={["Any", ...values]} searchable searchMode="local" searchPlaceholder="Search..."
+            containerClassName="w-full" buttonClassName={`${inputBase} text-left`} menuAlign="left"
+            onClickLink={(index: number) => setLocal(prev => ({ ...prev,
+              [key]: index === 0 ? undefined : values[index - 1],
+              ...(key === "state" ? { lga: undefined } : {}),
+            }))}
+          /></div>;
+        }
         const choices = options[key];
         if (key === "agentId" || key === "customerId") {
           const list = key === "agentId" ? agents : customers;
