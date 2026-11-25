@@ -117,10 +117,13 @@ export default function FiltersModal({ open, onClose, filters, exportType, onApp
   const [local, setLocal] = useState<Filters>(filters);
   const [error, setError] = useState("");
   useEffect(() => { if (open) { setLocal(filters); setError(""); } }, [open, filters, exportType]);
-  const { data: agentData } = useGetRequest(open ? "/v1/agents" : null, false);
-  const { data: customerData } = useGetRequest(open ? "/v1/customers" : null, false);
+  const [agentKeyword, setAgentKeyword] = useState("");
+  const [customerKeyword, setCustomerKeyword] = useState("");
+  const [selectedLabels, setSelectedLabels] = useState<Record<string, string>>({});
+  const { data: agentData, isLoading: agentsLoading } = useGetRequest(open ? `/v1/agents?page=1&limit=50&search=${encodeURIComponent(agentKeyword)}` : null, false);
+  const { data: customerData, isLoading: customersLoading } = useGetRequest(open ? `/v1/customers?page=1&limit=50&search=${encodeURIComponent(customerKeyword)}` : null, false);
   const records = (data: any): any[] => {
-    const rows = Array.isArray(data) ? data : data?.updatedResults || data?.data || data?.results;
+    const rows = Array.isArray(data) ? data : data?.customers || data?.agents || data?.customer || data?.agent || data?.updatedResults || data?.data || data?.results;
     return Array.isArray(rows) ? rows : [];
   };
   const agents = records(agentData);
@@ -169,10 +172,16 @@ export default function FiltersModal({ open, onClose, filters, exportType, onApp
           };
           const selected = list.find(record => record.id === local[key]);
           return <div key={key} className="text-sm text-gray-600">{key === "agentId" ? "Agent" : "Customer"}<DropDown
-            name={selected ? name(selected) : "Any"} title={key === "agentId" ? "Select agent" : "Select customer"}
-            items={["Any", ...list.map(name)]} searchable searchMode="local" searchPlaceholder="Search..."
+            name={local[key] ? (selected ? name(selected) : selectedLabels[local[key]!] || local[key]!) : "Any"} title={key === "agentId" ? "Select agent" : "Select customer"}
+            items={["Any", ...list.map(name)]} searchable searchMode="api" searchPlaceholder="Search by name, email or phone"
+            onDropdownSearch={key === "agentId" ? setAgentKeyword : setCustomerKeyword}
+            isLoading={key === "agentId" ? agentsLoading : customersLoading}
             containerClassName="w-full" buttonClassName={`${inputBase} text-left`} menuAlign="left"
-            onClickLink={(index: number) => setLocal(prev => ({ ...prev, [key]: index === 0 ? undefined : list[index - 1]?.id }))}
+            onClickLink={(index: number) => {
+              const record = index === 0 ? undefined : list[index - 1];
+              if (record) setSelectedLabels(prev => ({ ...prev, [record.id]: name(record) }));
+              setLocal(prev => ({ ...prev, [key]: record?.id }));
+            }}
           /></div>;
         }
         const numeric = ["minAmount", "maxAmount", "overdueDays"].includes(key);
